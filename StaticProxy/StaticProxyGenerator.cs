@@ -37,8 +37,12 @@ namespace StaticProxy
                     .AddReferences(MetadataReference.CreateFromFile(typeof(LightMock.InvocationInfo).Assembly.Location))
                     .AddSyntaxTrees(CSharpSyntaxTree.ParseText(SourceText.From(attribute.Value, Encoding.UTF8), options));
 
-                var attributeSymbol = compilation.GetTypeByMetadataName(KAttributeName)
-                    ?? throw new InvalidOperationException("attribute " + KAttributeName + " not found");
+                var attributeSymbol = compilation.GetTypeByMetadataName(KAttributeName);
+                if (attributeSymbol == null)
+                {
+                    ReportError(context, "SPG001", "attribute " + KAttributeName + " is missing");
+                    return;
+                }
 
                 foreach (var candidateClass in receiver.CandidateClasses)
                 {
@@ -56,39 +60,18 @@ namespace StaticProxy
                         .Any(modifier => modifier.IsKind(SyntaxKind.PartialKeyword));
                     if (isPartial == false)
                     {
-                        var missingPartialKeywordMessage =
+                        ReportError(context, "SPG002",
                             $"The type {typeSymbol.Name} should be declared with the 'partial' keyword " +
-                            "as it is annotated with the [MockGeneratedAttribute] attribute.";
-                        context.ReportDiagnostic(
-                            Diagnostic.Create(
-                                new DiagnosticDescriptor(
-                                    "SPG0001",
-                                    missingPartialKeywordMessage,
-                                    missingPartialKeywordMessage,
-                                    "Usage",
-                                    DiagnosticSeverity.Error,
-                                    true),
-                                Location.None));
+                            "as it is annotated with the [MockGeneratedAttribute] attribute.");
                         continue;
                     }
 
                     var @interface = typeSymbol.Interfaces.FirstOrDefault();
                     if (@interface == null)
                     {
-                        var missingInterfaceMessage =
+                        ReportError(context, "SPG0003",
                             $"The type {typeSymbol.Name} should be directly implement at least one interface " +
-                            "as it is annotated with the [MockGeneratedAttribute] attribute.";
-                        context.ReportDiagnostic(
-                            Diagnostic.Create(
-                                new DiagnosticDescriptor(
-                                    "SPG0002",
-                                    missingInterfaceMessage,
-                                    missingInterfaceMessage,
-                                    "Usage",
-                                    DiagnosticSeverity.Error,
-                                    true),
-                                Location.None));
-
+                            "as it is annotated with the [MockGeneratedAttribute] attribute.");
                         continue;
                     }
 
@@ -117,6 +100,20 @@ namespace {nameSpace}
                     context.AddSource(className + ".g.cs", SourceText.From(code, Encoding.UTF8));
                 }
             }
+        }
+
+        private static void ReportError(GeneratorExecutionContext context, string id, string message)
+        {
+            context.ReportDiagnostic(
+                Diagnostic.Create(
+                    new DiagnosticDescriptor(
+                        id,
+                        message,
+                        message,
+                        "Usage",
+                        DiagnosticSeverity.Error,
+                        true),
+                    Location.None));
         }
 
         IEnumerable<string> EnrichMembers(IEnumerable<ISymbol> symbols)
