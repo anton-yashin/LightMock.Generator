@@ -18,15 +18,21 @@ namespace StaticProxy.Tests
         [Fact]
         public void RunGenerator()
         {
+            // prepare
             var resource = Utils.LoadResource(KFileName);
             var compilation = CreateCompilation(resource);
             var driver = CSharpGeneratorDriver.Create(
                 ImmutableArray.Create(new StaticProxyGenerator()),
                 Enumerable.Empty<AdditionalText>(),
                 (CSharpParseOptions)compilation.SyntaxTrees.First().Options);
+
+            // act
             driver.RunGeneratorsAndUpdateCompilation(compilation, out var updatedCompilation, out var diagnostics);
+
+            // verify
+            var result = updatedCompilation.Emit(new MemoryStream());
+            Assert.True(result.Success);
             Assert.Empty(diagnostics);
-            Assert.NotNull(updatedCompilation);
         }
 
         private static CSharpCompilation CreateCompilation(string source, string compilationName = "someCompilation")
@@ -38,6 +44,9 @@ namespace StaticProxy.Tests
                 references: new[]
                 {
                     MetadataReference.CreateFromFile(typeof(string).Assembly.Location),
+                    MetadataReference.CreateFromFile(typeof(LightMock.InvocationInfo).Assembly.Location),
+                    MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("System.Linq.Expressions")).Location),
+                    MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("System.Runtime")).Location),
                 },
                 options: new CSharpCompilationOptions(Microsoft.CodeAnalysis.OutputKind.DynamicallyLinkedLibrary));
     }
