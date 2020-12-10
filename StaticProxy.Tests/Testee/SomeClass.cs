@@ -2,10 +2,13 @@
 
 namespace StaticProxy.Tests.Testee
 {
-    public class SomeClass
+    public interface ISomeInterface
     {
-        public SomeClass()
-        {
-        }
+        void DoSomething();        
+    }
+
+    [MockGenerated]
+    public partial class SomeClass : ISomeInterface
+    {
     }
 }
