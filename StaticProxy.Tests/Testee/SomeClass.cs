@@ -4,7 +4,8 @@ namespace StaticProxy.Tests.Testee
 {
     public interface ISomeInterface
     {
-        void DoSomething();        
+        void DoSomething(int someParam);
+        int ReturnSomething();
     }
 
     [MockGenerated]

@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -14,20 +16,115 @@ namespace StaticProxy
 
         readonly Lazy<string> attribute = new Lazy<string>(() => Utils.LoadResource(KAttributeFile));
 
+        private static readonly SymbolDisplayFormat SymbolDisplayFormat = new SymbolDisplayFormat(
+            typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
+            genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters |
+                             SymbolDisplayGenericsOptions.IncludeTypeConstraints |
+                             SymbolDisplayGenericsOptions.IncludeVariance);
+
+
         public StaticProxyGenerator()
         {
         }
 
         public void Execute(GeneratorExecutionContext context)
         {
-            context.AddSource(KAttributeName, SourceText.From(attribute.Value, Encoding.UTF8));
-            if (context.Compilation is CSharpCompilation compilation == false)
-                return;
-            if (context.SyntaxReceiver is StaticProxySyntaxReceiver receiver == false)
-                return;
+            if (context.Compilation is CSharpCompilation compilation &&
+                context.SyntaxReceiver is StaticProxySyntaxReceiver receiver &&
+                compilation.SyntaxTrees.First().Options is CSharpParseOptions options)
+            {
+                context.AddSource(KAttributeName, SourceText.From(attribute.Value, Encoding.UTF8));
 
+                compilation = compilation
+                    .AddReferences(MetadataReference.CreateFromFile(typeof(LightMock.InvocationInfo).Assembly.Location))
+                    .AddSyntaxTrees(CSharpSyntaxTree.ParseText(SourceText.From(attribute.Value, Encoding.UTF8), options));
 
+                var attributeSymbol = compilation.GetTypeByMetadataName(KAttributeName)
+                    ?? throw new InvalidOperationException("attribute " + KAttributeName + " not found");
+
+                foreach (var candidateClass in receiver.CandidateClasses)
+                {
+                    var model = compilation.GetSemanticModel(candidateClass.SyntaxTree);
+                    var typeSymbol = model.GetDeclaredSymbol(candidateClass);
+                    if (typeSymbol == null)
+                        continue;
+                    var relevantAttribute = typeSymbol.GetAttributes().FirstOrDefault(
+                        a => attributeSymbol.Equals(a.AttributeClass, SymbolEqualityComparer.Default));
+                    if (relevantAttribute == null)
+                        continue;
+
+                    var isPartial = candidateClass
+                        .Modifiers
+                        .Any(modifier => modifier.IsKind(SyntaxKind.PartialKeyword));
+                    if (isPartial == false)
+                    {
+                        var missingPartialKeywordMessage =
+                            $"The type {typeSymbol.Name} should be declared with the 'partial' keyword " +
+                            "as it is annotated with the [MockGeneratedAttribute] attribute.";
+                        context.ReportDiagnostic(
+                            Diagnostic.Create(
+                                new DiagnosticDescriptor(
+                                    "SPG0001",
+                                    missingPartialKeywordMessage,
+                                    missingPartialKeywordMessage,
+                                    "Usage",
+                                    DiagnosticSeverity.Error,
+                                    true),
+                                Location.None));
+                        continue;
+                    }
+
+                    var @interface = typeSymbol.Interfaces.FirstOrDefault();
+                    if (@interface == null)
+                    {
+                        var missingInterfaceMessage =
+                            $"The type {typeSymbol.Name} should be directly implement at least one interface " +
+                            "as it is annotated with the [MockGeneratedAttribute] attribute.";
+                        context.ReportDiagnostic(
+                            Diagnostic.Create(
+                                new DiagnosticDescriptor(
+                                    "SPG0002",
+                                    missingInterfaceMessage,
+                                    missingInterfaceMessage,
+                                    "Usage",
+                                    DiagnosticSeverity.Error,
+                                    true),
+                                Location.None));
+
+                        continue;
+                    }
+
+                    var className = typeSymbol.Name;
+                    var interfaceName = @interface.Name;
+                    var members = @interface.GetMembers();
+                    var nameSpace = typeSymbol.ContainingNamespace.ToDisplayString(SymbolDisplayFormat);
+                    var code = $@"// <auto-generated />
+using LightMock;
+
+namespace {nameSpace}
+{{
+    partial class {className}
+    {{
+        private readonly IInvocationContext<{interfaceName}> context;
+
+        public {className}(IInvocationContext<{interfaceName}> context)
+        {{
+            this.context = context;
+        }}
+
+        {string.Join("\r\n        ", EnrichMembers(members))}
+    }}
+}}
+";
+                    context.AddSource(className + ".g.cs", SourceText.From(code, Encoding.UTF8));
+                }
+            }
         }
+
+        IEnumerable<string> EnrichMembers(IEnumerable<ISymbol> symbols)
+            => symbols.Select(i => EnrichMember(i));
+
+        string EnrichMember(ISymbol symbol) => symbol.Accept(new EnrichSymbolVisitor());
 
         public void Initialize(GeneratorInitializationContext context)
         {
