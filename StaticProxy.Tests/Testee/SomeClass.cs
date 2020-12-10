@@ -8,7 +8,7 @@ namespace StaticProxy.Tests.Testee
         int ReturnSomething();
     }
 
-    [MockGenerated]
+    [GenerateMock]
     public partial class SomeClass : ISomeInterface
     {
     }

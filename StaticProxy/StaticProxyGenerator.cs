@@ -11,7 +11,7 @@ namespace StaticProxy
     [Generator]
     public class StaticProxyGenerator : ISourceGenerator
     {
-        const string KAttributeName = nameof(MockGeneratedAttribute);
+        const string KAttributeName = nameof(GenerateMockAttribute);
         const string KAttributeFile = KAttributeName + ".cs";
 
         readonly Lazy<string> attribute = new Lazy<string>(() => Utils.LoadResource(KAttributeFile));
