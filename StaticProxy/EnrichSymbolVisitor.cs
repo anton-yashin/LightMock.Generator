@@ -19,6 +19,12 @@ namespace StaticProxy
 
             result.Append("context.Invoke(f => f.");
             result.Append(symbol.Name);
+            if (symbol.IsGenericMethod)
+            {
+                result.Append("<");
+                result.Append(string.Join(",", symbol.TypeParameters.Select(i => i.Name)));
+                result.Append(">");
+            }
             result.Append("(");
             result.Append(string.Join(", ", symbol.Parameters.Select(i => i.Name)));
             result.Append("));}");
