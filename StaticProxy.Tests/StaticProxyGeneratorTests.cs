@@ -48,6 +48,16 @@ namespace StaticProxy.Tests
         }
 
         [Fact]
+        public void GenericClassAndGenericInterface()
+        {
+            var (compilation, diagnostics, success) = DoCompile(Utils.LoadResource("GenericClassAndGenericInterface.cs"));
+
+            // verify
+            Assert.True(success);
+            Assert.Empty(diagnostics);
+        }
+
+        [Fact]
         public void NoPartialKeyworkError()
         {
             var (compilation, diagnostics, success) = DoCompile(Utils.LoadResource("NoPartialKeyworkError.cs"));
