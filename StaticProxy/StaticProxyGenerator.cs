@@ -40,7 +40,8 @@ namespace StaticProxy
                 var attributeSymbol = compilation.GetTypeByMetadataName(KAttributeName);
                 if (attributeSymbol == null)
                 {
-                    ReportError(context, "SPG001", "attribute " + KAttributeName + " is missing");
+                    context.ReportDiagnostic(Diagnostic.Create(
+                        DiagnosticsDescriptors.KNoAttributeErrorDescriptor, Location.None, KAttributeName));
                     return;
                 }
 
@@ -60,18 +61,20 @@ namespace StaticProxy
                         .Any(modifier => modifier.IsKind(SyntaxKind.PartialKeyword));
                     if (isPartial == false)
                     {
-                        ReportError(context, "SPG002",
-                            $"The type {typeSymbol.Name} should be declared with the 'partial' keyword " +
-                            "as it is annotated with the [MockGeneratedAttribute] attribute.");
+                        context.ReportDiagnostic(Diagnostic.Create(
+                            DiagnosticsDescriptors.KNoPartialKeyworkErrorDescriptor,
+                            Location.Create(candidateClass.SyntaxTree, new TextSpan()),
+                            typeSymbol.Name));
                         continue;
                     }
 
                     var @interface = typeSymbol.Interfaces.FirstOrDefault();
                     if (@interface == null)
                     {
-                        ReportError(context, "SPG0003",
-                            $"The type {typeSymbol.Name} should be directly implement at least one interface " +
-                            "as it is annotated with the [MockGeneratedAttribute] attribute.");
+                        context.ReportDiagnostic(Diagnostic.Create(
+                            DiagnosticsDescriptors.KNoInterfaceErrorDescriptor,
+                            Location.Create(candidateClass.SyntaxTree, new TextSpan()),
+                            typeSymbol.Name));
                         continue;
                     }
 
@@ -100,20 +103,6 @@ namespace {nameSpace}
                     context.AddSource(className + ".g.cs", SourceText.From(code, Encoding.UTF8));
                 }
             }
-        }
-
-        private static void ReportError(GeneratorExecutionContext context, string id, string message)
-        {
-            context.ReportDiagnostic(
-                Diagnostic.Create(
-                    new DiagnosticDescriptor(
-                        id,
-                        message,
-                        message,
-                        "Usage",
-                        DiagnosticSeverity.Error,
-                        true),
-                    Location.None));
         }
 
         IEnumerable<string> EnrichMembers(IEnumerable<ISymbol> symbols)
