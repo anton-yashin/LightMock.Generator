@@ -32,6 +32,16 @@ namespace StaticProxy.Tests
             Assert.Contains(diagnostics, d => d.Id == "SPG002");
         }
 
+        [Fact]
+        public void NoInterfaceError()
+        {
+            var (compilation, diagnostics, success) = DoCompile(Utils.LoadResource("NoInterfaceError.cs"));
+
+            // verify
+            Assert.True(success);
+            Assert.Contains(diagnostics, d => d.Id == "SPG003");
+        }
+
         private static (CSharpCompilation updated, ImmutableArray<Diagnostic> diagnostics, bool succes) DoCompile(string source)
         {
             var compilation = CreateCompilation(source);
