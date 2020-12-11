@@ -22,6 +22,16 @@ namespace StaticProxy.Tests
             Assert.Empty(diagnostics);
         }
 
+        [Fact]
+        public void NoPartialKeyworkError()
+        {
+            var (compilation, diagnostics, success) = DoCompile(Utils.LoadResource("NoPartialKeyworkError.cs"));
+
+            // verify
+            Assert.False(success);
+            Assert.Contains(diagnostics, d => d.Id == "SPG002");
+        }
+
         private static (CSharpCompilation updated, ImmutableArray<Diagnostic> diagnostics, bool succes) DoCompile(string source)
         {
             var compilation = CreateCompilation(source);
