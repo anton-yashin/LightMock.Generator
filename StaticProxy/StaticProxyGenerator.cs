@@ -100,7 +100,7 @@ namespace {nameSpace}
     }}
 }}
 ";
-                    context.AddSource(className + ".g.cs", SourceText.From(code, Encoding.UTF8));
+                    context.AddSource(className + ".spg.g.cs", SourceText.From(code, Encoding.UTF8));
                 }
             }
         }
