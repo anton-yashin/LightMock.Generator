@@ -1,17 +1,22 @@
 ﻿using System;
 using System.Collections.Immutable;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace StaticProxy.Tests
 {
     public class StaticProxyGeneratorTests
     {
+        private readonly ITestOutputHelper testOutputHelper;
+
+        public StaticProxyGeneratorTests(ITestOutputHelper testOutputHelper)
+            => this.testOutputHelper = testOutputHelper;
+
         [Fact]
         public void BasicFunction()
         {
@@ -52,7 +57,7 @@ namespace StaticProxy.Tests
             Assert.Contains(diagnostics, d => d.Id == "SPG003");
         }
 
-        private static (CSharpCompilation updated, ImmutableArray<Diagnostic> diagnostics, bool succes) DoCompile(string source)
+        private (CSharpCompilation updated, ImmutableArray<Diagnostic> diagnostics, bool succes) DoCompile(string source)
         {
             var compilation = CreateCompilation(source);
             var driver = CSharpGeneratorDriver.Create(
@@ -62,6 +67,8 @@ namespace StaticProxy.Tests
 
             driver.RunGeneratorsAndUpdateCompilation(compilation, out var updatedCompilation, out var diagnostics);
             var result = updatedCompilation.Emit(new MemoryStream());
+            foreach (var i in result.Diagnostics)
+                testOutputHelper.WriteLine(i.ToString());
             return ((CSharpCompilation)updatedCompilation, diagnostics, result.Success);
         }
 
