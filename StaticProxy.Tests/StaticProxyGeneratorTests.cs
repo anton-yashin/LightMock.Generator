@@ -23,6 +23,16 @@ namespace StaticProxy.Tests
         }
 
         [Fact]
+        public void BasicProperty()
+        {
+            var (compilation, diagnostics, success) = DoCompile(Utils.LoadResource("BasicProperty.cs"));
+
+            // verify
+            Assert.True(success);
+            Assert.Empty(diagnostics);
+        }
+
+        [Fact]
         public void NoPartialKeyworkError()
         {
             var (compilation, diagnostics, success) = DoCompile(Utils.LoadResource("NoPartialKeyworkError.cs"));

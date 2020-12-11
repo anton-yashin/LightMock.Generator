@@ -10,6 +10,8 @@ namespace StaticProxy
     {
         public override string? VisitMethod(IMethodSymbol symbol)
         {
+            if (symbol.MethodKind != MethodKind.Ordinary)
+                return null;
             var result = new StringBuilder(symbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat))
                 .Append("{");
             if (symbol.ReturnsVoid == false)
@@ -26,7 +28,22 @@ namespace StaticProxy
 
         public override string? VisitProperty(IPropertySymbol symbol)
         {
-            return base.VisitProperty(symbol);
+            var result = new StringBuilder(symbol.ToDisplayString(SymbolDisplayFormat.MinimallyQualifiedFormat))
+                .Append(" {");
+            if (symbol.GetMethod != null)
+            {
+                result.Append(" get { return context.Invoke(f => f.")
+                    .Append(symbol.Name)
+                    .Append("); } ");
+            }
+            if (symbol.SetMethod != null)
+            {
+                result.Append("set { context.InvokeSetter(f => f.")
+                    .Append(symbol.Name)
+                    .Append(", value); } ");
+            }
+            result.Append("}");
+            return result.ToString();
         }
 
         public override string? VisitEvent(IEventSymbol symbol)
