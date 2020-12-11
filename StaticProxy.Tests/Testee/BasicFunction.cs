@@ -2,14 +2,14 @@
 
 namespace StaticProxy.Tests.Testee
 {
-    public interface ISomeInterface
+    public interface IBasicFunction
     {
         void DoSomething(int someParam);
         int ReturnSomething();
     }
 
     [GenerateMock]
-    public partial class SomeClass : ISomeInterface
+    public partial class BasicFunction : IBasicFunction
     {
     }
 }

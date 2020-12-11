@@ -12,31 +12,32 @@ namespace StaticProxy.Tests
 {
     public class StaticProxyGeneratorTests
     {
-        const string KClassName = "SomeClass";
-        const string KFileName = KClassName + ".cs";
-
         [Fact]
-        public void RunGenerator()
+        public void BasicFunction()
         {
-            // prepare
-            var resource = Utils.LoadResource(KFileName);
-            var compilation = CreateCompilation(resource);
+            var (compilation, diagnostics, success) = DoCompile(Utils.LoadResource("BasicFunction.cs"));
+
+            // verify
+            Assert.True(success);
+            Assert.Empty(diagnostics);
+        }
+
+        private static (CSharpCompilation updated, ImmutableArray<Diagnostic> diagnostics, bool succes) DoCompile(string source)
+        {
+            var compilation = CreateCompilation(source);
             var driver = CSharpGeneratorDriver.Create(
                 ImmutableArray.Create(new StaticProxyGenerator()),
                 Enumerable.Empty<AdditionalText>(),
                 (CSharpParseOptions)compilation.SyntaxTrees.First().Options);
 
-            // act
             driver.RunGeneratorsAndUpdateCompilation(compilation, out var updatedCompilation, out var diagnostics);
-
-            // verify
             var result = updatedCompilation.Emit(new MemoryStream());
-            Assert.True(result.Success);
-            Assert.Empty(diagnostics);
+            return ((CSharpCompilation)updatedCompilation, diagnostics, result.Success);
         }
 
-        private static CSharpCompilation CreateCompilation(string source, string compilationName = "someCompilation")
-            => CSharpCompilation.Create(compilationName,
+
+        private static CSharpCompilation CreateCompilation(string source, string? compilationName = null)
+            => CSharpCompilation.Create(compilationName ?? Guid.NewGuid().ToString("N"),
                 syntaxTrees: new[]
                 {
                     CSharpSyntaxTree.ParseText(source, new CSharpParseOptions(LanguageVersion.Preview))

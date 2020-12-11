@@ -34,9 +34,6 @@
     <ProjectReference Include="..\StaticProxy\StaticProxy.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Testee\" />
-  </ItemGroup>
-  <ItemGroup>
     <Compile Remove="Testee\*.cs" />
   </ItemGroup>
   <ItemGroup>
