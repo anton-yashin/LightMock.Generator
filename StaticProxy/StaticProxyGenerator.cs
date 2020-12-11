@@ -78,6 +78,14 @@ namespace StaticProxy
                         continue;
                     }
 
+                    if (typeSymbol.Interfaces.Length > 1)
+                    {
+                        context.ReportDiagnostic(Diagnostic.Create(
+                            DiagnosticsDescriptors.KTooManyInterfacesWarningDescriptor,
+                            Location.Create(candidateClass.SyntaxTree, new TextSpan()),
+                            typeSymbol.Name));
+                    }
+
                     var className = typeSymbol.Name;
                     var interfaceName = @interface.Name;
                     var members = @interface.GetMembers();

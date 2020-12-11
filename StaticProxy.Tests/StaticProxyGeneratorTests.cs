@@ -57,6 +57,16 @@ namespace StaticProxy.Tests
             Assert.Contains(diagnostics, d => d.Id == "SPG003");
         }
 
+        [Fact]
+        public void TooManyInterfacesWarning()
+        {
+            var (compilation, diagnostics, success) = DoCompile(Utils.LoadResource("TooManyInterfacesWarning.cs"));
+
+            // verify
+            Assert.True(success);
+            Assert.Contains(diagnostics, d => d.Id == "SPG004");
+        }
+
         private (CSharpCompilation updated, ImmutableArray<Diagnostic> diagnostics, bool succes) DoCompile(string source)
         {
             var compilation = CreateCompilation(source);

@@ -7,3 +7,4 @@ Rule ID | Category | Severity | Notes
 SPG001 | Usage | Error | DiagnosticsDescriptors
 SPG002 | Usage | Error | DiagnosticsDescriptors
 SPG003 | Usage | Error | DiagnosticsDescriptors
+SPG004 | Usage | Warning | DiagnosticsDescriptors

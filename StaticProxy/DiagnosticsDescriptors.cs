@@ -33,5 +33,13 @@ namespace StaticProxy
                 "Usage", DiagnosticSeverity.Error,
                 isEnabledByDefault: true);
 
+        public static readonly DiagnosticDescriptor KTooManyInterfacesWarningDescriptor =
+            new DiagnosticDescriptor(
+                "SPG004",
+                "too many interfaces",
+                "The type {0} implements more than one interface, only first one will be processed",
+                "Usage", DiagnosticSeverity.Warning,
+                isEnabledByDefault: true
+                );
     }
 }
