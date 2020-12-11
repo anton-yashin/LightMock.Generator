@@ -18,9 +18,9 @@ namespace StaticProxy.Tests
             => this.testOutputHelper = testOutputHelper;
 
         [Fact]
-        public void BasicFunction()
+        public void BasicMethod()
         {
-            var (compilation, diagnostics, success) = DoCompile(Utils.LoadResource("BasicFunction.cs"));
+            var (compilation, diagnostics, success) = DoCompile(Utils.LoadResource("BasicMethod.cs"));
 
             // verify
             Assert.True(success);
