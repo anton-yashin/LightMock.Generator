@@ -1,9 +1,54 @@
-<Project Sdk="MSBuild.Sdk.Extras">
+﻿<Project Sdk="MSBuild.Sdk.Extras">
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+
+    <AssemblyName>LightMock.Generator</AssemblyName>
+    <RootNamespace>LightMock.Generator</RootNamespace>
+    <PackageId>LightMock.Generator</PackageId>
+    <Summary>LightMock.Generator: mock generator powered by Roslyn</Summary>
+    <Description>LightMock.Generator: mock generator powered by Roslyn</Description>
+    <PackageTags>mock generator roslyn aot lightmock</PackageTags>
+    <Title>LightMock.Generator</Title>
+    <Product>$(AssemblyName) ($(TargetFramework))</Product>
+    <AssemblyVersion>0.90.0.0</AssemblyVersion>
+    <AssemblyFileVersion>0.90.0.0</AssemblyFileVersion>
+    <Version>0.90.0</Version>
+    <VersionSuffix>-beta</VersionSuffix>
+    <PackageVersion>$(Version)$(VersionSuffix)</PackageVersion>
+    <Authors>Anton Yashin</Authors>
+    <NeutralLanguage>en</NeutralLanguage>
+    <Copyright>Copyright © Anton Yashin 2020</Copyright>
+    <RepositoryUrl>https://github.com/anton-yashin/LightMock.Generator</RepositoryUrl>
+    <PackageReleaseNotes>See: https://github.com/anton-yashin/LightMock.Generator </PackageReleaseNotes>
+    <DefineConstants>$(DefineConstants);</DefineConstants>
+    <UseFullSemVerForNuGet>false</UseFullSemVerForNuGet>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageProjectUrl>https://github.com/anton-yashin/LightMock.Generator</PackageProjectUrl>
+    <DebugType>portable</DebugType>
+    <Configurations>Debug;Release</Configurations>
+
     <LangVersion>preview</LangVersion>
     <Nullable>enable</Nullable>
   </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)'=='Debug' ">
+    <DebugSymbols>true</DebugSymbols>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)'=='Release' And '$(OS)' == 'Windows_NT' ">
+    <!-- sourcelink: Declare that the Repository URL can be published to NuSpec -->
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <!-- sourcelink: Embed source files that are not tracked by the source control manager to the PDB -->
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <!-- sourcelink: Include PDB in the built .nupkg -->
+    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+  </PropertyGroup>
+  <ItemGroup Condition=" '$(Configuration)'=='Release' And '$(OS)' == 'Windows_NT' ">
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
+  </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="LightMock" Version="1.0.1" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.8.0" />
@@ -17,10 +62,14 @@
     <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
   </ItemGroup>
 
-  <!--  <ItemGroup>
-    <Compile Remove="Resources\*.cs" />
-  </ItemGroup>-->
   <ItemGroup>
     <EmbeddedResource Include="Resources\*.cs" />
+    <Compile Include="Resorces\*.cs" />
+    <Compile Include="*.cs" />
+    <Compile Include="*\*.cs" />
+    <None Include="..\..\LICENSE" PackagePath="" Pack="true" />
+    <None Include="..\..\README.md" PackagePath="" Pack="true" />
+    <None Include="..\..\nugetreadme.txt" PackagePath="readme.txt" Pack="true" />
   </ItemGroup>
+
 </Project>

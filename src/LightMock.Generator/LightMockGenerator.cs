@@ -35,7 +35,6 @@ namespace LightMock.Generator
                 context.AddSource(KAttributeName, SourceText.From(attribute.Value, Encoding.UTF8));
 
                 compilation = compilation
-                    .AddReferences(MetadataReference.CreateFromFile(typeof(LightMock.InvocationInfo).Assembly.Location))
                     .AddSyntaxTrees(CSharpSyntaxTree.ParseText(SourceText.From(attribute.Value, Encoding.UTF8), options));
 
                 var attributeSymbol = compilation.GetTypeByMetadataName(KAttributeName);
