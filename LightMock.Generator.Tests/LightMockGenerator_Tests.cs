@@ -4,20 +4,19 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Loader;
-using LightMock;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using StaticProxy.Tests.Testee;
+using LightMock.Generator.Tests.Testee;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace StaticProxy.Tests
+namespace LightMock.Generator.Tests
 {
-    public class StaticProxyGeneratorTests
+    public class LightMockGenerator_Tests
     {
         private readonly ITestOutputHelper testOutputHelper;
 
-        public StaticProxyGeneratorTests(ITestOutputHelper testOutputHelper)
+        public LightMockGenerator_Tests(ITestOutputHelper testOutputHelper)
             => this.testOutputHelper = testOutputHelper;
 
         [Fact]
@@ -155,7 +154,7 @@ namespace StaticProxy.Tests
         {
             var compilation = CreateCompilation(source);
             var driver = CSharpGeneratorDriver.Create(
-                ImmutableArray.Create(new StaticProxyGenerator()),
+                ImmutableArray.Create(new LightMockGenerator()),
                 Enumerable.Empty<AdditionalText>(),
                 (CSharpParseOptions)compilation.SyntaxTrees.First().Options);
 

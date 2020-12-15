@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace StaticProxy.Tests.Testee
+namespace LightMock.Generator.Tests.Testee
 {
     [GenerateMock]
     sealed partial class NoInterfaceError

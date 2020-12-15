@@ -3,9 +3,9 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace StaticProxy
+namespace LightMock.Generator
 {
-    internal class StaticProxySyntaxReceiver : CSharpSyntaxVisitor, ISyntaxReceiver
+    internal class LightMockSyntaxReceiver : CSharpSyntaxVisitor, ISyntaxReceiver
     {
         public List<ClassDeclarationSyntax> CandidateClasses { get; } = new List<ClassDeclarationSyntax>();
 

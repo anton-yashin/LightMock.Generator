@@ -3,7 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 
-namespace StaticProxy
+namespace LightMock.Generator
 {
     internal static class Utils
     {

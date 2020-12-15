@@ -6,10 +6,10 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.Text;
 
-namespace StaticProxy
+namespace LightMock.Generator
 {
     [Generator]
-    public class StaticProxyGenerator : ISourceGenerator
+    public class LightMockGenerator : ISourceGenerator
     {
         const string KGeneratedFileSuffix = ".spg.g.cs";
         const string KAttributeName = nameof(GenerateMockAttribute);
@@ -22,14 +22,14 @@ namespace StaticProxy
             );
 
 
-        public StaticProxyGenerator()
+        public LightMockGenerator()
         {
         }
 
         public void Execute(GeneratorExecutionContext context)
         {
             if (context.Compilation is CSharpCompilation compilation &&
-                context.SyntaxReceiver is StaticProxySyntaxReceiver receiver &&
+                context.SyntaxReceiver is LightMockSyntaxReceiver receiver &&
                 compilation.SyntaxTrees.First().Options is CSharpParseOptions options)
             {
                 context.AddSource(KAttributeName, SourceText.From(attribute.Value, Encoding.UTF8));
@@ -128,7 +128,7 @@ namespace {nameSpace}
 
         public void Initialize(GeneratorInitializationContext context)
         {
-            context.RegisterForSyntaxNotifications(() => new StaticProxySyntaxReceiver());
+            context.RegisterForSyntaxNotifications(() => new LightMockSyntaxReceiver());
         }
     }
 }

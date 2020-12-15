@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace StaticProxy.Tests.Testee
+namespace LightMock.Generator.Tests.Testee
 {
     [GenerateMock]
     public partial class GenericClassAndGenericInterface<T> : IGenericClassAndGenericInterface<T>

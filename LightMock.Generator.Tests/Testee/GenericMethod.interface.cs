@@ -1,4 +1,4 @@
-﻿namespace StaticProxy.Tests.Testee
+﻿namespace LightMock.Generator.Tests.Testee
 {
     public interface IGenericMethod
     {

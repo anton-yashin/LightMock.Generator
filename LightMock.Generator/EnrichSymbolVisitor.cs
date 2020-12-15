@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace StaticProxy
+namespace LightMock.Generator
 {
     sealed class EnrichSymbolVisitor : SymbolVisitor<string>
     {
