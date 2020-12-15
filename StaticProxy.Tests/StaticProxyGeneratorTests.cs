@@ -24,7 +24,7 @@ namespace StaticProxy.Tests
         public void BasicMethod()
         {
             const string KClassName = "BasicMethod";
-            var (compilation, diagnostics, success, assembly) = DoCompile(Utils.LoadResource(KClassName + ".class.cs"));
+            var (diagnostics, success, assembly) = DoCompile(Utils.LoadResource(KClassName + ".class.cs"));
 
             // verify
             Assert.True(success);
@@ -43,7 +43,7 @@ namespace StaticProxy.Tests
         public void BasicProperty()
         {
             const string KClassName = "BasicProperty";
-            var (compilation, diagnostics, success, assembly) = DoCompile(Utils.LoadResource(KClassName + ".class.cs"));
+            var (diagnostics, success, assembly) = DoCompile(Utils.LoadResource(KClassName + ".class.cs"));
 
             // verify
             Assert.True(success);
@@ -63,7 +63,7 @@ namespace StaticProxy.Tests
         public void GenericMethod()
         {
             const string KClassName = "GenericMethod";
-            var (compilation, diagnostics, success, assembly) = DoCompile(Utils.LoadResource(KClassName + ".class.cs"));
+            var (diagnostics, success, assembly) = DoCompile(Utils.LoadResource(KClassName + ".class.cs"));
 
             // verify
             Assert.True(success);
@@ -86,7 +86,7 @@ namespace StaticProxy.Tests
         public void GenericClassAndGenericInterface()
         {
             const string KClassName = "GenericClassAndGenericInterface";
-            var (compilation, diagnostics, success, assembly) = DoCompile(Utils.LoadResource(KClassName + ".class.cs"));
+            var (diagnostics, success, assembly) = DoCompile(Utils.LoadResource(KClassName + ".class.cs"));
 
             // verify
             Assert.True(success);
@@ -111,7 +111,7 @@ namespace StaticProxy.Tests
         [Fact]
         public void NoPartialKeyworkError()
         {
-            var (compilation, diagnostics, success, assembly) = DoCompile(Utils.LoadResource("NoPartialKeyworkError.class.cs"));
+            var (diagnostics, success, assembly) = DoCompile(Utils.LoadResource("NoPartialKeyworkError.class.cs"));
 
             // verify
             Assert.False(success);
@@ -121,7 +121,7 @@ namespace StaticProxy.Tests
         [Fact]
         public void NoInterfaceError()
         {
-            var (compilation, diagnostics, success, assembly) = DoCompile(Utils.LoadResource("NoInterfaceError.class.cs"));
+            var (diagnostics, success, assembly) = DoCompile(Utils.LoadResource("NoInterfaceError.class.cs"));
 
             // verify
             Assert.True(success);
@@ -131,7 +131,7 @@ namespace StaticProxy.Tests
         [Fact]
         public void TooManyInterfacesWarning()
         {
-            var (compilation, diagnostics, success, assembly) = DoCompile(Utils.LoadResource("TooManyInterfacesWarning.class.cs"));
+            var (diagnostics, success, assembly) = DoCompile(Utils.LoadResource("TooManyInterfacesWarning.class.cs"));
 
             // verify
             Assert.True(success);
@@ -151,7 +151,7 @@ namespace StaticProxy.Tests
             return (context, @interface);
         }
 
-        private (CSharpCompilation updated, ImmutableArray<Diagnostic> diagnostics, bool succes, byte[] assembly) DoCompile(string source)
+        private (ImmutableArray<Diagnostic> diagnostics, bool succes, byte[] assembly) DoCompile(string source)
         {
             var compilation = CreateCompilation(source);
             var driver = CSharpGeneratorDriver.Create(
@@ -164,7 +164,7 @@ namespace StaticProxy.Tests
             var result = updatedCompilation.Emit(ms);
             foreach (var i in result.Diagnostics)
                 testOutputHelper.WriteLine(i.ToString());
-            return ((CSharpCompilation)updatedCompilation, diagnostics, result.Success, ms.ToArray());
+            return (diagnostics, result.Success, ms.ToArray());
         }
 
 
