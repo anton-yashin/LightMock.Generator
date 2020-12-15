@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net5.0</TargetFramework>
@@ -34,7 +34,7 @@
     <ProjectReference Include="..\StaticProxy\StaticProxy.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Remove="Testee\*.cs" />
+    <Compile Remove="Testee\*.class.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Testee\*.cs" />
