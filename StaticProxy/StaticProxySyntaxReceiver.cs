@@ -1,17 +1,24 @@
 ﻿using System.Collections.Generic;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace StaticProxy
 {
-    internal class StaticProxySyntaxReceiver : ISyntaxReceiver
+    internal class StaticProxySyntaxReceiver : CSharpSyntaxVisitor, ISyntaxReceiver
     {
         public List<ClassDeclarationSyntax> CandidateClasses { get; } = new List<ClassDeclarationSyntax>();
 
         public void OnVisitSyntaxNode(SyntaxNode syntaxNode)
         {
-            if (syntaxNode is ClassDeclarationSyntax cds && cds.AttributeLists.Count > 0)
-                CandidateClasses.Add(cds);
+            if (syntaxNode is CSharpSyntaxNode cssn)
+                cssn.Accept(this);
+        }
+
+        public override void VisitClassDeclaration(ClassDeclarationSyntax node)
+        {
+            if (node.AttributeLists.Count > 0)
+                CandidateClasses.Add(node);
         }
     }
 }
