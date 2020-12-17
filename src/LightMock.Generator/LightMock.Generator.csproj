@@ -6,9 +6,9 @@
     <AssemblyName>LightMock.Generator</AssemblyName>
     <RootNamespace>LightMock.Generator</RootNamespace>
     <PackageId>LightMock.Generator</PackageId>
-    <Summary>LightMock.Generator: mock generator powered by Roslyn</Summary>
-    <Description>LightMock.Generator: mock generator powered by Roslyn</Description>
-    <PackageTags>mock generator roslyn aot lightmock</PackageTags>
+    <Summary>LightMock.Generator: mock generator powered by Roslyn and LightMock</Summary>
+    <Description>LightMock.Generator: mock generator powered by Roslyn and LightMock</Description>
+    <PackageTags>mock generator roslyn aot lightmock android ios uwp xamarin</PackageTags>
     <Title>LightMock.Generator</Title>
     <Product>$(AssemblyName) ($(TargetFramework))</Product>
     <AssemblyVersion>0.90.0.0</AssemblyVersion>
