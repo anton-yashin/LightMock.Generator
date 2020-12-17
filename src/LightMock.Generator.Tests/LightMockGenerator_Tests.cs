@@ -9,6 +9,8 @@ using Microsoft.CodeAnalysis.CSharp;
 using LightMock.Generator.Tests.Testee;
 using Xunit;
 using Xunit.Abstractions;
+using MultipleNamespaces2;
+using MultipleNamespaces1;
 
 namespace LightMock.Generator.Tests
 {
@@ -105,6 +107,32 @@ namespace LightMock.Generator.Tests
             context.ArrangeProperty(f => f.GetAndSet);
             @interface.GetAndSet = 3456;
             Assert.Equal(3456, @interface.GetAndSet);
+        }
+
+        [Fact]
+        public void MultipleNamespaces()
+        {
+            const string KClassName = "MultipleNamespaces";
+            var (diagnostics, success, assembly) = DoCompile(Utils.LoadResource(KClassName + ".class.cs"));
+
+            // verify
+            Assert.True(success);
+            Assert.Empty(diagnostics);
+
+            var (context, @interface) = LoadAssembly<IMultipleNamespaces>(KClassName, assembly);
+
+            var arg1 = new MultipleNamespacesArgument();
+            @interface.DoSomething(arg1);
+            context.Assert(f => f.DoSomething(arg1));
+
+            var arg2 = new MultipleNamespacesArgument();
+            context.Arrange(f => f.GetSomething()).Returns(arg2);
+            Assert.Same(expected: arg2, @interface.GetSomething());
+
+            var arg3 = new MultipleNamespacesArgument();
+            context.ArrangeProperty(f => f.SomeProperty);
+            @interface.SomeProperty = arg3;
+            Assert.Same(expected: arg3, @interface.SomeProperty);
         }
 
         [Fact]
