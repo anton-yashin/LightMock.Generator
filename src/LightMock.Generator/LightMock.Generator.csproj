@@ -71,4 +71,9 @@
     <None Include="..\..\nugetreadme.txt" PackagePath="readme.txt" Pack="true" />
   </ItemGroup>
 
+  <ItemGroup>
+    <AdditionalFiles Include="AnalyzerReleases.Shipped.md" />
+    <AdditionalFiles Include="AnalyzerReleases.Unshipped.md" />
+  </ItemGroup>
+
 </Project>
