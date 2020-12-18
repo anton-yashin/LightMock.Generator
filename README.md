@@ -1,6 +1,6 @@
 # LightMock.Generator (Beta)
 
-Source generator that generates mocks by provided interfaces. 
+Source generator that generates mocks by provided interfaces. [Available on nuget](https://www.nuget.org/packages/LightMock.Generator/)
 
 ## How to use
 * Install [LightMock](https://github.com/seesharper/LightMock) and LightMock.Generator to your test project
