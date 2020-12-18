@@ -31,6 +31,12 @@ namespace LightMock.Generator
                     SymbolDisplayMiscellaneousOptions.UseSpecialTypes |
                     SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier);
 
+        private readonly NullableContextOptions nullableContextOptions;
+
+        public EnrichSymbolVisitor(NullableContextOptions nullableContextOptions)
+        {
+            this.nullableContextOptions = nullableContextOptions;
+        }
 
         public override string? VisitMethod(IMethodSymbol symbol)
         {
@@ -83,7 +89,25 @@ namespace LightMock.Generator
 
         public override string? VisitEvent(IEventSymbol symbol)
         {
-            return base.VisitEvent(symbol);
+            bool nullableEnabled = nullableContextOptions != NullableContextOptions.Disable;
+            var localName = symbol.ContainingType.ToDisplayString(KSymbolDisplayFormat)
+                .Replace(".", "")
+                .Replace("<", "_")
+                .Replace(">", "_") + symbol.Name;
+            var result = new StringBuilder("public event ");
+            result.Append(symbol.Type.ToDisplayString(KSymbolDisplayFormat))
+                .Append(nullableEnabled ? "? " : " ")
+                .Append(localName)
+                .Append(";\r\n")
+                .Append(symbol.ToDisplayString(KSymbolDisplayFormat))
+                .Append("{ add { ")
+                .Append(localName)
+                .Append(" += value; } remove { ")
+                .Append(localName)
+                .Append(" -= value; } }")
+                ;
+            var s = result.ToString();
+            return result.ToString();
         }
 
         public override string? VisitNamedType(INamedTypeSymbol symbol)

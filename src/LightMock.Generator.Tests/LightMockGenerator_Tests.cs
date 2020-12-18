@@ -11,6 +11,7 @@ using Xunit;
 using Xunit.Abstractions;
 using MultipleNamespaces2;
 using MultipleNamespaces1;
+using EventNamespace2;
 
 namespace LightMock.Generator.Tests
 {
@@ -133,6 +134,51 @@ namespace LightMock.Generator.Tests
             context.ArrangeProperty(f => f.SomeProperty);
             @interface.SomeProperty = arg3;
             Assert.Same(expected: arg3, @interface.SomeProperty);
+        }
+
+        [Fact]
+        public void EventSource()
+        {
+            const string KClassName = "EventSource";
+            var (diagnostics, success, assembly) = DoCompile(Utils.LoadResource(KClassName + ".class.cs"));
+
+            // verify
+            Assert.True(success);
+            Assert.Empty(diagnostics);
+
+            var (context, @interface) = LoadAssembly<IEventSource>(KClassName, assembly);
+            Assert.NotNull(context);
+            Assert.NotNull(@interface);
+        }
+
+        [Fact]
+        public void EventSourceMultipleNamespaces()
+        {
+            const string KClassName = "EventSourceMultipleNamespaces";
+            var (diagnostics, success, assembly) = DoCompile(Utils.LoadResource(KClassName + ".class.cs"));
+
+            // verify
+            Assert.True(success);
+            Assert.Empty(diagnostics);
+
+            var (context, @interface) = LoadAssembly<IEventSourceMultipleNamespaces>(KClassName, assembly);
+            Assert.NotNull(context);
+            Assert.NotNull(@interface);
+        }
+
+        [Fact]
+        public void EventSourceGenericClass()
+        {
+            const string KClassName = "EventSourceGenericClass";
+            var (diagnostics, success, assembly) = DoCompile(Utils.LoadResource(KClassName + ".class.cs"));
+
+            // verify
+            Assert.True(success);
+            Assert.Empty(diagnostics);
+
+            var (context, @interface) = LoadAssembly<IEventSourceGenericClass<LightMockGenerator_Tests>>(KClassName + "`1", assembly);
+            Assert.NotNull(context);
+            Assert.NotNull(@interface);
         }
 
         [Fact]
