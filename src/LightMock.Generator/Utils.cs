@@ -11,7 +11,7 @@ namespace LightMock.Generator
         {
             assembly ??= Assembly.GetCallingAssembly();
 
-            resourceName = assembly.GetManifestResourceNames().First(n => n.EndsWith(resourceName));
+            resourceName = assembly.GetManifestResourceNames().First(n => n.EndsWith("." + resourceName));
             using var stream = assembly.GetManifestResourceStream(resourceName) ?? throw new InvalidOperationException("resource not found");
             using var reader = new StreamReader(stream);
             return reader.ReadToEnd();
