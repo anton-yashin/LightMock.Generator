@@ -6,7 +6,7 @@ using System.Text;
 
 namespace LightMock.Generator
 {
-    sealed class EnrichSymbolVisitor : SymbolVisitor<string>
+    sealed class InterfaceSymbolVisitor : SymbolVisitor<string>
     {
         static readonly SymbolDisplayFormat KSymbolDisplayFormat = 
             new SymbolDisplayFormat(
@@ -33,7 +33,7 @@ namespace LightMock.Generator
 
         private readonly NullableContextOptions nullableContextOptions;
 
-        public EnrichSymbolVisitor(NullableContextOptions nullableContextOptions)
+        public InterfaceSymbolVisitor(NullableContextOptions nullableContextOptions)
         {
             this.nullableContextOptions = nullableContextOptions;
         }
