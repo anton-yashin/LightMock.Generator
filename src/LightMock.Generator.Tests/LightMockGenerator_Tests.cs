@@ -182,6 +182,40 @@ namespace LightMock.Generator.Tests
         }
 
         [Fact]
+        public void AbstractClass()
+        {
+            const string KClassName = "AbstractClass";
+
+            var (diagnostics, success, assembly) = DoCompile(Utils.LoadResource(KClassName + ".class.cs"));
+
+            // verify
+            Assert.True(success);
+            Assert.Empty(diagnostics);
+
+            string className = "ConcreteClass";
+            var alc = new AssemblyLoadContext(className);
+            var loadedAssembly = alc.LoadFromStream(new MemoryStream(assembly));
+            var concrete = loadedAssembly.ExportedTypes.Where(t => t.Name == className).First();
+            if (concrete.ContainsGenericParameters)
+                concrete = concrete.MakeGenericType(typeof(AbstractClass).GetGenericArguments().First());
+            var generatedInterfaceType = loadedAssembly.ExportedTypes.Where(t => t.Name == "IP2P_" + KClassName).First();
+            if (generatedInterfaceType.ContainsGenericParameters)
+                throw new NotImplementedException("FIXME");
+            var protectedContextType = typeof(MockContext<>).MakeGenericType(generatedInterfaceType);
+            var protectedContext = Activator.CreateInstance(protectedContextType) ?? throw new InvalidOperationException("can't create protected context instance");
+            var context = new MockContext<AbstractClass>();
+            var mockInstance = Activator.CreateInstance(concrete, context, protectedContext) ?? throw new InvalidOperationException("can't create instance");
+            var baseClass = (AbstractClass)mockInstance;
+            var testClassType = loadedAssembly.ExportedTypes.Where(t => t.Name == className + "Test").First();
+            dynamic testClass = Activator.CreateInstance(testClassType, mockInstance, protectedContext) ?? throw new InvalidOperationException("can't create test class");
+
+            context.Arrange(f => f.GetSomething()).Returns(1234);
+            Assert.Equal(expected: 1234, baseClass.GetSomething());
+
+            testClass.TestProtectedMembers();
+        }
+
+        [Fact]
         public void NoPartialKeyworkError()
         {
             var (diagnostics, success, assembly) = DoCompile(Utils.LoadResource("NoPartialKeyworkError.class.cs"));
