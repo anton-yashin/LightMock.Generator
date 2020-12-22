@@ -28,26 +28,32 @@ namespace LightMock.Generator.Tests
             Assert.Empty(diagnostics);
 
             string className = KClassName;
-            var alc = new AssemblyLoadContext(className);
-            var loadedAssembly = alc.LoadFromStream(new MemoryStream(assembly));
-            var concrete = loadedAssembly.ExportedTypes.Where(t => t.Name == className).First();
-            if (concrete.ContainsGenericParameters)
-                concrete = concrete.MakeGenericType(typeof(ABasicMethod).GetGenericArguments().First());
-            var generatedInterfaceType = loadedAssembly.ExportedTypes.Where(t => t.Name == "IP2P_A" + KClassName).First();
-            if (generatedInterfaceType.ContainsGenericParameters)
-                throw new NotImplementedException("FIXME");
-            var protectedContextType = typeof(MockContext<>).MakeGenericType(generatedInterfaceType);
-            var protectedContext = Activator.CreateInstance(protectedContextType) ?? throw new InvalidOperationException("can't create protected context instance");
-            var context = new MockContext<ABasicMethod>();
-            var mockInstance = Activator.CreateInstance(concrete, context, protectedContext) ?? throw new InvalidOperationException("can't create instance");
-            var baseClass = (ABasicMethod)mockInstance;
-            var testClassType = loadedAssembly.ExportedTypes.Where(t => t.Name == className + "Test").First();
-            dynamic testClass = Activator.CreateInstance(testClassType, mockInstance, protectedContext) ?? throw new InvalidOperationException("can't create test class");
+            var (context, baseClass, testClass) = LoadAssembly<ABasicMethod>(KClassName, assembly, className);
 
             context.Arrange(f => f.GetSomething()).Returns(1234);
             Assert.Equal(expected: 1234, baseClass.GetSomething());
 
             testClass.TestProtectedMembers();
+        }
+
+        private static (MockContext<T> context, T baseClass, dynamic testClass) LoadAssembly<T>(string KClassName, byte[] assembly, string className)
+        {
+            var alc = new AssemblyLoadContext(className);
+            var loadedAssembly = alc.LoadFromStream(new MemoryStream(assembly));
+            var concrete = loadedAssembly.ExportedTypes.Where(t => t.Name == className).First();
+            if (concrete.ContainsGenericParameters)
+                concrete = concrete.MakeGenericType(typeof(T).GetGenericArguments().First());
+            var generatedInterfaceType = loadedAssembly.ExportedTypes.Where(t => t.Name == "IP2P_A" + KClassName).First();
+            if (generatedInterfaceType.ContainsGenericParameters)
+                throw new NotImplementedException("FIXME");
+            var protectedContextType = typeof(MockContext<>).MakeGenericType(generatedInterfaceType);
+            var protectedContext = Activator.CreateInstance(protectedContextType) ?? throw new InvalidOperationException("can't create protected context instance");
+            var context = new MockContext<T>();
+            var mockInstance = Activator.CreateInstance(concrete, context, protectedContext) ?? throw new InvalidOperationException("can't create instance");
+            var baseClass = (T)mockInstance;
+            var testClassType = loadedAssembly.ExportedTypes.Where(t => t.Name == className + "Test").First();
+            var testClass = Activator.CreateInstance(testClassType, mockInstance, protectedContext) ?? throw new InvalidOperationException("can't create test class");
+            return (context, baseClass, testClass);
         }
 
         [Fact]
