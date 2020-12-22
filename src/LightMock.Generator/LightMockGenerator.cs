@@ -72,7 +72,7 @@ namespace LightMock.Generator
                     var @interface = typeSymbol.Interfaces.FirstOrDefault();
                     ClassProcessor processor;
                     if (typeSymbol.BaseType != null && typeSymbol.BaseType.ToDisplayString(KNamespaceDisplayFormat) != "System.Object")
-                        processor = new AbstractClassProcessor(compilation, typeSymbol, typeSymbol.BaseType);
+                        processor = new AbstractClassProcessor(compilation, candidateClass, typeSymbol, typeSymbol.BaseType);
                     else
                         processor = new InterfaceProcessor(compilation, candidateClass, typeSymbol, @interface);
 

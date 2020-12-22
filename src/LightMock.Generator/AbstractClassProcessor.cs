@@ -11,15 +11,18 @@ namespace LightMock.Generator
 {
     sealed class AbstractClassProcessor : ClassProcessor
     {
+        private readonly ClassDeclarationSyntax candidateClass;
         private readonly INamedTypeSymbol baseClass;
         private readonly SymbolVisitor<string> symbolVisitor;
         private readonly ProtectedMemberSymbolVisitor protectedVisitor;
 
         public AbstractClassProcessor(
             CSharpCompilation compilation,
+            ClassDeclarationSyntax candidateClass,
             INamedTypeSymbol typeSymbol,
             INamedTypeSymbol baseClass) : base(typeSymbol)
         {
+            this.candidateClass = candidateClass;
             this.baseClass = baseClass;
             this.symbolVisitor = new AbstractClassSymbolVisitor(compilation.Options.NullableContextOptions);
             this.protectedVisitor = new ProtectedMemberSymbolVisitor(compilation.Options.NullableContextOptions);
@@ -65,6 +68,15 @@ namespace {nameSpace}
 
         public override IEnumerable<Diagnostic> GetErrors() => Enumerable.Empty<Diagnostic>();
 
-        public override IEnumerable<Diagnostic> GetWarnings() => Enumerable.Empty<Diagnostic>();
+        public override IEnumerable<Diagnostic> GetWarnings()
+        {
+            if (typeSymbol.Interfaces.Length > 0)
+            {
+                yield return Diagnostic.Create(
+                    DiagnosticsDescriptors.KTooManyInterfacesWarningDescriptor,
+                    Location.Create(candidateClass.SyntaxTree, new TextSpan()),
+                    typeSymbol.Name);
+            }
+        }
     }
 }

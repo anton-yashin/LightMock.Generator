@@ -60,6 +60,16 @@ namespace LightMock.Generator.Tests
             Assert.Contains(diagnostics, d => d.Id == "SPG002");
         }
 
+        [Fact]
+        public void TooManyInterfacesWarning()
+        {
+            var (diagnostics, success, assembly) = DoCompileResource("TooManyInterfacesWarning");
+
+            // verify
+            Assert.True(success);
+            Assert.Contains(diagnostics, d => d.Id == "SPG004");
+        }
+
         private (ImmutableArray<Diagnostic> diagnostics, bool succes, byte[] assembly) DoCompileResource(string resourceName)
         {
             return DoCompile(Utils.LoadResource("AbstractClass." + resourceName + ".class.cs"));
