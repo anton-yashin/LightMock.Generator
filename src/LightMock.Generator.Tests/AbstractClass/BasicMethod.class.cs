@@ -1,14 +1,14 @@
 ﻿namespace LightMock.Generator.Tests.AbstractClass
 {
     [GenerateMock]
-    public partial class ConcreteClass : BasicMethod { }
+    public partial class BasicMethod : ABasicMethod { }
 
-    public class ConcreteClassTest
+    public class BasicMethodTest
     {
-        private readonly IP2P_BasicMethod p2p;
-        private readonly MockContext<IP2P_BasicMethod> mockContext;
+        private readonly IP2P_ABasicMethod p2p;
+        private readonly MockContext<IP2P_ABasicMethod> mockContext;
 
-        public ConcreteClassTest(IP2P_BasicMethod p2p, MockContext<IP2P_BasicMethod> mockContext)
+        public BasicMethodTest(IP2P_ABasicMethod p2p, MockContext<IP2P_ABasicMethod> mockContext)
         {
             this.p2p = p2p;
             this.mockContext = mockContext;

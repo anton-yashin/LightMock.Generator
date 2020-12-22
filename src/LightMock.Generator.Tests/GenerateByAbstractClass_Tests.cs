@@ -27,20 +27,20 @@ namespace LightMock.Generator.Tests
             Assert.True(success);
             Assert.Empty(diagnostics);
 
-            string className = "ConcreteClass";
+            string className = KClassName;
             var alc = new AssemblyLoadContext(className);
             var loadedAssembly = alc.LoadFromStream(new MemoryStream(assembly));
             var concrete = loadedAssembly.ExportedTypes.Where(t => t.Name == className).First();
             if (concrete.ContainsGenericParameters)
-                concrete = concrete.MakeGenericType(typeof(BasicMethod).GetGenericArguments().First());
-            var generatedInterfaceType = loadedAssembly.ExportedTypes.Where(t => t.Name == "IP2P_" + KClassName).First();
+                concrete = concrete.MakeGenericType(typeof(ABasicMethod).GetGenericArguments().First());
+            var generatedInterfaceType = loadedAssembly.ExportedTypes.Where(t => t.Name == "IP2P_A" + KClassName).First();
             if (generatedInterfaceType.ContainsGenericParameters)
                 throw new NotImplementedException("FIXME");
             var protectedContextType = typeof(MockContext<>).MakeGenericType(generatedInterfaceType);
             var protectedContext = Activator.CreateInstance(protectedContextType) ?? throw new InvalidOperationException("can't create protected context instance");
-            var context = new MockContext<BasicMethod>();
+            var context = new MockContext<ABasicMethod>();
             var mockInstance = Activator.CreateInstance(concrete, context, protectedContext) ?? throw new InvalidOperationException("can't create instance");
-            var baseClass = (BasicMethod)mockInstance;
+            var baseClass = (ABasicMethod)mockInstance;
             var testClassType = loadedAssembly.ExportedTypes.Where(t => t.Name == className + "Test").First();
             dynamic testClass = Activator.CreateInstance(testClassType, mockInstance, protectedContext) ?? throw new InvalidOperationException("can't create test class");
 
