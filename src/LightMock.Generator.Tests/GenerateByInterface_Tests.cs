@@ -2,31 +2,29 @@
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.Loader;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using LightMock.Generator.Tests.Testee;
 using Xunit;
 using Xunit.Abstractions;
-using MultipleNamespaces2;
-using MultipleNamespaces1;
+using LightMock.Generator.Tests.Interface.MultipleNamespaces2;
+using LightMock.Generator.Tests.Interface.MultipleNamespaces1;
 using EventNamespace2;
+using LightMock.Generator.Tests.Interface;
 
 namespace LightMock.Generator.Tests
 {
-    public class LightMockGenerator_Tests
+    public class GenerateByInterface_Tests : TestsBase
     {
-        private readonly ITestOutputHelper testOutputHelper;
 
-        public LightMockGenerator_Tests(ITestOutputHelper testOutputHelper)
-            => this.testOutputHelper = testOutputHelper;
+        public GenerateByInterface_Tests(ITestOutputHelper testOutputHelper)
+            : base(testOutputHelper)
+        { }
 
         [Fact]
         public void BasicMethod()
         {
             const string KClassName = "BasicMethod";
-            var (diagnostics, success, assembly) = DoCompile(Utils.LoadResource(KClassName + ".class.cs"));
+            var (diagnostics, success, assembly) = DoCompileResource(KClassName);
 
             // verify
             Assert.True(success);
@@ -45,7 +43,7 @@ namespace LightMock.Generator.Tests
         public void BasicProperty()
         {
             const string KClassName = "BasicProperty";
-            var (diagnostics, success, assembly) = DoCompile(Utils.LoadResource(KClassName + ".class.cs"));
+            var (diagnostics, success, assembly) = DoCompileResource(KClassName);
 
             // verify
             Assert.True(success);
@@ -176,43 +174,9 @@ namespace LightMock.Generator.Tests
             Assert.True(success);
             Assert.Empty(diagnostics);
 
-            var (context, @interface) = LoadAssembly<IEventSourceGenericClass<LightMockGenerator_Tests>>(KClassName + "`1", assembly);
+            var (context, @interface) = LoadAssembly<IEventSourceGenericClass<GenerateByInterface_Tests>>(KClassName + "`1", assembly);
             Assert.NotNull(context);
             Assert.NotNull(@interface);
-        }
-
-        [Fact]
-        public void AbstractClass()
-        {
-            const string KClassName = "AbstractClass";
-
-            var (diagnostics, success, assembly) = DoCompile(Utils.LoadResource(KClassName + ".class.cs"));
-
-            // verify
-            Assert.True(success);
-            Assert.Empty(diagnostics);
-
-            string className = "ConcreteClass";
-            var alc = new AssemblyLoadContext(className);
-            var loadedAssembly = alc.LoadFromStream(new MemoryStream(assembly));
-            var concrete = loadedAssembly.ExportedTypes.Where(t => t.Name == className).First();
-            if (concrete.ContainsGenericParameters)
-                concrete = concrete.MakeGenericType(typeof(AbstractClass).GetGenericArguments().First());
-            var generatedInterfaceType = loadedAssembly.ExportedTypes.Where(t => t.Name == "IP2P_" + KClassName).First();
-            if (generatedInterfaceType.ContainsGenericParameters)
-                throw new NotImplementedException("FIXME");
-            var protectedContextType = typeof(MockContext<>).MakeGenericType(generatedInterfaceType);
-            var protectedContext = Activator.CreateInstance(protectedContextType) ?? throw new InvalidOperationException("can't create protected context instance");
-            var context = new MockContext<AbstractClass>();
-            var mockInstance = Activator.CreateInstance(concrete, context, protectedContext) ?? throw new InvalidOperationException("can't create instance");
-            var baseClass = (AbstractClass)mockInstance;
-            var testClassType = loadedAssembly.ExportedTypes.Where(t => t.Name == className + "Test").First();
-            dynamic testClass = Activator.CreateInstance(testClassType, mockInstance, protectedContext) ?? throw new InvalidOperationException("can't create test class");
-
-            context.Arrange(f => f.GetSomething()).Returns(1234);
-            Assert.Equal(expected: 1234, baseClass.GetSomething());
-
-            testClass.TestProtectedMembers();
         }
 
         [Fact]
@@ -258,37 +222,9 @@ namespace LightMock.Generator.Tests
             return (context, @interface);
         }
 
-        private (ImmutableArray<Diagnostic> diagnostics, bool succes, byte[] assembly) DoCompile(string source)
+        private (ImmutableArray<Diagnostic> diagnostics, bool succes, byte[] assembly) DoCompileResource(string resourceName)
         {
-            var compilation = CreateCompilation(source);
-            var driver = CSharpGeneratorDriver.Create(
-                ImmutableArray.Create(new LightMockGenerator()),
-                Enumerable.Empty<AdditionalText>(),
-                (CSharpParseOptions)compilation.SyntaxTrees.First().Options);
-
-            driver.RunGeneratorsAndUpdateCompilation(compilation, out var updatedCompilation, out var diagnostics);
-            var ms = new MemoryStream();
-            var result = updatedCompilation.Emit(ms);
-            foreach (var i in result.Diagnostics)
-                testOutputHelper.WriteLine(i.ToString());
-            return (diagnostics, result.Success, ms.ToArray());
+            return DoCompile(Utils.LoadResource("Interface." + resourceName + ".class.cs"));
         }
-
-
-        private static CSharpCompilation CreateCompilation(string source, string? compilationName = null)
-            => CSharpCompilation.Create(compilationName ?? Guid.NewGuid().ToString("N"),
-                syntaxTrees: new[]
-                {
-                    CSharpSyntaxTree.ParseText(source, new CSharpParseOptions(LanguageVersion.Preview))
-                },
-                references: new[]
-                {
-                    MetadataReference.CreateFromFile(Assembly.GetCallingAssembly().Location),
-                    MetadataReference.CreateFromFile(typeof(string).Assembly.Location),
-                    MetadataReference.CreateFromFile(typeof(LightMock.InvocationInfo).Assembly.Location),
-                    MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("System.Linq.Expressions")).Location),
-                    MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("System.Runtime")).Location),
-                },
-                options: new CSharpCompilationOptions(Microsoft.CodeAnalysis.OutputKind.DynamicallyLinkedLibrary));
     }
 }

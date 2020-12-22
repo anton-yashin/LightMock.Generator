@@ -1,10 +1,10 @@
-﻿namespace MultipleNamespaces1
+﻿namespace LightMock.Generator.Tests.Interface.MultipleNamespaces1
 {
     public class MultipleNamespacesArgument
     { }
 }
 
-namespace MultipleNamespaces2
+namespace LightMock.Generator.Tests.Interface.MultipleNamespaces2
 {
     using MultipleNamespaces1;
 

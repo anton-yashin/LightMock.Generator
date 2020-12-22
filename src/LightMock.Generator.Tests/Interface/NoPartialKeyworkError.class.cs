@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LightMock.Generator.Tests.Testee
+namespace LightMock.Generator.Tests.Interface
 {
     public interface INoPartialKeyworkError 
     {

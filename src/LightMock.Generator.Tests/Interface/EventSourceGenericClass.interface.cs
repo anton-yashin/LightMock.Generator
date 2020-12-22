@@ -1,4 +1,4 @@
-﻿namespace LightMock.Generator.Tests.Testee
+﻿namespace LightMock.Generator.Tests.Interface
 {
     public delegate void EventHandlerGenericClass<T>(object source, T data);
 

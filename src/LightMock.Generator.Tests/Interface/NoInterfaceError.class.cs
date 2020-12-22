@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LightMock.Generator.Tests.Testee
+namespace LightMock.Generator.Tests.Interface
 {
     [GenerateMock]
-    public partial class EventSource : IEventSource
+    sealed partial class NoInterfaceError
     {
     }
 }
