@@ -52,9 +52,19 @@ namespace LightMock.Generator
 
         public override string? VisitProperty(IPropertySymbol symbol)
         {
-            var result = new StringBuilder("");
+            if (IsSuitable(symbol) == false)
+                return null;
+            var result = new StringBuilder(symbol.ToDisplayString(KSymbolDisplayFormat))
+                .Append("{");
+
+            if (symbol.GetMethod != null)
+                result.Append("get;");
+            if (symbol.SetMethod != null)
+                result.Append("set;");
+            result.Append("}");
 
             var s = result.ToString();
+
             return result.ToString();
         }
 

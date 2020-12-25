@@ -134,18 +134,31 @@ namespace LightMock.Generator
 
         public override string? VisitProperty(IPropertySymbol symbol)
         {
-            var result = new StringBuilder(symbol.ToDisplayString(KSymbolDisplayFormat))
+            bool implementAsInterface = ImplementAsInterface(symbol);
+
+            var result = new StringBuilder();
+            if (implementAsInterface)
+                AddInterfaceImplementation(symbol, result);
+
+            result.Append("override ")
+                .Append(symbol.ToDisplayString(KSymbolDisplayFormat))
                 .Append(" {");
             if (symbol.GetMethod != null)
             {
-                result.Append(" get { return context.Invoke(f => f.")
-                    .Append(symbol.Name)
-                    .Append("); } ");
+                if (implementAsInterface)
+                    result.Append(" get { return protectedContext.Invoke(f => f.");
+                else
+                    result.Append(" get { return context.Invoke(f => f.");
+                result.Append(symbol.Name)
+                .Append("); } ");
             }
             if (symbol.SetMethod != null)
             {
-                result.Append("set { context.InvokeSetter(f => f.")
-                    .Append(symbol.Name)
+                if (implementAsInterface)
+                    result.Append("set { protectedContext.InvokeSetter(f => f.");
+                else
+                    result.Append("set { context.InvokeSetter(f => f.");
+                result.Append(symbol.Name)
                     .Append(", value); } ");
             }
             result.Append("}");
@@ -153,6 +166,30 @@ namespace LightMock.Generator
             var s = result.ToString();
 
             return result.ToString();
+        }
+
+        private void AddInterfaceImplementation(IPropertySymbol symbol, StringBuilder result)
+        {
+            var @namespace = symbol.ContainingNamespace.ToDisplayString(KInterfaceDisplayFormat);
+            var ctn = symbol.ContainingType.Name;
+            var raw = symbol.ToDisplayString(KInterfaceDisplayFormat);
+            var withInterface = raw.Replace(@namespace + "." + ctn, @namespace + "." + "IP2P_" + ctn);
+            result.Append(withInterface);
+
+            result.Append(" {");
+            if (symbol.GetMethod != null)
+            {
+                result.Append(" get { return protectedContext.Invoke(f => f.")
+                    .Append(symbol.Name)
+                    .Append("); } ");
+            }
+            if (symbol.SetMethod != null)
+            {
+                result.Append("set { protectedContext.InvokeSetter(f => f.")
+                    .Append(symbol.Name)
+                    .Append(", value); } ");
+            }
+            result.Append("}");
         }
 
         public override string? VisitEvent(IEventSymbol symbol)

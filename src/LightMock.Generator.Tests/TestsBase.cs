@@ -45,6 +45,7 @@ namespace LightMock.Generator.Tests
                     MetadataReference.CreateFromFile(Assembly.GetCallingAssembly().Location),
                     MetadataReference.CreateFromFile(typeof(string).Assembly.Location),
                     MetadataReference.CreateFromFile(typeof(LightMock.InvocationInfo).Assembly.Location),
+                    MetadataReference.CreateFromFile(typeof(Xunit.Assert).Assembly.Location),
                     MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("System.Linq.Expressions")).Location),
                     MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("System.Runtime")).Location),
                 },

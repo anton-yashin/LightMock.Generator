@@ -36,6 +36,26 @@ namespace LightMock.Generator.Tests
             testClass.TestProtectedMembers();
         }
 
+        [Fact]
+        public void BasicProperty()
+        {
+            const string KClassName = "BasicProperty";
+
+            var (diagnostics, success, assembly) = DoCompileResource(KClassName);
+
+            // verify
+            Assert.True(success);
+            Assert.Empty(diagnostics);
+
+            string className = KClassName;
+            var (context, baseClass, testClass) = LoadAssembly<ABasicProperty>(KClassName, assembly, className);
+
+            context.Arrange(f => f.OnlyGet).Returns(1234);
+            Assert.Equal(expected: 1234, baseClass.OnlyGet);
+
+            testClass.TestProtectedMembers();
+        }
+
         private static (MockContext<T> context, T baseClass, dynamic testClass) LoadAssembly<T>(string KClassName, byte[] assembly, string className)
         {
             var alc = new AssemblyLoadContext(className);
