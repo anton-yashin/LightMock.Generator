@@ -135,6 +135,9 @@ namespace LightMock.Generator
 
         public override string? VisitProperty(IPropertySymbol symbol)
         {
+            if (symbol.IsAbstract == false && symbol.IsVirtual == false)
+                return null;
+
             bool implementAsInterface = ImplementAsInterface(symbol);
 
             var result = new StringBuilder();

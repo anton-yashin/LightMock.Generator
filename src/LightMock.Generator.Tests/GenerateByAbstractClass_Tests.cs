@@ -53,6 +53,7 @@ namespace LightMock.Generator.Tests
 
             context.Arrange(f => f.OnlyGet).Returns(1234);
             Assert.Equal(expected: 1234, baseClass.OnlyGet);
+            Assert.Throws<NotImplementedException>(() => baseClass.NonAbstractNonVirtualProperty);
 
             testClass.TestProtectedMembers();
         }
