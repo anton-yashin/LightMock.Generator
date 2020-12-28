@@ -44,7 +44,7 @@ namespace {nameSpace}
 {{
     public interface {interfaceName}
     {{
-        {string.Join("\r\n        ", members.Select(i => i.Accept(protectedVisitor)))}
+        {string.Join("\r\n        ", members.Select(i => i.Accept(protectedVisitor)).SkipWhile(i => string.IsNullOrWhiteSpace(i)))}
     }}
 
 
@@ -59,7 +59,7 @@ namespace {nameSpace}
             this.protectedContext = protectedContext;
         }}
 
-        {string.Join("\r\n        ", members.Select(i => i.Accept(symbolVisitor)))}
+        {string.Join("\r\n        ", members.Select(i => i.Accept(symbolVisitor)).SkipWhile(i => string.IsNullOrWhiteSpace(i)))}
     }}
 }}
 ";
