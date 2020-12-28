@@ -96,7 +96,8 @@ namespace LightMock.Generator
 
         public override string? VisitMethod(IMethodSymbol symbol)
         {
-            if (symbol.MethodKind != MethodKind.Ordinary)
+            if (symbol.MethodKind != MethodKind.Ordinary
+                || (symbol.IsAbstract == false && symbol.IsVirtual == false))
                 return null;
             var result = new StringBuilder();
             bool implementAsInterface = ImplementAsInterface(symbol);
@@ -194,25 +195,16 @@ namespace LightMock.Generator
 
         public override string? VisitEvent(IEventSymbol symbol)
         {
-            bool nullableEnabled = nullableContextOptions != NullableContextOptions.Disable;
-            var localName = symbol.ContainingType.ToDisplayString(KSymbolDisplayFormat)
-                .Replace(".", "")
-                .Replace("<", "_")
-                .Replace(">", "_") + symbol.Name;
-            var result = new StringBuilder("public event ");
-            result.Append(symbol.Type.ToDisplayString(KSymbolDisplayFormat))
-                .Append(nullableEnabled ? "? " : " ")
-                .Append(localName)
-                .Append(";\r\n")
-                .Append(symbol.ToDisplayString(KSymbolDisplayFormat))
-                .Append("{ add { ")
-                .Append(localName)
-                .Append(" += value; } remove { ")
-                .Append(localName)
-                .Append(" -= value; } }")
-                ;
-            var s = result.ToString();
-            return result.ToString();
+            if (symbol.IsAbstract)
+            {
+                var sdf = symbol.ToDisplayString(KSymbolDisplayFormat);
+                var result = new StringBuilder("override ")
+                    .Append(sdf)
+                    .Append(";");
+                var s = result.ToString();
+                return result.ToString();
+            }
+            return null;
         }
 
         public override string? VisitNamedType(INamedTypeSymbol symbol)

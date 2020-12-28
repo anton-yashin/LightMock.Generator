@@ -1,6 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace LightMock.Generator
@@ -70,10 +71,7 @@ namespace LightMock.Generator
 
         public override string? VisitEvent(IEventSymbol symbol)
         {
-            var result = new StringBuilder("");
-
-            var s = result.ToString();
-            return result.ToString();
+            return null;
         }
     }
 }

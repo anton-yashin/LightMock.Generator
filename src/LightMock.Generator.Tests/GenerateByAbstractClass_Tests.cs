@@ -56,6 +56,24 @@ namespace LightMock.Generator.Tests
             testClass.TestProtectedMembers();
         }
 
+        [Fact]
+        public void EventSource()
+        {
+            const string KClassName = "EventSource";
+
+            var (diagnostics, success, assembly) = DoCompileResource(KClassName);
+
+            // verify
+            Assert.True(success);
+            Assert.Empty(diagnostics);
+
+            string className = KClassName;
+            var (context, baseClass, testClass) = LoadAssembly<AEventSource>(KClassName, assembly, className);
+
+            Assert.NotNull(baseClass);
+        }
+
+
         private static (MockContext<T> context, T baseClass, dynamic testClass) LoadAssembly<T>(string KClassName, byte[] assembly, string className)
         {
             var alc = new AssemblyLoadContext(className);
