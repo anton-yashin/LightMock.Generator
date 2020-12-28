@@ -59,6 +59,33 @@ namespace LightMock.Generator.Tests
         }
 
         [Fact]
+        public void GenericMethod()
+        {
+            const string KClassName = "GenericMethod";
+
+            var (diagnostics, success, assembly) = DoCompileResource(KClassName);
+
+            // verify
+            Assert.True(success);
+            Assert.Empty(diagnostics);
+
+            string className = KClassName;
+            var (context, baseClass, testClass) = LoadAssembly<AGenericMethod>(KClassName, assembly, className);
+
+            context.Arrange(f => f.GenericReturn<int>()).Returns(1234);
+            Assert.Equal(1234, baseClass.GenericReturn<int>());
+
+            baseClass.GenericParam<int>(5678);
+            context.Assert(f => f.GenericParam<int>(5678));
+
+            var p = new object();
+            baseClass.GenericWithConstraint(p);
+            context.Assert(f => f.GenericWithConstraint(p));
+
+            testClass.TestProtectedMembers();
+        }
+
+        [Fact]
         public void EventSource()
         {
             const string KClassName = "EventSource";
