@@ -86,6 +86,36 @@ namespace LightMock.Generator.Tests
         }
 
         [Fact]
+        public void GenericClassAndGenericBaseClass()
+        {
+            const string KClassName = "GenericClassAndGenericBaseClass";
+
+            var (diagnostics, success, assembly) = DoCompileResource(KClassName);
+
+            // verify
+            Assert.True(success);
+            Assert.Empty(diagnostics);
+
+            string className = KClassName;
+            var (context, baseClass, testClass) = LoadAssembly<AGenericClassAndGenericBaseClass<int>>(KClassName, assembly, className + "`1");
+
+            baseClass.DoSomething(1234);
+            context.Assert(f => f.DoSomething(1234));
+
+            context.Arrange(f => f.GetSomething()).Returns(5678);
+            Assert.Equal(5678, baseClass.GetSomething());
+
+            context.Arrange(f => f.OnlyGet).Returns(9012);
+            Assert.Equal(9012, baseClass.OnlyGet);
+
+            context.ArrangeProperty(f => f.GetAndSet);
+            baseClass.GetAndSet = 3456;
+            Assert.Equal(3456, baseClass.GetAndSet);
+
+            testClass.TestProtectedMembers();
+        }
+
+        [Fact]
         public void EventSource()
         {
             const string KClassName = "EventSource";
@@ -110,15 +140,15 @@ namespace LightMock.Generator.Tests
             var concrete = loadedAssembly.ExportedTypes.Where(t => t.Name == className).First();
             if (concrete.ContainsGenericParameters)
                 concrete = concrete.MakeGenericType(typeof(T).GetGenericArguments().First());
-            var generatedInterfaceType = loadedAssembly.ExportedTypes.Where(t => t.Name == "IP2P_A" + KClassName).First();
+            var generatedInterfaceType = loadedAssembly.ExportedTypes.Where(t => t.Name == "IP2P_A" + className).First();
             if (generatedInterfaceType.ContainsGenericParameters)
-                throw new NotImplementedException("FIXME");
+                generatedInterfaceType = generatedInterfaceType.MakeGenericType(typeof(T).GetGenericArguments().First());
             var protectedContextType = typeof(MockContext<>).MakeGenericType(generatedInterfaceType);
             var protectedContext = Activator.CreateInstance(protectedContextType) ?? throw new InvalidOperationException("can't create protected context instance");
             var context = new MockContext<T>();
             var mockInstance = Activator.CreateInstance(concrete, context, protectedContext) ?? throw new InvalidOperationException("can't create instance");
             var baseClass = (T)mockInstance;
-            var testClassType = loadedAssembly.ExportedTypes.Where(t => t.Name == className + "Test").First();
+            var testClassType = loadedAssembly.ExportedTypes.Where(t => t.Name == KClassName + "Test").First();
             var testClass = Activator.CreateInstance(testClassType, mockInstance, protectedContext) ?? throw new InvalidOperationException("can't create test class");
             return (context, baseClass, testClass);
         }
