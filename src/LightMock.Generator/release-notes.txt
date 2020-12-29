@@ -1,4 +1,6 @@
-﻿0.92
+﻿0.93
+* added support for subclassing abstract classes
+0.92
 * generate events
 0.91 
 * added support for symbols from multiple namespaces

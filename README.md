@@ -1,6 +1,6 @@
 # LightMock.Generator (Beta)
 
-Source generator that generates mocks by provided interfaces. [Available on nuget](https://www.nuget.org/packages/LightMock.Generator/)
+Source generator that generates mocks by provided interfaces and classes. [Available on nuget](https://www.nuget.org/packages/LightMock.Generator/)
 
 ## How to use
 * Install [LightMock](https://github.com/seesharper/LightMock) and LightMock.Generator to your test project
@@ -16,8 +16,17 @@ namespace SomeNamespace
 	    void DoFoo();
     }
 
+    public abstract class AbstractClass
+    {
+        public abstract void DoFoo();
+        protected abstract void DoProtectedFoo();
+    }
+
     [GenerateMock]
     public partial MockFoo : IFoo { }
+
+    [GenerateMock]
+    public partial MockAbstractClass : AbstractClass { }
 }
 ```
 
@@ -38,6 +47,38 @@ namespace SomeNamespace
         }
 
         void IFoo.DoFoo() { context.Invoke(f => f.DoFoo()); } 
+    }
+
+    public interface IP2P_AbstractClass
+    {
+        void DoProtectedFoo();
+    }
+
+    partial class MockAbstractClass : IP2P_AbstractClass
+    {
+        private readonly IInvocationContext<AbstractClass> context;
+        private readonly IInvocationContext<IP2P_AbstractClass> protectedContext;
+
+        public BasicMethod(IInvocationContext<AbstractClass> context, IInvocationContext<IP2P_AbstractClass> protectedContext)
+        {
+            this.context = context;
+            this.protectedContext = protectedContext;
+        }
+
+        override public void DoFoo(int p)
+        {
+            context.Invoke(f => f.DoFoo(p));
+        }
+
+        void LightMockIP2P_ABasicMethod.ProtectedDoFoo()
+        {
+            protectedContext.Invoke(f => f.ProtectedDoFoo());
+        }
+
+        override protected void ProtectedDoFoo()
+        {
+            protectedContext.Invoke(f => f.ProtectedDoFoo());
+        }
     }
 }
 ```
