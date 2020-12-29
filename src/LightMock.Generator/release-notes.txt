@@ -1,0 +1,6 @@
+﻿0.92
+* generate events
+0.91 
+* added support for symbols from multiple namespaces
+0.90
+* initial release

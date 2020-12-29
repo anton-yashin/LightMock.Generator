@@ -20,7 +20,7 @@
     <NeutralLanguage>en</NeutralLanguage>
     <Copyright>Copyright © Anton Yashin 2020</Copyright>
     <RepositoryUrl>https://github.com/anton-yashin/LightMock.Generator</RepositoryUrl>
-    <PackageReleaseNotes>See: https://github.com/anton-yashin/LightMock.Generator </PackageReleaseNotes>
+    <PackageReleaseNotes>$([System.IO.File]::ReadAllText("$(MSBuildProjectDirectory)/release-notes.txt"))</PackageReleaseNotes>
     <DefineConstants>$(DefineConstants);</DefineConstants>
     <UseFullSemVerForNuGet>false</UseFullSemVerForNuGet>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
