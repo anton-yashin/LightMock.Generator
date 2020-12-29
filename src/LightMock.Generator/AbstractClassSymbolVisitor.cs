@@ -69,33 +69,6 @@ namespace LightMock.Generator
             => (symbol.IsAbstract || symbol.IsVirtual)
                 && symbol.DeclaredAccessibility == Accessibility.Protected;
 
-
-        void AddInterfaceImplementation(IMethodSymbol symbol, StringBuilder result)
-        {
-            var @namespace = symbol.ContainingNamespace.ToDisplayString(KInterfaceDisplayFormat);
-            var ctn = symbol.ContainingType.Name;
-            var raw = symbol.ToDisplayString(KInterfaceDisplayFormat);
-            var withInterface = raw.Replace(@namespace + "." + ctn, interfaceNamespace + "." + "IP2P_" + ctn);
-            result.Append(withInterface);
-
-            result.Append("{");
-
-            if (symbol.ReturnsVoid == false)
-                result.Append("return ");
-
-            result.Append("protectedContext.Invoke(f => f.");
-            result.Append(symbol.Name);
-            if (symbol.IsGenericMethod)
-            {
-                result.Append("<");
-                result.Append(string.Join(",", symbol.TypeParameters.Select(i => i.Name)));
-                result.Append(">");
-            }
-            result.Append("(");
-            result.Append(string.Join(", ", symbol.Parameters.Select(i => i.Name)));
-            result.Append("));}");
-        }
-
         public override string? VisitMethod(IMethodSymbol symbol)
         {
             if (symbol.MethodKind != MethodKind.Ordinary
@@ -133,6 +106,32 @@ namespace LightMock.Generator
             var s = result.ToString();
 
             return result.ToString();
+        }
+
+        void AddInterfaceImplementation(IMethodSymbol symbol, StringBuilder result)
+        {
+            var @namespace = symbol.ContainingNamespace.ToDisplayString(KInterfaceDisplayFormat);
+            var ctn = symbol.ContainingType.Name;
+            var raw = symbol.ToDisplayString(KInterfaceDisplayFormat);
+            var withInterface = raw.Replace(@namespace + "." + ctn, interfaceNamespace + "." + "IP2P_" + ctn);
+            result.Append(withInterface);
+
+            result.Append("{");
+
+            if (symbol.ReturnsVoid == false)
+                result.Append("return ");
+
+            result.Append("protectedContext.Invoke(f => f.");
+            result.Append(symbol.Name);
+            if (symbol.IsGenericMethod)
+            {
+                result.Append("<");
+                result.Append(string.Join(",", symbol.TypeParameters.Select(i => i.Name)));
+                result.Append(">");
+            }
+            result.Append("(");
+            result.Append(string.Join(", ", symbol.Parameters.Select(i => i.Name)));
+            result.Append("));}");
         }
 
         public override string? VisitProperty(IPropertySymbol symbol)
