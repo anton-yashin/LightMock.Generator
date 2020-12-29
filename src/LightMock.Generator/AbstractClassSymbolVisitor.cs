@@ -57,10 +57,12 @@ namespace LightMock.Generator
 
 
         private readonly NullableContextOptions nullableContextOptions;
+        private readonly string interfaceNamespace;
 
-        public AbstractClassSymbolVisitor(NullableContextOptions nullableContextOptions)
+        public AbstractClassSymbolVisitor(NullableContextOptions nullableContextOptions, string interfaceNamespace)
         {
             this.nullableContextOptions = nullableContextOptions;
+            this.interfaceNamespace = interfaceNamespace;
         }
 
         bool ImplementAsInterface(ISymbol symbol)
@@ -73,7 +75,7 @@ namespace LightMock.Generator
             var @namespace = symbol.ContainingNamespace.ToDisplayString(KInterfaceDisplayFormat);
             var ctn = symbol.ContainingType.Name;
             var raw = symbol.ToDisplayString(KInterfaceDisplayFormat);
-            var withInterface = raw.Replace(@namespace + "." + ctn, @namespace + "." + "IP2P_" + ctn);
+            var withInterface = raw.Replace(@namespace + "." + ctn, interfaceNamespace + "." + "IP2P_" + ctn);
             result.Append(withInterface);
 
             result.Append("{");
@@ -177,7 +179,7 @@ namespace LightMock.Generator
             var @namespace = symbol.ContainingNamespace.ToDisplayString(KInterfaceDisplayFormat);
             var ctn = symbol.ContainingType.Name;
             var raw = symbol.ToDisplayString(KInterfaceDisplayFormat);
-            var withInterface = raw.Replace(@namespace + "." + ctn, @namespace + "." + "IP2P_" + ctn);
+            var withInterface = raw.Replace(@namespace + "." + ctn, interfaceNamespace + "." + "IP2P_" + ctn);
             result.Append(withInterface);
 
             result.Append(" {");

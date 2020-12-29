@@ -7,6 +7,8 @@ using Microsoft.CodeAnalysis;
 using Xunit;
 using Xunit.Abstractions;
 using LightMock.Generator.Tests.AbstractClass;
+using LightMock.Generator.Tests.AbstractClass.Namespace2;
+using LightMock.Generator.Tests.AbstractClass.Namespace1;
 
 namespace LightMock.Generator.Tests
 {
@@ -114,6 +116,37 @@ namespace LightMock.Generator.Tests
 
             testClass.TestProtectedMembers();
         }
+
+        [Fact]
+        public void MultipleNamespaces()
+        {
+            const string KClassName = "MultipleNamespaces";
+
+            var (diagnostics, success, assembly) = DoCompileResource(KClassName);
+
+            // verify
+            Assert.True(success);
+            Assert.Empty(diagnostics);
+
+            string className = KClassName;
+            var (context, baseClass, testClass) = LoadAssembly<AMultipleNamespaces>(KClassName, assembly, className);
+
+            var a1 = new AMultipleNamespacesArgument();
+            baseClass.DoSomething(a1);
+            context.Assert(f => f.DoSomething(a1));
+
+            var a2 = new AMultipleNamespacesArgument();
+            context.Arrange(f => f.GetSomething()).Returns(a2);
+            Assert.Same(a2, baseClass.GetSomething());
+
+            var a3 = new AMultipleNamespacesArgument();
+            context.ArrangeProperty(f => f.SomeProperty);
+            baseClass.SomeProperty = a3;
+            Assert.Same(a3, baseClass.SomeProperty);
+
+            testClass.TestProtectedMembers();
+        }
+
 
         [Fact]
         public void EventSource()

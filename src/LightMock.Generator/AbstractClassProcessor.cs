@@ -13,7 +13,7 @@ namespace LightMock.Generator
     {
         private readonly ClassDeclarationSyntax candidateClass;
         private readonly INamedTypeSymbol baseClass;
-        private readonly SymbolVisitor<string> symbolVisitor;
+        private readonly NullableContextOptions nullableContextOptions;
         private readonly ProtectedMemberSymbolVisitor protectedVisitor;
 
         public AbstractClassProcessor(
@@ -24,8 +24,8 @@ namespace LightMock.Generator
         {
             this.candidateClass = candidateClass;
             this.baseClass = baseClass;
-            this.symbolVisitor = new AbstractClassSymbolVisitor(compilation.Options.NullableContextOptions);
-            this.protectedVisitor = new ProtectedMemberSymbolVisitor(compilation.Options.NullableContextOptions);
+            this.nullableContextOptions = compilation.Options.NullableContextOptions;
+            this.protectedVisitor = new ProtectedMemberSymbolVisitor(nullableContextOptions);
         }
 
         public override SourceText DoGenerate()
@@ -33,8 +33,9 @@ namespace LightMock.Generator
             var className = typeSymbol.IsGenericType
                 ? typeSymbol.Name + "<" + string.Join(",", typeSymbol.TypeParameters.Select(i => i.Name)) + ">"
                 : typeSymbol.Name;
-            var baseName = baseClass.Accept(symbolVisitor);
             var nameSpace = typeSymbol.ContainingNamespace.ToDisplayString(KNamespaceDisplayFormat);
+            var symbolVisitor = new AbstractClassSymbolVisitor(nullableContextOptions, nameSpace);
+            var baseName = baseClass.Accept(symbolVisitor);
             var members = baseClass.GetMembers();
             var interfaceName = "IP2P_" + (typeSymbol.IsGenericType 
                 ? baseClass.Name + "<" + string.Join(",", typeSymbol.TypeParameters.Select(i => i.Name)) + ">"
