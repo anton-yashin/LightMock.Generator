@@ -190,11 +190,26 @@ namespace LightMock.Generator.Tests
             string className = KClassName;
             var (context, baseClass, testClass) = LoadAssembly<AEventSourceMultipleNamespaces>(KClassName, assembly, className);
 
+            Assert.NotNull(baseClass);
+        }
+
+        [Fact]
+        public void EventSourceGenericClass()
+        {
+            const string KClassName = "EventSourceGenericClass";
+            var (diagnostics, success, assembly) = DoCompileResource(KClassName);
+
+            // verify
+            Assert.True(success);
+            Assert.Empty(diagnostics);
+
+            string className = KClassName;
+            var (context, baseClass, testClass) = LoadAssembly<AEventSourceGenericClass<int>>(KClassName, assembly, className + "`1");
+
             var bt = baseClass.GetType();
 
             Assert.NotNull(baseClass);
         }
-
 
         private static (MockContext<T> context, T baseClass, ITestScript testClass) LoadAssembly<T>(string KClassName, byte[] assembly, string className)
         {
