@@ -53,13 +53,13 @@ namespace {nameSpace}
 
     partial class {className} : {interfaceName}
     {{
-        private readonly IInvocationContext<{baseName}> context;
-        private readonly IInvocationContext<{interfaceName}> protectedContext;
+        private readonly IInvocationContext<{baseName}> {VariableNames.Context};
+        private readonly IInvocationContext<{interfaceName}> {VariableNames.ProtectedContext};
 
-        public {typeSymbol.Name}(IInvocationContext<{baseName}> context, IInvocationContext<{interfaceName}> protectedContext)
+        public {typeSymbol.Name}(IInvocationContext<{baseName}> {VariableNames.Context}, IInvocationContext<{interfaceName}> {VariableNames.ProtectedContext})
         {{
-            this.context = context;
-            this.protectedContext = protectedContext;
+            this.{VariableNames.Context} = {VariableNames.Context};
+            this.{VariableNames.ProtectedContext} = {VariableNames.ProtectedContext};
         }}
 
         {string.Join("\r\n        ", members.Select(i => i.Accept(symbolVisitor)).SkipWhile(i => string.IsNullOrWhiteSpace(i)))}

@@ -47,7 +47,7 @@ namespace LightMock.Generator
             if (symbol.ReturnsVoid == false)
                 result.Append("return ");
 
-            result.Append("context.Invoke(f => f.");
+            result.Append(VariableNames.Context + ".Invoke(f => f.");
             result.Append(symbol.Name);
             if (symbol.IsGenericMethod)
             {
@@ -70,13 +70,13 @@ namespace LightMock.Generator
                 .Append(" {");
             if (symbol.GetMethod != null)
             {
-                result.Append(" get { return context.Invoke(f => f.")
+                result.Append(" get { return " + VariableNames.Context  + ".Invoke(f => f.")
                     .Append(symbol.Name)
                     .Append("); } ");
             }
             if (symbol.SetMethod != null)
             {
-                result.Append("set { context.InvokeSetter(f => f.")
+                result.Append("set { " + VariableNames.Context + ".InvokeSetter(f => f.")
                     .Append(symbol.Name)
                     .Append(", value); } ");
             }

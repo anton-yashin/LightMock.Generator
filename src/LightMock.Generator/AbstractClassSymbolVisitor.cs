@@ -87,8 +87,8 @@ namespace LightMock.Generator
                 result.Append("return ");
 
             result.Append(implementAsInterface
-                ? "protectedContext.Invoke(f => f."
-                : "context.Invoke(f => f.")
+                ? VariableNames.ProtectedContext + ".Invoke(f => f."
+                : VariableNames.Context + ".Invoke(f => f.")
                 .Append(symbol.Name);
             if (symbol.IsGenericMethod)
             {
@@ -111,7 +111,7 @@ namespace LightMock.Generator
             if (symbol.ReturnsVoid == false)
                 result.Append("return ");
 
-            result.Append("protectedContext.Invoke(f => f.")
+            result.Append(VariableNames.ProtectedContext + ".Invoke(f => f.")
                 .Append(symbol.Name);
             if (symbol.IsGenericMethod)
             {
@@ -150,16 +150,16 @@ namespace LightMock.Generator
             if (symbol.GetMethod != null)
             {
                 result.Append(implementAsInterface 
-                    ? " get { return protectedContext.Invoke(f => f." 
-                    : " get { return context.Invoke(f => f.")
+                    ? " get { return " + VariableNames.ProtectedContext + ".Invoke(f => f." 
+                    : " get { return " + VariableNames.Context + ".Invoke(f => f.")
                     .Append(symbol.Name)
                     .Append("); } ");
             }
             if (symbol.SetMethod != null)
             {
                 result.Append(implementAsInterface 
-                    ? "set { protectedContext.InvokeSetter(f => f." 
-                    : "set { context.InvokeSetter(f => f.")
+                    ? "set { " + VariableNames.ProtectedContext + ".InvokeSetter(f => f." 
+                    : "set { " + VariableNames.Context + ".InvokeSetter(f => f.")
                     .Append(symbol.Name)
                     .Append(", value); } ");
             }
@@ -174,13 +174,13 @@ namespace LightMock.Generator
                 .Append(" {");
             if (symbol.GetMethod != null)
             {
-                result.Append(" get { return protectedContext.Invoke(f => f.")
+                result.Append(" get { return " + VariableNames.ProtectedContext + ".Invoke(f => f.")
                     .Append(symbol.Name)
                     .Append("); } ");
             }
             if (symbol.SetMethod != null)
             {
-                result.Append("set { protectedContext.InvokeSetter(f => f.")
+                result.Append("set { " + VariableNames.ProtectedContext + ".InvokeSetter(f => f.")
                     .Append(symbol.Name)
                     .Append(", value); } ");
             }

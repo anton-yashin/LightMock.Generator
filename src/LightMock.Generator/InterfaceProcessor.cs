@@ -65,11 +65,11 @@ namespace {nameSpace}
 {{
     partial class {className}
     {{
-        private readonly IInvocationContext<{interfaceName}> context;
+        private readonly IInvocationContext<{interfaceName}> {VariableNames.Context};
 
-        public {typeSymbol.Name}(IInvocationContext<{interfaceName}> context)
+        public {typeSymbol.Name}(IInvocationContext<{interfaceName}> {VariableNames.Context})
         {{
-            this.context = context;
+            this.{VariableNames.Context} = {VariableNames.Context};
         }}
 
         {string.Join("\r\n        ",  members.Select(i => i.Accept(symbolVisitor)))}
