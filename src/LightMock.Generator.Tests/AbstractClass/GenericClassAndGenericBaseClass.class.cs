@@ -5,7 +5,7 @@
     {
     }
 
-    public sealed class GenericClassAndGenericBaseClassTest
+    public sealed class GenericClassAndGenericBaseClassTest : ITestScript
     {
         private readonly IP2P_AGenericClassAndGenericBaseClass<int> p2p;
         private readonly MockContext<IP2P_AGenericClassAndGenericBaseClass<int>> mockContext;

@@ -16,7 +16,7 @@ namespace LightMock.Generator.Tests.AbstractClass
     using LightMock.Generator.Tests.AbstractClass.Namespace2;
     using LightMock.Generator.Tests.AbstractClass.Namespace1;
 
-    public sealed class MultipleNamespacesTest
+    public sealed class MultipleNamespacesTest : ITestScript
     {
         private readonly IP2P_AMultipleNamespaces p2p;
         private readonly MockContext<IP2P_AMultipleNamespaces> mockContext;

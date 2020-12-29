@@ -196,7 +196,7 @@ namespace LightMock.Generator.Tests
         }
 
 
-        private static (MockContext<T> context, T baseClass, dynamic testClass) LoadAssembly<T>(string KClassName, byte[] assembly, string className)
+        private static (MockContext<T> context, T baseClass, ITestScript testClass) LoadAssembly<T>(string KClassName, byte[] assembly, string className)
         {
             var alc = new AssemblyLoadContext(className);
             var loadedAssembly = alc.LoadFromStream(new MemoryStream(assembly));
@@ -213,7 +213,7 @@ namespace LightMock.Generator.Tests
             var baseClass = (T)mockInstance;
             var testClassType = loadedAssembly.ExportedTypes.Where(t => t.Name == KClassName + "Test").First();
             var testClass = Activator.CreateInstance(testClassType, mockInstance, protectedContext) ?? throw new InvalidOperationException("can't create test class");
-            return (context, baseClass, testClass);
+            return (context, baseClass, (ITestScript)testClass);
         }
 
         [Fact]

@@ -3,7 +3,7 @@
     [GenerateMock]
     public partial class BasicMethod : ABasicMethod { }
 
-    public class BasicMethodTest
+    public class BasicMethodTest : ITestScript
     {
         private readonly IP2P_ABasicMethod p2p;
         private readonly MockContext<IP2P_ABasicMethod> mockContext;

@@ -7,7 +7,7 @@ namespace LightMock.Generator.Tests.AbstractClass
     {
     }
 
-    public class GenericMethodTest
+    public class GenericMethodTest : ITestScript
     {
         private readonly IP2P_AGenericMethod p2p;
         private readonly MockContext<IP2P_AGenericMethod> mockContext;

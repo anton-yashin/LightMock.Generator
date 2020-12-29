@@ -7,7 +7,7 @@ namespace LightMock.Generator.Tests.AbstractClass
     {
     }
 
-    public class BasicPropertyTest
+    public class BasicPropertyTest : ITestScript
     {
         private readonly IP2P_ABasicProperty p2p;
         private readonly MockContext<IP2P_ABasicProperty> mockContext;

@@ -4,7 +4,7 @@
     public partial class EventSource : AEventSource
     { }
 
-    public class EventSourceTest
+    public class EventSourceTest : ITestScript
     {
         private readonly EventSource p2p;
         private readonly MockContext<IP2P_AEventSource> mockContext;

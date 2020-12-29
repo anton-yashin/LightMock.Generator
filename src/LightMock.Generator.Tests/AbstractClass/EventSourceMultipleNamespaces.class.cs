@@ -7,7 +7,7 @@ namespace LightMock.Generator.Tests.AbstractClass
     {
     }
 
-    public class EventSourceMultipleNamespacesTest
+    public class EventSourceMultipleNamespacesTest : ITestScript
     {
         private readonly IP2P_AEventSourceMultipleNamespaces p2p;
         private readonly MockContext<IP2P_AEventSourceMultipleNamespaces> mockContext;
