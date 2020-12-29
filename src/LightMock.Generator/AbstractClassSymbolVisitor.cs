@@ -1,6 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
@@ -81,53 +80,48 @@ namespace LightMock.Generator
                 AddInterfaceImplementation(symbol, result);
 
             result.Append("override ")
-                .Append(symbol.ToDisplayString(KSymbolDisplayFormat));
-            
-            result.Append("{");
+                .Append(symbol.ToDisplayString(KSymbolDisplayFormat))
+                .Append("{");
 
             if (symbol.ReturnsVoid == false)
                 result.Append("return ");
 
-            if (implementAsInterface)
-                result.Append("protectedContext.Invoke(f => f.");
-            else
-                result.Append("context.Invoke(f => f.");
-            result.Append(symbol.Name);
+            result.Append(implementAsInterface
+                ? "protectedContext.Invoke(f => f."
+                : "context.Invoke(f => f.")
+                .Append(symbol.Name);
             if (symbol.IsGenericMethod)
             {
-                result.Append("<");
-                result.Append(string.Join(",", symbol.TypeParameters.Select(i => i.Name)));
-                result.Append(">");
+                result.Append("<")
+                    .Append(string.Join(",", symbol.TypeParameters.Select(i => i.Name)))
+                    .Append(">");
             }
-            result.Append("(");
-            result.Append(string.Join(", ", symbol.Parameters.Select(i => i.Name)));
-            result.Append("));}");
-
-            var s = result.ToString();
+            result.Append("(")
+                .Append(string.Join(", ", symbol.Parameters.Select(i => i.Name)))
+                .Append("));}");
 
             return result.ToString();
         }
 
         void AddInterfaceImplementation(IMethodSymbol symbol, StringBuilder result)
         {
-            result.Append(CombineWithInterface(symbol));
-
-            result.Append("{");
+            result.Append(CombineWithInterface(symbol))
+                .Append("{");
 
             if (symbol.ReturnsVoid == false)
                 result.Append("return ");
 
-            result.Append("protectedContext.Invoke(f => f.");
-            result.Append(symbol.Name);
+            result.Append("protectedContext.Invoke(f => f.")
+                .Append(symbol.Name);
             if (symbol.IsGenericMethod)
             {
-                result.Append("<");
-                result.Append(string.Join(",", symbol.TypeParameters.Select(i => i.Name)));
-                result.Append(">");
+                result.Append("<")
+                    .Append(string.Join(",", symbol.TypeParameters.Select(i => i.Name)))
+                    .Append(">");
             }
-            result.Append("(");
-            result.Append(string.Join(", ", symbol.Parameters.Select(i => i.Name)));
-            result.Append("));}");
+            result.Append("(")
+                .Append(string.Join(", ", symbol.Parameters.Select(i => i.Name)))
+                .Append("));}");
         }
 
         private string CombineWithInterface(ISymbol symbol)
@@ -155,34 +149,29 @@ namespace LightMock.Generator
                 .Append(" {");
             if (symbol.GetMethod != null)
             {
-                if (implementAsInterface)
-                    result.Append(" get { return protectedContext.Invoke(f => f.");
-                else
-                    result.Append(" get { return context.Invoke(f => f.");
-                result.Append(symbol.Name)
-                .Append("); } ");
+                result.Append(implementAsInterface 
+                    ? " get { return protectedContext.Invoke(f => f." 
+                    : " get { return context.Invoke(f => f.")
+                    .Append(symbol.Name)
+                    .Append("); } ");
             }
             if (symbol.SetMethod != null)
             {
-                if (implementAsInterface)
-                    result.Append("set { protectedContext.InvokeSetter(f => f.");
-                else
-                    result.Append("set { context.InvokeSetter(f => f.");
-                result.Append(symbol.Name)
+                result.Append(implementAsInterface 
+                    ? "set { protectedContext.InvokeSetter(f => f." 
+                    : "set { context.InvokeSetter(f => f.")
+                    .Append(symbol.Name)
                     .Append(", value); } ");
             }
             result.Append("}");
-
-            var s = result.ToString();
 
             return result.ToString();
         }
 
         private void AddInterfaceImplementation(IPropertySymbol symbol, StringBuilder result)
         {
-            result.Append(CombineWithInterface(symbol));
-
-            result.Append(" {");
+            result.Append(CombineWithInterface(symbol))
+                .Append(" {");
             if (symbol.GetMethod != null)
             {
                 result.Append(" get { return protectedContext.Invoke(f => f.")
@@ -206,7 +195,6 @@ namespace LightMock.Generator
                 var result = new StringBuilder("override ")
                     .Append(sdf)
                     .Append(";");
-                var s = result.ToString();
                 return result.ToString();
             }
             return null;
