@@ -9,6 +9,7 @@ using Xunit.Abstractions;
 using LightMock.Generator.Tests.AbstractClass;
 using LightMock.Generator.Tests.AbstractClass.Namespace2;
 using LightMock.Generator.Tests.AbstractClass.Namespace1;
+using LightMock.Generator.Tests.AbstractClass.Namespace4;
 
 namespace LightMock.Generator.Tests
 {
@@ -171,6 +172,25 @@ namespace LightMock.Generator.Tests
 
             string className = KClassName;
             var (context, baseClass, testClass) = LoadAssembly<AEventSource>(KClassName, assembly, className);
+
+            Assert.NotNull(baseClass);
+        }
+
+        [Fact]
+        public void EventSourceMultipleNamespaces()
+        {
+            const string KClassName = "EventSourceMultipleNamespaces";
+
+            var (diagnostics, success, assembly) = DoCompileResource(KClassName);
+
+            // verify
+            Assert.True(success);
+            Assert.Empty(diagnostics);
+
+            string className = KClassName;
+            var (context, baseClass, testClass) = LoadAssembly<AEventSourceMultipleNamespaces>(KClassName, assembly, className);
+
+            var bt = baseClass.GetType();
 
             Assert.NotNull(baseClass);
         }
