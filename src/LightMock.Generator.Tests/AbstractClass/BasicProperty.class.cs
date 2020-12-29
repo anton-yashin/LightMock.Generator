@@ -20,10 +20,14 @@ namespace LightMock.Generator.Tests.AbstractClass
 
         public void TestProtectedMembers()
         {
-            const int KExpected = 9218719;
-            mockContext.ArrangeProperty(f => f.GetAndSet);
-            p2p.GetAndSet = KExpected;
-            Xunit.Assert.Equal(KExpected, p2p.GetAndSet);
+            const int KExpected1 = 1234;
+            mockContext.Arrange(f => f.ProtectedOnlyGet).Returns(KExpected1);
+            Xunit.Assert.Equal(expected: KExpected1, p2p.ProtectedOnlyGet);
+
+            const int KExpected2 = 9218719;
+            mockContext.ArrangeProperty(f => f.ProtectedGetAndSet);
+            p2p.ProtectedGetAndSet = KExpected2;
+            Xunit.Assert.Equal(KExpected2, p2p.ProtectedGetAndSet);
         }
     }
 

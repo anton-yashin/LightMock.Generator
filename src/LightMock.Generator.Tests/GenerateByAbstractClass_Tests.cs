@@ -34,7 +34,11 @@ namespace LightMock.Generator.Tests
 
             context.Arrange(f => f.GetSomething()).Returns(1234);
             Assert.Equal(expected: 1234, baseClass.GetSomething());
+
             Assert.Throws<NotImplementedException>(() => baseClass.NonAbstractNonVirtualMethod());
+
+            baseClass.DoSomething(1234);
+            context.Assert(f => f.DoSomething(1234));
 
             testClass.TestProtectedMembers();
         }
@@ -53,9 +57,15 @@ namespace LightMock.Generator.Tests
             string className = KClassName;
             var (context, baseClass, testClass) = LoadAssembly<ABasicProperty>(KClassName, assembly, className);
 
-            context.Arrange(f => f.OnlyGet).Returns(1234);
-            Assert.Equal(expected: 1234, baseClass.OnlyGet);
+            const int KExpected1 = 1234;
+            context.Arrange(f => f.OnlyGet).Returns(KExpected1);
+            Assert.Equal(expected: KExpected1, baseClass.OnlyGet);
             Assert.Throws<NotImplementedException>(() => baseClass.NonAbstractNonVirtualProperty);
+
+            const int KExpected2 = 9218719;
+            context.ArrangeProperty(f => f.GetAndSet);
+            baseClass.GetAndSet = KExpected2;
+            Assert.Equal(KExpected2, baseClass.GetAndSet);
 
             testClass.TestProtectedMembers();
         }

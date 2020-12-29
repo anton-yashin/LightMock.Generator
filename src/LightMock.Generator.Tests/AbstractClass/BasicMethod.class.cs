@@ -16,9 +16,11 @@
 
         public void TestProtectedMembers()
         {
-            p2p.DoSomething(1234);
+            mockContext.Arrange(f => f.ProtectedGetSomething()).Returns(1234);
+            Xunit.Assert.Equal(expected: 1234, p2p.ProtectedGetSomething());
 
-            mockContext.Assert(f => f.DoSomething(1234));
+            p2p.ProtectedDoSomething(1234);
+            mockContext.Assert(f => f.ProtectedDoSomething(1234));
         }
     }
 
