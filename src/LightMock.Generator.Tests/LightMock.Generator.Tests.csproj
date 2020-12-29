@@ -35,9 +35,11 @@
     <ProjectReference Include="..\LightMock.Generator\LightMock.Generator.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Remove="Testee\*.class.cs" />
+    <Compile Remove="Interface\*.class.cs" />
+    <Compile Remove="AbstractClass\*.class.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Testee\*.cs" />
+    <EmbeddedResource Include="Interface\*.cs" />
+    <EmbeddedResource Include="AbstractClass\*.cs" />
   </ItemGroup>
 </Project>
