@@ -110,11 +110,7 @@ namespace LightMock.Generator
 
         void AddInterfaceImplementation(IMethodSymbol symbol, StringBuilder result)
         {
-            var @namespace = symbol.ContainingNamespace.ToDisplayString(KInterfaceDisplayFormat);
-            var ctn = symbol.ContainingType.Name;
-            var raw = symbol.ToDisplayString(KInterfaceDisplayFormat);
-            var withInterface = raw.Replace(@namespace + "." + ctn, interfaceNamespace + "." + "IP2P_" + ctn);
-            result.Append(withInterface);
+            result.Append(CombineWithInterface(symbol));
 
             result.Append("{");
 
@@ -132,6 +128,15 @@ namespace LightMock.Generator
             result.Append("(");
             result.Append(string.Join(", ", symbol.Parameters.Select(i => i.Name)));
             result.Append("));}");
+        }
+
+        private string CombineWithInterface(ISymbol symbol)
+        {
+            var @namespace = symbol.ContainingNamespace.ToDisplayString(KInterfaceDisplayFormat);
+            var ctn = symbol.ContainingType.Name;
+            return symbol
+                .ToDisplayString(KInterfaceDisplayFormat)
+                .Replace(@namespace + "." + ctn, interfaceNamespace + "." + "IP2P_" + ctn);
         }
 
         public override string? VisitProperty(IPropertySymbol symbol)
@@ -175,11 +180,7 @@ namespace LightMock.Generator
 
         private void AddInterfaceImplementation(IPropertySymbol symbol, StringBuilder result)
         {
-            var @namespace = symbol.ContainingNamespace.ToDisplayString(KInterfaceDisplayFormat);
-            var ctn = symbol.ContainingType.Name;
-            var raw = symbol.ToDisplayString(KInterfaceDisplayFormat);
-            var withInterface = raw.Replace(@namespace + "." + ctn, interfaceNamespace + "." + "IP2P_" + ctn);
-            result.Append(withInterface);
+            result.Append(CombineWithInterface(symbol));
 
             result.Append(" {");
             if (symbol.GetMethod != null)
