@@ -43,21 +43,7 @@ namespace LightMock.Generator
             if (symbol.MethodKind != MethodKind.Ordinary)
                 return null;
             var result = new StringBuilder(symbol.ToDisplayString(KSymbolDisplayFormat))
-                .Append("{");
-            if (symbol.ReturnsVoid == false)
-                result.Append("return ");
-
-            result.Append(VariableNames.Context + ".Invoke(f => f.");
-            result.Append(symbol.Name);
-            if (symbol.IsGenericMethod)
-            {
-                result.Append("<");
-                result.Append(string.Join(",", symbol.TypeParameters.Select(i => i.Name)));
-                result.Append(">");
-            }
-            result.Append("(");
-            result.Append(string.Join(", ", symbol.Parameters.Select(i => i.Name)));
-            result.Append("));}");
+                .AppendMethodBody(VariableNames.Context, symbol);
 
             var s = result.ToString();
 

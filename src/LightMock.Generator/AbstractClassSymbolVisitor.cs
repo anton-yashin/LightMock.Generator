@@ -79,47 +79,14 @@ namespace LightMock.Generator
 
             result.Append("override ")
                 .Append(symbol.ToDisplayString(KSymbolDisplayFormat))
-                .Append("{");
-
-            if (symbol.ReturnsVoid == false)
-                result.Append("return ");
-
-            result.Append(implementAsInterface
-                ? VariableNames.ProtectedContext + ".Invoke(f => f."
-                : VariableNames.Context + ".Invoke(f => f.")
-                .Append(symbol.Name);
-            if (symbol.IsGenericMethod)
-            {
-                result.Append("<")
-                    .Append(string.Join(",", symbol.TypeParameters.Select(i => i.Name)))
-                    .Append(">");
-            }
-            result.Append("(")
-                .Append(string.Join(", ", symbol.Parameters.Select(i => i.Name)))
-                .Append("));}");
-
+                .AppendMethodBody(implementAsInterface ? VariableNames.ProtectedContext : VariableNames.Context, symbol);
             return result.ToString();
         }
 
         void AddInterfaceImplementation(IMethodSymbol symbol, StringBuilder result)
         {
             result.Append(CombineWithInterface(symbol))
-                .Append("{");
-
-            if (symbol.ReturnsVoid == false)
-                result.Append("return ");
-
-            result.Append(VariableNames.ProtectedContext + ".Invoke(f => f.")
-                .Append(symbol.Name);
-            if (symbol.IsGenericMethod)
-            {
-                result.Append("<")
-                    .Append(string.Join(",", symbol.TypeParameters.Select(i => i.Name)))
-                    .Append(">");
-            }
-            result.Append("(")
-                .Append(string.Join(", ", symbol.Parameters.Select(i => i.Name)))
-                .Append("));}");
+                .AppendMethodBody(VariableNames.ProtectedContext, symbol);
         }
 
         private string CombineWithInterface(ISymbol symbol)

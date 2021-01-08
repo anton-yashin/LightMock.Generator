@@ -1,6 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace LightMock.Generator
@@ -29,6 +30,27 @@ namespace LightMock.Generator
             if (symbol.SetMethod != null)
                 @this.AppendSetter(contextName, symbol);
             return @this.Append("}");
+        }
+
+        public static StringBuilder AppendMethodBody(this StringBuilder @this, string contextName, IMethodSymbol symbol)
+        {
+            @this.Append("{");
+
+            if (symbol.ReturnsVoid == false)
+                @this.Append("return ");
+
+            @this.Append(contextName)
+                .Append(".Invoke(f => f.")
+                .Append(symbol.Name);
+            if (symbol.IsGenericMethod)
+            {
+                @this.Append("<")
+                    .Append(string.Join(",", symbol.TypeParameters.Select(i => i.Name)))
+                    .Append(">");
+            }
+            return @this.Append("(")
+                .Append(string.Join(", ", symbol.Parameters.Select(i => i.Name)))
+                .Append("));}");
         }
     }
 }
