@@ -48,6 +48,7 @@ namespace LightMock.Generator.Tests
                     MetadataReference.CreateFromFile(typeof(Xunit.Assert).Assembly.Location),
                     MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("System.Linq.Expressions")).Location),
                     MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("System.Runtime")).Location),
+                    MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("netstandard")).Location),
                 },
                 options: new CSharpCompilationOptions(Microsoft.CodeAnalysis.OutputKind.DynamicallyLinkedLibrary));
 
