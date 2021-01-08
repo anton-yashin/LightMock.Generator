@@ -59,7 +59,7 @@ namespace SomeNamespace
         private readonly IInvocationContext<AbstractClass> context;
         private readonly IInvocationContext<IP2P_AbstractClass> protectedContext;
 
-        public BasicMethod(IInvocationContext<AbstractClass> context, IInvocationContext<IP2P_AbstractClass> protectedContext)
+        public MockAbstractClass(IInvocationContext<AbstractClass> context, IInvocationContext<IP2P_AbstractClass> protectedContext)
         {
             this.context = context;
             this.protectedContext = protectedContext;

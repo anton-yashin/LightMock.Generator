@@ -16,9 +16,18 @@ namespace SomeNamespace
         void DoFoo();
     }
 
+    public abstract class AbstractClass
+    {
+        public abstract void DoFoo();
+        protected abstract void DoProtectedFoo();
+    }
+
     // your mock
     [GenerateMock]
     public partial MockFoo : IFoo { }
+
+    [GenerateMock]
+    public partial MockAbstractClass : AbstractClass { }
 }
 
 ## What will be generated in code behind:
@@ -38,4 +47,37 @@ namespace SomeNamespace
 
         void IFoo.DoFoo() { context.Invoke(f => f.DoFoo()); } 
     }
+
+    public interface IP2P_AbstractClass
+    {
+        void DoProtectedFoo();
+    }
+
+    partial class MockAbstractClass : IP2P_AbstractClass
+    {
+        private readonly IInvocationContext<AbstractClass> context;
+        private readonly IInvocationContext<IP2P_AbstractClass> protectedContext;
+
+        public MockAbstractClass(IInvocationContext<AbstractClass> context, IInvocationContext<IP2P_AbstractClass> protectedContext)
+        {
+            this.context = context;
+            this.protectedContext = protectedContext;
+        }
+
+        override public void DoFoo(int p)
+        {
+            context.Invoke(f => f.DoFoo(p));
+        }
+
+        void LightMockIP2P_ABasicMethod.ProtectedDoFoo()
+        {
+            protectedContext.Invoke(f => f.ProtectedDoFoo());
+        }
+
+        override protected void ProtectedDoFoo()
+        {
+            protectedContext.Invoke(f => f.ProtectedDoFoo());
+        }
+    }
+
 }
