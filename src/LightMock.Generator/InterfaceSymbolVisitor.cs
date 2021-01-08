@@ -70,15 +70,11 @@ namespace LightMock.Generator
                 .Append(" {");
             if (symbol.GetMethod != null)
             {
-                result.Append(" get { return " + VariableNames.Context  + ".Invoke(f => f.")
-                    .Append(symbol.Name)
-                    .Append("); } ");
+                result.AppendGetter(VariableNames.Context, symbol);
             }
             if (symbol.SetMethod != null)
             {
-                result.Append("set { " + VariableNames.Context + ".InvokeSetter(f => f.")
-                    .Append(symbol.Name)
-                    .Append(", value); } ");
+                result.AppendSetter(VariableNames.Context, symbol);
             }
             result.Append("}");
 

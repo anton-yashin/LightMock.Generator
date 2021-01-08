@@ -147,19 +147,11 @@ namespace LightMock.Generator
                 .Append(" {");
             if (symbol.GetMethod != null)
             {
-                result.Append(implementAsInterface 
-                    ? " get { return " + VariableNames.ProtectedContext + ".Invoke(f => f." 
-                    : " get { return " + VariableNames.Context + ".Invoke(f => f.")
-                    .Append(symbol.Name)
-                    .Append("); } ");
+                result.AppendGetter(implementAsInterface ? VariableNames.ProtectedContext : VariableNames.Context, symbol);
             }
             if (symbol.SetMethod != null)
             {
-                result.Append(implementAsInterface 
-                    ? "set { " + VariableNames.ProtectedContext + ".InvokeSetter(f => f." 
-                    : "set { " + VariableNames.Context + ".InvokeSetter(f => f.")
-                    .Append(symbol.Name)
-                    .Append(", value); } ");
+                result.AppendSetter(implementAsInterface ? VariableNames.ProtectedContext : VariableNames.Context, symbol);
             }
             result.Append("}");
 
@@ -172,15 +164,11 @@ namespace LightMock.Generator
                 .Append(" {");
             if (symbol.GetMethod != null)
             {
-                result.Append(" get { return " + VariableNames.ProtectedContext + ".Invoke(f => f.")
-                    .Append(symbol.Name)
-                    .Append("); } ");
+                result.AppendGetter(VariableNames.ProtectedContext, symbol);
             }
             if (symbol.SetMethod != null)
             {
-                result.Append("set { " + VariableNames.ProtectedContext + ".InvokeSetter(f => f.")
-                    .Append(symbol.Name)
-                    .Append(", value); } ");
+                result.AppendSetter(VariableNames.ProtectedContext, symbol);
             }
             result.Append("}");
         }
