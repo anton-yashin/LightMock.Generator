@@ -13,9 +13,8 @@ namespace LightMock.Generator
     public class LightMockGenerator : ISourceGenerator
     {
         const string KAttributeName = nameof(GenerateMockAttribute);
-        const string KAttributeFile = KAttributeName + ".cs";
 
-        readonly Lazy<string> attribute = new Lazy<string>(() => Utils.LoadResource(KAttributeFile));
+        readonly Lazy<string> attribute = new Lazy<string>(() => Utils.LoadResource(KAttributeName + ".cs"));
 
         private static readonly SymbolDisplayFormat KNamespaceDisplayFormat = new SymbolDisplayFormat(
             typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces
