@@ -1,7 +1,4 @@
 ﻿using Microsoft.CodeAnalysis;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace LightMock.Generator
@@ -56,146 +53,73 @@ namespace LightMock.Generator
 
 
 
-        private readonly NullableContextOptions nullableContextOptions;
         private readonly string interfaceNamespace;
 
-        public AbstractClassSymbolVisitor(NullableContextOptions nullableContextOptions, string interfaceNamespace)
+        public AbstractClassSymbolVisitor(string interfaceNamespace)
         {
-            this.nullableContextOptions = nullableContextOptions;
             this.interfaceNamespace = interfaceNamespace;
         }
 
-        bool ImplementAsInterface(ISymbol symbol)
-            => (symbol.IsAbstract || symbol.IsVirtual)
-                && symbol.DeclaredAccessibility == Accessibility.Protected;
+        static bool IsInterfaceRequired(ISymbol symbol)
+            => IsCanBeOverriden(symbol) && symbol.DeclaredAccessibility == Accessibility.Protected;
 
-
-        void AddInterfaceImplementation(IMethodSymbol symbol, StringBuilder result)
-        {
-            var @namespace = symbol.ContainingNamespace.ToDisplayString(KInterfaceDisplayFormat);
-            var ctn = symbol.ContainingType.Name;
-            var raw = symbol.ToDisplayString(KInterfaceDisplayFormat);
-            var withInterface = raw.Replace(@namespace + "." + ctn, interfaceNamespace + "." + "IP2P_" + ctn);
-            result.Append(withInterface);
-
-            result.Append("{");
-
-            if (symbol.ReturnsVoid == false)
-                result.Append("return ");
-
-            result.Append("protectedContext.Invoke(f => f.");
-            result.Append(symbol.Name);
-            if (symbol.IsGenericMethod)
-            {
-                result.Append("<");
-                result.Append(string.Join(",", symbol.TypeParameters.Select(i => i.Name)));
-                result.Append(">");
-            }
-            result.Append("(");
-            result.Append(string.Join(", ", symbol.Parameters.Select(i => i.Name)));
-            result.Append("));}");
-        }
+        static bool IsCanBeOverriden(ISymbol symbol)
+            => symbol.IsAbstract || symbol.IsVirtual;
 
         public override string? VisitMethod(IMethodSymbol symbol)
         {
-            if (symbol.MethodKind != MethodKind.Ordinary
-                || (symbol.IsAbstract == false && symbol.IsVirtual == false))
-                return null;
-            var result = new StringBuilder();
-            bool implementAsInterface = ImplementAsInterface(symbol);
-
-            if (implementAsInterface)
-                AddInterfaceImplementation(symbol, result);
-
-            result.Append("override ")
-                .Append(symbol.ToDisplayString(KSymbolDisplayFormat));
-            
-            result.Append("{");
-
-            if (symbol.ReturnsVoid == false)
-                result.Append("return ");
-
-            if (implementAsInterface)
-                result.Append("protectedContext.Invoke(f => f.");
-            else
-                result.Append("context.Invoke(f => f.");
-            result.Append(symbol.Name);
-            if (symbol.IsGenericMethod)
-            {
-                result.Append("<");
-                result.Append(string.Join(",", symbol.TypeParameters.Select(i => i.Name)));
-                result.Append(">");
-            }
-            result.Append("(");
-            result.Append(string.Join(", ", symbol.Parameters.Select(i => i.Name)));
-            result.Append("));}");
-
-            var s = result.ToString();
-
-            return result.ToString();
-        }
-
-        public override string? VisitProperty(IPropertySymbol symbol)
-        {
-            if (symbol.IsAbstract == false && symbol.IsVirtual == false)
+            if (symbol.MethodKind != MethodKind.Ordinary || IsCanBeOverriden(symbol) == false)
                 return null;
 
-            bool implementAsInterface = ImplementAsInterface(symbol);
-
             var result = new StringBuilder();
-            if (implementAsInterface)
+            bool isInterfaceRequired = IsInterfaceRequired(symbol);
+
+            if (isInterfaceRequired)
                 AddInterfaceImplementation(symbol, result);
 
             result.Append("override ")
                 .Append(symbol.ToDisplayString(KSymbolDisplayFormat))
-                .Append(" {");
-            if (symbol.GetMethod != null)
-            {
-                if (implementAsInterface)
-                    result.Append(" get { return protectedContext.Invoke(f => f.");
-                else
-                    result.Append(" get { return context.Invoke(f => f.");
-                result.Append(symbol.Name)
-                .Append("); } ");
-            }
-            if (symbol.SetMethod != null)
-            {
-                if (implementAsInterface)
-                    result.Append("set { protectedContext.InvokeSetter(f => f.");
-                else
-                    result.Append("set { context.InvokeSetter(f => f.");
-                result.Append(symbol.Name)
-                    .Append(", value); } ");
-            }
-            result.Append("}");
+                .AppendMethodBody(isInterfaceRequired ? VariableNames.ProtectedContext : VariableNames.Context, symbol);
+            return result.ToString();
+        }
 
-            var s = result.ToString();
+        void AddInterfaceImplementation(IMethodSymbol symbol, StringBuilder result)
+        {
+            result.Append(CombineWithInterface(symbol))
+                .AppendMethodBody(VariableNames.ProtectedContext, symbol);
+        }
+
+        private string CombineWithInterface(ISymbol symbol)
+        {
+            var @namespace = symbol.ContainingNamespace.ToDisplayString(KInterfaceDisplayFormat);
+            var ctn = symbol.ContainingType.Name;
+            return symbol
+                .ToDisplayString(KInterfaceDisplayFormat)
+                .Replace(@namespace + "." + ctn, interfaceNamespace + "." + Prefix.ProtectedToPublicInterface + ctn);
+        }
+
+        public override string? VisitProperty(IPropertySymbol symbol)
+        {
+            if (IsCanBeOverriden(symbol) == false)
+                return null;
+
+            bool isInterfaceRequired = IsInterfaceRequired(symbol);
+
+            var result = new StringBuilder();
+            if (isInterfaceRequired)
+                AddInterfaceImplementation(symbol, result);
+
+            result.Append("override ")
+                .Append(symbol.ToDisplayString(KSymbolDisplayFormat))
+                .AppendGetterAndSetter(isInterfaceRequired ? VariableNames.ProtectedContext : VariableNames.Context, symbol);
 
             return result.ToString();
         }
 
         private void AddInterfaceImplementation(IPropertySymbol symbol, StringBuilder result)
         {
-            var @namespace = symbol.ContainingNamespace.ToDisplayString(KInterfaceDisplayFormat);
-            var ctn = symbol.ContainingType.Name;
-            var raw = symbol.ToDisplayString(KInterfaceDisplayFormat);
-            var withInterface = raw.Replace(@namespace + "." + ctn, interfaceNamespace + "." + "IP2P_" + ctn);
-            result.Append(withInterface);
-
-            result.Append(" {");
-            if (symbol.GetMethod != null)
-            {
-                result.Append(" get { return protectedContext.Invoke(f => f.")
-                    .Append(symbol.Name)
-                    .Append("); } ");
-            }
-            if (symbol.SetMethod != null)
-            {
-                result.Append("set { protectedContext.InvokeSetter(f => f.")
-                    .Append(symbol.Name)
-                    .Append(", value); } ");
-            }
-            result.Append("}");
+            result.Append(CombineWithInterface(symbol))
+                .AppendGetterAndSetter(VariableNames.ProtectedContext, symbol);
         }
 
         public override string? VisitEvent(IEventSymbol symbol)
@@ -206,7 +130,6 @@ namespace LightMock.Generator
                 var result = new StringBuilder("override ")
                     .Append(sdf)
                     .Append(";");
-                var s = result.ToString();
                 return result.ToString();
             }
             return null;

@@ -1,7 +1,4 @@
 ﻿using Microsoft.CodeAnalysis;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace LightMock.Generator
@@ -30,20 +27,15 @@ namespace LightMock.Generator
                     SymbolDisplayMiscellaneousOptions.UseSpecialTypes |
                     SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier);
 
-        private readonly NullableContextOptions nullableContextOptions;
+        public ProtectedMemberSymbolVisitor() { }
 
-        public ProtectedMemberSymbolVisitor(NullableContextOptions nullableContextOptions)
-        {
-            this.nullableContextOptions = nullableContextOptions;
-        }
-
-        bool IsSuitable(ISymbol symbol)
+        bool IsInterfaceRequired(ISymbol symbol)
             => (symbol.IsAbstract || symbol.IsVirtual)
                 && symbol.DeclaredAccessibility == Accessibility.Protected;
 
         public override string? VisitMethod(IMethodSymbol symbol)
         {
-            if (symbol.MethodKind != MethodKind.Ordinary || IsSuitable(symbol) == false)
+            if (symbol.MethodKind != MethodKind.Ordinary || IsInterfaceRequired(symbol) == false)
                 return null;
 
             var result = symbol.ToDisplayString(KSymbolDisplayFormat) + ";";
@@ -53,7 +45,7 @@ namespace LightMock.Generator
 
         public override string? VisitProperty(IPropertySymbol symbol)
         {
-            if (IsSuitable(symbol) == false)
+            if (IsInterfaceRequired(symbol) == false)
                 return null;
             var result = new StringBuilder(symbol.ToDisplayString(KSymbolDisplayFormat))
                 .Append("{");
@@ -63,8 +55,6 @@ namespace LightMock.Generator
             if (symbol.SetMethod != null)
                 result.Append("set;");
             result.Append("}");
-
-            var s = result.ToString();
 
             return result.ToString();
         }

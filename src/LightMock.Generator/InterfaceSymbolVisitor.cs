@@ -43,23 +43,7 @@ namespace LightMock.Generator
             if (symbol.MethodKind != MethodKind.Ordinary)
                 return null;
             var result = new StringBuilder(symbol.ToDisplayString(KSymbolDisplayFormat))
-                .Append("{");
-            if (symbol.ReturnsVoid == false)
-                result.Append("return ");
-
-            result.Append("context.Invoke(f => f.");
-            result.Append(symbol.Name);
-            if (symbol.IsGenericMethod)
-            {
-                result.Append("<");
-                result.Append(string.Join(",", symbol.TypeParameters.Select(i => i.Name)));
-                result.Append(">");
-            }
-            result.Append("(");
-            result.Append(string.Join(", ", symbol.Parameters.Select(i => i.Name)));
-            result.Append("));}");
-
-            var s = result.ToString();
+                .AppendMethodBody(VariableNames.Context, symbol);
 
             return result.ToString();
         }
@@ -67,22 +51,7 @@ namespace LightMock.Generator
         public override string? VisitProperty(IPropertySymbol symbol)
         {
             var result = new StringBuilder(symbol.ToDisplayString(KSymbolDisplayFormat))
-                .Append(" {");
-            if (symbol.GetMethod != null)
-            {
-                result.Append(" get { return context.Invoke(f => f.")
-                    .Append(symbol.Name)
-                    .Append("); } ");
-            }
-            if (symbol.SetMethod != null)
-            {
-                result.Append("set { context.InvokeSetter(f => f.")
-                    .Append(symbol.Name)
-                    .Append(", value); } ");
-            }
-            result.Append("}");
-
-            var s = result.ToString();
+                .AppendGetterAndSetter(VariableNames.Context, symbol);
 
             return result.ToString();
         }
@@ -106,7 +75,6 @@ namespace LightMock.Generator
                 .Append(localName)
                 .Append(" -= value; } }")
                 ;
-            var s = result.ToString();
             return result.ToString();
         }
 

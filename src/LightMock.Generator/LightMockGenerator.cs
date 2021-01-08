@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 
 namespace LightMock.Generator
@@ -12,11 +11,9 @@ namespace LightMock.Generator
     [Generator]
     public class LightMockGenerator : ISourceGenerator
     {
-        const string KGeneratedFileSuffix = ".spg.g.cs";
         const string KAttributeName = nameof(GenerateMockAttribute);
-        const string KAttributeFile = KAttributeName + ".cs";
 
-        readonly Lazy<string> attribute = new Lazy<string>(() => Utils.LoadResource(KAttributeFile));
+        readonly Lazy<string> attribute = new Lazy<string>(() => Utils.LoadResource(KAttributeName + ".cs"));
 
         private static readonly SymbolDisplayFormat KNamespaceDisplayFormat = new SymbolDisplayFormat(
             typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces
@@ -72,14 +69,13 @@ namespace LightMock.Generator
                     var @interface = typeSymbol.Interfaces.FirstOrDefault();
                     ClassProcessor processor;
                     if (typeSymbol.BaseType != null && typeSymbol.BaseType.ToDisplayString(KNamespaceDisplayFormat) != "System.Object")
-                        processor = new AbstractClassProcessor(compilation, candidateClass, typeSymbol, typeSymbol.BaseType);
+                        processor = new AbstractClassProcessor(candidateClass, typeSymbol, typeSymbol.BaseType);
                     else
                         processor = new InterfaceProcessor(compilation, candidateClass, typeSymbol, @interface);
 
                     if (EmitDiagnostics(context, processor.GetErrors()))
                         continue;
                     EmitDiagnostics(context, processor.GetWarnings());
-                    var sc = processor.DoGenerate();
                     context.AddSource(processor.FileName, processor.DoGenerate());
                 }
             }
