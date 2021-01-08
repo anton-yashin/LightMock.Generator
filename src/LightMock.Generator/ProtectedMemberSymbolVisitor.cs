@@ -64,8 +64,6 @@ namespace LightMock.Generator
                 result.Append("set;");
             result.Append("}");
 
-            var s = result.ToString();
-
             return result.ToString();
         }
 

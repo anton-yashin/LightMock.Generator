@@ -12,7 +12,6 @@ namespace LightMock.Generator
     [Generator]
     public class LightMockGenerator : ISourceGenerator
     {
-        const string KGeneratedFileSuffix = ".spg.g.cs";
         const string KAttributeName = nameof(GenerateMockAttribute);
         const string KAttributeFile = KAttributeName + ".cs";
 

@@ -45,8 +45,6 @@ namespace LightMock.Generator
             var result = new StringBuilder(symbol.ToDisplayString(KSymbolDisplayFormat))
                 .AppendMethodBody(VariableNames.Context, symbol);
 
-            var s = result.ToString();
-
             return result.ToString();
         }
 
@@ -54,8 +52,6 @@ namespace LightMock.Generator
         {
             var result = new StringBuilder(symbol.ToDisplayString(KSymbolDisplayFormat))
                 .AppendGetterAndSetter(VariableNames.Context, symbol);
-
-            var s = result.ToString();
 
             return result.ToString();
         }
@@ -79,7 +75,6 @@ namespace LightMock.Generator
                 .Append(localName)
                 .Append(" -= value; } }")
                 ;
-            var s = result.ToString();
             return result.ToString();
         }
 
