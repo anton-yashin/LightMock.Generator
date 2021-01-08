@@ -55,12 +55,10 @@ namespace LightMock.Generator
 
 
 
-        private readonly NullableContextOptions nullableContextOptions;
         private readonly string interfaceNamespace;
 
-        public AbstractClassSymbolVisitor(NullableContextOptions nullableContextOptions, string interfaceNamespace)
+        public AbstractClassSymbolVisitor(string interfaceNamespace)
         {
-            this.nullableContextOptions = nullableContextOptions;
             this.interfaceNamespace = interfaceNamespace;
         }
 

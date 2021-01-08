@@ -34,7 +34,7 @@ namespace LightMock.Generator
                 ? typeSymbol.Name + "<" + string.Join(",", typeSymbol.TypeParameters.Select(i => i.Name)) + ">"
                 : typeSymbol.Name;
             var nameSpace = typeSymbol.ContainingNamespace.ToDisplayString(KNamespaceDisplayFormat);
-            var symbolVisitor = new AbstractClassSymbolVisitor(nullableContextOptions, nameSpace);
+            var symbolVisitor = new AbstractClassSymbolVisitor(nameSpace);
             var baseName = baseClass.Accept(symbolVisitor);
             var members = baseClass.GetMembers();
             var interfaceName = "IP2P_" + (typeSymbol.IsGenericType 
