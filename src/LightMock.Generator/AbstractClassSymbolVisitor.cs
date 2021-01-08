@@ -144,16 +144,7 @@ namespace LightMock.Generator
 
             result.Append("override ")
                 .Append(symbol.ToDisplayString(KSymbolDisplayFormat))
-                .Append(" {");
-            if (symbol.GetMethod != null)
-            {
-                result.AppendGetter(implementAsInterface ? VariableNames.ProtectedContext : VariableNames.Context, symbol);
-            }
-            if (symbol.SetMethod != null)
-            {
-                result.AppendSetter(implementAsInterface ? VariableNames.ProtectedContext : VariableNames.Context, symbol);
-            }
-            result.Append("}");
+                .AppendGetterAndSetter(implementAsInterface ? VariableNames.ProtectedContext : VariableNames.Context, symbol);
 
             return result.ToString();
         }
@@ -161,16 +152,7 @@ namespace LightMock.Generator
         private void AddInterfaceImplementation(IPropertySymbol symbol, StringBuilder result)
         {
             result.Append(CombineWithInterface(symbol))
-                .Append(" {");
-            if (symbol.GetMethod != null)
-            {
-                result.AppendGetter(VariableNames.ProtectedContext, symbol);
-            }
-            if (symbol.SetMethod != null)
-            {
-                result.AppendSetter(VariableNames.ProtectedContext, symbol);
-            }
-            result.Append("}");
+                .AppendGetterAndSetter(VariableNames.ProtectedContext, symbol);
         }
 
         public override string? VisitEvent(IEventSymbol symbol)
