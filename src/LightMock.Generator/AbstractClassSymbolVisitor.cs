@@ -62,24 +62,26 @@ namespace LightMock.Generator
             this.interfaceNamespace = interfaceNamespace;
         }
 
-        bool ImplementAsInterface(ISymbol symbol)
-            => (symbol.IsAbstract || symbol.IsVirtual)
-                && symbol.DeclaredAccessibility == Accessibility.Protected;
+        static bool IsInterfaceRequired(ISymbol symbol)
+            => IsCanBeOverriden(symbol) && symbol.DeclaredAccessibility == Accessibility.Protected;
+
+        static bool IsCanBeOverriden(ISymbol symbol)
+            => symbol.IsAbstract || symbol.IsVirtual;
 
         public override string? VisitMethod(IMethodSymbol symbol)
         {
-            if (symbol.MethodKind != MethodKind.Ordinary
-                || (symbol.IsAbstract == false && symbol.IsVirtual == false))
+            if (symbol.MethodKind != MethodKind.Ordinary || IsCanBeOverriden(symbol) == false)
                 return null;
-            var result = new StringBuilder();
-            bool implementAsInterface = ImplementAsInterface(symbol);
 
-            if (implementAsInterface)
+            var result = new StringBuilder();
+            bool isInterfaceRequired = IsInterfaceRequired(symbol);
+
+            if (isInterfaceRequired)
                 AddInterfaceImplementation(symbol, result);
 
             result.Append("override ")
                 .Append(symbol.ToDisplayString(KSymbolDisplayFormat))
-                .AppendMethodBody(implementAsInterface ? VariableNames.ProtectedContext : VariableNames.Context, symbol);
+                .AppendMethodBody(isInterfaceRequired ? VariableNames.ProtectedContext : VariableNames.Context, symbol);
             return result.ToString();
         }
 
@@ -100,18 +102,18 @@ namespace LightMock.Generator
 
         public override string? VisitProperty(IPropertySymbol symbol)
         {
-            if (symbol.IsAbstract == false && symbol.IsVirtual == false)
+            if (IsCanBeOverriden(symbol) == false)
                 return null;
 
-            bool implementAsInterface = ImplementAsInterface(symbol);
+            bool isInterfaceRequired = IsInterfaceRequired(symbol);
 
             var result = new StringBuilder();
-            if (implementAsInterface)
+            if (isInterfaceRequired)
                 AddInterfaceImplementation(symbol, result);
 
             result.Append("override ")
                 .Append(symbol.ToDisplayString(KSymbolDisplayFormat))
-                .AppendGetterAndSetter(implementAsInterface ? VariableNames.ProtectedContext : VariableNames.Context, symbol);
+                .AppendGetterAndSetter(isInterfaceRequired ? VariableNames.ProtectedContext : VariableNames.Context, symbol);
 
             return result.ToString();
         }
