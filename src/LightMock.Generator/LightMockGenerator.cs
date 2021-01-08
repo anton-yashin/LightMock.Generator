@@ -77,7 +77,6 @@ namespace LightMock.Generator
                     if (EmitDiagnostics(context, processor.GetErrors()))
                         continue;
                     EmitDiagnostics(context, processor.GetWarnings());
-                    var sc = processor.DoGenerate();
                     context.AddSource(processor.FileName, processor.DoGenerate());
                 }
             }
