@@ -30,12 +30,7 @@ namespace LightMock.Generator
                     SymbolDisplayMiscellaneousOptions.UseSpecialTypes |
                     SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier);
 
-        private readonly NullableContextOptions nullableContextOptions;
-
-        public ProtectedMemberSymbolVisitor(NullableContextOptions nullableContextOptions)
-        {
-            this.nullableContextOptions = nullableContextOptions;
-        }
+        public ProtectedMemberSymbolVisitor() { }
 
         bool IsInterfaceRequired(ISymbol symbol)
             => (symbol.IsAbstract || symbol.IsVirtual)

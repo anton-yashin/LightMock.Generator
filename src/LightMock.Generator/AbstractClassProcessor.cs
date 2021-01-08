@@ -13,19 +13,16 @@ namespace LightMock.Generator
     {
         private readonly ClassDeclarationSyntax candidateClass;
         private readonly INamedTypeSymbol baseClass;
-        private readonly NullableContextOptions nullableContextOptions;
         private readonly ProtectedMemberSymbolVisitor protectedVisitor;
 
         public AbstractClassProcessor(
-            CSharpCompilation compilation,
             ClassDeclarationSyntax candidateClass,
             INamedTypeSymbol typeSymbol,
             INamedTypeSymbol baseClass) : base(typeSymbol)
         {
             this.candidateClass = candidateClass;
             this.baseClass = baseClass;
-            this.nullableContextOptions = compilation.Options.NullableContextOptions;
-            this.protectedVisitor = new ProtectedMemberSymbolVisitor(nullableContextOptions);
+            this.protectedVisitor = new ProtectedMemberSymbolVisitor();
         }
 
         public override SourceText DoGenerate()
