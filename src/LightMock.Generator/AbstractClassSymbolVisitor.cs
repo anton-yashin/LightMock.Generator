@@ -128,7 +128,7 @@ namespace LightMock.Generator
             var ctn = symbol.ContainingType.Name;
             return symbol
                 .ToDisplayString(KInterfaceDisplayFormat)
-                .Replace(@namespace + "." + ctn, interfaceNamespace + "." + "IP2P_" + ctn);
+                .Replace(@namespace + "." + ctn, interfaceNamespace + "." + Prefix.ProtectedToPublicInterface + ctn);
         }
 
         public override string? VisitProperty(IPropertySymbol symbol)
