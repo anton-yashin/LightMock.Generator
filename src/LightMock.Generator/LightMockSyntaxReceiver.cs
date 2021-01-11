@@ -8,6 +8,7 @@ namespace LightMock.Generator
     internal class LightMockSyntaxReceiver : CSharpSyntaxVisitor, ISyntaxReceiver
     {
         public List<ClassDeclarationSyntax> CandidateClasses { get; } = new List<ClassDeclarationSyntax>();
+        public List<GenericNameSyntax> CandidateMocks { get; } = new List<GenericNameSyntax>();
 
         public void OnVisitSyntaxNode(SyntaxNode syntaxNode)
         {
@@ -19,6 +20,23 @@ namespace LightMock.Generator
         {
             if (node.AttributeLists.Count > 0)
                 CandidateClasses.Add(node);
+        }
+
+        public override void VisitObjectCreationExpression(ObjectCreationExpressionSyntax node)
+        {
+            {
+                if (node.Type is GenericNameSyntax gns && gns.Identifier.ValueText == "Mock" && gns.TypeArgumentList.Arguments.Any())
+                {
+                    CandidateMocks.Add(gns);
+                }
+            }
+            {
+                if (node.Type is QualifiedNameSyntax qns && qns.Right is GenericNameSyntax gns
+                    && gns.Identifier.ValueText == "Mock" && gns.TypeArgumentList.Arguments.Any())
+                {
+                    CandidateMocks.Add(gns);
+                }
+            }
         }
     }
 }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
 
 namespace LightMock.Generator
@@ -12,8 +13,12 @@ namespace LightMock.Generator
     public class LightMockGenerator : ISourceGenerator
     {
         const string KAttributeName = nameof(GenerateMockAttribute);
+        const string KMock = "Mock";
 
-        readonly Lazy<string> attribute = new Lazy<string>(() => Utils.LoadResource(KAttributeName + ".cs"));
+        readonly Lazy<SourceText> attribute = new(
+            () => SourceText.From(Utils.LoadResource(KAttributeName + ".cs"), Encoding.UTF8));
+        readonly Lazy<SourceText> mock = new(
+            () => SourceText.From(Utils.LoadResource(KMock + ".cs"), Encoding.UTF8));
 
         private static readonly SymbolDisplayFormat KNamespaceDisplayFormat = new SymbolDisplayFormat(
             typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces
@@ -30,10 +35,12 @@ namespace LightMock.Generator
                 context.SyntaxReceiver is LightMockSyntaxReceiver receiver &&
                 compilation.SyntaxTrees.First().Options is CSharpParseOptions options)
             {
-                context.AddSource(KAttributeName, SourceText.From(attribute.Value, Encoding.UTF8));
+                context.AddSource(KAttributeName, attribute.Value);
+                context.AddSource(KMock, mock.Value);
 
                 compilation = compilation
-                    .AddSyntaxTrees(CSharpSyntaxTree.ParseText(SourceText.From(attribute.Value, Encoding.UTF8), options));
+                    .AddSyntaxTrees(CSharpSyntaxTree.ParseText(attribute.Value, options))
+                    .AddSyntaxTrees(CSharpSyntaxTree.ParseText(mock.Value, options));
 
                 var attributeSymbol = compilation.GetTypeByMetadataName(KAttributeName);
                 if (attributeSymbol == null)
@@ -78,6 +85,68 @@ namespace LightMock.Generator
                     EmitDiagnostics(context, processor.GetWarnings());
                     context.AddSource(processor.FileName, processor.DoGenerate());
                 }
+
+                var mockContextType = typeof(MockContext<>);
+                var mockContextName = mockContextType.Name.Replace("`1", "");
+                var mockContextNamespace = mockContextType.Namespace;
+                var mockInstanceBuilder = new StringBuilder();
+                var protectedContextBuilder = new StringBuilder();
+                var processedTypes = new List<INamedTypeSymbol>();
+
+                foreach (var candidateGeneric in receiver.CandidateMocks)
+                {
+                    var candidateModel = compilation.GetSemanticModel(candidateGeneric.SyntaxTree);
+                    var candidateSi = candidateModel.GetSymbolInfo(candidateGeneric);
+                    var mockContainer = candidateSi.Symbol as INamedTypeSymbol;
+                    if (mockContainer != null && mockContainer.BaseType != null
+                        && mockContainer.BaseType.ContainingNamespace.Name == mockContextNamespace
+                        && mockContainer.BaseType.Name == mockContextName
+                        && mockContainer.BaseType.TypeArguments.FirstOrDefault() is INamedTypeSymbol mockedType
+                        && processedTypes.Contains(mockedType) == false)
+                    {
+                        var processor = new MockInterfaceProcessor(compilation, mockedType);
+                        if (EmitDiagnostics(context, processor.GetErrors()))
+                            continue;
+                        EmitDiagnostics(context, processor.GetWarnings());
+                        context.AddSource(processor.FileName, processor.DoGenerate());
+                        processor.DoGeneratePart_CreateMockInstance(mockInstanceBuilder);
+                        processor.DoGeneratePart_CreateProtectedContext(protectedContextBuilder);
+                        processedTypes.Add(mockedType);
+                    }
+                }
+
+                context.AddSource("CreateMockInstance.mock_impl.spg.g.cs", SourceText.From($@"
+using System;
+
+namespace LightMock.Generator
+{{
+    public sealed partial class Mock<T> : MockContext<T> where T : class
+    {{
+        T CreateMockInstance()
+        {{
+            {mockInstanceBuilder}
+
+            throw new NotSupportedException(contextType.FullName + "" is not supported"");
+        }}
+    }}
+}}
+", Encoding.UTF8));
+
+                context.AddSource("CreateProtectedContext.mock_impl.spg.g.cs", SourceText.From($@"
+using System;
+
+namespace LightMock.Generator
+{{
+    public sealed partial class Mock<T> : MockContext<T> where T : class
+    {{
+        object CreateProtectedContext()
+        {{
+            {protectedContextBuilder}
+            return DefaultProtectedContext;
+        }}
+    }}
+}}
+", Encoding.UTF8));
             }
         }
 

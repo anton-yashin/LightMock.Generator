@@ -37,9 +37,11 @@
   <ItemGroup>
     <Compile Remove="Interface\*.class.cs" />
     <Compile Remove="AbstractClass\*.class.cs" />
+    <Compile Remove="Mock\*.class.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Interface\*.cs" />
     <EmbeddedResource Include="AbstractClass\*.cs" />
+    <EmbeddedResource Include="Mock\*.cs" />
   </ItemGroup>
 </Project>

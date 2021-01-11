@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis.Text;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace LightMock.Generator
 {
@@ -24,7 +25,10 @@ namespace LightMock.Generator
         public abstract IEnumerable<Diagnostic> GetWarnings();
         public abstract SourceText DoGenerate();
 
-        public string FileName => typeSymbol.IsGenericType
+        public virtual void DoGeneratePart_CreateMockInstance(StringBuilder here) { }
+        public virtual void DoGeneratePart_CreateProtectedContext(StringBuilder here) { }
+
+        public virtual string FileName => typeSymbol.IsGenericType
                 ? typeSymbol.Name + "{" + string.Join(",", typeSymbol.TypeParameters.Select(i => i.Name)) + "}" + KGeneratedFileSuffix
                 : typeSymbol.Name + KGeneratedFileSuffix;
     }
