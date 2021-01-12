@@ -1,4 +1,7 @@
 ﻿using LightMock.Generator.Tests.Mock;
+using LightMock.Generator.Tests.Mock.EventNamespace2;
+using LightMock.Generator.Tests.Mock.Namespace1;
+using LightMock.Generator.Tests.Mock.Namespace2;
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
@@ -122,6 +125,35 @@ namespace LightMock.Generator.Tests
         }
 
         [Fact]
+        public void InterfaceWithMultipleNamespaces()
+        {
+            const string KClassName = "InterfaceWithMultipleNamespaces";
+
+            var (diagnostics, success, assembly) = DoCompileResource(KClassName);
+
+            // verify
+            Assert.True(success);
+            Assert.Empty(diagnostics);
+
+            var testScript = LoadAssembly<IInterfaceWithMultipleNamespaces>(KClassName, assembly, KClassName);
+            var context = testScript.Context;
+            var mock = testScript.MockObject;
+
+            var arg1 = new MultipleNamespacesArgument();
+            mock.DoSomething(arg1);
+            context.Assert(f => f.DoSomething(arg1));
+
+            var arg2 = new MultipleNamespacesArgument();
+            context.Arrange(f => f.GetSomething()).Returns(arg2);
+            Assert.Same(expected: arg2, mock.GetSomething());
+
+            var arg3 = new MultipleNamespacesArgument();
+            context.ArrangeProperty(f => f.SomeProperty);
+            mock.SomeProperty = arg3;
+            Assert.Same(expected: arg3, mock.SomeProperty);
+        }
+
+        [Fact]
         public void InterfaceWithEventSource()
         {
             const string KClassName = "InterfaceWithEventSource";
@@ -133,6 +165,40 @@ namespace LightMock.Generator.Tests
             Assert.Empty(diagnostics);
 
             var testScript = LoadAssembly<IInterfaceWithEventSource>(KClassName, assembly, KClassName);
+            Assert.NotNull(testScript.Context);
+            Assert.NotNull(testScript.MockObject);
+            Assert.Equal(expected: KExpected, testScript.DoRun());
+        }
+
+        [Fact]
+        public void InterfaceWithEventSourceAndMultipleNamespaces()
+        {
+            const string KClassName = "InterfaceWithEventSourceAndMultipleNamespaces";
+
+            var (diagnostics, success, assembly) = DoCompileResource(KClassName);
+
+            // verify
+            Assert.True(success);
+            Assert.Empty(diagnostics);
+
+            var testScript = LoadAssembly<IInterfaceWithEventSourceAndMultipleNamespaces>(KClassName, assembly, KClassName);
+            Assert.NotNull(testScript.Context);
+            Assert.NotNull(testScript.MockObject);
+            Assert.Equal(expected: KExpected, testScript.DoRun());
+        }
+
+        [Fact]
+        public void GenericInterfaceWithGenericEvent()
+        {
+            const string KClassName = "GenericInterfaceWithGenericEvent";
+
+            var (diagnostics, success, assembly) = DoCompileResource(KClassName);
+
+            // verify
+            Assert.True(success);
+            Assert.Empty(diagnostics);
+
+            var testScript = LoadAssembly<IGenericInterfaceWithGenericEvent<int>>(KClassName, assembly, KClassName);
             Assert.NotNull(testScript.Context);
             Assert.NotNull(testScript.MockObject);
             Assert.Equal(expected: KExpected, testScript.DoRun());
