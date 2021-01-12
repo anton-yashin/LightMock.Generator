@@ -104,7 +104,12 @@ namespace LightMock.Generator
                         && mockContainer.BaseType.TypeArguments.FirstOrDefault() is INamedTypeSymbol mockedType
                         && processedTypes.Contains(mockedType) == false)
                     {
-                        var processor = new MockInterfaceProcessor(compilation, mockedType);
+                        ClassProcessor processor;
+                        if (mockedType.BaseType != null)
+                            processor = new MockAbstractClassProcessor(mockedType);
+                        else
+                            processor = new MockInterfaceProcessor(compilation, mockedType);
+
                         if (EmitDiagnostics(context, processor.GetErrors()))
                             continue;
                         EmitDiagnostics(context, processor.GetWarnings());
@@ -115,7 +120,7 @@ namespace LightMock.Generator
                     }
                 }
 
-                context.AddSource("CreateMockInstance.mock_impl.spg.g.cs", SourceText.From($@"
+                string createMockInstanceImpl = $@"
 using System;
 
 namespace LightMock.Generator
@@ -130,9 +135,8 @@ namespace LightMock.Generator
         }}
     }}
 }}
-", Encoding.UTF8));
-
-                context.AddSource("CreateProtectedContext.mock_impl.spg.g.cs", SourceText.From($@"
+";
+                string createProtectedContextImpl = $@"
 using System;
 
 namespace LightMock.Generator
@@ -146,7 +150,11 @@ namespace LightMock.Generator
         }}
     }}
 }}
-", Encoding.UTF8));
+";
+
+                context.AddSource("CreateMockInstance.mock_impl.spg.g.cs", SourceText.From(createMockInstanceImpl, Encoding.UTF8));
+
+                context.AddSource("CreateProtectedContext.mock_impl.spg.g.cs", SourceText.From(createProtectedContextImpl, Encoding.UTF8));
             }
         }
 

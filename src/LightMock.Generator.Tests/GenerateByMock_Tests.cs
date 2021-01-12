@@ -47,6 +47,32 @@ namespace LightMock.Generator.Tests
         }
 
         [Fact]
+        public void AbstractClassWithBasicMethods()
+        {
+            const string KClassName = "AbstractClassWithBasicMethods";
+
+            var (diagnostics, success, assembly) = DoCompileResource(KClassName);
+
+            // verify
+            Assert.True(success);
+            Assert.Empty(diagnostics);
+
+            var testScript = LoadAssembly<AAbstractClassWithBasicMethods>(KClassName, assembly, KClassName);
+            var context = testScript.Context;
+            var mock = testScript.MockObject;
+
+            context.Arrange(f => f.GetSomething()).Returns(1234);
+            Assert.Equal(expected: 1234, mock.GetSomething());
+
+            Assert.Throws<NotImplementedException>(() => mock.NonAbstractNonVirtualMethod());
+
+            mock.DoSomething(1234);
+            context.Assert(f => f.DoSomething(1234));
+
+            Assert.Equal(KExpected, testScript.DoRun());
+        }
+
+        [Fact]
         public void InterfaceWithBasicProperty()
         {
             const string KClassName = "InterfaceWithBasicProperty";
@@ -67,6 +93,31 @@ namespace LightMock.Generator.Tests
             context.ArrangeProperty(f => f.GetAndSet);
             mock.GetAndSet = 5678;
             Assert.Equal(5678, mock.GetAndSet);
+        }
+
+        [Fact]
+        public void AbstractClassWithBasicProperty()
+        {
+            const string KClassName = "AbstractClassWithBasicProperty";
+
+            var (diagnostics, success, assembly) = DoCompileResource(KClassName);
+
+            // verify
+            Assert.True(success);
+            Assert.Empty(diagnostics);
+
+            var testScript = LoadAssembly<AAbstractClassWithBasicProperty>(KClassName, assembly, KClassName);
+            var context = testScript.Context;
+            var mock = testScript.MockObject;
+
+            context.Arrange(f => f.OnlyGet).Returns(1234);
+            Assert.Equal(1234, mock.OnlyGet);
+
+            context.ArrangeProperty(f => f.GetAndSet);
+            mock.GetAndSet = 5678;
+            Assert.Equal(5678, mock.GetAndSet);
+
+            Assert.Equal(KExpected, testScript.DoRun());
         }
 
         [Fact]
@@ -93,6 +144,35 @@ namespace LightMock.Generator.Tests
             var p = new object();
             mock.GenericWithConstraint(p);
             context.Assert(f => f.GenericWithConstraint(p));
+        }
+
+
+        [Fact]
+        public void AbstractClassWithGenericMethod()
+        {
+            const string KClassName = "AbstractClassWithGenericMethod";
+
+            var (diagnostics, success, assembly) = DoCompileResource(KClassName);
+
+            // verify
+            Assert.True(success);
+            Assert.Empty(diagnostics);
+
+            var testScript = LoadAssembly<AAbstractClassWithGenericMethod>(KClassName, assembly, KClassName);
+            var context = testScript.Context;
+            var mock = testScript.MockObject;
+
+            context.Arrange(f => f.GenericReturn<int>()).Returns(1234);
+            Assert.Equal(1234, mock.GenericReturn<int>());
+
+            mock.GenericParam<int>(5678);
+            context.Assert(f => f.GenericParam<int>(5678));
+
+            var p = new object();
+            mock.GenericWithConstraint(p);
+            context.Assert(f => f.GenericWithConstraint(p));
+
+            Assert.Equal(KExpected, testScript.DoRun());
         }
 
         [Fact]
