@@ -8,12 +8,15 @@ namespace LightMock.Generator
 {
     sealed class MockAbstractClassProcessor : ClassProcessor
     {
-        private readonly ProtectedMemberSymbolVisitor protectedVisitor;
+        private readonly SymbolVisitor<string> protectedVisitor;
         private readonly string @namespace;
-        private readonly AbstractClassSymbolVisitor symbolVisitor;
+        private readonly SymbolVisitor<string> symbolVisitor;
         private readonly string baseName;
         private readonly string className;
         private readonly string interfaceName;
+        private readonly string typeArgumentsWithBrackets;
+        private readonly object typeArgumentsWithComma;
+        private readonly string commaArguments;
 
         public MockAbstractClassProcessor(
             INamedTypeSymbol typeSymbol) : base(typeSymbol)
@@ -21,13 +24,13 @@ namespace LightMock.Generator
             this.protectedVisitor = new ProtectedMemberSymbolVisitor();
             this.@namespace = typeSymbol.ContainingNamespace.ToDisplayString(KNamespaceDisplayFormat);
             this.symbolVisitor = new AbstractClassSymbolVisitor(@namespace);
-            this.baseName = typeSymbol.Accept(symbolVisitor);
-            this.className = Prefix.MockClass + (typeSymbol.IsGenericType
-                ? typeSymbol.Name + "<" + string.Join(",", typeSymbol.TypeParameters.Select(i => i.Name)) + ">"
-                : typeSymbol.Name);
-            this.interfaceName = Prefix.ProtectedToPublicInterface + (typeSymbol.IsGenericType
-                ? typeSymbol.Name + "<" + string.Join(",", typeSymbol.TypeParameters.Select(i => i.Name)) + ">"
-                : typeSymbol.Name);
+            this.baseName = typeSymbol.OriginalDefinition.Name;
+            this.className = Prefix.MockClass + typeSymbol.Name;
+            this.interfaceName = Prefix.ProtectedToPublicInterface + typeSymbol.Name;
+            var typeArguments = string.Join(",", typeSymbol.OriginalDefinition.TypeArguments.Select(i => i.Name));
+            this.typeArgumentsWithBrackets = typeArguments.Length > 0 ? "<" + typeArguments + ">" : "";
+            this.typeArgumentsWithComma = typeArguments.Length > 0 ? typeArguments + ", " : "";
+            this.commaArguments = string.Join(",", typeSymbol.OriginalDefinition.TypeArguments.Select(i => " "));
         }
 
         public override SourceText DoGenerate()
@@ -41,57 +44,56 @@ using System.Linq.Expressions;
 
 namespace {@namespace}
 {{
-    public interface {interfaceName}
+    public interface {interfaceName}{typeArgumentsWithBrackets}
     {{
-        {string.Join("\r\n        ", members.Select(i => i.Accept(protectedVisitor)).SkipWhile(i => string.IsNullOrWhiteSpace(i)))}
+        {string.Join("\r\n        ", members.Select(i => i.OriginalDefinition.Accept(protectedVisitor)).SkipWhile(i => string.IsNullOrWhiteSpace(i)))}
     }}
 
 
-    partial class {className} : {baseName}, {interfaceName}
+    partial class {className}{typeArgumentsWithBrackets} : {baseName}{typeArgumentsWithBrackets}, {interfaceName}{typeArgumentsWithBrackets}
     {{
-        private readonly IInvocationContext<{baseName}> {VariableNames.Context};
-        private readonly IInvocationContext<{interfaceName}> {VariableNames.ProtectedContext};
+        private readonly IInvocationContext<{baseName}{typeArgumentsWithBrackets}> {VariableNames.Context};
+        private readonly IInvocationContext<{interfaceName}{typeArgumentsWithBrackets}> {VariableNames.ProtectedContext};
 
-        public {className}(IInvocationContext<{baseName}> {VariableNames.Context}, IInvocationContext<{interfaceName}> {VariableNames.ProtectedContext})
+        public {className}(IInvocationContext<{baseName}{typeArgumentsWithBrackets}> {VariableNames.Context}, IInvocationContext<{interfaceName}{typeArgumentsWithBrackets}> {VariableNames.ProtectedContext})
         {{
             this.{VariableNames.Context} = {VariableNames.Context};
             this.{VariableNames.ProtectedContext} = {VariableNames.ProtectedContext};
         }}
 
-        {string.Join("\r\n        ", members.Select(i => i.Accept(symbolVisitor)).SkipWhile(i => string.IsNullOrWhiteSpace(i)))}
+        {string.Join("\r\n        ", members.Select(i => i.OriginalDefinition.Accept(symbolVisitor)).SkipWhile(i => string.IsNullOrWhiteSpace(i)))}
     }}
 }}
 
 namespace LightMock.Generator
 {{
+    using {@namespace};
+
     public static partial class MockExtensions
     {{
-
-        // generated for abstract class 
-
         [DebuggerStepThrough]
-        public static MockContext<{@namespace}.{@interfaceName}> GetProtectedContext(this Mock<{baseName}> @this)
-            => (MockContext<{@namespace}.{@interfaceName}>)@this.ProtectedContext;
+        public static MockContext<{@namespace}.{@interfaceName}{typeArgumentsWithBrackets}> GetProtectedContext{typeArgumentsWithBrackets}(this Mock<{baseName}{typeArgumentsWithBrackets}> @this)
+            => (MockContext<{@namespace}.{@interfaceName}{typeArgumentsWithBrackets}>)@this.ProtectedContext;
 
         /// <summary>
         /// Shortcut for <see cref=""MockContext{{TMock}}.Arrange(Expression{{Action{{TMock}}}})""/>
         /// </summary>
         [DebuggerStepThrough]
-        public static Arrangement ProtectedArrange(this Mock<{baseName}> @this, Expression<Action<{@namespace}.{interfaceName}>> matchExpression)
+        public static Arrangement ProtectedArrange{typeArgumentsWithBrackets}(this Mock<{baseName}{typeArgumentsWithBrackets}> @this, Expression<Action<{@namespace}.{interfaceName}{typeArgumentsWithBrackets}>> matchExpression)
             => @this.GetProtectedContext().Arrange(matchExpression);
 
         /// <summary>
         /// Shortcut for <see cref=""MockContext{{TMock}}.Arrange{{TResult}}(Expression{{Func{{TMock, TResult}}}})""/>
         /// </summary>
         [DebuggerStepThrough]
-        public static Arrangement<TResult> ProtectedArrange<TResult>(this Mock<{baseName}> @this, Expression<Func<{@namespace}.{interfaceName}, TResult>> matchExpression)
+        public static Arrangement<TResult> ProtectedArrange<{typeArgumentsWithComma}TResult>(this Mock<{baseName}{typeArgumentsWithBrackets}> @this, Expression<Func<{@namespace}.{interfaceName}{typeArgumentsWithBrackets}, TResult>> matchExpression)
             => @this.GetProtectedContext().Arrange(matchExpression);
 
         /// <summary>
         /// Shortcut for <see cref=""MockContext{{TMock}}.ArrangeProperty{{TResult}}(Expression{{Func{{TMock, TResult}}}})""/>
         /// </summary>
         [DebuggerStepThrough]
-        public static PropertyArrangement<TResult> ProtectedArrangeProperty<TResult>(this Mock<{baseName}> @this, Expression<Func<{@namespace}.{interfaceName}, TResult>> matchExpression)
+        public static PropertyArrangement<TResult> ProtectedArrangeProperty<{typeArgumentsWithComma}TResult>(this Mock<{baseName}{typeArgumentsWithBrackets}> @this, Expression<Func<{@namespace}.{interfaceName}{typeArgumentsWithBrackets}, TResult>> matchExpression)
             => @this.GetProtectedContext().ArrangeProperty(matchExpression);
 
 
@@ -99,17 +101,15 @@ namespace LightMock.Generator
         /// Shortcut for <see cref=""MockContext{{TMock}}.Assert(Expression{{Action{{TMock}}}})""/>
         /// </summary>
         [DebuggerStepThrough]
-        public static void ProtectedAssert(this Mock<{baseName}> @this, Expression<Action<{@namespace}.{interfaceName}>> matchExpression)
+        public static void ProtectedAssert{typeArgumentsWithBrackets}(this Mock<{baseName}{typeArgumentsWithBrackets}> @this, Expression<Action<{@namespace}.{interfaceName}{typeArgumentsWithBrackets}>> matchExpression)
             => @this.GetProtectedContext().Assert(matchExpression);
 
         /// <summary>
         /// Shortcut for <see cref=""MockContext{{TMock}}.Assert(Expression{{Action{{TMock}}}}, Invoked)""/>
         /// </summary>
         [DebuggerStepThrough]
-        public static void ProtectedAssert(this Mock<{baseName}> @this, Expression<Action<{@namespace}.{interfaceName}>> matchExpression, Invoked invoked)
+        public static void ProtectedAssert{typeArgumentsWithBrackets}(this Mock<{baseName}{typeArgumentsWithBrackets}> @this, Expression<Action<{@namespace}.{interfaceName}{typeArgumentsWithBrackets}>> matchExpression, Invoked invoked)
             => @this.GetProtectedContext().Assert(matchExpression, invoked);
-
-        // end generated for abstract class
     }}
 }}
 ";
@@ -122,14 +122,20 @@ namespace LightMock.Generator
 
         public override void DoGeneratePart_CreateMockInstance(StringBuilder here)
         {
-            here.Append($@"if (contextType == typeof({baseName})) return (T)(object)new {@namespace}.{className}((MockContext<{baseName}>)(object)this, (MockContext<{@namespace}.{interfaceName}>)ProtectedContext);");
+            var toAppend = typeSymbol.IsGenericType
+                ? $"if (gtd == typeof({@namespace}.{baseName}<{commaArguments}>)) return (T)ActivateMockInstanceWithProtectedContext(typeof({@namespace}.{className}<{commaArguments}>));"
+                : $"if (contextType == typeof({@namespace}.{baseName})) return (T)(object)new {@namespace}.{className}((MockContext<{@namespace}.{baseName}>)(object)this, (MockContext<{@namespace}.{interfaceName}>)ProtectedContext);";
+            here.Append(toAppend);
         }
 
         public override void DoGeneratePart_CreateProtectedContext(StringBuilder here)
         {
-            here.Append($@"if (contextType == typeof({baseName})) return new MockContext<{@namespace}.{interfaceName}>();");
+            var toAppend = typeSymbol.IsGenericType
+                ? $@"if (gtd == typeof({@namespace}.{baseName}<{commaArguments}>)) return ActivateProtectedContext(typeof({@namespace}.{interfaceName}<{commaArguments}>));"
+                : $@"if (contextType == typeof({@namespace}.{baseName})) return new MockContext<{@namespace}.{interfaceName}>();";
+            here.Append(toAppend);
         }
 
-        public override string FileName => "Mock_" + base.FileName;
+        public override string FileName => Prefix.MockClass + base.FileName;
     }
 }

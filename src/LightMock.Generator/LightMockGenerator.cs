@@ -129,9 +129,11 @@ namespace LightMock.Generator
     {{
         T CreateMockInstance()
         {{
+            var gtd = contextType.IsGenericType ? contextType.GetGenericTypeDefinition() : null;
+
             {mockInstanceBuilder}
 
-            throw new NotSupportedException(contextType.FullName + "" is not supported"");
+            throw new NotSupportedException(contextType.FullName + "" is not supported "" + gtd.FullName);
         }}
     }}
 }}
@@ -145,6 +147,8 @@ namespace LightMock.Generator
     {{
         object CreateProtectedContext()
         {{
+            var gtd = contextType.IsGenericType ? contextType.GetGenericTypeDefinition() : null;
+
             {protectedContextBuilder}
             return DefaultProtectedContext;
         }}

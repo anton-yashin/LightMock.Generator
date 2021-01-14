@@ -205,6 +205,69 @@ namespace LightMock.Generator.Tests
         }
 
         [Fact]
+        public void GenericAbstractClass()
+        {
+            const string KClassName = "GenericAbstractClass";
+
+            var (diagnostics, success, assembly) = DoCompileResource(KClassName);
+
+            // verify
+            Assert.True(success);
+            Assert.Empty(diagnostics);
+
+            var testScript = LoadAssembly<AGenericAbstractClass<int>>(KClassName, assembly, KClassName);
+            var context = testScript.Context;
+            var mock = testScript.MockObject;
+
+            mock.DoSomething(1234);
+            context.Assert(f => f.DoSomething(1234));
+
+            context.Arrange(f => f.GetSomething()).Returns(5678);
+            Assert.Equal(5678, mock.GetSomething());
+
+            context.Arrange(f => f.OnlyGet).Returns(9012);
+            Assert.Equal(9012, mock.OnlyGet);
+
+            context.ArrangeProperty(f => f.GetAndSet);
+            mock.GetAndSet = 3456;
+            Assert.Equal(3456, mock.GetAndSet);
+
+            Assert.Equal(KExpected, testScript.DoRun());
+        }
+
+        [Fact]
+        public void GenericMockAndGenericAbstractClass()
+        {
+            const string KClassName = "GenericMockAndGenericAbstractClass";
+
+            var (diagnostics, success, assembly) = DoCompileResource(KClassName);
+
+            // verify
+            Assert.True(success);
+            Assert.Empty(diagnostics);
+
+            var testScript = LoadAssembly<AGenericMockAndGenericAbstractClass<int>>(KClassName + "`1", assembly, KClassName);
+            var context = testScript.Context;
+            var mock = testScript.MockObject;
+
+            mock.DoSomething(1234);
+            context.Assert(f => f.DoSomething(1234));
+
+            context.Arrange(f => f.GetSomething()).Returns(5678);
+            Assert.Equal(5678, mock.GetSomething());
+
+            context.Arrange(f => f.OnlyGet).Returns(9012);
+            Assert.Equal(9012, mock.OnlyGet);
+
+            context.ArrangeProperty(f => f.GetAndSet);
+            mock.GetAndSet = 3456;
+            Assert.Equal(3456, mock.GetAndSet);
+
+            Assert.Equal(KExpected, testScript.DoRun());
+        }
+
+
+        [Fact]
         public void InterfaceWithMultipleNamespaces()
         {
             const string KClassName = "InterfaceWithMultipleNamespaces";
@@ -295,6 +358,8 @@ namespace LightMock.Generator.Tests
             var alc = new AssemblyLoadContext(className);
             var loadedAssembly = alc.LoadFromStream(new MemoryStream(assembly));
             var testClassType = loadedAssembly.ExportedTypes.Where(t => t.Name == KClassName).First();
+            if (testClassType.ContainsGenericParameters)
+                testClassType = testClassType.MakeGenericType(typeof(T).GetGenericArguments());
             var testClass = Activator.CreateInstance(testClassType) ?? throw new InvalidOperationException("can't create test class");
             return (ITestScript<T>)testClass;
         }
