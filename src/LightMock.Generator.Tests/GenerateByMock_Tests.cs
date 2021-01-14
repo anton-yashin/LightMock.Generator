@@ -236,6 +236,37 @@ namespace LightMock.Generator.Tests
         }
 
         [Fact]
+        public void GenericMockAndGenericInterface()
+        {
+            const string KClassName = "GenericMockAndGenericInterface";
+
+            var (diagnostics, success, assembly) = DoCompileResource(KClassName);
+
+            // verify
+            Assert.True(success);
+            Assert.Empty(diagnostics);
+
+            var testScript = LoadAssembly<IGenericMockAndGenericInterface<int>>(KClassName + "`1", assembly, KClassName);
+            var context = testScript.Context;
+            var mock = testScript.MockObject;
+
+            mock.DoSomething(1234);
+            context.Assert(f => f.DoSomething(1234));
+
+            context.Arrange(f => f.GetSomething()).Returns(5678);
+            Assert.Equal(5678, mock.GetSomething());
+
+            context.Arrange(f => f.OnlyGet).Returns(9012);
+            Assert.Equal(9012, mock.OnlyGet);
+
+            context.ArrangeProperty(f => f.GetAndSet);
+            mock.GetAndSet = 3456;
+            Assert.Equal(3456, mock.GetAndSet);
+
+            Assert.Equal(KExpected, testScript.DoRun());
+        }
+
+        [Fact]
         public void GenericMockAndGenericAbstractClass()
         {
             const string KClassName = "GenericMockAndGenericAbstractClass";
