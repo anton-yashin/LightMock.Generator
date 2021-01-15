@@ -3,6 +3,7 @@
 namespace LightMock.Generator.Tests.Mock
 {
     public abstract class AGenericMockAndGenericAbstractClass<T>
+        where T : struct, IComparable<T>
     {
         public abstract T OnlyGet { get; }
         public abstract T GetAndSet { get; set; }
