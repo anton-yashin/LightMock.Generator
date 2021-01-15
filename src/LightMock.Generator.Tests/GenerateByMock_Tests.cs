@@ -328,6 +328,37 @@ namespace LightMock.Generator.Tests
         }
 
         [Fact]
+        public void AbstractClassWithMultipleNamespaces()
+        {
+            const string KClassName = "AbstractClassWithMultipleNamespaces";
+
+            var (diagnostics, success, assembly) = DoCompileResource(KClassName);
+
+            // verify
+            Assert.True(success);
+            Assert.Empty(diagnostics);
+
+            var testScript = LoadAssembly<AAbstractClassWithMultipleNamespaces>(KClassName, assembly, KClassName);
+            var context = testScript.Context;
+            var mock = testScript.MockObject;
+
+            var arg1 = new MultipleNamespacesArgument();
+            mock.DoSomething(arg1);
+            context.Assert(f => f.DoSomething(arg1));
+
+            var arg2 = new MultipleNamespacesArgument();
+            context.Arrange(f => f.GetSomething()).Returns(arg2);
+            Assert.Same(expected: arg2, mock.GetSomething());
+
+            var arg3 = new MultipleNamespacesArgument();
+            context.ArrangeProperty(f => f.SomeProperty);
+            mock.SomeProperty = arg3;
+            Assert.Same(expected: arg3, mock.SomeProperty);
+
+            Assert.Equal(KExpected, testScript.DoRun());
+        }
+
+        [Fact]
         public void InterfaceWithEventSource()
         {
             const string KClassName = "InterfaceWithEventSource";
@@ -339,6 +370,23 @@ namespace LightMock.Generator.Tests
             Assert.Empty(diagnostics);
 
             var testScript = LoadAssembly<IInterfaceWithEventSource>(KClassName, assembly, KClassName);
+            Assert.NotNull(testScript.Context);
+            Assert.NotNull(testScript.MockObject);
+            Assert.Equal(expected: KExpected, testScript.DoRun());
+        }
+
+        [Fact]
+        public void AbstractClassWithEventSource()
+        {
+            const string KClassName = "AbstractClassWithEventSource";
+
+            var (diagnostics, success, assembly) = DoCompileResource(KClassName);
+
+            // verify
+            Assert.True(success);
+            Assert.Empty(diagnostics);
+
+            var testScript = LoadAssembly<AAbstractClassWithEventSource>(KClassName, assembly, KClassName);
             Assert.NotNull(testScript.Context);
             Assert.NotNull(testScript.MockObject);
             Assert.Equal(expected: KExpected, testScript.DoRun());
@@ -362,6 +410,23 @@ namespace LightMock.Generator.Tests
         }
 
         [Fact]
+        public void AbstractClassWithEventSourceAndMultipleNamespaces()
+        {
+            const string KClassName = "AbstractClassWithEventSourceAndMultipleNamespaces";
+
+            var (diagnostics, success, assembly) = DoCompileResource(KClassName);
+
+            // verify
+            Assert.True(success);
+            Assert.Empty(diagnostics);
+
+            var testScript = LoadAssembly<AAbstractClassWithEventSourceAndMultipleNamespaces>(KClassName, assembly, KClassName);
+            Assert.NotNull(testScript.Context);
+            Assert.NotNull(testScript.MockObject);
+            Assert.Equal(expected: KExpected, testScript.DoRun());
+        }
+
+        [Fact]
         public void GenericInterfaceWithGenericEvent()
         {
             const string KClassName = "GenericInterfaceWithGenericEvent";
@@ -373,6 +438,23 @@ namespace LightMock.Generator.Tests
             Assert.Empty(diagnostics);
 
             var testScript = LoadAssembly<IGenericInterfaceWithGenericEvent<int>>(KClassName, assembly, KClassName);
+            Assert.NotNull(testScript.Context);
+            Assert.NotNull(testScript.MockObject);
+            Assert.Equal(expected: KExpected, testScript.DoRun());
+        }
+
+        [Fact]
+        public void GenericAbstractClassWithGenericEvent()
+        {
+            const string KClassName = "GenericAbstractClassWithGenericEvent";
+
+            var (diagnostics, success, assembly) = DoCompileResource(KClassName);
+
+            // verify
+            Assert.True(success);
+            Assert.Empty(diagnostics);
+
+            var testScript = LoadAssembly<AGenericAbstractClassWithGenericEvent<int>>(KClassName, assembly, KClassName);
             Assert.NotNull(testScript.Context);
             Assert.NotNull(testScript.MockObject);
             Assert.Equal(expected: KExpected, testScript.DoRun());
