@@ -11,12 +11,10 @@ namespace LightMock.Generator
 {
     sealed class MockInterfaceProcessor : ClassProcessor
     {
-        const string KMockPrefix = "Mock_";
         private readonly SymbolVisitor<string> symbolVisitor;
         private readonly string className;
         private readonly string interfaceName;
         private readonly string typeArgumentsWithBrackets;
-        private readonly string typeArgumentsWithComma;
         private readonly string commaArguments;
         private readonly string @namespace;
 
@@ -30,7 +28,6 @@ namespace LightMock.Generator
             className = Prefix.MockClass + typeSymbol.Name;
             interfaceName = typeSymbol.Name;
             typeArgumentsWithBrackets = typeArguments.Length > 0 ? "<" + typeArguments + ">" : "";
-            typeArgumentsWithComma = typeArguments.Length > 0 ? typeArguments + ", " : "";
             commaArguments = string.Join(",", typeSymbol.OriginalDefinition.TypeArguments.Select(i => " "));
             @namespace = typeSymbol.ContainingNamespace.ToDisplayString(KNamespaceDisplayFormat);
         }
