@@ -17,9 +17,22 @@ namespace LightMock.Generator
         }
 
         protected const string KGeneratedFileSuffix = ".spg.g.cs";
+
         protected static readonly SymbolDisplayFormat KNamespaceDisplayFormat = new SymbolDisplayFormat(
             typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces
             );
+
+        protected static readonly SymbolDisplayFormat KWithTypeParams =
+            new SymbolDisplayFormat(
+                typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
+                genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters);
+
+        protected static readonly SymbolDisplayFormat KWithWhereClause =
+            new SymbolDisplayFormat(
+                typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
+                genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters |
+                    SymbolDisplayGenericsOptions.IncludeTypeConstraints |
+                    SymbolDisplayGenericsOptions.IncludeVariance);
 
         public abstract IEnumerable<Diagnostic> GetErrors();
         public abstract IEnumerable<Diagnostic> GetWarnings();

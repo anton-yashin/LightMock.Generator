@@ -16,6 +16,7 @@ namespace LightMock.Generator
         private readonly string interfaceName;
         private readonly string typeArgumentsWithBrackets;
         private readonly string commaArguments;
+        private readonly string whereClause;
         private readonly string @namespace;
 
         public MockInterfaceProcessor(
@@ -23,12 +24,16 @@ namespace LightMock.Generator
             INamedTypeSymbol typeSymbol) : base(typeSymbol)
         {
             this.symbolVisitor = new InterfaceSymbolVisitor(compilation.Options.NullableContextOptions);
-            var typeArguments = string.Join(",", typeSymbol.OriginalDefinition.TypeArguments.Select(i => i.Name));
+            var to = typeSymbol.OriginalDefinition;
+            var withTypeParams = to.ToDisplayString(KWithTypeParams);
+            var withWhereClause = to.ToDisplayString(KWithWhereClause);
+            var typeArguments = withTypeParams.Replace(to.ToDisplayString(KNamespaceDisplayFormat), "");
 
             className = Prefix.MockClass + typeSymbol.Name;
             interfaceName = typeSymbol.Name;
-            typeArgumentsWithBrackets = typeArguments.Length > 0 ? "<" + typeArguments + ">" : "";
-            commaArguments = string.Join(",", typeSymbol.OriginalDefinition.TypeArguments.Select(i => " "));
+            typeArgumentsWithBrackets = typeArguments.Length > 0 ? typeArguments : "";
+            commaArguments = string.Join(",", to.TypeArguments.Select(i => " "));
+            whereClause = withWhereClause.Replace(withTypeParams, "");
             @namespace = typeSymbol.ContainingNamespace.ToDisplayString(KNamespaceDisplayFormat);
         }
 
@@ -47,6 +52,7 @@ using LightMock;
 namespace {@namespace}
 {{
     partial class {className}{typeArgumentsWithBrackets} : {interfaceName}{typeArgumentsWithBrackets}
+        {whereClause}
     {{
         private readonly IInvocationContext<{interfaceName}{typeArgumentsWithBrackets}> {VariableNames.Context};
 

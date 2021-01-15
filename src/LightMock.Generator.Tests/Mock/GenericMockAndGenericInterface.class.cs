@@ -3,6 +3,7 @@
 namespace LightMock.Generator.Tests.Mock
 {
     public class GenericMockAndGenericInterface<T> : ITestScript<IGenericMockAndGenericInterface<T>>
+        where T : struct, System.IComparable<T>
     {
         private readonly Mock<IGenericMockAndGenericInterface<T>> mock;
 
