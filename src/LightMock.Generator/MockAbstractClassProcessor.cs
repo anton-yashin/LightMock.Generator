@@ -18,6 +18,8 @@ namespace LightMock.Generator
         private readonly object typeArgumentsWithComma;
         private readonly string whereClause;
         private readonly string commaArguments;
+        private readonly List<string> constructors;
+        private readonly List<string> constructorsCall;
 
         public MockAbstractClassProcessor(
             INamedTypeSymbol typeSymbol) : base(typeSymbol)
@@ -39,6 +41,45 @@ namespace LightMock.Generator
             this.typeArgumentsWithComma = typeArguments.Length > 0 ? typeArguments.Trim('<', '>') + ", " : "";
             this.whereClause = withWhereClause.Replace(withTypeParams, "");
             this.commaArguments = string.Join(",", typeSymbol.OriginalDefinition.TypeArguments.Select(i => " "));
+            this.constructors = new List<string>(
+                to.Constructors.Select(
+                    i => i.ToDisplayString(KConstructorFormat).Replace(typeSymbol.Name, "").Trim('(', ')')));
+            this.constructorsCall = new List<string>(
+                to.Constructors.Select(
+                    i => i.ToDisplayString(KConstructorCallFormat).Replace(typeSymbol.Name, "").Trim('(', ')')));
+        }
+
+        string GenerateConstructor(string declaration, string call)
+        {
+            return $@"
+        public {className}(IInvocationContext<{baseName}{typeArgumentsWithBrackets}> {VariableNames.Context}, IInvocationContext<{interfaceName}{typeArgumentsWithBrackets}> {VariableNames.ProtectedContext}, {declaration})
+            : base({call})
+        {{
+            this.{VariableNames.Context} = {VariableNames.Context};
+            this.{VariableNames.ProtectedContext} = {VariableNames.ProtectedContext};
+        }}
+";
+        }
+
+        string GenerateDefaultConstructor()
+        {
+            return $@"
+        public {className}(IInvocationContext<{baseName}{typeArgumentsWithBrackets}> {VariableNames.Context}, IInvocationContext<{interfaceName}{typeArgumentsWithBrackets}> {VariableNames.ProtectedContext})
+        {{
+            this.{VariableNames.Context} = {VariableNames.Context};
+            this.{VariableNames.ProtectedContext} = {VariableNames.ProtectedContext};
+        }}
+";
+        }
+
+        IEnumerable<string> GenerateConstructors()
+        {
+            for (int i = 0; i < constructors.Count; i++)
+            {
+                yield return constructors[i].Length == 0
+                    ? GenerateDefaultConstructor()
+                    : GenerateConstructor(constructors[i], constructorsCall[i]);
+            }
         }
 
         public override SourceText DoGenerate()
@@ -65,11 +106,7 @@ namespace {@namespace}
         private readonly IInvocationContext<{baseName}{typeArgumentsWithBrackets}> {VariableNames.Context};
         private readonly IInvocationContext<{interfaceName}{typeArgumentsWithBrackets}> {VariableNames.ProtectedContext};
 
-        public {className}(IInvocationContext<{baseName}{typeArgumentsWithBrackets}> {VariableNames.Context}, IInvocationContext<{interfaceName}{typeArgumentsWithBrackets}> {VariableNames.ProtectedContext})
-        {{
-            this.{VariableNames.Context} = {VariableNames.Context};
-            this.{VariableNames.ProtectedContext} = {VariableNames.ProtectedContext};
-        }}
+{string.Join("\r\n", GenerateConstructors())}
 
         {string.Join("\r\n        ", members.Select(i => i.OriginalDefinition.Accept(symbolVisitor)).SkipWhile(i => string.IsNullOrWhiteSpace(i)))}
     }}
@@ -140,7 +177,7 @@ namespace LightMock.Generator
         {
             var toAppend = typeSymbol.IsGenericType
                 ? $"if (gtd == typeof({@namespace}.{baseName}<{commaArguments}>)) return (T)ActivateMockInstanceWithProtectedContext(typeof({@namespace}.{className}<{commaArguments}>));"
-                : $"if (contextType == typeof({@namespace}.{baseName})) return (T)(object)new {@namespace}.{className}((MockContext<{@namespace}.{baseName}>)(object)this, (MockContext<{@namespace}.{interfaceName}>)ProtectedContext);";
+                : $"if (contextType == typeof({@namespace}.{baseName})) return (T)ActivateMockInstanceWithProtectedContext<{@namespace}.{className}>();";
             here.Append(toAppend);
         }
 
@@ -153,5 +190,48 @@ namespace LightMock.Generator
         }
 
         public override string FileName => Prefix.MockClass + base.FileName;
+
+        static readonly SymbolDisplayFormat KConstructorFormat =
+            new SymbolDisplayFormat(
+                globalNamespaceStyle: SymbolDisplayGlobalNamespaceStyle.OmittedAsContaining,
+                typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
+                genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
+                memberOptions:
+                    SymbolDisplayMemberOptions.IncludeParameters |
+                    SymbolDisplayMemberOptions.IncludeType |
+                    SymbolDisplayMemberOptions.IncludeRef,
+                kindOptions:
+                    SymbolDisplayKindOptions.IncludeMemberKeyword,
+                parameterOptions:
+                    SymbolDisplayParameterOptions.IncludeName |
+                    SymbolDisplayParameterOptions.IncludeType |
+                    SymbolDisplayParameterOptions.IncludeParamsRefOut |
+                    SymbolDisplayParameterOptions.IncludeDefaultValue,
+                localOptions: SymbolDisplayLocalOptions.IncludeType,
+                miscellaneousOptions:
+                    SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers |
+                    SymbolDisplayMiscellaneousOptions.UseSpecialTypes |
+                    SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier);
+
+        static readonly SymbolDisplayFormat KConstructorCallFormat =
+            new SymbolDisplayFormat(
+                globalNamespaceStyle: SymbolDisplayGlobalNamespaceStyle.OmittedAsContaining,
+                typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
+                genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
+                memberOptions:
+                    SymbolDisplayMemberOptions.IncludeParameters |
+                    SymbolDisplayMemberOptions.IncludeType |
+                    SymbolDisplayMemberOptions.IncludeRef,
+                kindOptions:
+                    SymbolDisplayKindOptions.IncludeMemberKeyword,
+                parameterOptions:
+                    SymbolDisplayParameterOptions.IncludeName |
+                    SymbolDisplayParameterOptions.IncludeParamsRefOut |
+                    SymbolDisplayParameterOptions.IncludeDefaultValue,
+                localOptions: SymbolDisplayLocalOptions.IncludeType,
+                miscellaneousOptions:
+                    SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers |
+                    SymbolDisplayMiscellaneousOptions.UseSpecialTypes |
+                    SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier);
     }
 }

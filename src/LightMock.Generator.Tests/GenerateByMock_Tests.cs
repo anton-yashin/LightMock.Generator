@@ -460,6 +460,23 @@ namespace LightMock.Generator.Tests
             Assert.Equal(expected: KExpected, testScript.DoRun());
         }
 
+        [Fact]
+        public void AbstractClassWithConstructors()
+        {
+            const string KClassName = "AbstractClassWithConstructors";
+
+            var (diagnostics, success, assembly) = DoCompileResource(KClassName);
+
+            // verify
+            Assert.True(success);
+            Assert.Empty(diagnostics);
+
+            var testScript = LoadAssembly<AAbstractClassWithConstructors>(KClassName, assembly, KClassName);
+            Assert.NotNull(testScript.Context);
+            Assert.NotNull(testScript.MockObject);
+            Assert.Equal(expected: KExpected, testScript.DoRun());
+        }
+
         private (ImmutableArray<Diagnostic> diagnostics, bool succes, byte[] assembly) DoCompileResource(string resourceName)
         {
             return DoCompile(Utils.LoadResource("Mock." + resourceName + ".class.cs"));

@@ -7,13 +7,21 @@ namespace LightMock.Generator
     {
         T? instance;
         readonly Type contextType;
+        readonly object[] prms;
         readonly static object DefaultProtectedContext = new object();
+        readonly static object[] DefaultParams = new object[0];
 
         public Mock()
         {
             contextType = typeof(T);
+            prms = DefaultParams;
 
             ProtectedContext = CreateProtectedContext();
+        }
+
+        public Mock(params object[] prms) : this()
+        {
+            this.prms = prms;
         }
 
         public T Object => (instance ?? (instance = CreateMockInstance()));
@@ -48,9 +56,27 @@ namespace LightMock.Generator
             return Activator.CreateInstance(GetOrCacheType(mockInstanceTypes,
                 () => genericType.MakeGenericType(
                     contextType.GetGenericArguments())),
-                    this, ProtectedContext)
+                    args: GetArgs())
                 ?? throw new InvalidOperationException("can't create mock instance for: " + contextType.FullName);
         }
+
+        object ActivateMockInstanceWithProtectedContext<TContext>()
+        {
+            return Activator.CreateInstance(typeof(TContext), args: GetArgs())
+                ?? throw new InvalidOperationException("can't create mock instance for: " + contextType.FullName);
+        }
+
+        object[] GetArgs()
+        {
+            var args = new object[prms.Length + 2];
+            args[0] = this;
+            args[1] = ProtectedContext;
+            for (int i = 0; i < prms.Length; i++)
+                args[i + 2] = prms[i];
+            return args;
+        }
+
+
 
         static readonly Type MockContextType = typeof(MockContext<>);
 
