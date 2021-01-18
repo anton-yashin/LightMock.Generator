@@ -2,6 +2,6 @@
 {
     public interface ITestScript
     {
-        void TestProtectedMembers();
+        int TestProtectedMembers();
     }
 }

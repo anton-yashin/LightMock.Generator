@@ -13,7 +13,7 @@ namespace LightMock.Generator.Tests.AbstractClass
         {
         }
 
-        public void TestProtectedMembers()
+        public int TestProtectedMembers()
         {
             var context = new MockContext<AConstructor>();
             var protectedContext = new MockContext<IP2P_AConstructor>();
@@ -43,6 +43,8 @@ namespace LightMock.Generator.Tests.AbstractClass
             Assert.Null(mc3.P2);
             Assert.Null(mc3.P3);
             Assert.Same(expectedObjects, mc3.Objects);
+
+            return 42;
         }
     }
 }

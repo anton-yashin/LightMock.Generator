@@ -27,7 +27,7 @@ namespace LightMock.Generator.Tests.AbstractClass
             this.mockContext = mockContext;
         }
 
-        public void TestProtectedMembers()
+        public int TestProtectedMembers()
         {
             var a1 = new AMultipleNamespacesArgument();
             p2p.ProtectedDoSomething(a1);
@@ -42,6 +42,7 @@ namespace LightMock.Generator.Tests.AbstractClass
             p2p.ProtectedSomeProperty = a3;
             Xunit.Assert.Same(a3, p2p.ProtectedSomeProperty);
 
+            return 42;
         }
     }
 }

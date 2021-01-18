@@ -15,8 +15,9 @@
             this.mockContext = mockContext;
         }
 
-        public void TestProtectedMembers()
+        public int TestProtectedMembers()
         {
+            return 42;
         }
     }
 

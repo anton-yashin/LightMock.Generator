@@ -16,6 +16,8 @@ namespace LightMock.Generator.Tests
 {
     public class GenerateByAbstractClass_Tests : TestsBase
     {
+        const int KExpected = 42;
+
         public GenerateByAbstractClass_Tests(ITestOutputHelper testOutputHelper)
             : base(testOutputHelper) 
         { }
@@ -33,7 +35,7 @@ namespace LightMock.Generator.Tests
             baseClass.DoSomething(1234);
             context.Assert(f => f.DoSomething(1234));
 
-            testClass.TestProtectedMembers();
+            Assert.Equal(KExpected, testClass.TestProtectedMembers());
         }
 
         [Fact]
@@ -51,7 +53,7 @@ namespace LightMock.Generator.Tests
             baseClass.GetAndSet = KExpected2;
             Assert.Equal(KExpected2, baseClass.GetAndSet);
 
-            testClass.TestProtectedMembers();
+            Assert.Equal(KExpected, testClass.TestProtectedMembers());
         }
 
         [Fact]
@@ -69,7 +71,7 @@ namespace LightMock.Generator.Tests
             baseClass.GenericWithConstraint(p);
             context.Assert(f => f.GenericWithConstraint(p));
 
-            testClass.TestProtectedMembers();
+            Assert.Equal(KExpected, testClass.TestProtectedMembers());
         }
 
         [Fact]
@@ -92,7 +94,7 @@ namespace LightMock.Generator.Tests
             baseClass.GetAndSet = 3456;
             Assert.Equal(3456, baseClass.GetAndSet);
 
-            testClass.TestProtectedMembers();
+            Assert.Equal(KExpected, testClass.TestProtectedMembers());
         }
 
         [Fact]
@@ -113,7 +115,7 @@ namespace LightMock.Generator.Tests
             baseClass.SomeProperty = a3;
             Assert.Same(a3, baseClass.SomeProperty);
 
-            testClass.TestProtectedMembers();
+            Assert.Equal(KExpected, testClass.TestProtectedMembers());
         }
 
 
@@ -161,7 +163,7 @@ namespace LightMock.Generator.Tests
 
             var testScript = (ITestScript)testClass;
 
-            testScript.TestProtectedMembers();
+            Assert.Equal(KExpected, testScript.TestProtectedMembers());
         }
 
         [Fact]

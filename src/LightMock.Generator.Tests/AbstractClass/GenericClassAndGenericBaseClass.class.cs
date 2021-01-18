@@ -16,7 +16,7 @@
             this.mockContext = mockContext;
         }
 
-        public void TestProtectedMembers()
+        public int TestProtectedMembers()
         {
             p2p.ProtectedDoSomething(1234);
             mockContext.Assert(f => f.ProtectedDoSomething(1234));
@@ -30,6 +30,8 @@
             mockContext.ArrangeProperty(f => f.ProtectedGetAndSet);
             p2p.ProtectedGetAndSet = 3456;
             Xunit.Assert.Equal(3456, p2p.ProtectedGetAndSet);
+
+            return 42;
         }
     }
 }
