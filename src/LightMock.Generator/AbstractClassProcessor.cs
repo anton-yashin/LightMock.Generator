@@ -124,49 +124,5 @@ namespace {nameSpace}
                     typeSymbol.Name);
             }
         }
-
-
-        static readonly SymbolDisplayFormat KConstructorFormat =
-            new SymbolDisplayFormat(
-                globalNamespaceStyle: SymbolDisplayGlobalNamespaceStyle.OmittedAsContaining,
-                typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
-                genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
-                memberOptions:
-                    SymbolDisplayMemberOptions.IncludeParameters |
-                    SymbolDisplayMemberOptions.IncludeType |
-                    SymbolDisplayMemberOptions.IncludeRef,
-                kindOptions:
-                    SymbolDisplayKindOptions.IncludeMemberKeyword,
-                parameterOptions:
-                    SymbolDisplayParameterOptions.IncludeName |
-                    SymbolDisplayParameterOptions.IncludeType |
-                    SymbolDisplayParameterOptions.IncludeParamsRefOut |
-                    SymbolDisplayParameterOptions.IncludeDefaultValue,
-                localOptions: SymbolDisplayLocalOptions.IncludeType,
-                miscellaneousOptions:
-                    SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers |
-                    SymbolDisplayMiscellaneousOptions.UseSpecialTypes |
-                    SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier);
-
-        static readonly SymbolDisplayFormat KConstructorCallFormat =
-            new SymbolDisplayFormat(
-                globalNamespaceStyle: SymbolDisplayGlobalNamespaceStyle.OmittedAsContaining,
-                typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
-                genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
-                memberOptions:
-                    SymbolDisplayMemberOptions.IncludeParameters |
-                    SymbolDisplayMemberOptions.IncludeType |
-                    SymbolDisplayMemberOptions.IncludeRef,
-                kindOptions:
-                    SymbolDisplayKindOptions.IncludeMemberKeyword,
-                parameterOptions:
-                    SymbolDisplayParameterOptions.IncludeName |
-                    SymbolDisplayParameterOptions.IncludeParamsRefOut |
-                    SymbolDisplayParameterOptions.IncludeDefaultValue,
-                localOptions: SymbolDisplayLocalOptions.IncludeType,
-                miscellaneousOptions:
-                    SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers |
-                    SymbolDisplayMiscellaneousOptions.UseSpecialTypes |
-                    SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier);
     }
 }

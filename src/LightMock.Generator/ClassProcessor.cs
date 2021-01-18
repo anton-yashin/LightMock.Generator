@@ -34,6 +34,49 @@ namespace LightMock.Generator
                     SymbolDisplayGenericsOptions.IncludeTypeConstraints |
                     SymbolDisplayGenericsOptions.IncludeVariance);
 
+        protected static readonly SymbolDisplayFormat KConstructorFormat =
+            new SymbolDisplayFormat(
+                globalNamespaceStyle: SymbolDisplayGlobalNamespaceStyle.OmittedAsContaining,
+                typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
+                genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
+                memberOptions:
+                    SymbolDisplayMemberOptions.IncludeParameters |
+                    SymbolDisplayMemberOptions.IncludeType |
+                    SymbolDisplayMemberOptions.IncludeRef,
+                kindOptions:
+                    SymbolDisplayKindOptions.IncludeMemberKeyword,
+                parameterOptions:
+                    SymbolDisplayParameterOptions.IncludeName |
+                    SymbolDisplayParameterOptions.IncludeType |
+                    SymbolDisplayParameterOptions.IncludeParamsRefOut |
+                    SymbolDisplayParameterOptions.IncludeDefaultValue,
+                localOptions: SymbolDisplayLocalOptions.IncludeType,
+                miscellaneousOptions:
+                    SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers |
+                    SymbolDisplayMiscellaneousOptions.UseSpecialTypes |
+                    SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier);
+
+        protected static readonly SymbolDisplayFormat KConstructorCallFormat =
+            new SymbolDisplayFormat(
+                globalNamespaceStyle: SymbolDisplayGlobalNamespaceStyle.OmittedAsContaining,
+                typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
+                genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
+                memberOptions:
+                    SymbolDisplayMemberOptions.IncludeParameters |
+                    SymbolDisplayMemberOptions.IncludeType |
+                    SymbolDisplayMemberOptions.IncludeRef,
+                kindOptions:
+                    SymbolDisplayKindOptions.IncludeMemberKeyword,
+                parameterOptions:
+                    SymbolDisplayParameterOptions.IncludeName |
+                    SymbolDisplayParameterOptions.IncludeParamsRefOut |
+                    SymbolDisplayParameterOptions.IncludeDefaultValue,
+                localOptions: SymbolDisplayLocalOptions.IncludeType,
+                miscellaneousOptions:
+                    SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers |
+                    SymbolDisplayMiscellaneousOptions.UseSpecialTypes |
+                    SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier);
+
         public abstract IEnumerable<Diagnostic> GetErrors();
         public abstract IEnumerable<Diagnostic> GetWarnings();
         public abstract SourceText DoGenerate();
