@@ -5,6 +5,7 @@ using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using Xunit;
 using Xunit.Abstractions;
 
 namespace LightMock.Generator.Tests
@@ -16,8 +17,7 @@ namespace LightMock.Generator.Tests
         public TestsBase(ITestOutputHelper testOutputHelper)
             => this.testOutputHelper = testOutputHelper;
 
-
-        protected (ImmutableArray<Diagnostic> diagnostics, bool succes, byte[] assembly) DoCompile(string source, string compilationName)
+        protected (ImmutableArray<Diagnostic> diagnostics, bool success, byte[] assembly) DoCompile(string source, string compilationName)
         {
             var compilation = CreateCompilation(source, compilationName);
             var driver = CSharpGeneratorDriver.Create(
