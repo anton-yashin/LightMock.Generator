@@ -1,20 +1,23 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Threading;
 
 namespace LightMock.Generator
 {
+    static class MockDefaults
+    {
+        public readonly static Type DefaultProtectedContextType = typeof(object);
+        public readonly static object[] DefaultParams = Array.Empty<object>();
+        public readonly static Type MockContextType = typeof(MockContext<>);
+    }
+
     public sealed partial class Mock<T> : MockContext<T> where T : class
     {
         T? instance;
-        readonly Type contextType;
         readonly object[] prms;
-        readonly static object DefaultProtectedContext = new object();
-        readonly static object[] DefaultParams = new object[0];
 
         public Mock()
         {
-            contextType = typeof(T);
-            prms = DefaultParams;
+            prms = MockDefaults.DefaultParams;
 
             ProtectedContext = CreateProtectedContext();
         }
@@ -24,47 +27,11 @@ namespace LightMock.Generator
             this.prms = prms;
         }
 
-        public T Object => (instance ?? (instance = CreateMockInstance()));
+        public T Object => (instance ??= CreateMockInstance());
         public object ProtectedContext { get; }
 
-        static readonly Dictionary<Type, Type> mockInstanceTypes = new Dictionary<Type, Type>();
-        static readonly Dictionary<Type, Type> protectedContextTypes = new Dictionary<Type, Type>();
-
-        Type GetOrCacheType(Dictionary<Type, Type> cache, Func<Type> typeFactory)
-        {
-            Type? tgt = null;
-            lock (cache)
-            {
-                if (cache.TryGetValue(contextType, out tgt) == false)
-                {
-                    tgt = typeFactory();
-                    cache.Add(contextType, tgt);
-                }
-            }
-            return tgt;
-        }
-
-        object ActivateMockInstance(Type genericType)
-        {
-            return Activator.CreateInstance(GetOrCacheType(mockInstanceTypes,
-                () => genericType.MakeGenericType(contextType.GetGenericArguments())), this)
-                ?? throw new InvalidOperationException("can't create mock instance for: " + contextType.FullName);
-        }
-
-        object ActivateMockInstanceWithProtectedContext(Type genericType)
-        {
-            return Activator.CreateInstance(GetOrCacheType(mockInstanceTypes,
-                () => genericType.MakeGenericType(
-                    contextType.GetGenericArguments())),
-                    args: GetArgs())
-                ?? throw new InvalidOperationException("can't create mock instance for: " + contextType.FullName);
-        }
-
-        object ActivateMockInstanceWithProtectedContext<TContext>()
-        {
-            return Activator.CreateInstance(typeof(TContext), args: GetArgs())
-                ?? throw new InvalidOperationException("can't create mock instance for: " + contextType.FullName);
-        }
+        static Type? mockInstanceType;
+        static Type? protectedContextType;
 
         object[] GetArgs()
         {
@@ -76,17 +43,19 @@ namespace LightMock.Generator
             return args;
         }
 
-
-
-        static readonly Type MockContextType = typeof(MockContext<>);
-
-        object ActivateProtectedContext(Type genericInterface)
+        T CreateMockInstance()
         {
-            return Activator.CreateInstance(GetOrCacheType(protectedContextTypes,
-                () => MockContextType.MakeGenericType(
-                    genericInterface.MakeGenericType(
-                        contextType.GetGenericArguments()))))
-                ?? throw new InvalidOperationException("can't create protected context for: " + contextType.FullName);
+            var result = Activator.CreateInstance(LazyInitializer.EnsureInitialized(ref mockInstanceType,
+                GetInstanceType), args: GetArgs())
+                ?? throw new InvalidOperationException("can't create context for: " + typeof(T).FullName);
+            return (T)result;
+        }
+
+        object CreateProtectedContext()
+        {
+            return Activator.CreateInstance(LazyInitializer.EnsureInitialized(ref protectedContextType,
+                GetProtectedContextType))
+                ?? throw new InvalidOperationException("can't create protected context for: " + typeof(T).FullName);
         }
     }
 

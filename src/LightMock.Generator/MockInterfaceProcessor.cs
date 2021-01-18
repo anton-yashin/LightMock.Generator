@@ -61,6 +61,9 @@ namespace {@namespace}
             this.{VariableNames.Context} = {VariableNames.Context};
         }}
 
+        public {className}(IInvocationContext<{interfaceName}{typeArgumentsWithBrackets}> {VariableNames.Context}, object unused)
+            : this({VariableNames.Context}) {{ }}
+
         {string.Join("\r\n        ", members.Select(i => i.OriginalDefinition.Accept(symbolVisitor)))}
     }}
 }}
@@ -68,11 +71,11 @@ namespace {@namespace}
             return SourceText.From(code, Encoding.UTF8);
         }
 
-        public override void DoGeneratePart_CreateMockInstance(StringBuilder here)
+        public override void DoGeneratePart_GetInstanceType(StringBuilder here)
         {
             var toAppend = typeSymbol.IsGenericType 
-                ? $"if (gtd == typeof({@namespace}.{interfaceName}<{commaArguments}>)) return (T)ActivateMockInstance(typeof({@namespace}.{className}<{commaArguments}>));" 
-                : $"if (contextType == typeof({@namespace}.{interfaceName})) return (T)(object)new {@namespace}.{className}((MockContext<{@namespace}.{interfaceName}>)(object)this);";
+                ? $"if (gtd == typeof({@namespace}.{interfaceName}<{commaArguments}>)) return typeof({@namespace}.{className}<{commaArguments}>).MakeGenericType(contextType.GetGenericArguments());" 
+                : $"if (contextType == typeof({@namespace}.{interfaceName})) return typeof({@namespace}.{className});";
             here.Append(toAppend);
         }
 

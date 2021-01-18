@@ -173,19 +173,19 @@ namespace LightMock.Generator
 
         public override IEnumerable<Diagnostic> GetWarnings() => Enumerable.Empty<Diagnostic>();
 
-        public override void DoGeneratePart_CreateMockInstance(StringBuilder here)
+        public override void DoGeneratePart_GetInstanceType(StringBuilder here)
         {
             var toAppend = typeSymbol.IsGenericType
-                ? $"if (gtd == typeof({@namespace}.{baseName}<{commaArguments}>)) return (T)ActivateMockInstanceWithProtectedContext(typeof({@namespace}.{className}<{commaArguments}>));"
-                : $"if (contextType == typeof({@namespace}.{baseName})) return (T)ActivateMockInstanceWithProtectedContext<{@namespace}.{className}>();";
+                ? $"if (gtd == typeof({@namespace}.{baseName}<{commaArguments}>)) return typeof({@namespace}.{className}<{commaArguments}>).MakeGenericType(contextType.GetGenericArguments());"
+                : $"if (contextType == typeof({@namespace}.{baseName})) return typeof({@namespace}.{className});";
             here.Append(toAppend);
         }
 
-        public override void DoGeneratePart_CreateProtectedContext(StringBuilder here)
+        public override void DoGeneratePart_GetProtectedContextType(StringBuilder here)
         {
             var toAppend = typeSymbol.IsGenericType
-                ? $@"if (gtd == typeof({@namespace}.{baseName}<{commaArguments}>)) return ActivateProtectedContext(typeof({@namespace}.{interfaceName}<{commaArguments}>));"
-                : $@"if (contextType == typeof({@namespace}.{baseName})) return new MockContext<{@namespace}.{interfaceName}>();";
+                ? $@"if (gtd == typeof({@namespace}.{baseName}<{commaArguments}>)) return MockDefaults.MockContextType.MakeGenericType(typeof({@namespace}.{interfaceName}<{commaArguments}>).MakeGenericType(contextType.GetGenericArguments()));"
+                : $@"if (contextType == typeof({@namespace}.{baseName})) return MockDefaults.MockContextType.MakeGenericType(typeof({@namespace}.{interfaceName}));";
             here.Append(toAppend);
         }
 
