@@ -547,7 +547,8 @@ namespace LightMock.Generator.Tests
 
         private (ImmutableArray<Diagnostic> diagnostics, bool succes, byte[] assembly) DoCompileResource(string resourceName)
         {
-            return DoCompile(Utils.LoadResource("Mock." + resourceName + ".class.cs"));
+            var fn = "Mock." + resourceName + ".class.cs";
+            return DoCompile(Utils.LoadResource(fn), fn);
         }
 
         private static ITestScript<T> LoadAssembly<T>(string KClassName, byte[] assembly, string className)

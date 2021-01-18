@@ -17,9 +17,9 @@ namespace LightMock.Generator.Tests
             => this.testOutputHelper = testOutputHelper;
 
 
-        protected (ImmutableArray<Diagnostic> diagnostics, bool succes, byte[] assembly) DoCompile(string source)
+        protected (ImmutableArray<Diagnostic> diagnostics, bool succes, byte[] assembly) DoCompile(string source, string compilationName)
         {
-            var compilation = CreateCompilation(source);
+            var compilation = CreateCompilation(source, compilationName);
             var driver = CSharpGeneratorDriver.Create(
                 ImmutableArray.Create(new LightMockGenerator()),
                 Enumerable.Empty<AdditionalText>(),
@@ -34,8 +34,8 @@ namespace LightMock.Generator.Tests
         }
 
 
-        protected static CSharpCompilation CreateCompilation(string source, string? compilationName = null)
-            => CSharpCompilation.Create(compilationName ?? Guid.NewGuid().ToString("N"),
+        protected static CSharpCompilation CreateCompilation(string source, string compilationName)
+            => CSharpCompilation.Create(compilationName,
                 syntaxTrees: new[]
                 {
                     CSharpSyntaxTree.ParseText(source, new CSharpParseOptions(LanguageVersion.Preview))

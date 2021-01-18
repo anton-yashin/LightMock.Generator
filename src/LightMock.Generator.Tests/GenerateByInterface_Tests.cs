@@ -63,7 +63,7 @@ namespace LightMock.Generator.Tests
         public void GenericMethod()
         {
             const string KClassName = "GenericMethod";
-            var (diagnostics, success, assembly) = DoCompile(Utils.LoadResource(KClassName + ".class.cs"));
+            var (diagnostics, success, assembly) = DoCompileResource(KClassName);
 
             // verify
             Assert.True(success);
@@ -86,7 +86,7 @@ namespace LightMock.Generator.Tests
         public void GenericClassAndGenericInterface()
         {
             const string KClassName = "GenericClassAndGenericInterface";
-            var (diagnostics, success, assembly) = DoCompile(Utils.LoadResource(KClassName + ".class.cs"));
+            var (diagnostics, success, assembly) = DoCompileResource(KClassName);
 
             // verify
             Assert.True(success);
@@ -112,7 +112,7 @@ namespace LightMock.Generator.Tests
         public void MultipleNamespaces()
         {
             const string KClassName = "MultipleNamespaces";
-            var (diagnostics, success, assembly) = DoCompile(Utils.LoadResource(KClassName + ".class.cs"));
+            var (diagnostics, success, assembly) = DoCompileResource(KClassName);
 
             // verify
             Assert.True(success);
@@ -138,7 +138,7 @@ namespace LightMock.Generator.Tests
         public void EventSource()
         {
             const string KClassName = "EventSource";
-            var (diagnostics, success, assembly) = DoCompile(Utils.LoadResource(KClassName + ".class.cs"));
+            var (diagnostics, success, assembly) = DoCompileResource(KClassName);
 
             // verify
             Assert.True(success);
@@ -153,7 +153,7 @@ namespace LightMock.Generator.Tests
         public void EventSourceMultipleNamespaces()
         {
             const string KClassName = "EventSourceMultipleNamespaces";
-            var (diagnostics, success, assembly) = DoCompile(Utils.LoadResource(KClassName + ".class.cs"));
+            var (diagnostics, success, assembly) = DoCompileResource(KClassName);
 
             // verify
             Assert.True(success);
@@ -168,7 +168,7 @@ namespace LightMock.Generator.Tests
         public void EventSourceGenericClass()
         {
             const string KClassName = "EventSourceGenericClass";
-            var (diagnostics, success, assembly) = DoCompile(Utils.LoadResource(KClassName + ".class.cs"));
+            var (diagnostics, success, assembly) = DoCompileResource(KClassName);
 
             // verify
             Assert.True(success);
@@ -182,7 +182,7 @@ namespace LightMock.Generator.Tests
         [Fact]
         public void NoPartialKeyworkError()
         {
-            var (diagnostics, success, assembly) = DoCompile(Utils.LoadResource("NoPartialKeyworkError.class.cs"));
+            var (diagnostics, success, assembly) = DoCompileResource("NoPartialKeyworkError");
 
             // verify
             Assert.False(success);
@@ -192,7 +192,7 @@ namespace LightMock.Generator.Tests
         [Fact]
         public void NoInterfaceError()
         {
-            var (diagnostics, success, assembly) = DoCompile(Utils.LoadResource("NoInterfaceError.class.cs"));
+            var (diagnostics, success, assembly) = DoCompileResource("NoInterfaceError");
 
             // verify
             Assert.True(success);
@@ -202,7 +202,7 @@ namespace LightMock.Generator.Tests
         [Fact]
         public void TooManyInterfacesWarning()
         {
-            var (diagnostics, success, assembly) = DoCompile(Utils.LoadResource("TooManyInterfacesWarning.class.cs"));
+            var (diagnostics, success, assembly) = DoCompileResource("TooManyInterfacesWarning");
 
             // verify
             Assert.True(success);
@@ -224,7 +224,7 @@ namespace LightMock.Generator.Tests
 
         private (ImmutableArray<Diagnostic> diagnostics, bool succes, byte[] assembly) DoCompileResource(string resourceName)
         {
-            return DoCompile(Utils.LoadResource("Interface." + resourceName + ".class.cs"));
+            return DoCompile(Utils.LoadResource("Interface." + resourceName + ".class.cs"), resourceName);
         }
     }
 }
