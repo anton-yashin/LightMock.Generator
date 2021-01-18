@@ -4,10 +4,10 @@ namespace LightMock.Generator
 {
     public sealed partial class Mock<T> : MockContext<T> where T : class
     {
-        T CreateMockInstance()
-            => throw new NotSupportedException(contextType.FullName + " is not supported");
+        Type GetInstanceType()
+            => throw new NotSupportedException(typeof(T).FullName + " is not supported");
 
-        object CreateProtectedContext()
-            => DefaultProtectedContext;
+        Type GetProtectedContextType()
+            => MockDefaults.DefaultProtectedContextType;
     }
 }

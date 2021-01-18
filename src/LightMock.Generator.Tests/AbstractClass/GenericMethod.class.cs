@@ -18,7 +18,7 @@ namespace LightMock.Generator.Tests.AbstractClass
             this.mockContext = mockContext;
         }
 
-        public void TestProtectedMembers()
+        public int TestProtectedMembers()
         {
             mockContext.Arrange(f => f.ProtectedGenericReturn<int>()).Returns(1234);
             Xunit.Assert.Equal(1234, p2p.ProtectedGenericReturn<int>());
@@ -29,6 +29,8 @@ namespace LightMock.Generator.Tests.AbstractClass
             var p = new object();
             p2p.ProtectedGenericWithConstraint(p);
             mockContext.Assert(f => f.ProtectedGenericWithConstraint(p));
+
+            return 42;
         }
     }
 }

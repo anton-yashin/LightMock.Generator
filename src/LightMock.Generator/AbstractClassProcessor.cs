@@ -29,24 +29,26 @@ namespace LightMock.Generator
             this.candidateClass = candidateClass;
             this.baseClass = baseClass;
             this.protectedVisitor = new ProtectedMemberSymbolVisitor();
-            this.nameSpace = typeSymbol.ContainingNamespace.ToDisplayString(KNamespaceDisplayFormat);
+            this.nameSpace = typeSymbol.ContainingNamespace.ToDisplayString(SymbolDisplayFormats.Namespace);
             this.symbolVisitor = new AbstractClassSymbolVisitor(nameSpace);
             this.baseName = baseClass.Accept(symbolVisitor);
             this.interfaceName = Prefix.ProtectedToPublicInterface + baseClass.Name;
 
             var bcod = baseClass.OriginalDefinition;
-            var withTypeParams = bcod.ToDisplayString(KWithTypeParams);
-            var withWhereClause = bcod.ToDisplayString(KWithWhereClause);
-            var typeArguments = withTypeParams.Replace(bcod.ToDisplayString(KNamespaceDisplayFormat), "");
+            var withTypeParams = bcod.ToDisplayString(SymbolDisplayFormats.WithTypeParams);
+            var withWhereClause = bcod.ToDisplayString(SymbolDisplayFormats.WithWhereClause);
+            var typeArguments = withTypeParams.Replace(bcod.ToDisplayString(SymbolDisplayFormats.Namespace), "");
 
             this.typeArgumentsWithBrackets = typeArguments.Length > 0 ? typeArguments : "";
             this.whereClause = withWhereClause.Replace(withTypeParams, "");
             this.constructors = new List<string>(
                 baseClass.Constructors.Select(
-                    (IMethodSymbol i) => i.ToDisplayString(KConstructorFormat).Replace(baseClass.Name, "").Trim('(', ')')));
+                    (IMethodSymbol i) => i.ToDisplayString(SymbolDisplayFormats.ConstructorDecl)
+                    .Replace(baseClass.Name, "").Trim('(', ')')));
             this.constructorsCall = new List<string>(
                 baseClass.Constructors.Select(
-                    (IMethodSymbol i) => i.ToDisplayString(KConstructorCallFormat).Replace(baseClass.Name, "").Trim('(', ')')));
+                    (IMethodSymbol i) => i.ToDisplayString(SymbolDisplayFormats.ConstructorCall)
+                    .Replace(baseClass.Name, "").Trim('(', ')')));
         }
 
         string GenerateConstructor(string declaration, string call)

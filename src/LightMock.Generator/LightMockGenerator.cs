@@ -10,7 +10,7 @@ using Microsoft.CodeAnalysis.Text;
 namespace LightMock.Generator
 {
     [Generator]
-    public class LightMockGenerator : ISourceGenerator
+    public sealed class LightMockGenerator : ISourceGenerator
     {
         const string KAttributeName = nameof(GenerateMockAttribute);
         const string KMock = "Mock";
@@ -19,11 +19,6 @@ namespace LightMock.Generator
             () => SourceText.From(Utils.LoadResource(KAttributeName + ".cs"), Encoding.UTF8));
         readonly Lazy<SourceText> mock = new(
             () => SourceText.From(Utils.LoadResource(KMock + ".cs"), Encoding.UTF8));
-
-        private static readonly SymbolDisplayFormat KNamespaceDisplayFormat = new SymbolDisplayFormat(
-            typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces
-            );
-
 
         public LightMockGenerator()
         {
@@ -75,7 +70,7 @@ namespace LightMock.Generator
 
                     var @interface = typeSymbol.Interfaces.FirstOrDefault();
                     ClassProcessor processor;
-                    if (typeSymbol.BaseType != null && typeSymbol.BaseType.ToDisplayString(KNamespaceDisplayFormat) != "System.Object")
+                    if (typeSymbol.BaseType != null && typeSymbol.BaseType.ToDisplayString(SymbolDisplayFormats.Namespace) != "System.Object")
                         processor = new AbstractClassProcessor(candidateClass, typeSymbol, typeSymbol.BaseType);
                     else
                         processor = new InterfaceProcessor(compilation, candidateClass, typeSymbol, @interface);
@@ -89,8 +84,8 @@ namespace LightMock.Generator
                 var mockContextType = typeof(MockContext<>);
                 var mockContextName = mockContextType.Name.Replace("`1", "");
                 var mockContextNamespace = mockContextType.Namespace;
-                var mockInstanceBuilder = new StringBuilder();
-                var protectedContextBuilder = new StringBuilder();
+                var getInstanceTypeBuilder = new StringBuilder();
+                var getProtectedContextTypeBuilder = new StringBuilder();
                 var processedTypes = new List<INamedTypeSymbol>();
 
                 foreach (var candidateGeneric in receiver.CandidateMocks)
@@ -114,51 +109,52 @@ namespace LightMock.Generator
                             continue;
                         EmitDiagnostics(context, processor.GetWarnings());
                         context.AddSource(processor.FileName, processor.DoGenerate());
-                        processor.DoGeneratePart_CreateMockInstance(mockInstanceBuilder);
-                        processor.DoGeneratePart_CreateProtectedContext(protectedContextBuilder);
+                        processor.DoGeneratePart_GetInstanceType(getInstanceTypeBuilder);
+                        processor.DoGeneratePart_GetProtectedContextType(getProtectedContextTypeBuilder);
                         processedTypes.Add(mockedType);
                     }
                 }
 
-                string createMockInstanceImpl = $@"
+                string getInstanceTypeImpl = $@"
 using System;
 
 namespace LightMock.Generator
 {{
     public sealed partial class Mock<T> : MockContext<T> where T : class
     {{
-        T CreateMockInstance()
+        Type GetInstanceType()
         {{
+            var contextType = typeof(T);
             var gtd = contextType.IsGenericType ? contextType.GetGenericTypeDefinition() : null;
 
-            {mockInstanceBuilder}
+            {getInstanceTypeBuilder}
 
             throw new NotSupportedException(contextType.FullName + "" is not supported "" + gtd.FullName);
         }}
     }}
 }}
 ";
-                string createProtectedContextImpl = $@"
+                string getProtectedContextTypeImpl = $@"
 using System;
 
 namespace LightMock.Generator
 {{
     public sealed partial class Mock<T> : MockContext<T> where T : class
     {{
-        object CreateProtectedContext()
+        Type GetProtectedContextType()
         {{
+            var contextType = typeof(T);
             var gtd = contextType.IsGenericType ? contextType.GetGenericTypeDefinition() : null;
 
-            {protectedContextBuilder}
-            return DefaultProtectedContext;
+            {getProtectedContextTypeBuilder}
+            return MockDefaults.DefaultProtectedContextType;
         }}
     }}
 }}
 ";
 
-                context.AddSource("CreateMockInstance.mock_impl.spg.g.cs", SourceText.From(createMockInstanceImpl, Encoding.UTF8));
-
-                context.AddSource("CreateProtectedContext.mock_impl.spg.g.cs", SourceText.From(createProtectedContextImpl, Encoding.UTF8));
+                context.AddSource("GetInstanceType.mock_impl.spg.g.cs", SourceText.From(getInstanceTypeImpl, Encoding.UTF8));
+                context.AddSource("GetProtectedContextType.mock_impl.spg.g.cs", SourceText.From(getProtectedContextTypeImpl, Encoding.UTF8));
             }
         }
 

@@ -14,13 +14,15 @@
             this.mockContext = mockContext;
         }
 
-        public void TestProtectedMembers()
+        public int TestProtectedMembers()
         {
             mockContext.Arrange(f => f.ProtectedGetSomething()).Returns(1234);
             Xunit.Assert.Equal(expected: 1234, p2p.ProtectedGetSomething());
 
             p2p.ProtectedDoSomething(1234);
             mockContext.Assert(f => f.ProtectedDoSomething(1234));
+
+            return 42;
         }
     }
 
