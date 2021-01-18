@@ -5,7 +5,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace LightMock.Generator
 {
-    internal class LightMockSyntaxReceiver : CSharpSyntaxVisitor, ISyntaxReceiver
+    sealed internal class LightMockSyntaxReceiver : CSharpSyntaxVisitor, ISyntaxReceiver
     {
         public List<ClassDeclarationSyntax> CandidateClasses { get; } = new List<ClassDeclarationSyntax>();
         public List<GenericNameSyntax> CandidateMocks { get; } = new List<GenericNameSyntax>();

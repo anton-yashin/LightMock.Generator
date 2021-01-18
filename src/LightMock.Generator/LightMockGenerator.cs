@@ -10,7 +10,7 @@ using Microsoft.CodeAnalysis.Text;
 namespace LightMock.Generator
 {
     [Generator]
-    public class LightMockGenerator : ISourceGenerator
+    public sealed class LightMockGenerator : ISourceGenerator
     {
         const string KAttributeName = nameof(GenerateMockAttribute);
         const string KMock = "Mock";
