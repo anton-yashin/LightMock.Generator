@@ -36,9 +36,10 @@ namespace LightMock.Generator
             this.baseName = baseClass.Accept(symbolVisitor);
             this.interfaceName = Prefix.ProtectedToPublicInterface + baseClass.Name;
 
-            var withTypeParams = typeSymbol.ToDisplayString(KWithTypeParams);
-            var withWhereClause = typeSymbol.ToDisplayString(KWithWhereClause);
-            var typeArguments = withTypeParams.Replace(typeSymbol.ToDisplayString(KNamespaceDisplayFormat), "");
+            var bcod = baseClass.OriginalDefinition;
+            var withTypeParams = bcod.ToDisplayString(KWithTypeParams);
+            var withWhereClause = bcod.ToDisplayString(KWithWhereClause);
+            var typeArguments = withTypeParams.Replace(bcod.ToDisplayString(KNamespaceDisplayFormat), "");
 
             this.typeArgumentsWithBrackets = typeArguments.Length > 0 ? typeArguments : "";
             this.typeArgumentsWithComma = typeArguments.Length > 0 ? typeArguments.Trim('<', '>') + ", " : "";
