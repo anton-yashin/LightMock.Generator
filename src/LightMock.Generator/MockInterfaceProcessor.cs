@@ -79,6 +79,6 @@ namespace {@namespace}
             here.Append(toAppend);
         }
 
-        public override string FileName => "Mock_" + base.FileName;
+        public override string FileName => Prefix.MockClass + base.FileName;
     }
 }
