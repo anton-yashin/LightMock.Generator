@@ -14,11 +14,14 @@ namespace LightMock.Generator
     {
         const string KAttributeName = nameof(GenerateMockAttribute);
         const string KMock = "Mock";
+        const string KContextResolver = nameof(ContextResolver);
 
         readonly Lazy<SourceText> attribute = new(
             () => SourceText.From(Utils.LoadResource(KAttributeName + ".cs"), Encoding.UTF8));
         readonly Lazy<SourceText> mock = new(
             () => SourceText.From(Utils.LoadResource(KMock + ".cs"), Encoding.UTF8));
+        readonly Lazy<SourceText> contextResolver = new(
+            () => SourceText.From(Utils.LoadResource(KContextResolver + ".cs"), Encoding.UTF8));
 
         public LightMockGenerator()
         {
@@ -30,12 +33,14 @@ namespace LightMock.Generator
                 context.SyntaxReceiver is LightMockSyntaxReceiver receiver &&
                 compilation.SyntaxTrees.First().Options is CSharpParseOptions options)
             {
-                context.AddSource(KAttributeName, attribute.Value);
-                context.AddSource(KMock, mock.Value);
+                context.AddSource(KAttributeName + ".spg.g.cs", attribute.Value);
+                context.AddSource(KMock + ".spg.g.cs", mock.Value);
+                context.AddSource(KContextResolver + ".spg.g.cs", contextResolver.Value);
 
                 compilation = compilation
                     .AddSyntaxTrees(CSharpSyntaxTree.ParseText(attribute.Value, options))
-                    .AddSyntaxTrees(CSharpSyntaxTree.ParseText(mock.Value, options));
+                    .AddSyntaxTrees(CSharpSyntaxTree.ParseText(mock.Value, options))
+                    .AddSyntaxTrees(CSharpSyntaxTree.ParseText(contextResolver.Value, options));
 
                 var attributeSymbol = compilation.GetTypeByMetadataName(KAttributeName);
                 if (attributeSymbol == null)
@@ -115,46 +120,11 @@ namespace LightMock.Generator
                     }
                 }
 
-                string getInstanceTypeImpl = $@"
-using System;
+                var impl = Utils.LoadResource(KContextResolver + "_Impl.cs")
+                    .Replace("/*getInstanceTypeBuilder*/", getInstanceTypeBuilder.ToString())
+                    .Replace("/*getProtectedContextTypeBuilder*/", getProtectedContextTypeBuilder.ToString());
 
-namespace LightMock.Generator
-{{
-    public sealed partial class Mock<T> : MockContext<T> where T : class
-    {{
-        Type GetInstanceType()
-        {{
-            var contextType = typeof(T);
-            var gtd = contextType.IsGenericType ? contextType.GetGenericTypeDefinition() : null;
-
-            {getInstanceTypeBuilder}
-
-            throw new NotSupportedException(contextType.FullName + "" is not supported "" + gtd.FullName);
-        }}
-    }}
-}}
-";
-                string getProtectedContextTypeImpl = $@"
-using System;
-
-namespace LightMock.Generator
-{{
-    public sealed partial class Mock<T> : MockContext<T> where T : class
-    {{
-        Type GetProtectedContextType()
-        {{
-            var contextType = typeof(T);
-            var gtd = contextType.IsGenericType ? contextType.GetGenericTypeDefinition() : null;
-
-            {getProtectedContextTypeBuilder}
-            return MockDefaults.DefaultProtectedContextType;
-        }}
-    }}
-}}
-";
-
-                context.AddSource("GetInstanceType.mock_impl.spg.g.cs", SourceText.From(getInstanceTypeImpl, Encoding.UTF8));
-                context.AddSource("GetProtectedContextType.mock_impl.spg.g.cs", SourceText.From(getProtectedContextTypeImpl, Encoding.UTF8));
+                context.AddSource(KContextResolver + "_Impl.spg.g.cs", SourceText.From(impl, Encoding.UTF8));
             }
         }
 
