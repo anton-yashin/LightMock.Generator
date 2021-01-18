@@ -10,6 +10,7 @@ using LightMock.Generator.Tests.Interface.MultipleNamespaces2;
 using LightMock.Generator.Tests.Interface.MultipleNamespaces1;
 using EventNamespace2;
 using LightMock.Generator.Tests.Interface;
+using System.Runtime.CompilerServices;
 
 namespace LightMock.Generator.Tests
 {
@@ -23,14 +24,7 @@ namespace LightMock.Generator.Tests
         [Fact]
         public void BasicMethod()
         {
-            const string KClassName = "BasicMethod";
-            var (diagnostics, success, assembly) = DoCompileResource(KClassName);
-
-            // verify
-            Assert.True(success);
-            Assert.Empty(diagnostics);
-
-            var (context, @interface) = LoadAssembly<IBasicMethod>(KClassName, assembly);
+            var (context, @interface) = LoadAssembly<IBasicMethod>();
 
             @interface.DoSomething(1234);
             context.Assert(f => f.DoSomething(1234));
@@ -42,14 +36,7 @@ namespace LightMock.Generator.Tests
         [Fact]
         public void BasicProperty()
         {
-            const string KClassName = "BasicProperty";
-            var (diagnostics, success, assembly) = DoCompileResource(KClassName);
-
-            // verify
-            Assert.True(success);
-            Assert.Empty(diagnostics);
-
-            var (context, @interface) = LoadAssembly<IBasicProperty>(KClassName, assembly);
+            var (context, @interface) = LoadAssembly<IBasicProperty>();
 
             context.Arrange(f => f.OnlyGet).Returns(1234);
             Assert.Equal(1234, @interface.OnlyGet);
@@ -62,14 +49,7 @@ namespace LightMock.Generator.Tests
         [Fact]
         public void GenericMethod()
         {
-            const string KClassName = "GenericMethod";
-            var (diagnostics, success, assembly) = DoCompileResource(KClassName);
-
-            // verify
-            Assert.True(success);
-            Assert.Empty(diagnostics);
-
-            var (context, @interface) = LoadAssembly<IGenericMethod>(KClassName, assembly);
+            var (context, @interface) = LoadAssembly<IGenericMethod>();
 
             context.Arrange(f => f.GenericReturn<int>()).Returns(1234);
             Assert.Equal(1234, @interface.GenericReturn<int>());
@@ -85,14 +65,9 @@ namespace LightMock.Generator.Tests
         [Fact]
         public void GenericClassAndGenericInterface()
         {
-            const string KClassName = "GenericClassAndGenericInterface";
-            var (diagnostics, success, assembly) = DoCompileResource(KClassName);
-
-            // verify
-            Assert.True(success);
-            Assert.Empty(diagnostics);
-
-            var (context, @interface) = LoadAssembly<IGenericClassAndGenericInterface<int>>(KClassName + "`1", assembly);
+            const string resource = "GenericClassAndGenericInterface";
+            const string className = resource + "`1";
+            var (context, @interface) = LoadAssembly<IGenericClassAndGenericInterface<int>>(resource, className);
 
             @interface.DoSomething(1234);
             context.Assert(f => f.DoSomething(1234));
@@ -111,14 +86,7 @@ namespace LightMock.Generator.Tests
         [Fact]
         public void MultipleNamespaces()
         {
-            const string KClassName = "MultipleNamespaces";
-            var (diagnostics, success, assembly) = DoCompileResource(KClassName);
-
-            // verify
-            Assert.True(success);
-            Assert.Empty(diagnostics);
-
-            var (context, @interface) = LoadAssembly<IMultipleNamespaces>(KClassName, assembly);
+            var (context, @interface) = LoadAssembly<IMultipleNamespaces>();
 
             var arg1 = new MultipleNamespacesArgument();
             @interface.DoSomething(arg1);
@@ -137,14 +105,8 @@ namespace LightMock.Generator.Tests
         [Fact]
         public void EventSource()
         {
-            const string KClassName = "EventSource";
-            var (diagnostics, success, assembly) = DoCompileResource(KClassName);
+            var (context, @interface) = LoadAssembly<IEventSource>();
 
-            // verify
-            Assert.True(success);
-            Assert.Empty(diagnostics);
-
-            var (context, @interface) = LoadAssembly<IEventSource>(KClassName, assembly);
             Assert.NotNull(context);
             Assert.NotNull(@interface);
         }
@@ -152,14 +114,8 @@ namespace LightMock.Generator.Tests
         [Fact]
         public void EventSourceMultipleNamespaces()
         {
-            const string KClassName = "EventSourceMultipleNamespaces";
-            var (diagnostics, success, assembly) = DoCompileResource(KClassName);
+            var (context, @interface) = LoadAssembly<IEventSourceMultipleNamespaces>();
 
-            // verify
-            Assert.True(success);
-            Assert.Empty(diagnostics);
-
-            var (context, @interface) = LoadAssembly<IEventSourceMultipleNamespaces>(KClassName, assembly);
             Assert.NotNull(context);
             Assert.NotNull(@interface);
         }
@@ -167,14 +123,10 @@ namespace LightMock.Generator.Tests
         [Fact]
         public void EventSourceGenericClass()
         {
-            const string KClassName = "EventSourceGenericClass";
-            var (diagnostics, success, assembly) = DoCompileResource(KClassName);
+            const string resource = "EventSourceGenericClass";
+            const string className = resource + "`1";
+            var (context, @interface) = LoadAssembly<IEventSourceGenericClass<GenerateByInterface_Tests>>(resource, className);
 
-            // verify
-            Assert.True(success);
-            Assert.Empty(diagnostics);
-
-            var (context, @interface) = LoadAssembly<IEventSourceGenericClass<GenerateByInterface_Tests>>(KClassName + "`1", assembly);
             Assert.NotNull(context);
             Assert.NotNull(@interface);
         }
@@ -182,7 +134,7 @@ namespace LightMock.Generator.Tests
         [Fact]
         public void NoPartialKeyworkError()
         {
-            var (diagnostics, success, assembly) = DoCompileResource("NoPartialKeyworkError");
+            var (diagnostics, success, assembly) = DoCompileResource();
 
             // verify
             Assert.False(success);
@@ -192,7 +144,7 @@ namespace LightMock.Generator.Tests
         [Fact]
         public void NoInterfaceError()
         {
-            var (diagnostics, success, assembly) = DoCompileResource("NoInterfaceError");
+            var (diagnostics, success, assembly) = DoCompileResource();
 
             // verify
             Assert.True(success);
@@ -202,15 +154,21 @@ namespace LightMock.Generator.Tests
         [Fact]
         public void TooManyInterfacesWarning()
         {
-            var (diagnostics, success, assembly) = DoCompileResource("TooManyInterfacesWarning");
+            var (diagnostics, success, assembly) = DoCompileResource();
 
             // verify
             Assert.True(success);
             Assert.Contains(diagnostics, d => d.Id == "SPG004");
         }
 
-        private static (MockContext<T>, T) LoadAssembly<T>(string className, byte[] assembly)
+        private (MockContext<T>, T) LoadAssembly<T>([CallerMemberName] string resourceName = "", string? className = null)
         {
+            var (diagnostics, success, assembly) = DoCompileResource(resourceName);
+            Assert.True(success);
+            Assert.Empty(diagnostics);
+
+            className ??= resourceName;
+
             var alc = new AssemblyLoadContext(className);
             var loadedAssembly = alc.LoadFromStream(new MemoryStream(assembly));
             var concrete = loadedAssembly.ExportedTypes.Where(t => t.Name == className).First();
@@ -222,7 +180,7 @@ namespace LightMock.Generator.Tests
             return (context, @interface);
         }
 
-        private (ImmutableArray<Diagnostic> diagnostics, bool succes, byte[] assembly) DoCompileResource(string resourceName)
+        private (ImmutableArray<Diagnostic> diagnostics, bool succes, byte[] assembly) DoCompileResource([CallerMemberName] string resourceName = "")
         {
             return DoCompile(Utils.LoadResource("Interface." + resourceName + ".class.cs"), resourceName);
         }
