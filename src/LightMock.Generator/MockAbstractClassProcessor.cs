@@ -26,27 +26,30 @@ namespace LightMock.Generator
         {
 
             this.protectedVisitor = new ProtectedMemberSymbolVisitor();
-            this.@namespace = typeSymbol.ContainingNamespace.ToDisplayString(KNamespaceDisplayFormat);
+            this.@namespace = typeSymbol.ContainingNamespace.ToDisplayString(SymbolDisplayFormats.Namespace);
             this.symbolVisitor = new AbstractClassSymbolVisitor(@namespace);
             this.baseName = typeSymbol.OriginalDefinition.Name;
             this.className = Prefix.MockClass + typeSymbol.Name;
             this.interfaceName = Prefix.ProtectedToPublicInterface + typeSymbol.Name;
 
             var to = typeSymbol.OriginalDefinition;
-            var withTypeParams = to.ToDisplayString(KWithTypeParams);
-            var withWhereClause = to.ToDisplayString(KWithWhereClause);
-            var typeArguments = withTypeParams.Replace(to.ToDisplayString(KNamespaceDisplayFormat), "");
+            var withTypeParams = to.ToDisplayString(SymbolDisplayFormats.WithTypeParams);
+            var withWhereClause = to.ToDisplayString(SymbolDisplayFormats.WithWhereClause);
+            var typeArguments = withTypeParams.Replace(to.ToDisplayString(SymbolDisplayFormats.Namespace), "");
 
             this.typeArgumentsWithBrackets = typeArguments.Length > 0 ? typeArguments : "";
             this.typeArgumentsWithComma = typeArguments.Length > 0 ? typeArguments.Trim('<', '>') + ", " : "";
             this.whereClause = withWhereClause.Replace(withTypeParams, "");
-            this.commaArguments = string.Join(",", typeSymbol.OriginalDefinition.TypeArguments.Select(i => " "));
+            this.commaArguments = string.Join(",",
+                typeSymbol.OriginalDefinition.TypeArguments.Select(i => " "));
             this.constructors = new List<string>(
                 to.Constructors.Select(
-                    i => i.ToDisplayString(KConstructorFormat).Replace(typeSymbol.Name, "").Trim('(', ')')));
+                    i => i.ToDisplayString(SymbolDisplayFormats.ConstructorDecl)
+                    .Replace(typeSymbol.Name, "").Trim('(', ')')));
             this.constructorsCall = new List<string>(
                 to.Constructors.Select(
-                    i => i.ToDisplayString(KConstructorCallFormat).Replace(typeSymbol.Name, "").Trim('(', ')')));
+                    i => i.ToDisplayString(SymbolDisplayFormats.ConstructorCall)
+                    .Replace(typeSymbol.Name, "").Trim('(', ')')));
         }
 
         string GenerateConstructor(string declaration, string call)

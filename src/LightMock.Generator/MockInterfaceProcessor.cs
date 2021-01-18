@@ -25,16 +25,16 @@ namespace LightMock.Generator
         {
             this.symbolVisitor = new InterfaceSymbolVisitor(compilation.Options.NullableContextOptions);
             var to = typeSymbol.OriginalDefinition;
-            var withTypeParams = to.ToDisplayString(KWithTypeParams);
-            var withWhereClause = to.ToDisplayString(KWithWhereClause);
-            var typeArguments = withTypeParams.Replace(to.ToDisplayString(KNamespaceDisplayFormat), "");
+            var withTypeParams = to.ToDisplayString(SymbolDisplayFormats.WithTypeParams);
+            var withWhereClause = to.ToDisplayString(SymbolDisplayFormats.WithWhereClause);
+            var typeArguments = withTypeParams.Replace(to.ToDisplayString(SymbolDisplayFormats.Namespace), "");
 
             className = Prefix.MockClass + typeSymbol.Name;
             interfaceName = typeSymbol.Name;
             typeArgumentsWithBrackets = typeArguments.Length > 0 ? typeArguments : "";
             commaArguments = string.Join(",", to.TypeArguments.Select(i => " "));
             whereClause = withWhereClause.Replace(withTypeParams, "");
-            @namespace = typeSymbol.ContainingNamespace.ToDisplayString(KNamespaceDisplayFormat);
+            @namespace = typeSymbol.ContainingNamespace.ToDisplayString(SymbolDisplayFormats.Namespace);
         }
 
         public override IEnumerable<Diagnostic> GetErrors()

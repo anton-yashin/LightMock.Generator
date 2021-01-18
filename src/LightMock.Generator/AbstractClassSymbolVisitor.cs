@@ -5,54 +5,6 @@ namespace LightMock.Generator
 {
     sealed class AbstractClassSymbolVisitor : SymbolVisitor<string>
     {
-        static readonly SymbolDisplayFormat KSymbolDisplayFormat = 
-            new SymbolDisplayFormat(
-                globalNamespaceStyle: SymbolDisplayGlobalNamespaceStyle.OmittedAsContaining,
-                typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
-                genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
-                memberOptions:
-                    SymbolDisplayMemberOptions.IncludeParameters |
-                    SymbolDisplayMemberOptions.IncludeType |
-                    SymbolDisplayMemberOptions.IncludeRef |
-                    SymbolDisplayMemberOptions.IncludeAccessibility,
-                kindOptions:
-                    SymbolDisplayKindOptions.IncludeMemberKeyword,
-                parameterOptions:
-                    SymbolDisplayParameterOptions.IncludeName |
-                    SymbolDisplayParameterOptions.IncludeType |
-                    SymbolDisplayParameterOptions.IncludeParamsRefOut |
-                    SymbolDisplayParameterOptions.IncludeDefaultValue,
-                localOptions: SymbolDisplayLocalOptions.IncludeType,
-                miscellaneousOptions:
-                    SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers |
-                    SymbolDisplayMiscellaneousOptions.UseSpecialTypes |
-                    SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier);
-
-        static readonly SymbolDisplayFormat KInterfaceDisplayFormat =
-            new SymbolDisplayFormat(
-                globalNamespaceStyle: SymbolDisplayGlobalNamespaceStyle.OmittedAsContaining,
-                typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
-                genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
-                memberOptions:
-                    SymbolDisplayMemberOptions.IncludeParameters |
-                    SymbolDisplayMemberOptions.IncludeType |
-                    SymbolDisplayMemberOptions.IncludeRef |
-                    SymbolDisplayMemberOptions.IncludeContainingType,
-                kindOptions:
-                    SymbolDisplayKindOptions.IncludeMemberKeyword,
-                parameterOptions:
-                    SymbolDisplayParameterOptions.IncludeName |
-                    SymbolDisplayParameterOptions.IncludeType |
-                    SymbolDisplayParameterOptions.IncludeParamsRefOut |
-                    SymbolDisplayParameterOptions.IncludeDefaultValue,
-                localOptions: SymbolDisplayLocalOptions.IncludeType,
-                miscellaneousOptions:
-                    SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers |
-                    SymbolDisplayMiscellaneousOptions.UseSpecialTypes |
-                    SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier);
-
-
-
         private readonly string interfaceNamespace;
 
         public AbstractClassSymbolVisitor(string interfaceNamespace)
@@ -78,7 +30,7 @@ namespace LightMock.Generator
                 AddInterfaceImplementation(symbol, result);
 
             result.Append("override ")
-                .Append(symbol.ToDisplayString(KSymbolDisplayFormat))
+                .Append(symbol.ToDisplayString(SymbolDisplayFormats.AbstractClass))
                 .AppendMethodBody(isInterfaceRequired ? VariableNames.ProtectedContext : VariableNames.Context, symbol);
             return result.ToString();
         }
@@ -91,10 +43,10 @@ namespace LightMock.Generator
 
         private string CombineWithInterface(ISymbol symbol)
         {
-            var @namespace = symbol.ContainingNamespace.ToDisplayString(KInterfaceDisplayFormat);
+            var @namespace = symbol.ContainingNamespace.ToDisplayString(SymbolDisplayFormats.Interface);
             var ctn = symbol.ContainingType.Name;
             return symbol
-                .ToDisplayString(KInterfaceDisplayFormat)
+                .ToDisplayString(SymbolDisplayFormats.Interface)
                 .Replace(@namespace + "." + ctn, interfaceNamespace + "." + Prefix.ProtectedToPublicInterface + ctn);
         }
 
@@ -110,7 +62,7 @@ namespace LightMock.Generator
                 AddInterfaceImplementation(symbol, result);
 
             result.Append("override ")
-                .Append(symbol.ToDisplayString(KSymbolDisplayFormat))
+                .Append(symbol.ToDisplayString(SymbolDisplayFormats.AbstractClass))
                 .AppendGetterAndSetter(isInterfaceRequired ? VariableNames.ProtectedContext : VariableNames.Context, symbol);
 
             return result.ToString();
@@ -126,7 +78,7 @@ namespace LightMock.Generator
         {
             if (symbol.IsAbstract)
             {
-                var sdf = symbol.ToDisplayString(KSymbolDisplayFormat);
+                var sdf = symbol.ToDisplayString(SymbolDisplayFormats.AbstractClass);
                 var result = new StringBuilder("override ")
                     .Append(sdf)
                     .Append(";");
@@ -137,7 +89,7 @@ namespace LightMock.Generator
 
         public override string? VisitNamedType(INamedTypeSymbol symbol)
         {
-            return symbol.ToDisplayString(KSymbolDisplayFormat);
+            return symbol.ToDisplayString(SymbolDisplayFormats.AbstractClass);
         }
     }
 }

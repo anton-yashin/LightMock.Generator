@@ -20,11 +20,6 @@ namespace LightMock.Generator
         readonly Lazy<SourceText> mock = new(
             () => SourceText.From(Utils.LoadResource(KMock + ".cs"), Encoding.UTF8));
 
-        private static readonly SymbolDisplayFormat KNamespaceDisplayFormat = new SymbolDisplayFormat(
-            typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces
-            );
-
-
         public LightMockGenerator()
         {
         }
@@ -75,7 +70,7 @@ namespace LightMock.Generator
 
                     var @interface = typeSymbol.Interfaces.FirstOrDefault();
                     ClassProcessor processor;
-                    if (typeSymbol.BaseType != null && typeSymbol.BaseType.ToDisplayString(KNamespaceDisplayFormat) != "System.Object")
+                    if (typeSymbol.BaseType != null && typeSymbol.BaseType.ToDisplayString(SymbolDisplayFormats.Namespace) != "System.Object")
                         processor = new AbstractClassProcessor(candidateClass, typeSymbol, typeSymbol.BaseType);
                     else
                         processor = new InterfaceProcessor(compilation, candidateClass, typeSymbol, @interface);

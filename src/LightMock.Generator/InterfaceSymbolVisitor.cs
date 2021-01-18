@@ -8,29 +8,6 @@ namespace LightMock.Generator
 {
     sealed class InterfaceSymbolVisitor : SymbolVisitor<string>
     {
-        static readonly SymbolDisplayFormat KSymbolDisplayFormat = 
-            new SymbolDisplayFormat(
-                globalNamespaceStyle: SymbolDisplayGlobalNamespaceStyle.OmittedAsContaining,
-                typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
-                genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
-                memberOptions:
-                    SymbolDisplayMemberOptions.IncludeParameters |
-                    SymbolDisplayMemberOptions.IncludeType |
-                    SymbolDisplayMemberOptions.IncludeRef |
-                    SymbolDisplayMemberOptions.IncludeContainingType,
-                kindOptions:
-                    SymbolDisplayKindOptions.IncludeMemberKeyword,
-                parameterOptions:
-                    SymbolDisplayParameterOptions.IncludeName |
-                    SymbolDisplayParameterOptions.IncludeType |
-                    SymbolDisplayParameterOptions.IncludeParamsRefOut |
-                    SymbolDisplayParameterOptions.IncludeDefaultValue,
-                localOptions: SymbolDisplayLocalOptions.IncludeType,
-                miscellaneousOptions:
-                    SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers |
-                    SymbolDisplayMiscellaneousOptions.UseSpecialTypes |
-                    SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier);
-
         private readonly NullableContextOptions nullableContextOptions;
 
         public InterfaceSymbolVisitor(NullableContextOptions nullableContextOptions)
@@ -42,7 +19,7 @@ namespace LightMock.Generator
         {
             if (symbol.MethodKind != MethodKind.Ordinary)
                 return null;
-            var result = new StringBuilder(symbol.ToDisplayString(KSymbolDisplayFormat))
+            var result = new StringBuilder(symbol.ToDisplayString(SymbolDisplayFormats.Interface))
                 .AppendMethodBody(VariableNames.Context, symbol);
 
             return result.ToString();
@@ -50,7 +27,7 @@ namespace LightMock.Generator
 
         public override string? VisitProperty(IPropertySymbol symbol)
         {
-            var result = new StringBuilder(symbol.ToDisplayString(KSymbolDisplayFormat))
+            var result = new StringBuilder(symbol.ToDisplayString(SymbolDisplayFormats.Interface))
                 .AppendGetterAndSetter(VariableNames.Context, symbol);
 
             return result.ToString();
@@ -59,16 +36,16 @@ namespace LightMock.Generator
         public override string? VisitEvent(IEventSymbol symbol)
         {
             bool nullableEnabled = nullableContextOptions != NullableContextOptions.Disable;
-            var localName = symbol.ContainingType.ToDisplayString(KSymbolDisplayFormat)
+            var localName = symbol.ContainingType.ToDisplayString(SymbolDisplayFormats.Interface)
                 .Replace(".", "")
                 .Replace("<", "_")
                 .Replace(">", "_") + symbol.Name;
             var result = new StringBuilder("public event ");
-            result.Append(symbol.Type.ToDisplayString(KSymbolDisplayFormat))
+            result.Append(symbol.Type.ToDisplayString(SymbolDisplayFormats.Interface))
                 .Append(nullableEnabled ? "? " : " ")
                 .Append(localName)
                 .Append(";\r\n")
-                .Append(symbol.ToDisplayString(KSymbolDisplayFormat))
+                .Append(symbol.ToDisplayString(SymbolDisplayFormats.Interface))
                 .Append("{ add { ")
                 .Append(localName)
                 .Append(" += value; } remove { ")
@@ -80,7 +57,7 @@ namespace LightMock.Generator
 
         public override string? VisitNamedType(INamedTypeSymbol symbol)
         {
-            return symbol.ToDisplayString(KSymbolDisplayFormat);
+            return symbol.ToDisplayString(SymbolDisplayFormats.Interface);
         }
     }
 }
