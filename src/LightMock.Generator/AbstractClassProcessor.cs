@@ -17,9 +17,7 @@ namespace LightMock.Generator
         private readonly string baseName;
         private readonly string interfaceName;
         private readonly string typeArgumentsWithBrackets;
-        private readonly string typeArgumentsWithComma;
         private readonly string whereClause;
-        private readonly string commaArguments;
         private readonly List<string> constructors;
         private readonly List<string> constructorsCall;
 
@@ -42,9 +40,7 @@ namespace LightMock.Generator
             var typeArguments = withTypeParams.Replace(bcod.ToDisplayString(KNamespaceDisplayFormat), "");
 
             this.typeArgumentsWithBrackets = typeArguments.Length > 0 ? typeArguments : "";
-            this.typeArgumentsWithComma = typeArguments.Length > 0 ? typeArguments.Trim('<', '>') + ", " : "";
             this.whereClause = withWhereClause.Replace(withTypeParams, "");
-            this.commaArguments = string.Join(",", typeSymbol.OriginalDefinition.TypeArguments.Select(i => " "));
             this.constructors = new List<string>(
                 baseClass.Constructors.Select(
                     (IMethodSymbol i) => i.ToDisplayString(KConstructorFormat).Replace(baseClass.Name, "").Trim('(', ')')));
