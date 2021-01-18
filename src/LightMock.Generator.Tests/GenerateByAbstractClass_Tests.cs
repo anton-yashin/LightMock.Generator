@@ -211,6 +211,26 @@ namespace LightMock.Generator.Tests
             Assert.NotNull(baseClass);
         }
 
+        [Fact]
+        public void Constructor()
+        {
+            const string KClassName = "Constructor";
+            var (diagnostics, success, assembly) = DoCompileResource(KClassName);
+
+            // verify
+            Assert.True(success);
+            Assert.Empty(diagnostics);
+
+            var alc = new AssemblyLoadContext(KClassName);
+            var loadedAssembly = alc.LoadFromStream(new MemoryStream(assembly));
+            var testClassType = loadedAssembly.ExportedTypes.Where(t => t.Name == KClassName + "Test").First();
+            var testClass = Activator.CreateInstance(testClassType) ?? throw new InvalidOperationException("can't create test class");
+
+            var testScript = (ITestScript)testClass;
+
+            testScript.TestProtectedMembers();
+        }
+
         private static (MockContext<T> context, T baseClass, ITestScript testClass) LoadAssembly<T>(string KClassName, byte[] assembly, string className)
         {
             var alc = new AssemblyLoadContext(className);

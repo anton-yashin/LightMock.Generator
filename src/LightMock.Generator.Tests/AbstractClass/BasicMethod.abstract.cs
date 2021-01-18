@@ -2,6 +2,7 @@
 
 namespace LightMock.Generator.Tests.AbstractClass
 {
+    [GenerateMock]
     public abstract class ABasicMethod
     {
         public abstract void DoSomething(int p);

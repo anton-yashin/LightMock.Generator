@@ -3,6 +3,7 @@
 namespace LightMock.Generator.Tests.AbstractClass
 {
     public abstract class AGenericClassAndGenericBaseClass<T>
+        where T : struct, IEquatable<T>
     {
         public abstract T OnlyGet { get; }
         public abstract T GetAndSet { get; set; }
