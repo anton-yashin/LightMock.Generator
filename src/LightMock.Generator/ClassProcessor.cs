@@ -16,8 +16,6 @@ namespace LightMock.Generator
             this.typeSymbol = typeSymbol;
         }
 
-        protected const string KGeneratedFileSuffix = ".spg.g.cs";
-
         public abstract IEnumerable<Diagnostic> GetErrors();
         public abstract IEnumerable<Diagnostic> GetWarnings();
         public abstract SourceText DoGenerate();
@@ -26,7 +24,7 @@ namespace LightMock.Generator
         public virtual void DoGeneratePart_GetProtectedContextType(StringBuilder here) { }
 
         public virtual string FileName => typeSymbol.IsGenericType
-                ? typeSymbol.Name + "{" + string.Join(",", typeSymbol.TypeParameters.Select(i => i.Name)) + "}" + KGeneratedFileSuffix
-                : typeSymbol.Name + KGeneratedFileSuffix;
+                ? typeSymbol.Name + "{" + string.Join(",", typeSymbol.TypeParameters.Select(i => i.Name)) + "}" + Suffix.FileName
+                : typeSymbol.Name + Suffix.FileName;
     }
 }

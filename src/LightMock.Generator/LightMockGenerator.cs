@@ -33,9 +33,9 @@ namespace LightMock.Generator
                 context.SyntaxReceiver is LightMockSyntaxReceiver receiver &&
                 compilation.SyntaxTrees.First().Options is CSharpParseOptions options)
             {
-                context.AddSource(KAttributeName + ".spg.g.cs", attribute.Value);
-                context.AddSource(KMock + ".spg.g.cs", mock.Value);
-                context.AddSource(KContextResolver + ".spg.g.cs", contextResolver.Value);
+                context.AddSource(KAttributeName + Suffix.FileName, attribute.Value);
+                context.AddSource(KMock + Suffix.FileName, mock.Value);
+                context.AddSource(KContextResolver + Suffix.FileName, contextResolver.Value);
 
                 compilation = compilation
                     .AddSyntaxTrees(CSharpSyntaxTree.ParseText(attribute.Value, options))
@@ -124,7 +124,7 @@ namespace LightMock.Generator
                     .Replace("/*getInstanceTypeBuilder*/", getInstanceTypeBuilder.ToString())
                     .Replace("/*getProtectedContextTypeBuilder*/", getProtectedContextTypeBuilder.ToString());
 
-                context.AddSource(KContextResolver + "_Impl.spg.g.cs", SourceText.From(impl, Encoding.UTF8));
+                context.AddSource(KContextResolver + "_Impl" + Suffix.FileName, SourceText.From(impl, Encoding.UTF8));
             }
         }
 
