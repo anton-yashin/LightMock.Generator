@@ -1,4 +1,7 @@
-﻿0.93
+﻿0.94
+* added support for constructors of abstract classes
+* added Mock<T> which can batch construct mock object and MockContext<T> for public and protected members of T
+0.93
 * added support for subclassing abstract classes
 0.92
 * generate events
