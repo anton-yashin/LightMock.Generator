@@ -50,6 +50,8 @@ namespace LightMock.Generator
                     return;
                 }
 
+                // process symbols marked by GenerateMockAttribute
+
                 foreach (var candidateClass in receiver.CandidateClasses)
                 {
                     var model = compilation.GetSemanticModel(candidateClass.SyntaxTree);
@@ -85,6 +87,8 @@ namespace LightMock.Generator
                     EmitDiagnostics(context, processor.GetWarnings());
                     context.AddSource(processor.FileName, processor.DoGenerate());
                 }
+
+                // process symbols under Mock<> generic
 
                 var mockContextType = typeof(MockContext<>);
                 var mockContextName = mockContextType.Name.Replace("`1", "");
