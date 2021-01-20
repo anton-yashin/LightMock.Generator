@@ -386,6 +386,14 @@ namespace LightMock.Generator.Tests
             Assert.Contains(diagnostics, i => i.Id == "SPG005");
         }
 
+        [Fact]
+        public void NamespacesIssue()
+        {
+            var testScript = LoadAssembly<Playground.IFoo>();
+
+            Assert.Equal(KExpected, testScript.DoRun());
+        }
+
         private (ImmutableArray<Diagnostic> diagnostics, bool success, byte[] assembly) DoCompileResource([CallerMemberName]string resourceName = "")
         {
             var fn = "Mock." + resourceName + ".class.cs";

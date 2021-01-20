@@ -118,14 +118,14 @@ namespace {@namespace}
 
 namespace LightMock.Generator
 {{
-    using {@namespace};
+    using global::{@namespace};
 
     public static partial class MockExtensions
     {{
         [DebuggerStepThrough]
-        public static MockContext<{@namespace}.{@interfaceName}{typeArgumentsWithBrackets}> Protected{typeArgumentsWithBrackets}(this IProtectedContext<{baseName}{typeArgumentsWithBrackets}> @this)
+        public static MockContext<global::{@namespace}.{@interfaceName}{typeArgumentsWithBrackets}> Protected{typeArgumentsWithBrackets}(this IProtectedContext<{baseName}{typeArgumentsWithBrackets}> @this)
             {whereClause}
-            => (MockContext<{@namespace}.{@interfaceName}{typeArgumentsWithBrackets}>)@this.{nameof(IProtectedContext<object>.ProtectedContext)};
+            => (MockContext<global::{@namespace}.{@interfaceName}{typeArgumentsWithBrackets}>)@this.{nameof(IProtectedContext<object>.ProtectedContext)};
     }}
 }}
 ";
@@ -147,16 +147,16 @@ namespace LightMock.Generator
         public override void DoGeneratePart_GetInstanceType(StringBuilder here)
         {
             var toAppend = typeSymbol.IsGenericType
-                ? $"if (gtd == typeof({@namespace}.{baseName}<{commaArguments}>)) return typeof({@namespace}.{className}<{commaArguments}>).MakeGenericType(contextType.GetGenericArguments());"
-                : $"if (contextType == typeof({@namespace}.{baseName})) return typeof({@namespace}.{className});";
+                ? $"if (gtd == typeof(global::{@namespace}.{baseName}<{commaArguments}>)) return typeof(global::{@namespace}.{className}<{commaArguments}>).MakeGenericType(contextType.GetGenericArguments());"
+                : $"if (contextType == typeof(global::{@namespace}.{baseName})) return typeof(global::{@namespace}.{className});";
             here.Append(toAppend);
         }
 
         public override void DoGeneratePart_GetProtectedContextType(StringBuilder here)
         {
             var toAppend = typeSymbol.IsGenericType
-                ? $@"if (gtd == typeof({@namespace}.{baseName}<{commaArguments}>)) return MockDefaults.MockContextType.MakeGenericType(typeof({@namespace}.{interfaceName}<{commaArguments}>).MakeGenericType(contextType.GetGenericArguments()));"
-                : $@"if (contextType == typeof({@namespace}.{baseName})) return MockDefaults.MockContextType.MakeGenericType(typeof({@namespace}.{interfaceName}));";
+                ? $@"if (gtd == typeof(global::{@namespace}.{baseName}<{commaArguments}>)) return MockDefaults.MockContextType.MakeGenericType(typeof(global::{@namespace}.{interfaceName}<{commaArguments}>).MakeGenericType(contextType.GetGenericArguments()));"
+                : $@"if (contextType == typeof(global::{@namespace}.{baseName})) return MockDefaults.MockContextType.MakeGenericType(typeof(global::{@namespace}.{interfaceName}));";
             here.Append(toAppend);
         }
 

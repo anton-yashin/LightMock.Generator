@@ -73,8 +73,8 @@ namespace {@namespace}
         public override void DoGeneratePart_GetInstanceType(StringBuilder here)
         {
             var toAppend = typeSymbol.IsGenericType 
-                ? $"if (gtd == typeof({@namespace}.{interfaceName}<{commaArguments}>)) return typeof({@namespace}.{className}<{commaArguments}>).MakeGenericType(contextType.GetGenericArguments());" 
-                : $"if (contextType == typeof({@namespace}.{interfaceName})) return typeof({@namespace}.{className});";
+                ? $"if (gtd == typeof(global::{@namespace}.{interfaceName}<{commaArguments}>)) return typeof(global::{@namespace}.{className}<{commaArguments}>).MakeGenericType(contextType.GetGenericArguments());" 
+                : $"if (contextType == typeof(global::{@namespace}.{interfaceName})) return typeof(global::{@namespace}.{className});";
             here.Append(toAppend);
         }
 
