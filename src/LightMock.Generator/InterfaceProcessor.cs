@@ -52,9 +52,9 @@ namespace LightMock.Generator
         {
             if (@interface == null)
                 throw new InvalidOperationException("Call ");
-            var className = typeSymbol.IsGenericType
-                ? typeSymbol.Name + "<" + string.Join(",", typeSymbol.TypeParameters.Select(i => i.Name)) + ">"
-                : typeSymbol.Name;
+            var className = typeSymbol.Name;
+            if (typeSymbol.IsGenericType)
+                className += "<" + string.Join(",", typeSymbol.TypeParameters.Select(i => i.Name)) + ">";
             var interfaceName = @interface.Accept(symbolVisitor);
             var nameSpace = typeSymbol.ContainingNamespace.ToDisplayString(SymbolDisplayFormats.Namespace);
             var members = @interface.GetMembers();
