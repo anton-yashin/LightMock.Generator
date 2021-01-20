@@ -120,9 +120,9 @@ namespace LightMock.Generator
     public static partial class MockExtensions
     {{
         [DebuggerStepThrough]
-        public static MockContext<{@namespace}.{@interfaceName}{typeArgumentsWithBrackets}> Protected{typeArgumentsWithBrackets}(this Mock<{baseName}{typeArgumentsWithBrackets}> @this)
+        public static MockContext<{@namespace}.{@interfaceName}{typeArgumentsWithBrackets}> Protected{typeArgumentsWithBrackets}(this IProtectedContext<{baseName}{typeArgumentsWithBrackets}> @this)
             {whereClause}
-            => (MockContext<{@namespace}.{@interfaceName}{typeArgumentsWithBrackets}>)@this.{nameof(Mock<object>.__protectedContext)};
+            => (MockContext<{@namespace}.{@interfaceName}{typeArgumentsWithBrackets}>)@this.{nameof(IProtectedContext<object>.ProtectedContext)};
     }}
 }}
 ";
