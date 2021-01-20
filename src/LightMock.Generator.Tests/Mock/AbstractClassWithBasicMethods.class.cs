@@ -16,11 +16,11 @@ namespace LightMock.Generator.Tests.Mock
 
         public int DoRun()
         {
-            mock.ProtectedArrange(f => f.ProtectedGetSomething()).Returns(1234);
+            mock.Protected().Arrange(f => f.ProtectedGetSomething()).Returns(1234);
             Assert.Equal(expected: 1234, mock.Object.InvokeProtectedGetSomething());
 
             mock.Object.InvokeProtectedDoSomething(5678);
-            mock.ProtectedAssert(f => f.ProtectedDoSomething(5678));
+            mock.Protected().Assert(f => f.ProtectedDoSomething(5678));
 
             return 42;
         }
