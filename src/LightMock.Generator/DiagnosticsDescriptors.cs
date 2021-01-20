@@ -38,5 +38,14 @@ namespace LightMock.Generator
                 "Usage", DiagnosticSeverity.Warning,
                 isEnabledByDefault: true
                 );
+
+        public static readonly DiagnosticDescriptor KCantProcessSealedClass =
+            new DiagnosticDescriptor(
+                "SPG005",
+                "can't process sealed class",
+                "The type {0} must be not sealed",
+                "Usage", DiagnosticSeverity.Error,
+                isEnabledByDefault: true
+                );
     }
 }

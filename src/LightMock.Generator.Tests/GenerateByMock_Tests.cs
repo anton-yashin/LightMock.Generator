@@ -378,7 +378,15 @@ namespace LightMock.Generator.Tests
             Assert.Equal(expected: KExpected, testScript.DoRun());
         }
 
-        private (ImmutableArray<Diagnostic> diagnostics, bool success, byte[] assembly) DoCompileResource(string resourceName)
+        [Fact]
+        public void CantProcessSealedClass()
+        {
+            var (diagnostics, success, assembly) = DoCompileResource();
+
+            Assert.Contains(diagnostics, i => i.Id == "SPG005");
+        }
+
+        private (ImmutableArray<Diagnostic> diagnostics, bool success, byte[] assembly) DoCompileResource([CallerMemberName]string resourceName = "")
         {
             var fn = "Mock." + resourceName + ".class.cs";
             return DoCompile(Utils.LoadResource(fn), fn);

@@ -19,8 +19,10 @@ namespace LightMock.Generator
         private readonly string commaArguments;
         private readonly List<string> constructors;
         private readonly List<string> constructorsCall;
+        private readonly SyntaxNode containingGeneric;
 
         public MockAbstractClassProcessor(
+            SyntaxNode containingGeneric,
             INamedTypeSymbol typeSymbol) : base(typeSymbol)
         {
 
@@ -48,6 +50,7 @@ namespace LightMock.Generator
                 to.Constructors.Select(
                     i => i.ToDisplayString(SymbolDisplayFormats.ConstructorCall)
                     .Replace(typeSymbol.Name, "").Trim('(', ')')));
+            this.containingGeneric = containingGeneric;
         }
 
         string GenerateConstructor(string declaration, string call)
@@ -129,7 +132,15 @@ namespace LightMock.Generator
             return SourceText.From(code, Encoding.UTF8);
         }
 
-        public override IEnumerable<Diagnostic> GetErrors() => Enumerable.Empty<Diagnostic>();
+        public override IEnumerable<Diagnostic> GetErrors()
+        {
+            if (typeSymbol.IsSealed)
+            {
+                yield return Diagnostic.Create(DiagnosticsDescriptors.KCantProcessSealedClass,
+                    Location.Create(containingGeneric.SyntaxTree, new TextSpan()),
+                    typeSymbol.Name);
+            }
+        }
 
         public override IEnumerable<Diagnostic> GetWarnings() => Enumerable.Empty<Diagnostic>();
 
