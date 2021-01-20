@@ -1,4 +1,6 @@
-﻿0.95
+﻿0.96
+* fix: type not found in specified namespace if exists sub namespace of LightMock.Generator with same name.
+0.95
 * removed excessive extensions for Mock<T>
 * remove Mock<T>.__protectedContext out of sight
 * new diagnostic that shown when Mock<T> used with sealed class
