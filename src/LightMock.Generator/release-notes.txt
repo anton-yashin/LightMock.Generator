@@ -1,4 +1,8 @@
-﻿0.94
+﻿0.95
+* removed excessive extensions for Mock<T>
+* remove Mock<T>.__protectedContext out of sight
+* new diagnostic that shown when Mock<T> used with sealed class
+0.94
 * added support for constructors of abstract classes
 * added Mock<T> which can batch construct mock object and MockContext<T> for public and protected members of T
 0.93
