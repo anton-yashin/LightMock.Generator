@@ -17,11 +17,11 @@ namespace LightMock.Generator
         const string KContextResolver = nameof(ContextResolver);
 
         readonly Lazy<SourceText> attribute = new(
-            () => SourceText.From(Utils.LoadResource(KAttributeName + ".cs"), Encoding.UTF8));
+            () => SourceText.From(Utils.LoadResource(KAttributeName + Suffix.CSharpFile), Encoding.UTF8));
         readonly Lazy<SourceText> mock = new(
-            () => SourceText.From(Utils.LoadResource(KMock + ".cs"), Encoding.UTF8));
+            () => SourceText.From(Utils.LoadResource(KMock + Suffix.CSharpFile), Encoding.UTF8));
         readonly Lazy<SourceText> contextResolver = new(
-            () => SourceText.From(Utils.LoadResource(KContextResolver + ".cs"), Encoding.UTF8));
+            () => SourceText.From(Utils.LoadResource(KContextResolver + Suffix.CSharpFile), Encoding.UTF8));
 
         public LightMockGenerator()
         {
@@ -124,11 +124,11 @@ namespace LightMock.Generator
                     }
                 }
 
-                var impl = Utils.LoadResource(KContextResolver + "_Impl.cs")
+                var impl = Utils.LoadResource(KContextResolver + Suffix.ImplFile + Suffix.CSharpFile)
                     .Replace("/*getInstanceTypeBuilder*/", getInstanceTypeBuilder.ToString())
                     .Replace("/*getProtectedContextTypeBuilder*/", getProtectedContextTypeBuilder.ToString());
 
-                context.AddSource(KContextResolver + "_Impl" + Suffix.FileName, SourceText.From(impl, Encoding.UTF8));
+                context.AddSource(KContextResolver + Suffix.ImplFile + Suffix.FileName, SourceText.From(impl, Encoding.UTF8));
             }
         }
 
