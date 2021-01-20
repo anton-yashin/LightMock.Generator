@@ -22,14 +22,14 @@ namespace LightMock.Generator.Tests.Mock
         {
             var arg1 = new MultipleNamespacesArgument();
             mock.Object.InvokeProtectedDoSomething(arg1);
-            mock.ProtectedAssert(f => f.ProtectedDoSomething(arg1));
+            mock.Protected().Assert(f => f.ProtectedDoSomething(arg1));
 
             var arg2 = new MultipleNamespacesArgument();
-            mock.ProtectedArrange(f => f.ProtectedGetSomething()).Returns(arg2);
+            mock.Protected().Arrange(f => f.ProtectedGetSomething()).Returns(arg2);
             Assert.Same(expected: arg2, mock.Object.InvokeProtectedGetSomething());
 
             var arg3 = new MultipleNamespacesArgument();
-            mock.ProtectedArrangeProperty(f => f.ProtectedSomeProperty);
+            mock.Protected().ArrangeProperty(f => f.ProtectedSomeProperty);
             mock.Object.InvokeProtectedSomeProperty = arg3;
             Assert.Same(expected: arg3, mock.Object.InvokeProtectedSomeProperty);
 

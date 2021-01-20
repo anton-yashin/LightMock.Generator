@@ -15,7 +15,6 @@ namespace LightMock.Generator
         private readonly string className;
         private readonly string interfaceName;
         private readonly string typeArgumentsWithBrackets;
-        private readonly object typeArgumentsWithComma;
         private readonly string whereClause;
         private readonly string commaArguments;
         private readonly List<string> constructors;
@@ -38,7 +37,6 @@ namespace LightMock.Generator
             var typeArguments = withTypeParams.Replace(to.ToDisplayString(SymbolDisplayFormats.Namespace), "");
 
             this.typeArgumentsWithBrackets = typeArguments.Length > 0 ? typeArguments : "";
-            this.typeArgumentsWithComma = typeArguments.Length > 0 ? typeArguments.Trim('<', '>') + ", " : "";
             this.whereClause = withWhereClause.Replace(withTypeParams, "");
             this.commaArguments = string.Join(",",
                 typeSymbol.OriginalDefinition.TypeArguments.Select(i => " "));
@@ -122,50 +120,9 @@ namespace LightMock.Generator
     public static partial class MockExtensions
     {{
         [DebuggerStepThrough]
-        public static MockContext<{@namespace}.{@interfaceName}{typeArgumentsWithBrackets}> Protected{typeArgumentsWithBrackets}(this Mock<{baseName}{typeArgumentsWithBrackets}> @this)
+        public static MockContext<{@namespace}.{@interfaceName}{typeArgumentsWithBrackets}> Protected{typeArgumentsWithBrackets}(this IProtectedContext<{baseName}{typeArgumentsWithBrackets}> @this)
             {whereClause}
-            => (MockContext<{@namespace}.{@interfaceName}{typeArgumentsWithBrackets}>)@this.{nameof(Mock<object>.__protectedContext)};
-
-        /// <summary>
-        /// Shortcut for <see cref=""MockContext{{TMock}}.Arrange(Expression{{Action{{TMock}}}})""/>
-        /// </summary>
-        [DebuggerStepThrough]
-        public static Arrangement ProtectedArrange{typeArgumentsWithBrackets}(this Mock<{baseName}{typeArgumentsWithBrackets}> @this, Expression<Action<{@namespace}.{interfaceName}{typeArgumentsWithBrackets}>> matchExpression)
-            {whereClause}
-            => @this.Protected().Arrange(matchExpression);
-
-        /// <summary>
-        /// Shortcut for <see cref=""MockContext{{TMock}}.Arrange{{TResult}}(Expression{{Func{{TMock, TResult}}}})""/>
-        /// </summary>
-        [DebuggerStepThrough]
-        public static Arrangement<{VariableNames.MockTResult}> ProtectedArrange<{typeArgumentsWithComma}{VariableNames.MockTResult}>(this Mock<{baseName}{typeArgumentsWithBrackets}> @this, Expression<Func<{@namespace}.{interfaceName}{typeArgumentsWithBrackets}, {VariableNames.MockTResult}>> matchExpression)
-            {whereClause}
-            => @this.Protected().Arrange(matchExpression);
-
-        /// <summary>
-        /// Shortcut for <see cref=""MockContext{{TMock}}.ArrangeProperty{{TResult}}(Expression{{Func{{TMock, TResult}}}})""/>
-        /// </summary>
-        [DebuggerStepThrough]
-        public static PropertyArrangement<{VariableNames.MockTResult}> ProtectedArrangeProperty<{typeArgumentsWithComma}{VariableNames.MockTResult}>(this Mock<{baseName}{typeArgumentsWithBrackets}> @this, Expression<Func<{@namespace}.{interfaceName}{typeArgumentsWithBrackets}, {VariableNames.MockTResult}>> matchExpression)
-            {whereClause}
-            => @this.Protected().ArrangeProperty(matchExpression);
-
-
-        /// <summary>
-        /// Shortcut for <see cref=""MockContext{{TMock}}.Assert(Expression{{Action{{TMock}}}})""/>
-        /// </summary>
-        [DebuggerStepThrough]
-        public static void ProtectedAssert{typeArgumentsWithBrackets}(this Mock<{baseName}{typeArgumentsWithBrackets}> @this, Expression<Action<{@namespace}.{interfaceName}{typeArgumentsWithBrackets}>> matchExpression)
-            {whereClause}
-            => @this.Protected().Assert(matchExpression);
-
-        /// <summary>
-        /// Shortcut for <see cref=""MockContext{{TMock}}.Assert(Expression{{Action{{TMock}}}}, Invoked)""/>
-        /// </summary>
-        [DebuggerStepThrough]
-        public static void ProtectedAssert{typeArgumentsWithBrackets}(this Mock<{baseName}{typeArgumentsWithBrackets}> @this, Expression<Action<{@namespace}.{interfaceName}{typeArgumentsWithBrackets}>> matchExpression, Invoked invoked)
-            {whereClause}
-            => @this.Protected().Assert(matchExpression, invoked);
+            => (MockContext<{@namespace}.{@interfaceName}{typeArgumentsWithBrackets}>)@this.{nameof(IProtectedContext<object>.ProtectedContext)};
     }}
 }}
 ";

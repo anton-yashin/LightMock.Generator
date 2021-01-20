@@ -16,10 +16,10 @@ namespace LightMock.Generator.Tests.Mock
 
         public int DoRun()
         {
-            mock.ProtectedArrange(f => f.ProtectedOnlyGet).Returns(1234);
+            mock.Protected().Arrange(f => f.ProtectedOnlyGet).Returns(1234);
             Assert.Equal(1234, mock.Object.InvokeProtectedOnlyGet);
 
-            mock.ProtectedArrangeProperty(f => f.ProtectedGetAndSet);
+            mock.Protected().ArrangeProperty(f => f.ProtectedGetAndSet);
             mock.Object.InvokeProtectedGetAndSet = 5678;
             Assert.Equal(5678, mock.Object.InvokeProtectedGetAndSet);
 

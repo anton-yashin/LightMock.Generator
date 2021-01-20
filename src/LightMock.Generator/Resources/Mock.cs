@@ -13,16 +13,28 @@ namespace LightMock.Generator
         public readonly static Type MockContextType = typeof(MockContext<>);
     }
 
-    public sealed class Mock<T> : MockContext<T> where T : class
+    /// <summary>
+    /// For internal usage
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public interface IProtectedContext<T> where T : class
+    { 
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        object ProtectedContext { get; }
+    }
+
+    public sealed class Mock<T> : MockContext<T>, IProtectedContext<T>
+        where T : class
     {
         T? instance;
         readonly object[] prms;
+        readonly object protectedContext;
 
         public Mock()
         {
             prms = MockDefaults.DefaultParams;
 
-            __protectedContext = CreateProtectedContext();
+            protectedContext = CreateProtectedContext();
         }
 
         public Mock(params object[] prms) : this()
@@ -32,11 +44,7 @@ namespace LightMock.Generator
 
         public T Object => (instance ??= CreateMockInstance());
 
-        /// <summary>
-        /// For internal usage
-        /// </summary>
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        public object __protectedContext { get; }
+        object IProtectedContext<T>.ProtectedContext => protectedContext;
 
         static Type? mockInstanceType;
         static Type? protectedContextType;
@@ -45,7 +53,7 @@ namespace LightMock.Generator
         {
             var args = new object[prms.Length + 2];
             args[0] = this;
-            args[1] = __protectedContext;
+            args[1] = protectedContext;
             for (int i = 0; i < prms.Length; i++)
                 args[i + 2] = prms[i];
             return args;
