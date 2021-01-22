@@ -394,6 +394,27 @@ namespace LightMock.Generator.Tests
             Assert.Equal(KExpected, testScript.DoRun());
         }
 
+        [Fact]
+        public void InherittedInterface()
+        {
+            var testScript = LoadAssembly<IInherittedInterface>();
+            var context = testScript.Context;
+            var mock = testScript.MockObject;
+
+            mock.Foo();
+            mock.Bar();
+            mock.Baz();
+            mock.Quux();
+
+            context.Assert(f => f.Foo());
+            context.Assert(f => f.Bar());
+            context.Assert(f => f.Baz());
+            context.Assert(f => f.Quux());
+
+            Assert.Equal(expected: KExpected, testScript.DoRun());
+        }
+
+
         private (ImmutableArray<Diagnostic> diagnostics, bool success, byte[] assembly) DoCompileResource([CallerMemberName]string resourceName = "")
         {
             var fn = "Mock." + resourceName + ".class.cs";

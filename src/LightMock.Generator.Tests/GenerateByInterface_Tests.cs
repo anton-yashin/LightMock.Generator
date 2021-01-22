@@ -161,6 +161,22 @@ namespace LightMock.Generator.Tests
             Assert.Contains(diagnostics, d => d.Id == "SPG004");
         }
 
+        [Fact]
+        public void InherittedInterface()
+        {
+            var (context, @interface) = LoadAssembly<IInherittedInterface>();
+
+            @interface.Foo();
+            @interface.Bar();
+            @interface.Baz();
+            @interface.Quux();
+
+            context.Assert(f => f.Foo());
+            context.Assert(f => f.Bar());
+            context.Assert(f => f.Baz());
+            context.Assert(f => f.Quux());
+        }
+
         private (MockContext<T>, T) LoadAssembly<T>([CallerMemberName] string resourceName = "", string? className = null)
         {
             var (diagnostics, success, assembly) = DoCompileResource(resourceName);
