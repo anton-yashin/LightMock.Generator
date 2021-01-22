@@ -4,6 +4,6 @@
     {
         T GenericReturn<T>();
         void GenericParam<T>(T p);
-        void GenericWithConstraint<T>(T p) where T : new();
+        void GenericWithConstraint<T>(T? p) where T : class;
     }
 }
