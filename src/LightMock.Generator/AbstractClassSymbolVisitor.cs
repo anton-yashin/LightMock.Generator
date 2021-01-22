@@ -6,10 +6,12 @@ namespace LightMock.Generator
     sealed class AbstractClassSymbolVisitor : SymbolVisitor<string>
     {
         private readonly string interfaceNamespace;
+        private readonly string interfaceName;
 
-        public AbstractClassSymbolVisitor(string interfaceNamespace)
+        public AbstractClassSymbolVisitor(string interfaceNamespace, string interfaceName)
         {
             this.interfaceNamespace = interfaceNamespace;
+            this.interfaceName = interfaceName;
         }
 
         static bool IsInterfaceRequired(ISymbol symbol)
@@ -43,11 +45,11 @@ namespace LightMock.Generator
 
         private string CombineWithInterface(ISymbol symbol)
         {
-            var @namespace = symbol.ContainingNamespace.ToDisplayString(SymbolDisplayFormats.Interface);
+            var @namespace = symbol.ContainingNamespace.ToDisplayString(SymbolDisplayFormats.Namespace);
             var ctn = symbol.ContainingType.Name;
             return symbol
                 .ToDisplayString(SymbolDisplayFormats.Interface)
-                .Replace(@namespace + "." + ctn, interfaceNamespace + "." + Prefix.ProtectedToPublicInterface + ctn);
+                .Replace(@namespace + "." + ctn, interfaceNamespace + "." + interfaceName);
         }
 
         public override string? VisitProperty(IPropertySymbol symbol)

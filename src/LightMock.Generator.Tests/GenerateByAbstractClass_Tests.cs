@@ -186,6 +186,25 @@ namespace LightMock.Generator.Tests
             Assert.Contains(diagnostics, d => d.Id == "SPG004");
         }
 
+        [Fact]
+        public void InheritAbstractClass()
+        {
+            var (context, baseClass, testClass) = LoadAssembly<AInheritAbstractClass>();
+
+            baseClass.Foo();
+            baseClass.Bar();
+            baseClass.Baz();
+            baseClass.InvokeProtectedFoo();
+            baseClass.InvokeProtectedBar();
+            baseClass.InvokeProtectedBaz();
+
+            context.Assert(f => f.Foo());
+            context.Assert(f => f.Bar());
+            context.Assert(f => f.Baz());
+
+            Assert.Equal(KExpected, testClass.TestProtectedMembers());
+        }
+
         private (MockContext<T> context, T baseClass, ITestScript testClass) LoadAssembly<T>(
             [CallerMemberName] string resource = "",
             string? className = null)

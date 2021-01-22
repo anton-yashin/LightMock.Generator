@@ -26,5 +26,11 @@ namespace LightMock.Generator
         public virtual string FileName => typeSymbol.IsGenericType
                 ? typeSymbol.Name + "{" + string.Join(",", typeSymbol.TypeParameters.Select(i => i.Name)) + "}" + Suffix.FileName
                 : typeSymbol.Name + Suffix.FileName;
+
+        protected static IEnumerable<INamedTypeSymbol> GetAllBaseTypes(INamedTypeSymbol type)
+        {
+            for (var bt = type.BaseType; bt != null; bt = bt.BaseType)
+                yield return bt;
+        }
     }
 }

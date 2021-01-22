@@ -414,6 +414,26 @@ namespace LightMock.Generator.Tests
             Assert.Equal(expected: KExpected, testScript.DoRun());
         }
 
+        [Fact]
+        public void InheritAbstractClass()
+        {
+            var testScript = LoadAssembly<AInheritAbstractClass>();
+            var context = testScript.Context;
+            var mock = testScript.MockObject;
+
+            mock.Foo();
+            mock.Bar();
+            mock.Baz();
+            mock.InvokeProtectedFoo();
+            mock.InvokeProtectedBar();
+            mock.InvokeProtectedBaz();
+
+            context.Assert(f => f.Foo());
+            context.Assert(f => f.Bar());
+            context.Assert(f => f.Baz());
+
+            Assert.Equal(KExpected, testScript.DoRun());
+        }
 
         private (ImmutableArray<Diagnostic> diagnostics, bool success, byte[] assembly) DoCompileResource([CallerMemberName]string resourceName = "")
         {
