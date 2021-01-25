@@ -27,8 +27,17 @@ namespace LightMock.Generator.Tests.AbstractClass
             mockContext.Assert(f => f.ProtectedGenericParam<int>(5678));
 
             var p = new object();
-            p2p.ProtectedGenericWithConstraint(p);
-            mockContext.Assert(f => f.ProtectedGenericWithConstraint(p));
+            p2p.ProtectedGenericWithClassConstraint(p);
+            mockContext.Assert(f => f.ProtectedGenericWithClassConstraint(p));
+
+            p2p.ProtectedGenericWithStructConstraint<int>(1234);
+            mockContext.Assert(f => f.ProtectedGenericWithStructConstraint<int>(1234));
+
+            p2p.ProtectedGenericWithConstraint(1234);
+            mockContext.Assert(f => f.ProtectedGenericWithConstraint(1234));
+
+            p2p.ProtectedGenericWithManyConstraints<object, int, long>(p, 123, 456);
+            mockContext.Assert(f => f.ProtectedGenericWithManyConstraints<object, int, long>(p, 123, 456));
 
             return 42;
         }

@@ -58,8 +58,17 @@ namespace LightMock.Generator.Tests
             context.Assert(f => f.GenericParam<int>(5678));
 
             var p = new object();
-            @interface.GenericWithConstraint(p);
-            context.Assert(f => f.GenericWithConstraint(p));
+            @interface.GenericWithClassConstraint(p);
+            context.Assert(f => f.GenericWithClassConstraint(p));
+
+            @interface.GenericWithStructConstraint<int>(1234);
+            context.Assert(f => f.GenericWithStructConstraint<int>(1234));
+
+            @interface.GenericWithConstraint(1234);
+            context.Assert(f => f.GenericWithConstraint(1234));
+
+            @interface.GenericWithManyConstraints<object, int, long>(p, 123, 456);
+            context.Assert(f => f.GenericWithManyConstraints<object, int, long>(p, 123, 456));
         }
 
         [Fact]

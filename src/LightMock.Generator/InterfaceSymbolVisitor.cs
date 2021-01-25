@@ -19,9 +19,9 @@ namespace LightMock.Generator
         {
             if (symbol.MethodKind != MethodKind.Ordinary)
                 return null;
-            var result = new StringBuilder(symbol.ToDisplayString(SymbolDisplayFormats.Interface))
+            var result = new StringBuilder()
+                .AppendMethodDeclaration(symbol.ToDisplayString(SymbolDisplayFormats.Interface), symbol)
                 .AppendMethodBody(VariableNames.Context, symbol);
-
             return result.ToString();
         }
 

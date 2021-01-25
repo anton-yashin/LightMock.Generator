@@ -103,8 +103,17 @@ namespace LightMock.Generator.Tests
             context.Assert(f => f.GenericParam<int>(5678));
 
             var p = new object();
-            mock.GenericWithConstraint(p);
-            context.Assert(f => f.GenericWithConstraint(p));
+            mock.GenericWithClassConstraint(p);
+            context.Assert(f => f.GenericWithClassConstraint(p));
+
+            mock.GenericWithStructConstraint<int>(1234);
+            context.Assert(f => f.GenericWithStructConstraint<int>(1234));
+
+            mock.GenericWithConstraint(1234);
+            context.Assert(f => f.GenericWithConstraint(1234));
+
+            mock.GenericWithManyConstraints<object, int, long>(p, 123, 456);
+            context.Assert(f => f.GenericWithManyConstraints<object, int, long>(p, 123, 456));
         }
 
 
@@ -122,8 +131,17 @@ namespace LightMock.Generator.Tests
             context.Assert(f => f.GenericParam<int>(5678));
 
             var p = new object();
-            mock.GenericWithConstraint(p);
-            context.Assert(f => f.GenericWithConstraint(p));
+            mock.GenericWithClassConstraint(p);
+            context.Assert(f => f.GenericWithClassConstraint(p));
+
+            mock.GenericWithStructConstraint<int>(1234);
+            context.Assert(f => f.GenericWithStructConstraint<int>(1234));
+
+            mock.GenericWithConstraint(1234);
+            context.Assert(f => f.GenericWithConstraint(1234));
+
+            mock.GenericWithManyConstraints<object, int, long>(p, 123, 456);
+            context.Assert(f => f.GenericWithManyConstraints<object, int, long>(p, 123, 456));
 
             Assert.Equal(KExpected, testScript.DoRun());
         }

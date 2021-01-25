@@ -68,8 +68,17 @@ namespace LightMock.Generator.Tests
             context.Assert(f => f.GenericParam<int>(5678));
 
             var p = new object();
-            baseClass.GenericWithConstraint(p);
-            context.Assert(f => f.GenericWithConstraint(p));
+            baseClass.GenericWithClassConstraint(p);
+            context.Assert(f => f.GenericWithClassConstraint(p));
+
+            baseClass.GenericWithStructConstraint<int>(1234);
+            context.Assert(f => f.GenericWithStructConstraint<int>(1234));
+
+            baseClass.GenericWithConstraint(1234);
+            context.Assert(f => f.GenericWithConstraint(1234));
+
+            baseClass.GenericWithManyConstraints<object, int, long>(p, 123, 456);
+            context.Assert(f => f.GenericWithManyConstraints<object, int, long>(p, 123, 456));
 
             Assert.Equal(KExpected, testClass.TestProtectedMembers());
         }

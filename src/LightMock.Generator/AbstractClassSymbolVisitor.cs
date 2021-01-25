@@ -32,14 +32,14 @@ namespace LightMock.Generator
                 AddInterfaceImplementation(symbol, result);
 
             result.Append("override ")
-                .Append(symbol.ToDisplayString(SymbolDisplayFormats.AbstractClass))
+                .AppendMethodDeclaration(symbol.ToDisplayString(SymbolDisplayFormats.AbstractClass), symbol)
                 .AppendMethodBody(isInterfaceRequired ? VariableNames.ProtectedContext : VariableNames.Context, symbol);
             return result.ToString();
         }
 
         void AddInterfaceImplementation(IMethodSymbol symbol, StringBuilder result)
         {
-            result.Append(CombineWithInterface(symbol))
+            result.AppendMethodDeclaration(CombineWithInterface(symbol), symbol)
                 .AppendMethodBody(VariableNames.ProtectedContext, symbol);
         }
 

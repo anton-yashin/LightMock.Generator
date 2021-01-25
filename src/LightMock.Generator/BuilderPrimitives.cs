@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
+using System;
 using System.Linq;
 using System.Text;
 
@@ -28,6 +29,41 @@ namespace LightMock.Generator
             if (symbol.SetMethod != null)
                 @this.AppendSetter(contextName, symbol);
             return @this.Append("}");
+        }
+
+        static readonly string[] whereSeparator = new string[] { "where" };
+
+        public static StringBuilder AppendMethodDeclaration(this StringBuilder @this, string declaration, IMethodSymbol symbol)
+        {
+            var allowedTypeParameters = symbol.TypeParameters.Where(
+                i => i.HasReferenceTypeConstraint || i.HasValueTypeConstraint)
+                .ToList();
+            int i = 0;
+            foreach (var part in declaration.Split(whereSeparator, StringSplitOptions.RemoveEmptyEntries))
+            {
+                if (i++ == 0)
+                {
+                    @this.Append(part);
+                }
+                else
+                {
+                    foreach (var atp in allowedTypeParameters)
+                    {
+                        if (part.StartsWith(" " + atp.Name + " : "))
+                        {
+                            @this.Append("where ")
+                                .Append(atp.Name);
+                            if (atp.HasReferenceTypeConstraint)
+                                @this.Append(" : class ");
+                            if (atp.HasValueTypeConstraint)
+                                @this.Append(" : struct ");
+                            break;
+                        }
+                    }
+                }
+            }
+
+            return @this;
         }
 
         public static StringBuilder AppendMethodBody(this StringBuilder @this, string contextName, IMethodSymbol symbol)
