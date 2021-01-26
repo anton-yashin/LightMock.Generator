@@ -207,7 +207,7 @@ namespace LightMock.Generator.Tests
 
         private (ImmutableArray<Diagnostic> diagnostics, bool succes, byte[] assembly) DoCompileResource([CallerMemberName] string resourceName = "")
         {
-            return DoCompile(Utils.LoadResource("Interface." + resourceName + ".class.cs"), resourceName);
+            return DoCompile(Utils.LoadResource("Interface." + resourceName + ".test.cs"), resourceName);
         }
     }
 }
