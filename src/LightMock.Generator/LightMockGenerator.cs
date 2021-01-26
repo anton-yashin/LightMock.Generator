@@ -29,6 +29,12 @@ namespace LightMock.Generator
 
         public void Execute(GeneratorExecutionContext context)
         {
+            if (context.AnalyzerConfigOptions.GlobalOptions.TryGetValue(GlobalOptionsNames.Enable, out var value)
+                && value.Equals("false", StringComparison.InvariantCultureIgnoreCase))
+            {
+                return;
+            }
+
             if (context.Compilation is CSharpCompilation compilation &&
                 context.SyntaxReceiver is LightMockSyntaxReceiver receiver &&
                 compilation.SyntaxTrees.First().Options is CSharpParseOptions options)

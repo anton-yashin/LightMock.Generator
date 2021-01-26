@@ -1,0 +1,6 @@
+﻿<Project>
+  <ItemGroup>
+    <CompilerVisibleProperty Include="LightMockGenerator_Enable"/>
+  </ItemGroup>
+</Project>
+       
