@@ -1,4 +1,6 @@
-﻿0.98
+﻿0.99
+* fix: Mock<T> interface variance support
+0.98
 * fix: constraints for override and explicit interface implementation methods
 are inherited from the base method, so they cannot be specified directly,
 except for either a 'class', or a 'struct' constraint.
