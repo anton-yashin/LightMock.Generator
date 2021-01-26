@@ -453,6 +453,20 @@ namespace LightMock.Generator.Tests
             Assert.Equal(KExpected, testScript.DoRun());
         }
 
+        [Fact]
+        public void GenericInterfaceWithVariance()
+        {
+            var testScript = LoadAssembly<IGenericInterfaceWithVariance<IFoo, IBar>>();
+            var context = testScript.Context;
+            var mock = testScript.MockObject;
+
+            mock.Foo();
+
+            context.Assert(f => f.Foo());
+
+            Assert.Equal(KExpected, testScript.DoRun());
+        }
+
         private (ImmutableArray<Diagnostic> diagnostics, bool success, byte[] assembly) DoCompileResource([CallerMemberName]string resourceName = "")
         {
             var fn = "Mock." + resourceName + ".test.cs";

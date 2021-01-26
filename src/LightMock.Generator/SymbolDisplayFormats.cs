@@ -17,8 +17,7 @@ namespace LightMock.Generator
             new SymbolDisplayFormat(
                 typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
                 genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters |
-                    SymbolDisplayGenericsOptions.IncludeTypeConstraints |
-                    SymbolDisplayGenericsOptions.IncludeVariance);
+                    SymbolDisplayGenericsOptions.IncludeTypeConstraints);
 
         public static readonly SymbolDisplayFormat ConstructorDecl =
             new SymbolDisplayFormat(
