@@ -11,7 +11,7 @@ namespace LightMock.Generator.Tests.Mock
             mock = new Mock<IInterfaceWithBasicProperty>();
         }
 
-        public MockContext<IInterfaceWithBasicProperty> Context => mock;
+        public IMock<IInterfaceWithBasicProperty> Context => mock;
 
         public IInterfaceWithBasicProperty MockObject => mock.Object;
 

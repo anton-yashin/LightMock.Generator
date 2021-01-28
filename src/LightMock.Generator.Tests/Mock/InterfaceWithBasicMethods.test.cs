@@ -13,7 +13,7 @@ namespace LightMock.Generator.Tests.Mock
             mock = new Mock<IInterfaceWithBasicMethods>();
         }
 
-        public MockContext<IInterfaceWithBasicMethods> Context => mock;
+        public IMock<IInterfaceWithBasicMethods> Context => mock;
         public IInterfaceWithBasicMethods MockObject => mock.Object;
 
         public int DoRun() => 42;

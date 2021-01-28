@@ -10,7 +10,7 @@ namespace LightMock.Generator.Tests.Mock
         public GenericMockAndGenericAbstractClass()
             => this.mock = new Mock<AGenericMockAndGenericAbstractClass<T>>();
 
-        public MockContext<AGenericMockAndGenericAbstractClass<T>> Context => mock;
+        public IMock<AGenericMockAndGenericAbstractClass<T>> Context => mock;
 
         public AGenericMockAndGenericAbstractClass<T> MockObject => mock.Object;
 

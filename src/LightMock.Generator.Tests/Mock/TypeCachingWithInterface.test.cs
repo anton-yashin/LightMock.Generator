@@ -10,7 +10,7 @@ namespace LightMock.Generator.Tests.Mock
         public TypeCachingWithInterface()
             => mock = new Mock<ITypeCachingWithInterface>();
 
-        public MockContext<ITypeCachingWithInterface> Context => mock;
+        public IMock<ITypeCachingWithInterface> Context => mock;
 
         public ITypeCachingWithInterface MockObject => mock.Object;
 

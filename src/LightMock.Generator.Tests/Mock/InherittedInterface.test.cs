@@ -8,7 +8,7 @@ namespace LightMock.Generator.Tests.Mock
 
         public InherittedInterface() => mock = new Mock<IInherittedInterface>();
 
-        public MockContext<IInherittedInterface> Context => mock;
+        public IMock<IInherittedInterface> Context => mock;
 
         public IInherittedInterface MockObject => mock.Object;
 

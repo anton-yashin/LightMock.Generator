@@ -3,7 +3,7 @@
     public interface ITestScript<T>
         where T : class
     {
-        MockContext<T> Context { get; }
+        IMock<T> Context { get; }
         T MockObject { get; }
 
         int DoRun();

@@ -8,7 +8,7 @@ namespace LightMock.Generator.Tests.Mock
 
         public InheritAbstractClass() => mock = new Mock<AInheritAbstractClass>();
 
-        public MockContext<AInheritAbstractClass> Context => mock;
+        public IMock<AInheritAbstractClass> Context => mock;
 
         public AInheritAbstractClass MockObject => mock.Object;
 

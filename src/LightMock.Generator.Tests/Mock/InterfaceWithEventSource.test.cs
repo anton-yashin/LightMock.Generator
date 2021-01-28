@@ -11,7 +11,7 @@ namespace LightMock.Generator.Tests.Mock
             mock = new Mock<IInterfaceWithEventSource>();
         }
 
-        public MockContext<IInterfaceWithEventSource> Context => mock;
+        public IMock<IInterfaceWithEventSource> Context => mock;
 
         public IInterfaceWithEventSource MockObject => mock.Object;
 
