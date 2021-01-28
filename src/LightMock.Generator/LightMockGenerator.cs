@@ -16,8 +16,6 @@ namespace LightMock.Generator
         const string KMock = "Mock";
         const string KContextResolver = nameof(ContextResolver);
 
-        readonly Lazy<SourceText> attribute = new(
-            () => SourceText.From(Utils.LoadResource(KAttributeName + Suffix.CSharpFile), Encoding.UTF8));
         readonly Lazy<SourceText> mock = new(
             () => SourceText.From(Utils.LoadResource(KMock + Suffix.CSharpFile), Encoding.UTF8));
         readonly Lazy<SourceText> contextResolver = new(
@@ -39,12 +37,10 @@ namespace LightMock.Generator
                 context.SyntaxReceiver is LightMockSyntaxReceiver receiver &&
                 compilation.SyntaxTrees.First().Options is CSharpParseOptions options)
             {
-                context.AddSource(KAttributeName + Suffix.FileName, attribute.Value);
                 context.AddSource(KMock + Suffix.FileName, mock.Value);
                 context.AddSource(KContextResolver + Suffix.FileName, contextResolver.Value);
 
                 compilation = compilation
-                    .AddSyntaxTrees(CSharpSyntaxTree.ParseText(attribute.Value, options))
                     .AddSyntaxTrees(CSharpSyntaxTree.ParseText(mock.Value, options))
                     .AddSyntaxTrees(CSharpSyntaxTree.ParseText(contextResolver.Value, options));
 
