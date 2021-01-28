@@ -6,7 +6,7 @@ using System.Text;
 
 namespace LightMock.Generator
 {
-    sealed class InterfaceSymbolVisitor : SymbolVisitor<string>
+    class InterfaceSymbolVisitor : SymbolVisitor<string>
     {
         private readonly NullableContextOptions nullableContextOptions;
 

@@ -22,6 +22,8 @@ namespace LightMock.Generator
 
         public virtual void DoGeneratePart_GetInstanceType(StringBuilder here) { }
         public virtual void DoGeneratePart_GetProtectedContextType(StringBuilder here) { }
+        public virtual void DoGeneratePart_GetPropertiesContextType(StringBuilder here) { }
+        public virtual void DoGeneratePart_GetAssertType(StringBuilder here) { }
 
         public virtual string FileName => typeSymbol.IsGenericType
                 ? typeSymbol.Name + "{" + string.Join(",", typeSymbol.TypeParameters.Select(i => i.Name)) + "}" + Suffix.FileName

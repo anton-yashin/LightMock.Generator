@@ -31,6 +31,40 @@ namespace LightMock.Generator
             return @this.Append("}");
         }
 
+        public static StringBuilder AppendMockGetter(this StringBuilder @this, string contextName, ISymbol symbol)
+            => @this.Append(" get { ")
+            .Append(VariableNames.PropertiesContext)
+            .Append(".Invoke(f => f.")
+            .Append(symbol.Name)
+            .Append(Suffix.Getter)
+            .Append("()); return ")
+            .Append(contextName)
+            .Append(".Invoke(f => f.")
+            .Append(symbol.Name)
+            .Append("); } ");
+
+        public static StringBuilder AppendMockSetter(this StringBuilder @this, string contextName, ISymbol symbol)
+            => @this.Append("set { ")
+            .Append(VariableNames.PropertiesContext)
+            .Append(".Invoke(f => f.")
+            .Append(symbol.Name)
+            .Append(Suffix.Setter)
+            .Append("(value)); ")
+            .Append(contextName)
+            .Append(".InvokeSetter(f => f.")
+            .Append(symbol.Name)
+            .Append(", value); } ");
+
+        public static StringBuilder AppendMockGetterAndSetter(this StringBuilder @this, string contextName, IPropertySymbol symbol)
+        {
+            @this.Append(" {");
+            if (symbol.GetMethod != null)
+                @this.AppendMockGetter(contextName, symbol);
+            if (symbol.SetMethod != null)
+                @this.AppendMockSetter(contextName, symbol);
+            return @this.Append("}");
+        }
+
         static readonly string[] whereSeparator = new string[] { "where" };
 
         public static StringBuilder AppendMethodDeclaration(this StringBuilder @this, string declaration, IMethodSymbol symbol)

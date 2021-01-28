@@ -24,6 +24,23 @@ namespace LightMock.Generator
             return MockDefaults.DefaultProtectedContextType;
         }
 
+        public static Type GetPropertiesContextType(Type contextType)
+        {
+            var gtd = contextType.IsGenericType ? contextType.GetGenericTypeDefinition() : null;
+
+            /*getPropertiesContextTypeBuilder*/
+
+            throw new NotSupportedException(contextType.FullName + " is not supported " + gtd?.FullName);
+        }
+
+        public static Type GetAssertType(Type contextType)
+        {
+            var gtd = contextType.IsGenericType ? contextType.GetGenericTypeDefinition() : null;
+
+            /*getAssertTypeBuilder*/
+
+            throw new NotSupportedException(contextType.FullName + " is not supported " + gtd?.FullName);
+        }
     }
 
 }

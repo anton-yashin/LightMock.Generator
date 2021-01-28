@@ -3,10 +3,10 @@ using System.Text;
 
 namespace LightMock.Generator
 {
-    sealed class AbstractClassSymbolVisitor : SymbolVisitor<string>
+    class AbstractClassSymbolVisitor : SymbolVisitor<string>
     {
-        private readonly string interfaceNamespace;
-        private readonly string interfaceName;
+        protected readonly string interfaceNamespace;
+        protected readonly string interfaceName;
 
         public AbstractClassSymbolVisitor(string interfaceNamespace, string interfaceName)
         {
@@ -14,10 +14,10 @@ namespace LightMock.Generator
             this.interfaceName = interfaceName;
         }
 
-        static bool IsInterfaceRequired(ISymbol symbol)
+        protected static bool IsInterfaceRequired(ISymbol symbol)
             => IsCanBeOverriden(symbol) && symbol.DeclaredAccessibility == Accessibility.Protected;
 
-        static bool IsCanBeOverriden(ISymbol symbol)
+        protected static bool IsCanBeOverriden(ISymbol symbol)
             => symbol.IsAbstract || symbol.IsVirtual;
 
         public override string? VisitMethod(IMethodSymbol symbol)
@@ -37,7 +37,7 @@ namespace LightMock.Generator
             return result.ToString();
         }
 
-        void AddInterfaceImplementation(IMethodSymbol symbol, StringBuilder result)
+        protected void AddInterfaceImplementation(IMethodSymbol symbol, StringBuilder result)
         {
             result.AppendMethodDeclaration(CombineWithInterface(symbol), symbol)
                 .AppendMethodBody(VariableNames.ProtectedContext, symbol);
@@ -70,7 +70,7 @@ namespace LightMock.Generator
             return result.ToString();
         }
 
-        private void AddInterfaceImplementation(IPropertySymbol symbol, StringBuilder result)
+        protected void AddInterfaceImplementation(IPropertySymbol symbol, StringBuilder result)
         {
             result.Append(CombineWithInterface(symbol))
                 .AppendGetterAndSetter(VariableNames.ProtectedContext, symbol);

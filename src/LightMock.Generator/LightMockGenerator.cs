@@ -101,6 +101,8 @@ namespace LightMock.Generator
                 var mockContextNamespace = mockContextType.Namespace;
                 var getInstanceTypeBuilder = new StringBuilder();
                 var getProtectedContextTypeBuilder = new StringBuilder();
+                var getPropertiesContextTypeBuilder = new StringBuilder();
+                var getAssertTypeBuilder = new StringBuilder();
                 var processedTypes = new List<INamedTypeSymbol>();
 
                 foreach (var candidateGeneric in receiver.CandidateMocks)
@@ -116,7 +118,7 @@ namespace LightMock.Generator
                     {
                         ClassProcessor processor;
                         if (mockedType.BaseType != null)
-                            processor = new MockAbstractClassProcessor(candidateGeneric, mockedType);
+                            processor = new MockAbstractClassProcessor(compilation, candidateGeneric, mockedType);
                         else
                             processor = new MockInterfaceProcessor(compilation, mockedType);
 
@@ -126,13 +128,17 @@ namespace LightMock.Generator
                         context.AddSource(processor.FileName, processor.DoGenerate());
                         processor.DoGeneratePart_GetInstanceType(getInstanceTypeBuilder);
                         processor.DoGeneratePart_GetProtectedContextType(getProtectedContextTypeBuilder);
+                        processor.DoGeneratePart_GetPropertiesContextType(getPropertiesContextTypeBuilder);
+                        processor.DoGeneratePart_GetAssertType(getAssertTypeBuilder);
                         processedTypes.Add(mockedType);
                     }
                 }
 
                 var impl = Utils.LoadResource(KContextResolver + Suffix.ImplFile + Suffix.CSharpFile)
                     .Replace("/*getInstanceTypeBuilder*/", getInstanceTypeBuilder.ToString())
-                    .Replace("/*getProtectedContextTypeBuilder*/", getProtectedContextTypeBuilder.ToString());
+                    .Replace("/*getProtectedContextTypeBuilder*/", getProtectedContextTypeBuilder.ToString())
+                    .Replace("/*getPropertiesContextTypeBuilder*/", getPropertiesContextTypeBuilder.ToString())
+                    .Replace("/*getAssertTypeBuilder*/", getAssertTypeBuilder.ToString());
 
                 context.AddSource(KContextResolver + Suffix.ImplFile + Suffix.FileName, SourceText.From(impl, Encoding.UTF8));
             }

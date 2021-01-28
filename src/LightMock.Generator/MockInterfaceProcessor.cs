@@ -11,6 +11,8 @@ namespace LightMock.Generator
     sealed class MockInterfaceProcessor : ClassProcessor
     {
         private readonly SymbolVisitor<string> symbolVisitor;
+        private readonly SymbolVisitor<string> propertyDefinitionVisitor;
+        private readonly SymbolVisitor<string> assertImplementationVisitor;
         private readonly string className;
         private readonly string interfaceName;
         private readonly string typeArgumentsWithBrackets;
@@ -22,7 +24,11 @@ namespace LightMock.Generator
             CSharpCompilation compilation,
             INamedTypeSymbol typeSymbol) : base(typeSymbol)
         {
-            this.symbolVisitor = new InterfaceSymbolVisitor(compilation.Options.NullableContextOptions);
+            this.symbolVisitor = new MockInterfaceSymbolVisitor(compilation.Options.NullableContextOptions);
+            this.propertyDefinitionVisitor = new PropertyDefinitionVisitor();
+            this.assertImplementationVisitor = new AssertImplementationVisitor(
+                compilation.Options.NullableContextOptions,
+                SymbolDisplayFormats.Interface);
             var to = typeSymbol.OriginalDefinition;
             var withTypeParams = to.ToDisplayString(SymbolDisplayFormats.WithTypeParams);
             var withWhereClause = to.ToDisplayString(SymbolDisplayFormats.WithWhereClause);
@@ -50,18 +56,48 @@ using LightMock;
 
 namespace {@namespace}
 {{
+    public interface {Prefix.PropertyToFuncInterface}{interfaceName}{typeArgumentsWithBrackets}
+        {whereClause}
+    {{
+        {string.Join("\r\n        ", members.Select(i => i.OriginalDefinition.Accept(propertyDefinitionVisitor)))}
+    }}
+
+    sealed class {Prefix.AssertImplementation}{interfaceName}{typeArgumentsWithBrackets} : {interfaceName}{typeArgumentsWithBrackets}
+        {whereClause}
+    {{
+        private readonly IMockContext<{Prefix.PropertyToFuncInterface}{interfaceName}{typeArgumentsWithBrackets}> {VariableNames.Context};
+        private readonly Invoked {VariableNames.Invoked};
+
+        public {Prefix.AssertImplementation}{interfaceName}(
+            IMockContext<{Prefix.PropertyToFuncInterface}{interfaceName}{typeArgumentsWithBrackets}> {VariableNames.Context},
+            Invoked {VariableNames.Invoked})
+        {{
+            this.{VariableNames.Context} = {VariableNames.Context};
+            this.{VariableNames.Invoked} = {VariableNames.Invoked};
+        }}
+
+        {string.Join("\r\n        ", members.Select(i => i.OriginalDefinition.Accept(assertImplementationVisitor)))}
+    }}
+
     partial class {className}{typeArgumentsWithBrackets} : {interfaceName}{typeArgumentsWithBrackets}
         {whereClause}
     {{
         private readonly IInvocationContext<{interfaceName}{typeArgumentsWithBrackets}> {VariableNames.Context};
+        private readonly IInvocationContext<{Prefix.PropertyToFuncInterface}{interfaceName}{typeArgumentsWithBrackets}> {VariableNames.PropertiesContext};
 
-        public {className}(IInvocationContext<{interfaceName}{typeArgumentsWithBrackets}> {VariableNames.Context})
+        public {className}(
+            IInvocationContext<{interfaceName}{typeArgumentsWithBrackets}> {VariableNames.Context},
+            IInvocationContext<{Prefix.PropertyToFuncInterface}{interfaceName}{typeArgumentsWithBrackets}> {VariableNames.PropertiesContext})
         {{
             this.{VariableNames.Context} = {VariableNames.Context};
+            this.{VariableNames.PropertiesContext} = {VariableNames.PropertiesContext};
         }}
 
-        public {className}(IInvocationContext<{interfaceName}{typeArgumentsWithBrackets}> {VariableNames.Context}, object unused)
-            : this({VariableNames.Context}) {{ }}
+        public {className}(
+            IInvocationContext<{interfaceName}{typeArgumentsWithBrackets}> {VariableNames.Context},
+            IInvocationContext<{Prefix.PropertyToFuncInterface}{interfaceName}{typeArgumentsWithBrackets}> {VariableNames.PropertiesContext},
+            object unused)
+            : this({VariableNames.Context}, {VariableNames.PropertiesContext}) {{ }}
 
         {string.Join("\r\n        ", members.Select(i => i.OriginalDefinition.Accept(symbolVisitor)))}
     }}
@@ -75,6 +111,22 @@ namespace {@namespace}
             var toAppend = typeSymbol.IsGenericType 
                 ? $"if (gtd == typeof(global::{@namespace}.{interfaceName}<{commaArguments}>)) return typeof(global::{@namespace}.{className}<{commaArguments}>).MakeGenericType(contextType.GetGenericArguments());" 
                 : $"if (contextType == typeof(global::{@namespace}.{interfaceName})) return typeof(global::{@namespace}.{className});";
+            here.Append(toAppend);
+        }
+
+        public override void DoGeneratePart_GetPropertiesContextType(StringBuilder here)
+        {
+            var toAppend = typeSymbol.IsGenericType
+                ? $"if (gtd == typeof(global::{@namespace}.{interfaceName}<{commaArguments}>)) return MockDefaults.MockContextType.MakeGenericType(typeof(global::{@namespace}.{Prefix.PropertyToFuncInterface}{interfaceName}<{commaArguments}>).MakeGenericType(contextType.GetGenericArguments()));"
+                : $"if (contextType == typeof(global::{@namespace}.{interfaceName})) return MockDefaults.MockContextType.MakeGenericType(typeof(global::{@namespace}.{Prefix.PropertyToFuncInterface}{interfaceName}));";
+            here.Append(toAppend);
+        }
+
+        public override void DoGeneratePart_GetAssertType(StringBuilder here)
+        {
+            var toAppend = typeSymbol.IsGenericType
+                ? $"if (gtd == typeof(global::{@namespace}.{interfaceName}<{commaArguments}>)) return typeof(global::{@namespace}.{Prefix.AssertImplementation}{interfaceName}<{commaArguments}>).MakeGenericType(contextType.GetGenericArguments());"
+                : $"if (contextType == typeof(global::{@namespace}.{interfaceName})) return typeof(global::{@namespace}.{Prefix.AssertImplementation}{interfaceName});";
             here.Append(toAppend);
         }
 
