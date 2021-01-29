@@ -25,7 +25,7 @@ namespace LightMock.Generator
             this.prms = prms;
         }
 
-        public T Object => (instance ??= CreateMockInstance());
+        public T Object => LazyInitializer.EnsureInitialized(ref instance!, CreateMockInstance);
 
         object IProtectedContext<T>.ProtectedContext => protectedContext;
 
