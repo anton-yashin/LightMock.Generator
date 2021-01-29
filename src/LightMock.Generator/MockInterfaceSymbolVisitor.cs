@@ -6,8 +6,7 @@ namespace LightMock.Generator
 {
     sealed class MockInterfaceSymbolVisitor : InterfaceSymbolVisitor
     {
-        public MockInterfaceSymbolVisitor(NullableContextOptions nullableContextOptions)
-            : base(nullableContextOptions)
+        public MockInterfaceSymbolVisitor()
         { }
 
         public override string? VisitProperty(IPropertySymbol symbol)

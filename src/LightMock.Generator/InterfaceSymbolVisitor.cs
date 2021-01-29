@@ -8,12 +8,7 @@ namespace LightMock.Generator
 {
     class InterfaceSymbolVisitor : SymbolVisitor<string>
     {
-        private readonly NullableContextOptions nullableContextOptions;
-
-        public InterfaceSymbolVisitor(NullableContextOptions nullableContextOptions)
-        {
-            this.nullableContextOptions = nullableContextOptions;
-        }
+        public InterfaceSymbolVisitor() { }
 
         public override string? VisitMethod(IMethodSymbol symbol)
         {
@@ -35,14 +30,13 @@ namespace LightMock.Generator
 
         public override string? VisitEvent(IEventSymbol symbol)
         {
-            bool nullableEnabled = nullableContextOptions != NullableContextOptions.Disable;
             var localName = symbol.ContainingType.ToDisplayString(SymbolDisplayFormats.Interface)
                 .Replace(".", "")
                 .Replace("<", "_")
                 .Replace(">", "_") + symbol.Name;
             var result = new StringBuilder("public event ");
             result.Append(symbol.Type.ToDisplayString(SymbolDisplayFormats.Interface))
-                .Append(nullableEnabled ? "? " : " ")
+                .Append("? ")
                 .Append(localName)
                 .Append(";\r\n")
                 .Append(symbol.ToDisplayString(SymbolDisplayFormats.Interface))
