@@ -92,7 +92,7 @@ namespace LightMock.Generator
 
                 // process symbols under Mock<> generic
 
-                var mockContextType = typeof(MockContext<>);
+                var mockContextType = typeof(AbstractMock<>);
                 var mockContextName = mockContextType.Name.Replace("`1", "");
                 var mockContextNamespace = mockContextType.Namespace;
                 var getInstanceTypeBuilder = new StringBuilder();
@@ -103,13 +103,15 @@ namespace LightMock.Generator
 
                 foreach (var candidateGeneric in receiver.CandidateMocks)
                 {
-                    var candidateModel = compilation.GetSemanticModel(candidateGeneric.SyntaxTree);
-                    var candidateSi = candidateModel.GetSymbolInfo(candidateGeneric);
-                    var mockContainer = candidateSi.Symbol as INamedTypeSymbol;
-                    if (mockContainer != null && mockContainer.BaseType != null
-                        && mockContainer.BaseType.ContainingNamespace.Name == mockContextNamespace
-                        && mockContainer.BaseType.Name == mockContextName
-                        && mockContainer.BaseType.TypeArguments.FirstOrDefault() is INamedTypeSymbol mockedType
+                    var mockContainer = compilation
+                        .GetSemanticModel(candidateGeneric.SyntaxTree)
+                        .GetSymbolInfo(candidateGeneric).Symbol
+                        as INamedTypeSymbol;
+                    var mcbt = mockContainer?.BaseType;
+                    if (mcbt != null
+                        && mcbt.ContainingNamespace.ToDisplayString(SymbolDisplayFormats.Namespace) == mockContextNamespace
+                        && mcbt.Name == mockContextName
+                        && mcbt.TypeArguments.FirstOrDefault() is INamedTypeSymbol mockedType
                         && processedTypes.Contains(mockedType) == false)
                     {
                         ClassProcessor processor;

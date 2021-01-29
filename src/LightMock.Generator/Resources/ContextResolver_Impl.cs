@@ -21,7 +21,7 @@ namespace LightMock.Generator
 
             /*getProtectedContextTypeBuilder*/
 
-            return MockDefaults.DefaultProtectedContextType;
+            return DefaultProtectedContextType;
         }
 
         public static Type GetPropertiesContextType(Type contextType)
