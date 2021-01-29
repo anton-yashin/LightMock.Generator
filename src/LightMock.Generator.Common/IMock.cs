@@ -5,11 +5,34 @@ namespace LightMock.Generator
     public interface IMock<T> : IMockContext<T>
         where T : class
     {
+        /// <summary>
+        /// Exposes the mocked object instance.
+        /// </summary>
         T Object { get; }
 
-        void AssertGet<TResult>(Func<T, TResult> getterExpression);
-        void AssertGet<TResult>(Func<T, TResult> getterExpression, Invoked invoked);
-        void AssertSet(Action<T> setterExpression);
-        void AssertSet(Action<T> setterExpression, Invoked invoked);
+        /// <summary>
+        /// Verifies that a property was read on the mock.
+        /// </summary>
+        /// <typeparam name="TProperty">Type of the property to verify</typeparam>
+        /// <param name="expression">Expression to verify.</param>
+        void AssertGet<TProperty>(Func<T, TProperty> expression);
+        /// <summary>
+        /// Verifies that a property was read on the mock.
+        /// </summary>
+        /// <typeparam name="TProperty">Type of the property to verify</typeparam>
+        /// <param name="expression">Expression to verify.</param>
+        /// <param name="times">The number of times a method is expected to be called.</param>
+        void AssertGet<TProperty>(Func<T, TProperty> expression, Invoked times);
+        /// <summary>
+        /// Verifies that a property was set on the mock.
+        /// </summary>
+        /// <param name="expression">Expression to verify.</param>
+        void AssertSet(Action<T> expression);
+        /// <summary>
+        /// Verifies that a property was set on the mock.
+        /// </summary>
+        /// <param name="expression">Expression to verify.</param>
+        /// <param name="times">The number of times a method is expected to be called.</param>
+        void AssertSet(Action<T> expression, Invoked times);
     }
 }
