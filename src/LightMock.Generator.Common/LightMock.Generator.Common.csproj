@@ -5,6 +5,7 @@
     <RootNamespace>LightMock.Generator</RootNamespace>
     <LangVersion>preview</LangVersion>
     <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
