@@ -392,60 +392,126 @@ namespace LightMock.Generator.Tests
         public void InterfaceWithEventSource()
         {
             var testScript = LoadAssembly<IInterfaceWithEventSource>();
+            var context = testScript.Context;
+            var mock = testScript.MockObject;
 
-            Assert.NotNull(testScript.Context);
-            Assert.NotNull(testScript.MockObject);
+            mock.OnEvent += ExpectedEventHandler;
+            mock.OnEvent -= ExpectedEventHandler;
+
+            context.AssertAdd(f => f.OnEvent += ExpectedEventHandler);
+            context.AssertRemove(f => f.OnEvent -= ExpectedEventHandler);
+            Assert.Throws<InvalidOperationException>(() => context.AssertAdd(f => f.OnEvent += UnexpectedEventHandler));
+            Assert.Throws<InvalidOperationException>(() => context.AssertRemove(f => f.OnEvent -= UnexpectedEventHandler));
+
             Assert.Equal(expected: KExpected, testScript.DoRun());
+
+            static void ExpectedEventHandler(object o, int a) { }
+            static void UnexpectedEventHandler(object o, int a) { }
         }
 
         [Fact]
         public void AbstractClassWithEventSource()
         {
             var testScript = LoadAssembly<AAbstractClassWithEventSource>();
+            var context = testScript.Context;
+            var mock = testScript.MockObject;
 
-            Assert.NotNull(testScript.Context);
-            Assert.NotNull(testScript.MockObject);
+            mock.OnAbstractEvent += ExpectedEventHandler;
+            mock.OnAbstractEvent -= ExpectedEventHandler;
+
+            context.AssertAdd(f => f.OnAbstractEvent += ExpectedEventHandler);
+            context.AssertRemove(f => f.OnAbstractEvent -= ExpectedEventHandler);
+            Assert.Throws<InvalidOperationException>(() => context.AssertAdd(f => f.OnAbstractEvent += UnexpectedEventHandler));
+            Assert.Throws<InvalidOperationException>(() => context.AssertRemove(f => f.OnAbstractEvent -= UnexpectedEventHandler));
+
             Assert.Equal(expected: KExpected, testScript.DoRun());
+
+            static void ExpectedEventHandler(object o, int a) { }
+            static void UnexpectedEventHandler(object o, int a) { }
         }
 
         [Fact]
         public void InterfaceWithEventSourceAndMultipleNamespaces()
         {
             var testScript = LoadAssembly<IInterfaceWithEventSourceAndMultipleNamespaces>();
+            var context = testScript.Context;
+            var mock = testScript.MockObject;
 
-            Assert.NotNull(testScript.Context);
-            Assert.NotNull(testScript.MockObject);
+            mock.OnEvent += ExpectedEventHandler;
+            mock.OnEvent -= ExpectedEventHandler;
+
+            context.AssertAdd(f => f.OnEvent += ExpectedEventHandler);
+            context.AssertRemove(f => f.OnEvent -= ExpectedEventHandler);
+            Assert.Throws<InvalidOperationException>(() => context.AssertAdd(f => f.OnEvent += UnexpectedEventHandler));
+            Assert.Throws<InvalidOperationException>(() => context.AssertRemove(f => f.OnEvent -= UnexpectedEventHandler));
+
             Assert.Equal(expected: KExpected, testScript.DoRun());
+
+            static void ExpectedEventHandler(object o, int a) { }
+            static void UnexpectedEventHandler(object o, int a) { }
         }
 
         [Fact]
         public void AbstractClassWithEventSourceAndMultipleNamespaces()
         {
             var testScript = LoadAssembly<AAbstractClassWithEventSourceAndMultipleNamespaces>();
+            var context = testScript.Context;
+            var mock = testScript.MockObject;
 
-            Assert.NotNull(testScript.Context);
-            Assert.NotNull(testScript.MockObject);
+            mock.OnAbstractEvent += ExpectedEventHandler;
+            mock.OnAbstractEvent -= ExpectedEventHandler;
+
+            context.AssertAdd(f => f.OnAbstractEvent += ExpectedEventHandler);
+            context.AssertRemove(f => f.OnAbstractEvent -= ExpectedEventHandler);
+            Assert.Throws<InvalidOperationException>(() => context.AssertAdd(f => f.OnAbstractEvent += UnexpectedEventHandler));
+            Assert.Throws<InvalidOperationException>(() => context.AssertRemove(f => f.OnAbstractEvent -= UnexpectedEventHandler));
+
             Assert.Equal(expected: KExpected, testScript.DoRun());
+
+            static void ExpectedEventHandler(object o, int a) { }
+            static void UnexpectedEventHandler(object o, int a) { }
         }
 
         [Fact]
         public void GenericInterfaceWithGenericEvent()
         {
             var testScript = LoadAssembly<IGenericInterfaceWithGenericEvent<int>>();
+            var context = testScript.Context;
+            var mock = testScript.MockObject;
 
-            Assert.NotNull(testScript.Context);
-            Assert.NotNull(testScript.MockObject);
+            mock.OnEvent += ExpectedEventHandler;
+            mock.OnEvent -= ExpectedEventHandler;
+
+            context.AssertAdd(f => f.OnEvent += ExpectedEventHandler);
+            context.AssertRemove(f => f.OnEvent -= ExpectedEventHandler);
+            Assert.Throws<InvalidOperationException>(() => context.AssertAdd(f => f.OnEvent += UnexpectedEventHandler));
+            Assert.Throws<InvalidOperationException>(() => context.AssertRemove(f => f.OnEvent -= UnexpectedEventHandler));
+
             Assert.Equal(expected: KExpected, testScript.DoRun());
+
+            static void ExpectedEventHandler(object o, int a) { }
+            static void UnexpectedEventHandler(object o, int a) { }
         }
 
         [Fact]
         public void GenericAbstractClassWithGenericEvent()
         {
             var testScript = LoadAssembly<AGenericAbstractClassWithGenericEvent<int>>();
+            var context = testScript.Context;
+            var mock = testScript.MockObject;
 
-            Assert.NotNull(testScript.Context);
-            Assert.NotNull(testScript.MockObject);
+            mock.OnAbstractEvent += ExpectedEventHandler;
+            mock.OnAbstractEvent -= ExpectedEventHandler;
+
+            context.AssertAdd(f => f.OnAbstractEvent += ExpectedEventHandler);
+            context.AssertRemove(f => f.OnAbstractEvent -= ExpectedEventHandler);
+            Assert.Throws<InvalidOperationException>(() => context.AssertAdd(f => f.OnAbstractEvent += UnexpectedEventHandler));
+            Assert.Throws<InvalidOperationException>(() => context.AssertRemove(f => f.OnAbstractEvent -= UnexpectedEventHandler));
+
             Assert.Equal(expected: KExpected, testScript.DoRun());
+
+            static void ExpectedEventHandler(object o, int a) { }
+            static void UnexpectedEventHandler(object o, int a) { }
         }
 
         [Fact]

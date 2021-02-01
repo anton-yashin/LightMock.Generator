@@ -7,14 +7,10 @@ namespace LightMock.Generator
 {
     sealed class AssertImplementationVisitor : SymbolVisitor<string>
     {
-        private readonly NullableContextOptions nullableContextOptions;
         private readonly SymbolDisplayFormat definitionFormat;
 
-        public AssertImplementationVisitor(
-            NullableContextOptions nullableContextOptions,
-            SymbolDisplayFormat definitionFormat)
+        public AssertImplementationVisitor(SymbolDisplayFormat definitionFormat)
         {
-            this.nullableContextOptions = nullableContextOptions;
             this.definitionFormat = definitionFormat;
         }
 
@@ -83,34 +79,20 @@ namespace LightMock.Generator
 
         public override string? VisitEvent(IEventSymbol symbol)
         {
+            const string methodName = "Assert";
             var ct = symbol.ContainingType;
+            var result = new StringBuilder();
             if (ct.Name != nameof(Object) && ct.BaseType == null)
             {
-                bool nullableEnabled = nullableContextOptions != NullableContextOptions.Disable;
-                var localName = ct.ToDisplayString(SymbolDisplayFormats.Interface)
-                    .Replace(".", "")
-                    .Replace("<", "_")
-                    .Replace(">", "_") + symbol.Name;
-                var result = new StringBuilder("public event ");
-                result.Append(symbol.Type.ToDisplayString(SymbolDisplayFormats.Interface))
-                    .Append(nullableEnabled ? "? " : " ")
-                    .Append(localName)
-                    .Append(";\r\n")
-                    .Append(symbol.ToDisplayString(SymbolDisplayFormats.Interface))
-                    .Append("{ add { ")
-                    .Append(localName)
-                    .Append(" += value; } remove { ")
-                    .Append(localName)
-                    .Append(" -= value; } }")
-                    ;
+                result.Append(symbol.ToDisplayString(SymbolDisplayFormats.Interface))
+                    .AppendEventAddRemove(VariableNames.Context, symbol, methodName);
                 return result.ToString();
             }
             if (symbol.IsAbstract)
             {
-                var sdf = symbol.ToDisplayString(SymbolDisplayFormats.AbstractClass);
-                var result = new StringBuilder("override ")
-                    .Append(sdf)
-                    .Append(";");
+                result.Append("override ")
+                    .Append(symbol.ToDisplayString(SymbolDisplayFormats.AbstractClass))
+                    .AppendEventAddRemove(VariableNames.Context, symbol, methodName);
                 return result.ToString();
             }
             return null;

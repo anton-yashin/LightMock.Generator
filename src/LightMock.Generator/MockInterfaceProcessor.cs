@@ -21,14 +21,11 @@ namespace LightMock.Generator
         private readonly string @namespace;
 
         public MockInterfaceProcessor(
-            CSharpCompilation compilation,
             INamedTypeSymbol typeSymbol) : base(typeSymbol)
         {
             this.symbolVisitor = new MockInterfaceSymbolVisitor();
             this.propertyDefinitionVisitor = new PropertyDefinitionVisitor();
-            this.assertImplementationVisitor = new AssertImplementationVisitor(
-                compilation.Options.NullableContextOptions,
-                SymbolDisplayFormats.Interface);
+            this.assertImplementationVisitor = new AssertImplementationVisitor(SymbolDisplayFormats.Interface);
             var to = typeSymbol.OriginalDefinition;
             var withTypeParams = to.ToDisplayString(SymbolDisplayFormats.WithTypeParams);
             var withWhereClause = to.ToDisplayString(SymbolDisplayFormats.WithWhereClause);

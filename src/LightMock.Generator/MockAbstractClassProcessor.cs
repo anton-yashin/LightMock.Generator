@@ -25,16 +25,13 @@ namespace LightMock.Generator
         private readonly SyntaxNode containingGeneric;
 
         public MockAbstractClassProcessor(
-            CSharpCompilation compilation,
             SyntaxNode containingGeneric,
             INamedTypeSymbol typeSymbol) : base(typeSymbol)
         {
 
             this.protectedVisitor = new ProtectedMemberSymbolVisitor();
             this.propertyDefinitionVisitor = new PropertyDefinitionVisitor();
-            this.assertImplementationVisitor = new AssertImplementationVisitor(
-                compilation.Options.NullableContextOptions,
-                SymbolDisplayFormats.AbstractClass);
+            this.assertImplementationVisitor = new AssertImplementationVisitor(SymbolDisplayFormats.AbstractClass);
             this.@namespace = typeSymbol.ContainingNamespace.ToDisplayString(SymbolDisplayFormats.Namespace);
             this.interfaceName = Prefix.ProtectedToPublicInterface + typeSymbol.Name;
             this.symbolVisitor = new MockAbstractClassSymbolVisitor(@namespace, interfaceName);

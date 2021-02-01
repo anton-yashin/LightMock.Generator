@@ -25,5 +25,17 @@ namespace LightMock.Generator
                 .AppendMockGetterAndSetter(isInterfaceRequired ? VariableNames.ProtectedContext : VariableNames.Context, symbol);
             return result.ToString();
         }
+
+        public override string? VisitEvent(IEventSymbol symbol)
+        {
+            if (symbol.IsAbstract)
+            {
+                var result = new StringBuilder("override ")
+                    .Append(symbol.ToDisplayString(SymbolDisplayFormats.AbstractClass))
+                    .AppendEventAddRemove(VariableNames.PropertiesContext, symbol, methodName: "Invoke");
+                return result.ToString();
+            }
+            return null;
+        }
     }
 }

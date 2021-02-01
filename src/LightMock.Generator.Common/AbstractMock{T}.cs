@@ -106,14 +106,29 @@ namespace LightMock.Generator
 
         [DebuggerStepThrough]
         public void AssertSet(Action<T> expression)
-        {
-            AssertSet(expression, Invoked.Once);
-        }
+            => AssertUsingAssertInstance(expression, Invoked.Once);
 
         [DebuggerStepThrough]
         public void AssertSet(Action<T> expression, Invoked times)
-        {
-            expression(CreateAssertInstance(times));
-        }
+            => AssertUsingAssertInstance(expression, times);
+
+        [DebuggerStepThrough]
+        public void AssertAdd(Action<T> expression)
+            => AssertUsingAssertInstance(expression, Invoked.Once);
+
+        [DebuggerStepThrough]
+        public void AssertAdd(Action<T> expression, Invoked times)
+            => AssertUsingAssertInstance(expression, times);
+
+        [DebuggerStepThrough]
+        public void AssertRemove(Action<T> expression)
+            => AssertUsingAssertInstance(expression, Invoked.Once);
+
+        [DebuggerStepThrough]
+        public void AssertRemove(Action<T> expression, Invoked times)
+            => AssertUsingAssertInstance(expression, times);
+
+        void AssertUsingAssertInstance(Action<T> expression, Invoked times)
+            => expression(CreateAssertInstance(times));
     }
 }

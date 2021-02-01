@@ -116,9 +116,9 @@ namespace LightMock.Generator
                     {
                         ClassProcessor processor;
                         if (mockedType.BaseType != null)
-                            processor = new MockAbstractClassProcessor(compilation, candidateGeneric, mockedType);
+                            processor = new MockAbstractClassProcessor(candidateGeneric, mockedType);
                         else
-                            processor = new MockInterfaceProcessor(compilation, mockedType);
+                            processor = new MockInterfaceProcessor(mockedType);
 
                         if (EmitDiagnostics(context, processor.GetErrors()))
                             continue;

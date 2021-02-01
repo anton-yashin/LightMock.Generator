@@ -7,5 +7,7 @@
         public const string ImplFile = "_Impl";
         public const string Getter = "_GETTER";
         public const string Setter = "_SETTER";
+        public const string Add = "_ADD";
+        public const string Remove = "_REMOVE";
     }
 }
