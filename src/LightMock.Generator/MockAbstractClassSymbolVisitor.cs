@@ -28,7 +28,7 @@ namespace LightMock.Generator
 
         public override string? VisitEvent(IEventSymbol symbol)
         {
-            if (symbol.IsAbstract)
+            if (IsCanBeOverriden(symbol))
             {
                 var result = new StringBuilder("override ")
                     .Append(symbol.ToDisplayString(SymbolDisplayFormats.AbstractClass))

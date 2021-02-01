@@ -424,6 +424,13 @@ namespace LightMock.Generator.Tests
             Assert.Throws<InvalidOperationException>(() => context.AssertAdd(f => f.OnAbstractEvent += UnexpectedEventHandler));
             Assert.Throws<InvalidOperationException>(() => context.AssertRemove(f => f.OnAbstractEvent -= UnexpectedEventHandler));
 
+            mock.OnVirtualEvent += ExpectedEventHandler;
+            mock.OnVirtualEvent -= ExpectedEventHandler;
+            context.AssertAdd(f => f.OnVirtualEvent += ExpectedEventHandler);
+            context.AssertRemove(f => f.OnVirtualEvent -= ExpectedEventHandler);
+            Assert.Throws<InvalidOperationException>(() => context.AssertAdd(f => f.OnVirtualEvent += UnexpectedEventHandler));
+            Assert.Throws<InvalidOperationException>(() => context.AssertRemove(f => f.OnVirtualEvent -= UnexpectedEventHandler));
+
             Assert.Equal(expected: KExpected, testScript.DoRun());
 
             static void ExpectedEventHandler(object o, int a) { }
@@ -466,6 +473,14 @@ namespace LightMock.Generator.Tests
             Assert.Throws<InvalidOperationException>(() => context.AssertAdd(f => f.OnAbstractEvent += UnexpectedEventHandler));
             Assert.Throws<InvalidOperationException>(() => context.AssertRemove(f => f.OnAbstractEvent -= UnexpectedEventHandler));
 
+            mock.OnVirtualEvent += ExpectedEventHandler;
+            mock.OnVirtualEvent -= ExpectedEventHandler;
+
+            context.AssertAdd(f => f.OnVirtualEvent += ExpectedEventHandler);
+            context.AssertRemove(f => f.OnVirtualEvent -= ExpectedEventHandler);
+            Assert.Throws<InvalidOperationException>(() => context.AssertAdd(f => f.OnVirtualEvent += UnexpectedEventHandler));
+            Assert.Throws<InvalidOperationException>(() => context.AssertRemove(f => f.OnVirtualEvent -= UnexpectedEventHandler));
+
             Assert.Equal(expected: KExpected, testScript.DoRun());
 
             static void ExpectedEventHandler(object o, int a) { }
@@ -507,6 +522,14 @@ namespace LightMock.Generator.Tests
             context.AssertRemove(f => f.OnAbstractEvent -= ExpectedEventHandler);
             Assert.Throws<InvalidOperationException>(() => context.AssertAdd(f => f.OnAbstractEvent += UnexpectedEventHandler));
             Assert.Throws<InvalidOperationException>(() => context.AssertRemove(f => f.OnAbstractEvent -= UnexpectedEventHandler));
+
+            mock.OnVirtualEvent += ExpectedEventHandler;
+            mock.OnVirtualEvent -= ExpectedEventHandler;
+
+            context.AssertAdd(f => f.OnVirtualEvent += ExpectedEventHandler);
+            context.AssertRemove(f => f.OnVirtualEvent -= ExpectedEventHandler);
+            Assert.Throws<InvalidOperationException>(() => context.AssertAdd(f => f.OnVirtualEvent += UnexpectedEventHandler));
+            Assert.Throws<InvalidOperationException>(() => context.AssertRemove(f => f.OnVirtualEvent -= UnexpectedEventHandler));
 
             Assert.Equal(expected: KExpected, testScript.DoRun());
 

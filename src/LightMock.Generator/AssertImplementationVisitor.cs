@@ -88,7 +88,7 @@ namespace LightMock.Generator
                     .AppendEventAddRemove(VariableNames.Context, symbol, methodName);
                 return result.ToString();
             }
-            if (symbol.IsAbstract)
+            if (IsCanBeOverriden(symbol))
             {
                 result.Append("override ")
                     .Append(symbol.ToDisplayString(SymbolDisplayFormats.AbstractClass))
