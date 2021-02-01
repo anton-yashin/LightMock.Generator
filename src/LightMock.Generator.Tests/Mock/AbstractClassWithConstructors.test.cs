@@ -11,7 +11,7 @@ namespace LightMock.Generator.Tests.Mock
         public AbstractClassWithConstructors()
             => mock = new Mock<AAbstractClassWithConstructors>((int)1234, (IEnumerable<object>)null);
 
-        public MockContext<AAbstractClassWithConstructors> Context => mock;
+        public IMock<AAbstractClassWithConstructors> Context => mock;
 
         public AAbstractClassWithConstructors MockObject => mock.Object;
 

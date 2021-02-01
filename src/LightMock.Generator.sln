@@ -7,6 +7,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LightMock.Generator", "Ligh
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LightMock.Generator.Tests", "LightMock.Generator.Tests\LightMock.Generator.Tests.csproj", "{D709DDC6-3531-4885-9FF4-23D68BD63F55}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LightMock.Generator.Common", "LightMock.Generator.Common\LightMock.Generator.Common.csproj", "{6D3D2D32-2E51-4139-B289-B5BE62C3C2B5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{D709DDC6-3531-4885-9FF4-23D68BD63F55}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D709DDC6-3531-4885-9FF4-23D68BD63F55}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D709DDC6-3531-4885-9FF4-23D68BD63F55}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6D3D2D32-2E51-4139-B289-B5BE62C3C2B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D3D2D32-2E51-4139-B289-B5BE62C3C2B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6D3D2D32-2E51-4139-B289-B5BE62C3C2B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6D3D2D32-2E51-4139-B289-B5BE62C3C2B5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

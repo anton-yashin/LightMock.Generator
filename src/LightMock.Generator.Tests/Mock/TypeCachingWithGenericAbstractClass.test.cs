@@ -10,7 +10,7 @@ namespace LightMock.Generator.Tests.Mock
         public TypeCachingWithGenericAbstractClass()
             => mock = new Mock<ATypeCachingWithGenericAbstractClass<int>>();
 
-        public MockContext<ATypeCachingWithGenericAbstractClass<int>> Context => mock;
+        public IMock<ATypeCachingWithGenericAbstractClass<int>> Context => mock;
 
         public ATypeCachingWithGenericAbstractClass<int> MockObject => mock.Object;
 

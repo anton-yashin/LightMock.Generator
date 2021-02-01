@@ -10,7 +10,7 @@ namespace LightMock.Generator.Tests.Mock
         public AbstractClassWithBasicProperty()
             => mock = new Mock<AAbstractClassWithBasicProperty>();
 
-        public MockContext<AAbstractClassWithBasicProperty> Context => mock;
+        public IMock<AAbstractClassWithBasicProperty> Context => mock;
 
         public AAbstractClassWithBasicProperty MockObject => mock.Object;
 

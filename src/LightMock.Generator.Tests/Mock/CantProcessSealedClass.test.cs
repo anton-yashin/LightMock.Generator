@@ -9,7 +9,7 @@ namespace LightMock.Generator.Tests.Mock
         public CantProcessSealedClass()
             => mock = new Mock<SomeSealedClass>();
 
-        public MockContext<SomeSealedClass> Context => mock;
+        public IMock<SomeSealedClass> Context => mock;
 
         public SomeSealedClass MockObject => mock.Object;
 

@@ -16,8 +16,6 @@ namespace LightMock.Generator
         const string KMock = "Mock";
         const string KContextResolver = nameof(ContextResolver);
 
-        readonly Lazy<SourceText> attribute = new(
-            () => SourceText.From(Utils.LoadResource(KAttributeName + Suffix.CSharpFile), Encoding.UTF8));
         readonly Lazy<SourceText> mock = new(
             () => SourceText.From(Utils.LoadResource(KMock + Suffix.CSharpFile), Encoding.UTF8));
         readonly Lazy<SourceText> contextResolver = new(
@@ -39,12 +37,10 @@ namespace LightMock.Generator
                 context.SyntaxReceiver is LightMockSyntaxReceiver receiver &&
                 compilation.SyntaxTrees.First().Options is CSharpParseOptions options)
             {
-                context.AddSource(KAttributeName + Suffix.FileName, attribute.Value);
                 context.AddSource(KMock + Suffix.FileName, mock.Value);
                 context.AddSource(KContextResolver + Suffix.FileName, contextResolver.Value);
 
                 compilation = compilation
-                    .AddSyntaxTrees(CSharpSyntaxTree.ParseText(attribute.Value, options))
                     .AddSyntaxTrees(CSharpSyntaxTree.ParseText(mock.Value, options))
                     .AddSyntaxTrees(CSharpSyntaxTree.ParseText(contextResolver.Value, options));
 
@@ -96,29 +92,33 @@ namespace LightMock.Generator
 
                 // process symbols under Mock<> generic
 
-                var mockContextType = typeof(MockContext<>);
+                var mockContextType = typeof(AbstractMock<>);
                 var mockContextName = mockContextType.Name.Replace("`1", "");
                 var mockContextNamespace = mockContextType.Namespace;
                 var getInstanceTypeBuilder = new StringBuilder();
                 var getProtectedContextTypeBuilder = new StringBuilder();
+                var getPropertiesContextTypeBuilder = new StringBuilder();
+                var getAssertTypeBuilder = new StringBuilder();
                 var processedTypes = new List<INamedTypeSymbol>();
 
                 foreach (var candidateGeneric in receiver.CandidateMocks)
                 {
-                    var candidateModel = compilation.GetSemanticModel(candidateGeneric.SyntaxTree);
-                    var candidateSi = candidateModel.GetSymbolInfo(candidateGeneric);
-                    var mockContainer = candidateSi.Symbol as INamedTypeSymbol;
-                    if (mockContainer != null && mockContainer.BaseType != null
-                        && mockContainer.BaseType.ContainingNamespace.Name == mockContextNamespace
-                        && mockContainer.BaseType.Name == mockContextName
-                        && mockContainer.BaseType.TypeArguments.FirstOrDefault() is INamedTypeSymbol mockedType
+                    var mockContainer = compilation
+                        .GetSemanticModel(candidateGeneric.SyntaxTree)
+                        .GetSymbolInfo(candidateGeneric).Symbol
+                        as INamedTypeSymbol;
+                    var mcbt = mockContainer?.BaseType;
+                    if (mcbt != null
+                        && mcbt.ContainingNamespace.ToDisplayString(SymbolDisplayFormats.Namespace) == mockContextNamespace
+                        && mcbt.Name == mockContextName
+                        && mcbt.TypeArguments.FirstOrDefault() is INamedTypeSymbol mockedType
                         && processedTypes.Contains(mockedType) == false)
                     {
                         ClassProcessor processor;
                         if (mockedType.BaseType != null)
                             processor = new MockAbstractClassProcessor(candidateGeneric, mockedType);
                         else
-                            processor = new MockInterfaceProcessor(compilation, mockedType);
+                            processor = new MockInterfaceProcessor(mockedType);
 
                         if (EmitDiagnostics(context, processor.GetErrors()))
                             continue;
@@ -126,13 +126,17 @@ namespace LightMock.Generator
                         context.AddSource(processor.FileName, processor.DoGenerate());
                         processor.DoGeneratePart_GetInstanceType(getInstanceTypeBuilder);
                         processor.DoGeneratePart_GetProtectedContextType(getProtectedContextTypeBuilder);
+                        processor.DoGeneratePart_GetPropertiesContextType(getPropertiesContextTypeBuilder);
+                        processor.DoGeneratePart_GetAssertType(getAssertTypeBuilder);
                         processedTypes.Add(mockedType);
                     }
                 }
 
                 var impl = Utils.LoadResource(KContextResolver + Suffix.ImplFile + Suffix.CSharpFile)
                     .Replace("/*getInstanceTypeBuilder*/", getInstanceTypeBuilder.ToString())
-                    .Replace("/*getProtectedContextTypeBuilder*/", getProtectedContextTypeBuilder.ToString());
+                    .Replace("/*getProtectedContextTypeBuilder*/", getProtectedContextTypeBuilder.ToString())
+                    .Replace("/*getPropertiesContextTypeBuilder*/", getPropertiesContextTypeBuilder.ToString())
+                    .Replace("/*getAssertTypeBuilder*/", getAssertTypeBuilder.ToString());
 
                 context.AddSource(KContextResolver + Suffix.ImplFile + Suffix.FileName, SourceText.From(impl, Encoding.UTF8));
             }

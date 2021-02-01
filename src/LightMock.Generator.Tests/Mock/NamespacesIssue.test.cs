@@ -12,7 +12,7 @@ namespace Playground
 
         public NamespacesIssue() => mock = new Mock<IFoo>();
 
-        public MockContext<IFoo> Context => mock;
+        public IMock<IFoo> Context => mock;
 
         public IFoo MockObject => mock.Object;
 

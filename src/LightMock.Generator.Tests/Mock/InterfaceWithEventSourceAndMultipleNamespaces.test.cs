@@ -12,7 +12,7 @@ namespace LightMock.Generator.Tests.Mock
         public InterfaceWithEventSourceAndMultipleNamespaces()
             => mock = new Mock<IInterfaceWithEventSourceAndMultipleNamespaces>();
 
-        public MockContext<IInterfaceWithEventSourceAndMultipleNamespaces> Context => mock;
+        public IMock<IInterfaceWithEventSourceAndMultipleNamespaces> Context => mock;
 
         public IInterfaceWithEventSourceAndMultipleNamespaces MockObject => mock.Object;
 

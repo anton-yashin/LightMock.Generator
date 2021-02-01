@@ -31,6 +31,40 @@ namespace LightMock.Generator
             return @this.Append("}");
         }
 
+        public static StringBuilder AppendMockGetter(this StringBuilder @this, string contextName, ISymbol symbol)
+            => @this.Append(" get { ")
+            .Append(VariableNames.PropertiesContext)
+            .Append(".Invoke(f => f.")
+            .Append(symbol.Name)
+            .Append(Suffix.Getter)
+            .Append("()); return ")
+            .Append(contextName)
+            .Append(".Invoke(f => f.")
+            .Append(symbol.Name)
+            .Append("); } ");
+
+        public static StringBuilder AppendMockSetter(this StringBuilder @this, string contextName, ISymbol symbol)
+            => @this.Append("set { ")
+            .Append(VariableNames.PropertiesContext)
+            .Append(".Invoke(f => f.")
+            .Append(symbol.Name)
+            .Append(Suffix.Setter)
+            .Append("(value)); ")
+            .Append(contextName)
+            .Append(".InvokeSetter(f => f.")
+            .Append(symbol.Name)
+            .Append(", value); } ");
+
+        public static StringBuilder AppendMockGetterAndSetter(this StringBuilder @this, string contextName, IPropertySymbol symbol)
+        {
+            @this.Append(" {");
+            if (symbol.GetMethod != null)
+                @this.AppendMockGetter(contextName, symbol);
+            if (symbol.SetMethod != null)
+                @this.AppendMockSetter(contextName, symbol);
+            return @this.Append("}");
+        }
+
         static readonly string[] whereSeparator = new string[] { "where" };
 
         public static StringBuilder AppendMethodDeclaration(this StringBuilder @this, string declaration, IMethodSymbol symbol)
@@ -85,6 +119,37 @@ namespace LightMock.Generator
             return @this.Append("(")
                 .Append(string.Join(", ", symbol.Parameters.Select(i => i.Name)))
                 .Append("));}");
+        }
+
+        public static StringBuilder AppendEventAdd(this StringBuilder @this, string contextName, IEventSymbol symbol, string methodName)
+            => @this.Append("add{")
+            .Append(contextName)
+            .Append(".")
+            .Append(methodName)
+            .Append("(f => f.")
+            .Append(symbol.Name)
+            .Append(Suffix.Add)
+            .Append("(value));}");
+
+        public static StringBuilder AppendEventRemove(this StringBuilder @this, string contextName, IEventSymbol symbol, string methodName)
+            => @this.Append("remove{")
+            .Append(contextName)
+            .Append(".")
+            .Append(methodName)
+            .Append("(f => f.")
+            .Append(symbol.Name)
+            .Append(Suffix.Remove)
+            .Append("(value));}");
+
+        public static StringBuilder AppendEventAddRemove(this StringBuilder @this, string contextName, IEventSymbol symbol, string methodName)
+        {
+            @this.Append("{");
+            if (symbol.AddMethod != null)
+                @this.AppendEventAdd(contextName, symbol, methodName);
+            if (symbol.RemoveMethod != null)
+                @this.AppendEventRemove(contextName, symbol, methodName);
+            @this.Append("}");
+            return @this;
         }
     }
 }

@@ -11,7 +11,7 @@ namespace LightMock.Generator.Tests.Mock
         public AbstractClassWithEventSourceAndMultipleNamespaces()
             => mock = new Mock<AAbstractClassWithEventSourceAndMultipleNamespaces>();
 
-        public MockContext<AAbstractClassWithEventSourceAndMultipleNamespaces> Context => mock;
+        public IMock<AAbstractClassWithEventSourceAndMultipleNamespaces> Context => mock;
 
         public AAbstractClassWithEventSourceAndMultipleNamespaces MockObject => mock.Object;
 

@@ -61,7 +61,9 @@
   <ItemGroup>
     <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
     <None Include="$(PkgLightMock)\lib\netstandard2.0\*.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
-    <None Include="LightMock.Generator.props" Pack="true" PackagePath="build" Visible="false"/>
+    <None Include="LightMock.Generator.props" Pack="true" PackagePath="build" Visible="false" />
+    <None Include="..\LightMock.Generator.Common\$(OutputPath)\LightMock.Generator.Common.dll" Pack="true" PackagePath="lib/netstandard2.0;analyzers/dotnet/cs" Visible="false" />
+    <None Include="..\LightMock.Generator.Common\$(OutputPath)\LightMock.Generator.Common.pdb" Pack="true" PackagePath="lib/netstandard2.0" Visible="false" />
   </ItemGroup>
 
   <ItemGroup>
@@ -77,6 +79,10 @@
   <ItemGroup>
     <AdditionalFiles Include="AnalyzerReleases.Shipped.md" />
     <AdditionalFiles Include="AnalyzerReleases.Unshipped.md" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\LightMock.Generator.Common\LightMock.Generator.Common.csproj" PrivateAssets="all" />
   </ItemGroup>
 
 </Project>

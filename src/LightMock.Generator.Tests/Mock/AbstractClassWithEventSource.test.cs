@@ -9,7 +9,7 @@ namespace LightMock.Generator.Tests.Mock
         public AbstractClassWithEventSource()
             => mock = new Mock<AAbstractClassWithEventSource>();
 
-        public MockContext<AAbstractClassWithEventSource> Context => mock;
+        public IMock<AAbstractClassWithEventSource> Context => mock;
 
         public AAbstractClassWithEventSource MockObject => mock.Object;
 

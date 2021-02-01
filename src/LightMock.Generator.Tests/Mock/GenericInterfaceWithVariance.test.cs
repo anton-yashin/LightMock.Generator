@@ -9,7 +9,7 @@ namespace LightMock.Generator.Tests.Mock
         public GenericInterfaceWithVariance()
             => mock = new Mock<IGenericInterfaceWithVariance<IFoo, IBar>>();
 
-        public MockContext<IGenericInterfaceWithVariance<IFoo, IBar>> Context => mock;
+        public IMock<IGenericInterfaceWithVariance<IFoo, IBar>> Context => mock;
 
         public IGenericInterfaceWithVariance<IFoo, IBar> MockObject => mock.Object;
 

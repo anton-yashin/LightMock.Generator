@@ -32,6 +32,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\LightMock.Generator.Common\LightMock.Generator.Common.csproj" />
     <ProjectReference Include="..\LightMock.Generator\LightMock.Generator.csproj" />
   </ItemGroup>
   <ItemGroup>
