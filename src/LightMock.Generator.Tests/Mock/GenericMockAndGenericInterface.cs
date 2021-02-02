@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace LightMock.Generator.Tests.Mock
 {
@@ -9,5 +10,6 @@ namespace LightMock.Generator.Tests.Mock
         T GetAndSet { get; set; }
         T GetSomething();
         void DoSomething(T p);
+        Task<TResult?> FooAsync<TResult>() where TResult : class;
     }
 }

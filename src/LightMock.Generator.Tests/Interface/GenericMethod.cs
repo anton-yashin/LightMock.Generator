@@ -6,7 +6,7 @@ namespace LightMock.Generator.Tests.Interface
     public interface IGenericMethod
     {
         T GenericReturn<T>();
-        Task<T?> GenericReturnAsync<T>();
+        Task<T?> GenericReturnAsync<T>() where T : class;
         void GenericParam<T>(T p);
         void GenericWithClassConstraint<T>(T? p) where T : class;
         void GenericWithStructConstraint<T>(T p) where T : struct;

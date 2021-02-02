@@ -31,7 +31,7 @@ namespace LightMock.Generator
             if (symbol.ReturnsVoid == false)
             {
                 result.Append("return default(")
-                    .Append(symbol.ReturnType.ToDisplayString(SymbolDisplayFormats.Interface))
+                    .Append(symbol.ReturnType.ToDisplayString(SymbolDisplayFormats.WithTypeParams))
                     .Append(");");
             }
             result.Append("}");
@@ -57,7 +57,7 @@ namespace LightMock.Generator
                     .Append("(), ")
                     .Append(VariableNames.Invoked)
                     .Append("); return default(")
-                    .Append(symbol.Type.ToDisplayString(SymbolDisplayFormats.Interface))
+                    .Append(symbol.Type.ToDisplayString(SymbolDisplayFormats.WithTypeParams))
                     .Append(");}");
             }
             if (symbol.SetMethod != null)
