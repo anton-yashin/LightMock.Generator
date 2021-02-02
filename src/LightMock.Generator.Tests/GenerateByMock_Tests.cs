@@ -658,6 +658,78 @@ namespace LightMock.Generator.Tests
             Assert.Equal(KExpected, testScript.DoRun());
         }
 
+        [Fact]
+        public void InterfaceWithTaskMethod()
+        {
+            var testScript = LoadAssembly<IInterfaceWithTaskMethod>();
+            var context = testScript.Context;
+            var mock = testScript.MockObject;
+
+            var fooTask = mock.FooAsync();
+            Assert.True(fooTask.IsCompleted);
+
+            var barTask = mock.BarAsync();
+            Assert.True(barTask.IsCompleted);
+            Assert.Equal(default(int), barTask.Result);
+
+            var bazTask = mock.BazAsync<IInterfaceWithTaskMethod>();
+            Assert.True(bazTask.IsCompleted);
+            Assert.Equal(default(IInterfaceWithTaskMethod), bazTask.Result);
+        }
+
+        [Fact]
+        public void AbstractClassWithTaskMethod()
+        {
+            var testScript = LoadAssembly<AAbstractClassWithTaskMethod>();
+            var context = testScript.Context;
+            var mock = testScript.MockObject;
+
+            var fooTask = mock.FooAsync();
+            Assert.True(fooTask.IsCompleted);
+
+            var barTask = mock.BarAsync();
+            Assert.True(barTask.IsCompleted);
+            Assert.Equal(default(int), barTask.Result);
+
+            var bazTask = mock.BazAsync<IInterfaceWithTaskMethod>();
+            Assert.True(bazTask.IsCompleted);
+            Assert.Equal(default(IInterfaceWithTaskMethod), bazTask.Result);
+
+            var fooVirtualTask = mock.VirtualFooAsync();
+            Assert.True(fooVirtualTask.IsCompleted);
+
+            var barVirtualTask = mock.VirtualBarAsync();
+            Assert.True(barVirtualTask.IsCompleted);
+            Assert.Equal(default(int), barVirtualTask.Result);
+
+            var bazVirtualTask = mock.VirtualBazAsync<IInterfaceWithTaskMethod>();
+            Assert.True(bazVirtualTask.IsCompleted);
+            Assert.Equal(default(IInterfaceWithTaskMethod), bazVirtualTask.Result);
+
+            var fooProtectedTask = mock.InvokeProtectedFooAsync();
+            Assert.True(fooProtectedTask.IsCompleted);
+
+            var barProtectedTask = mock.InvokeProtectedBarAsync();
+            Assert.True(barProtectedTask.IsCompleted);
+            Assert.Equal(default(int), barProtectedTask.Result);
+
+            var bazProtectedTask = mock.InvokeProtectedBazAsync<IInterfaceWithTaskMethod>();
+            Assert.True(bazProtectedTask.IsCompleted);
+            Assert.Equal(default(IInterfaceWithTaskMethod), bazProtectedTask.Result);
+
+            var fooProtectedVirtualTask = mock.InvokeProtectedVirtualFooAsync();
+            Assert.True(fooProtectedVirtualTask.IsCompleted);
+
+            var barProtectedVirtualTask = mock.InvokeProtectedVirtualBarAsync();
+            Assert.True(barProtectedVirtualTask.IsCompleted);
+            Assert.Equal(default(int), barProtectedVirtualTask.Result);
+
+            var bazProtectedVirtualTask = mock.InvokeProtectedVirtualBazAsync<IInterfaceWithTaskMethod>();
+            Assert.True(bazProtectedVirtualTask.IsCompleted);
+            Assert.Equal(default(IInterfaceWithTaskMethod), bazProtectedVirtualTask.Result);
+
+        }
+
         private (ImmutableArray<Diagnostic> diagnostics, bool success, byte[] assembly) DoCompileResource([CallerMemberName]string resourceName = "")
         {
             var fn = "Mock." + resourceName + ".test.cs";

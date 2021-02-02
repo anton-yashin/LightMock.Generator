@@ -107,7 +107,8 @@ namespace LightMock.Generator
             if (symbol.ReturnsVoid == false)
                 @this.Append("return ");
 
-            @this.Append(contextName)
+            @this.Append("global::LightMock.Generator.Default.Get(() =>")
+                .Append(contextName)
                 .Append(".Invoke(f => f.")
                 .Append(symbol.Name);
             if (symbol.IsGenericMethod)
@@ -118,7 +119,7 @@ namespace LightMock.Generator
             }
             return @this.Append("(")
                 .Append(string.Join(", ", symbol.Parameters.Select(i => i.Name)))
-                .Append("));}");
+                .Append(")));}");
         }
 
         public static StringBuilder AppendEventAdd(this StringBuilder @this, string contextName, IEventSymbol symbol, string methodName)
