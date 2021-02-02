@@ -32,7 +32,7 @@ namespace LightMock.Generator
             {
                 result.Append("return default(")
                     .Append(symbol.ReturnType.ToDisplayString(SymbolDisplayFormats.Interface))
-                    .Append(");");
+                    .Append(")!;");
             }
             result.Append("}");
             return result.ToString();
@@ -58,7 +58,7 @@ namespace LightMock.Generator
                     .Append(VariableNames.Invoked)
                     .Append("); return default(")
                     .Append(symbol.Type.ToDisplayString(SymbolDisplayFormats.Interface))
-                    .Append(");}");
+                    .Append(")!;}");
             }
             if (symbol.SetMethod != null)
             {
