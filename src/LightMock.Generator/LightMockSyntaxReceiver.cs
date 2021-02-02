@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -7,11 +8,19 @@ namespace LightMock.Generator
 {
     sealed internal class LightMockSyntaxReceiver : CSharpSyntaxVisitor, ISyntaxReceiver
     {
+        private CancellationToken cancellationToken;
+
+        public LightMockSyntaxReceiver(CancellationToken cancellationToken)
+        {
+            this.cancellationToken = cancellationToken;
+        }
+
         public List<ClassDeclarationSyntax> CandidateClasses { get; } = new List<ClassDeclarationSyntax>();
         public List<GenericNameSyntax> CandidateMocks { get; } = new List<GenericNameSyntax>();
 
         public void OnVisitSyntaxNode(SyntaxNode syntaxNode)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             if (syntaxNode is CSharpSyntaxNode cssn)
                 cssn.Accept(this);
         }

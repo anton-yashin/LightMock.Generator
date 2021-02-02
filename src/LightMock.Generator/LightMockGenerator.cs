@@ -27,6 +27,7 @@ namespace LightMock.Generator
 
         public void Execute(GeneratorExecutionContext context)
         {
+            context.CancellationToken.ThrowIfCancellationRequested();
             if (context.AnalyzerConfigOptions.GlobalOptions.TryGetValue(GlobalOptionsNames.Enable, out var value)
                 && value.Equals("false", StringComparison.InvariantCultureIgnoreCase))
             {
@@ -56,6 +57,7 @@ namespace LightMock.Generator
 
                 foreach (var candidateClass in receiver.CandidateClasses)
                 {
+                    context.CancellationToken.ThrowIfCancellationRequested();
                     var model = compilation.GetSemanticModel(candidateClass.SyntaxTree);
                     var typeSymbol = model.GetDeclaredSymbol(candidateClass);
                     if (typeSymbol == null)
@@ -65,6 +67,7 @@ namespace LightMock.Generator
                     if (relevantAttribute == null)
                         continue;
 
+                    context.CancellationToken.ThrowIfCancellationRequested();
                     var isPartial = candidateClass
                         .Modifiers
                         .Any(modifier => modifier.IsKind(SyntaxKind.PartialKeyword));
@@ -77,6 +80,7 @@ namespace LightMock.Generator
                         continue;
                     }
 
+                    context.CancellationToken.ThrowIfCancellationRequested();
                     var @interface = typeSymbol.Interfaces.FirstOrDefault();
                     ClassProcessor processor;
                     if (typeSymbol.BaseType != null && typeSymbol.BaseType.ToDisplayString(SymbolDisplayFormats.Namespace) != "System.Object")
@@ -86,7 +90,9 @@ namespace LightMock.Generator
 
                     if (EmitDiagnostics(context, processor.GetErrors()))
                         continue;
+                    context.CancellationToken.ThrowIfCancellationRequested();
                     EmitDiagnostics(context, processor.GetWarnings());
+                    context.CancellationToken.ThrowIfCancellationRequested();
                     context.AddSource(processor.FileName, processor.DoGenerate());
                 }
 
@@ -103,10 +109,12 @@ namespace LightMock.Generator
 
                 foreach (var candidateGeneric in receiver.CandidateMocks)
                 {
+                    context.CancellationToken.ThrowIfCancellationRequested();
                     var mockContainer = compilation
                         .GetSemanticModel(candidateGeneric.SyntaxTree)
                         .GetSymbolInfo(candidateGeneric).Symbol
                         as INamedTypeSymbol;
+                    context.CancellationToken.ThrowIfCancellationRequested();
                     var mcbt = mockContainer?.BaseType;
                     if (mcbt != null
                         && mcbt.ContainingNamespace.ToDisplayString(SymbolDisplayFormats.Namespace) == mockContextNamespace
@@ -120,24 +128,33 @@ namespace LightMock.Generator
                         else
                             processor = new MockInterfaceProcessor(mockedType);
 
+                        context.CancellationToken.ThrowIfCancellationRequested();
                         if (EmitDiagnostics(context, processor.GetErrors()))
                             continue;
+                        context.CancellationToken.ThrowIfCancellationRequested();
                         EmitDiagnostics(context, processor.GetWarnings());
                         context.AddSource(processor.FileName, processor.DoGenerate());
+                        context.CancellationToken.ThrowIfCancellationRequested();
                         processor.DoGeneratePart_GetInstanceType(getInstanceTypeBuilder);
+                        context.CancellationToken.ThrowIfCancellationRequested();
                         processor.DoGeneratePart_GetProtectedContextType(getProtectedContextTypeBuilder);
+                        context.CancellationToken.ThrowIfCancellationRequested();
                         processor.DoGeneratePart_GetPropertiesContextType(getPropertiesContextTypeBuilder);
+                        context.CancellationToken.ThrowIfCancellationRequested();
                         processor.DoGeneratePart_GetAssertType(getAssertTypeBuilder);
+                        context.CancellationToken.ThrowIfCancellationRequested();
                         processedTypes.Add(mockedType);
                     }
                 }
 
+                context.CancellationToken.ThrowIfCancellationRequested();
                 var impl = Utils.LoadResource(KContextResolver + Suffix.ImplFile + Suffix.CSharpFile)
                     .Replace("/*getInstanceTypeBuilder*/", getInstanceTypeBuilder.ToString())
                     .Replace("/*getProtectedContextTypeBuilder*/", getProtectedContextTypeBuilder.ToString())
                     .Replace("/*getPropertiesContextTypeBuilder*/", getPropertiesContextTypeBuilder.ToString())
                     .Replace("/*getAssertTypeBuilder*/", getAssertTypeBuilder.ToString());
 
+                context.CancellationToken.ThrowIfCancellationRequested();
                 context.AddSource(KContextResolver + Suffix.ImplFile + Suffix.FileName, SourceText.From(impl, Encoding.UTF8));
             }
         }
@@ -155,7 +172,8 @@ namespace LightMock.Generator
 
         public void Initialize(GeneratorInitializationContext context)
         {
-            context.RegisterForSyntaxNotifications(() => new LightMockSyntaxReceiver());
+            context.CancellationToken.ThrowIfCancellationRequested();
+            context.RegisterForSyntaxNotifications(() => new LightMockSyntaxReceiver(context.CancellationToken));
         }
     }
 }
