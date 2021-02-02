@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace LightMock.Generator.Tests.Mock
 {
     public abstract class AAbstractClassWithGenericMethod
     {
         public abstract T GenericReturn<T>();
+        public abstract Task<T?> GenericReturnAsync<T>();
         public abstract void GenericParam<T>(T p);
         public abstract void GenericWithClassConstraint<T>(T? p) where T : class;
         public abstract void GenericWithStructConstraint<T>(T p) where T : struct;
@@ -15,6 +17,7 @@ namespace LightMock.Generator.Tests.Mock
             where T3 : IEquatable<T3>, new();
 
         protected abstract T ProtectedGenericReturn<T>();
+        protected abstract Task<T?> ProtectedGenericReturnAsync<T>();
         protected abstract void ProtectedGenericParam<T>(T p);
         protected abstract void ProtectedGenericWithClassConstraint<T>(T? p) where T : class;
         protected abstract void ProtectedGenericWithStructConstraint<T>(T p) where T : struct;

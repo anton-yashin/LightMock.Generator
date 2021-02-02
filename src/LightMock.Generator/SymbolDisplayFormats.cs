@@ -38,8 +38,7 @@ namespace LightMock.Generator
                 localOptions: SymbolDisplayLocalOptions.IncludeType,
                 miscellaneousOptions:
                     SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers |
-                    SymbolDisplayMiscellaneousOptions.UseSpecialTypes |
-                    SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier);
+                    SymbolDisplayMiscellaneousOptions.UseSpecialTypes);
 
         public static readonly SymbolDisplayFormat ConstructorCall =
             new SymbolDisplayFormat(
@@ -59,8 +58,7 @@ namespace LightMock.Generator
                 localOptions: SymbolDisplayLocalOptions.IncludeType,
                 miscellaneousOptions:
                     SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers |
-                    SymbolDisplayMiscellaneousOptions.UseSpecialTypes |
-                    SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier);
+                    SymbolDisplayMiscellaneousOptions.UseSpecialTypes);
 
 
         public static readonly SymbolDisplayFormat AbstractClass =
@@ -86,8 +84,7 @@ namespace LightMock.Generator
                 localOptions: SymbolDisplayLocalOptions.IncludeType,
                 miscellaneousOptions:
                     SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers |
-                    SymbolDisplayMiscellaneousOptions.UseSpecialTypes |
-                    SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier);
+                    SymbolDisplayMiscellaneousOptions.UseSpecialTypes);
 
         public static readonly SymbolDisplayFormat Interface =
             new SymbolDisplayFormat(
@@ -110,8 +107,7 @@ namespace LightMock.Generator
                 localOptions: SymbolDisplayLocalOptions.IncludeType,
                 miscellaneousOptions:
                     SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers |
-                    SymbolDisplayMiscellaneousOptions.UseSpecialTypes |
-                    SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier);
+                    SymbolDisplayMiscellaneousOptions.UseSpecialTypes);
 
 
         public static readonly SymbolDisplayFormat KP2PInterfaceDeclaration =
@@ -136,7 +132,6 @@ namespace LightMock.Generator
                 localOptions: SymbolDisplayLocalOptions.IncludeType,
                 miscellaneousOptions:
                     SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers |
-                    SymbolDisplayMiscellaneousOptions.UseSpecialTypes |
-                    SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier);
+                    SymbolDisplayMiscellaneousOptions.UseSpecialTypes);
     }
 }

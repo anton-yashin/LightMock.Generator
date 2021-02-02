@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Threading.Tasks;
 
 namespace LightMock.Generator.Tests.Mock
 {
     public interface IInterfaceWithGenericMethod
     {
         T GenericReturn<T>();
+        Task<T?> GenericReturnAsync<T>();
         void GenericParam<T>(T p);
         void GenericWithClassConstraint<T>(T? p) where T : class;
         void GenericWithStructConstraint<T>(T p) where T : struct;
