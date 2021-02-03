@@ -1,4 +1,8 @@
-﻿* feat: Verify a property is read on Mock<T> with AssertGet
-* feat: Verify a property is set on Mock<T> with AssertSet
-* feat: Verify a event handler is added to event on Mock<T> with AssertAdd
-* feat: Verify a event handler is removed from event on Mock<T> with AssertRemove
+﻿* fix: remove excessive nullable warnings
+* fix: correct code generation for 
+interface IInterface<Tag>
+{
+	Task<TResult?> FooAsync();
+}
+* feat: generator now supports cancellation
+* feat: Task and Task<T> function now return not null result by default
