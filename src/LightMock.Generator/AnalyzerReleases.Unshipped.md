@@ -3,4 +3,3 @@
 ### New Rules
 Rule ID | Category | Severity | Notes
 --------|----------|----------|-------
-SPG005 | Usage | Error | DiagnosticsDescriptors

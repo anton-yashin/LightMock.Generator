@@ -10,3 +10,4 @@ SPG001 | Usage | Error | DiagnosticsDescriptors
 SPG002 | Usage | Error | DiagnosticsDescriptors
 SPG003 | Usage | Error | DiagnosticsDescriptors
 SPG004 | Usage | Warning | DiagnosticsDescriptors
+SPG005 | Usage | Error | DiagnosticsDescriptors
