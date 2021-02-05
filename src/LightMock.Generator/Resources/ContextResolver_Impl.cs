@@ -29,7 +29,8 @@ namespace LightMock.Generator
 
             /*getPropertiesContextTypeBuilder*/
 
-            return typeof(MockContext<object>);
+            if (contextType.IsSubclassOf(MulticastDelegateType))
+                return typeof(MockContext<object>);
             throw new NotSupportedException(contextType.FullName + " is not supported " + gtd?.FullName);
         }
 

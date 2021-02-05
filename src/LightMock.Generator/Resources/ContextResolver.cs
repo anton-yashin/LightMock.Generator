@@ -7,5 +7,7 @@ namespace LightMock.Generator
     {
         readonly static Type DefaultProtectedContextType = typeof(object);
         readonly static Type MockContextType = typeof(MockContext<>);
+        readonly static Type DefaultPropertiesContextType = typeof(MockContext<object>);
+        readonly static Type MulticastDelegateType = typeof(MulticastDelegate);
     }
 }
