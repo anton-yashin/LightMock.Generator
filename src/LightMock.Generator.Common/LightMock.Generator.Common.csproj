@@ -7,15 +7,6 @@
     <PackageId>LightMock.Generator.Common</PackageId>
     <Summary>This package is dependency for LightMock.Generator</Summary>
     <Description>This package is dependency for LightMock.Generator</Description>
-    <AssemblyVersion>0.901.0.0</AssemblyVersion>
-    <AssemblyFileVersion>0.901.0.0</AssemblyFileVersion>
-    <Version>0.901.0</Version>
-    <VersionSuffix>-beta</VersionSuffix>
-    <PackageVersion>$(Version)$(VersionSuffix)</PackageVersion>
-    <Authors>Anton Yashin</Authors>
-    <NeutralLanguage>en</NeutralLanguage>
-    <Copyright>Copyright © Anton Yashin 2020</Copyright>
-    <RepositoryUrl>https://github.com/anton-yashin/LightMock.Generator</RepositoryUrl>
 
     <LangVersion>preview</LangVersion>
     <Nullable>enable</Nullable>
@@ -25,6 +16,8 @@
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
+
+  <Import Project="../common.props"/>
 
   <ItemGroup>
     <PackageReference Include="LightMock" Version="2.0.0" />

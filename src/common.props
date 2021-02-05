@@ -1,0 +1,24 @@
+<Project>
+  <PropertyGroup>
+    <Product>$(AssemblyName) ($(TargetFramework))</Product>
+    <AssemblyVersion>0.901.7.0</AssemblyVersion>
+    <AssemblyFileVersion>0.901.7.0</AssemblyFileVersion>
+    <Version>0.901.7</Version>
+    <VersionSuffix>-beta</VersionSuffix>
+    <PackageVersion>$(Version)$(VersionSuffix)</PackageVersion>
+    <Authors>Anton Yashin</Authors>
+    <NeutralLanguage>en</NeutralLanguage>
+    <Copyright>Copyright © Anton Yashin 2021</Copyright>
+    <RepositoryUrl>https://github.com/anton-yashin/LightMock.Generator</RepositoryUrl>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageProjectUrl>https://github.com/anton-yashin/LightMock.Generator</PackageProjectUrl>
+    <LangVersion>preview</LangVersion>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\LICENSE" PackagePath="" Pack="true" Visible="false"/>
+    <None Include="..\..\README.md" PackagePath="" Pack="true" Visible="false"/>
+  </ItemGroup>
+</Project>
