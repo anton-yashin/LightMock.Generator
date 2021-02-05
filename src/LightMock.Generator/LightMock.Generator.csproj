@@ -37,17 +37,6 @@
   <PropertyGroup Condition=" '$(Configuration)'=='Debug' ">
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)'=='Release' And '$(OS)' == 'Windows_NT' ">
-    <!-- sourcelink: Declare that the Repository URL can be published to NuSpec -->
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <!-- sourcelink: Embed source files that are not tracked by the source control manager to the PDB -->
-    <EmbedUntrackedSources>true</EmbedUntrackedSources>
-    <!-- sourcelink: Include PDB in the built .nupkg -->
-    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
-  </PropertyGroup>
-  <ItemGroup Condition=" '$(Configuration)'=='Release' And '$(OS)' == 'Windows_NT' ">
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
-  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="LightMock" Version="2.0.0" GeneratePathProperty="true" />
@@ -61,9 +50,8 @@
   <ItemGroup>
     <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
     <None Include="$(PkgLightMock)\lib\netstandard2.0\*.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
-    <None Include="LightMock.Generator.props" Pack="true" PackagePath="build" Visible="false" />
-    <None Include="..\LightMock.Generator.Common\$(OutputPath)\LightMock.Generator.Common.dll" Pack="true" PackagePath="lib/netstandard2.0;analyzers/dotnet/cs" Visible="false" />
-    <None Include="..\LightMock.Generator.Common\$(OutputPath)\LightMock.Generator.Common.pdb" Pack="true" PackagePath="lib/netstandard2.0" Visible="false" />
+    <None Include="LightMock.Generator.props" Pack="true" PackagePath="build" />
+    <None Include="..\LightMock.Generator.Common\$(OutputPath)\LightMock.Generator.Common.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
   </ItemGroup>
 
   <ItemGroup>
@@ -82,7 +70,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\LightMock.Generator.Common\LightMock.Generator.Common.csproj" PrivateAssets="all" />
+    <ProjectReference Include="..\LightMock.Generator.Common\LightMock.Generator.Common.csproj"/>
   </ItemGroup>
 
 </Project>
