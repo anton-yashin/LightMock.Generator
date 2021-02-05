@@ -730,6 +730,19 @@ namespace LightMock.Generator.Tests
 
         }
 
+        [Fact]
+        public void BasicDelegate()
+        {
+            var expectedObject = new object();
+            var expectedEventArgs = new EventArgs();
+            var testScript = LoadAssembly<EventHandler>();
+            var context = testScript.Context;
+            var mock = testScript.MockObject;
+
+            mock(expectedObject, expectedEventArgs);
+            context.Assert(f => f.Invoke(expectedObject, expectedEventArgs));
+        }
+
         private (ImmutableArray<Diagnostic> diagnostics, bool success, byte[] assembly) DoCompileResource([CallerMemberName]string resourceName = "")
         {
             var fn = "Mock." + resourceName + ".test.cs";

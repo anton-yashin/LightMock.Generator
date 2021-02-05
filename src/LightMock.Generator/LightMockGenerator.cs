@@ -99,13 +99,15 @@ namespace LightMock.Generator
                 // process symbols under Mock<> generic
 
                 var mockContextType = typeof(AbstractMock<>);
-                var mockContextName = mockContextType.Name.Replace("`1", "");
-                var mockContextNamespace = mockContextType.Namespace;
+                var mockContextNamespaceAndName = mockContextType.Namespace + "." + mockContextType.Name.Replace("`1", "");
                 var getInstanceTypeBuilder = new StringBuilder();
                 var getProtectedContextTypeBuilder = new StringBuilder();
                 var getPropertiesContextTypeBuilder = new StringBuilder();
                 var getAssertTypeBuilder = new StringBuilder();
+                var getDelegateBuilder = new StringBuilder();
                 var processedTypes = new List<INamedTypeSymbol>();
+                var multicastDelegateType = typeof(MulticastDelegate);
+                var multicastDelegateNameSpaceAndName = multicastDelegateType.Namespace + "." + multicastDelegateType.Name;
 
                 foreach (var candidateGeneric in receiver.CandidateMocks)
                 {
@@ -117,14 +119,19 @@ namespace LightMock.Generator
                     context.CancellationToken.ThrowIfCancellationRequested();
                     var mcbt = mockContainer?.BaseType;
                     if (mcbt != null
-                        && mcbt.ContainingNamespace.ToDisplayString(SymbolDisplayFormats.Namespace) == mockContextNamespace
-                        && mcbt.Name == mockContextName
+                        && mcbt.ToDisplayString(SymbolDisplayFormats.Namespace) == mockContextNamespaceAndName
                         && mcbt.TypeArguments.FirstOrDefault() is INamedTypeSymbol mockedType
                         && processedTypes.Contains(mockedType) == false)
                     {
                         ClassProcessor processor;
-                        if (mockedType.BaseType != null)
-                            processor = new MockAbstractClassProcessor(candidateGeneric, mockedType);
+                        var mtbt = mockedType.BaseType;
+                        if (mtbt != null)
+                        {
+                            if (mtbt.ToDisplayString(SymbolDisplayFormats.Namespace) == multicastDelegateNameSpaceAndName)
+                                processor = new MockDelegateProcessor(mockedType);
+                            else
+                                processor = new MockAbstractClassProcessor(candidateGeneric, mockedType);
+                        }
                         else
                             processor = new MockInterfaceProcessor(mockedType);
 
@@ -143,6 +150,8 @@ namespace LightMock.Generator
                         context.CancellationToken.ThrowIfCancellationRequested();
                         processor.DoGeneratePart_GetAssertType(getAssertTypeBuilder);
                         context.CancellationToken.ThrowIfCancellationRequested();
+                        processor.DoGeneratePart_GetDelegate(getDelegateBuilder);
+                        context.CancellationToken.ThrowIfCancellationRequested();
                         processedTypes.Add(mockedType);
                     }
                 }
@@ -152,7 +161,8 @@ namespace LightMock.Generator
                     .Replace("/*getInstanceTypeBuilder*/", getInstanceTypeBuilder.ToString())
                     .Replace("/*getProtectedContextTypeBuilder*/", getProtectedContextTypeBuilder.ToString())
                     .Replace("/*getPropertiesContextTypeBuilder*/", getPropertiesContextTypeBuilder.ToString())
-                    .Replace("/*getAssertTypeBuilder*/", getAssertTypeBuilder.ToString());
+                    .Replace("/*getAssertTypeBuilder*/", getAssertTypeBuilder.ToString())
+                    .Replace("/*getDelegateBuilder*/", getDelegateBuilder.ToString());
 
                 context.CancellationToken.ThrowIfCancellationRequested();
                 context.AddSource(KContextResolver + Suffix.ImplFile + Suffix.FileName, SourceText.From(impl, Encoding.UTF8));

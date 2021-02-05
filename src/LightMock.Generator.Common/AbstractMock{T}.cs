@@ -58,8 +58,10 @@ namespace LightMock.Generator
 
         T CreateMockInstance()
         {
-            var result = Activator.CreateInstance(LazyInitializer.EnsureInitialized(ref mockInstanceType,
-                GetInstanceType), args: GetArgs())
+            var type = LazyInitializer.EnsureInitialized(ref mockInstanceType!, GetInstanceType);
+            if (type.IsDelegate())
+                return GetDelegate(type);
+            var result = Activator.CreateInstance(type, args: GetArgs())
                 ?? throw new InvalidOperationException("can't create context for: " + typeof(T).FullName);
             return (T)result;
         }
@@ -91,6 +93,7 @@ namespace LightMock.Generator
         protected abstract Type GetProtectedContextType();
         protected abstract Type GetPropertiesContextType();
         protected abstract Type GetAssertType();
+        protected abstract T GetDelegate(Type type);
 
         [DebuggerStepThrough]
         public void AssertGet<TProperty>(Func<T, TProperty> expression)

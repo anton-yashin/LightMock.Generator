@@ -18,7 +18,7 @@
     <Configurations>Debug;Release</Configurations>
   </PropertyGroup>
 
-  <Import Project="../common.props"/>
+  <Import Project="../common.props" />
   
   <PropertyGroup Condition=" '$(Configuration)'=='Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -26,7 +26,7 @@
 
   <ItemGroup>
     <PackageReference Include="LightMock" Version="2.0.0" GeneratePathProperty="true" />
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.8.0" PrivateAssets="all"/>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.8.0" PrivateAssets="all" />
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.2">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
@@ -45,7 +45,7 @@
     <Compile Include="Resorces\*.cs" />
     <Compile Include="*.cs" />
     <Compile Include="*\*.cs" />
-    <None Include="..\..\nugetreadme.txt" PackagePath="readme.txt" Pack="true" Visible="false"/>
+    <None Include="..\..\nugetreadme.txt" PackagePath="readme.txt" Pack="true" Visible="false" />
   </ItemGroup>
 
   <ItemGroup>
@@ -54,7 +54,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\LightMock.Generator.Common\LightMock.Generator.Common.csproj"/>
+    <ProjectReference Include="..\LightMock.Generator.Common\LightMock.Generator.Common.csproj" />
   </ItemGroup>
 
 </Project>
