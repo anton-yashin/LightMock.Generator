@@ -1,4 +1,8 @@
-﻿0.901:
+﻿0.902:
+* fix: ILT0005 at uwp release build
+* fix: compatibility with non nullalble projects
+* chore: dependency moved into separate package
+0.901:
 * fix: remove excessive nullable warnings
 * fix: correct code generation for 
 interface IInterface<Tag>
