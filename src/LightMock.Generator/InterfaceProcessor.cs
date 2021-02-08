@@ -126,7 +126,5 @@ namespace {@namespace}
                 : $"if (contextType == typeof(global::{@namespace}.{interfaceName})) return typeof(global::{@namespace}.{Prefix.AssertImplementation}{interfaceName});";
             here.Append(toAppend);
         }
-
-        public override string FileName => Prefix.MockClass + base.FileName;
     }
 }
