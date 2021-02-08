@@ -4,9 +4,9 @@ using System.Text;
 
 namespace LightMock.Generator
 {
-    sealed class MockInterfaceSymbolVisitor : SymbolVisitor<string>
+    sealed class InterfaceSymbolVisitor : SymbolVisitor<string>
     {
-        public MockInterfaceSymbolVisitor()
+        public InterfaceSymbolVisitor()
         { }
 
         public override string? VisitMethod(IMethodSymbol symbol)

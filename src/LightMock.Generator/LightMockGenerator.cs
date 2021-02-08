@@ -76,12 +76,12 @@ namespace LightMock.Generator
                         if (mtbt != null)
                         {
                             if (mtbt.ToDisplayString(SymbolDisplayFormats.Namespace) == multicastDelegateNameSpaceAndName)
-                                processor = new MockDelegateProcessor(mockedType);
+                                processor = new DelegateProcessor(mockedType);
                             else
-                                processor = new MockAbstractClassProcessor(candidateGeneric, mockedType);
+                                processor = new AbstractClassProcessor(candidateGeneric, mockedType);
                         }
                         else
-                            processor = new MockInterfaceProcessor(mockedType);
+                            processor = new InterfaceProcessor(mockedType);
 
                         context.CancellationToken.ThrowIfCancellationRequested();
                         if (EmitDiagnostics(context, processor.GetErrors()))

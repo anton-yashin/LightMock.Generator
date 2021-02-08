@@ -8,7 +8,7 @@ using System.Text;
 
 namespace LightMock.Generator
 {
-    sealed class MockInterfaceProcessor : ClassProcessor
+    sealed class InterfaceProcessor : ClassProcessor
     {
         private readonly SymbolVisitor<string> symbolVisitor;
         private readonly SymbolVisitor<string> propertyDefinitionVisitor;
@@ -20,10 +20,10 @@ namespace LightMock.Generator
         private readonly string whereClause;
         private readonly string @namespace;
 
-        public MockInterfaceProcessor(
+        public InterfaceProcessor(
             INamedTypeSymbol typeSymbol) : base(typeSymbol)
         {
-            this.symbolVisitor = new MockInterfaceSymbolVisitor();
+            this.symbolVisitor = new InterfaceSymbolVisitor();
             this.propertyDefinitionVisitor = new PropertyDefinitionVisitor();
             this.assertImplementationVisitor = new AssertImplementationVisitor(SymbolDisplayFormats.Interface);
             var to = typeSymbol.OriginalDefinition;

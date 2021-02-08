@@ -7,7 +7,7 @@ using System.Text;
 
 namespace LightMock.Generator
 {
-    sealed class MockAbstractClassProcessor : ClassProcessor
+    sealed class AbstractClassProcessor : ClassProcessor
     {
         private readonly SymbolVisitor<string> protectedVisitor;
         private readonly SymbolVisitor<string> propertyDefinitionVisitor;
@@ -24,7 +24,7 @@ namespace LightMock.Generator
         private readonly List<string> constructorsCall;
         private readonly SyntaxNode containingGeneric;
 
-        public MockAbstractClassProcessor(
+        public AbstractClassProcessor(
             SyntaxNode containingGeneric,
             INamedTypeSymbol typeSymbol) : base(typeSymbol)
         {
@@ -34,7 +34,7 @@ namespace LightMock.Generator
             this.assertImplementationVisitor = new AssertImplementationVisitor(SymbolDisplayFormats.AbstractClass);
             this.@namespace = typeSymbol.ContainingNamespace.ToDisplayString(SymbolDisplayFormats.Namespace);
             this.interfaceName = Prefix.ProtectedToPublicInterface + typeSymbol.Name;
-            this.symbolVisitor = new MockAbstractClassSymbolVisitor(@namespace, interfaceName);
+            this.symbolVisitor = new AbstractClassSymbolVisitor(@namespace, interfaceName);
             this.baseName = typeSymbol.OriginalDefinition.Name;
             this.className = Prefix.MockClass + typeSymbol.Name;
 

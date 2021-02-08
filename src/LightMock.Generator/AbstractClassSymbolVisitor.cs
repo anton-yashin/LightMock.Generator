@@ -3,12 +3,12 @@ using System.Text;
 
 namespace LightMock.Generator
 {
-    sealed class MockAbstractClassSymbolVisitor : SymbolVisitor<string>
+    sealed class AbstractClassSymbolVisitor : SymbolVisitor<string>
     {
         readonly string interfaceNamespace;
         readonly string interfaceName;
 
-        public MockAbstractClassSymbolVisitor(string interfaceNamespace, string interfaceName)
+        public AbstractClassSymbolVisitor(string interfaceNamespace, string interfaceName)
         {
             this.interfaceNamespace = interfaceNamespace;
             this.interfaceName = interfaceName;

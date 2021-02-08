@@ -7,7 +7,7 @@ using System.Text;
 
 namespace LightMock.Generator
 {
-    sealed class MockDelegateProcessor : ClassProcessor
+    sealed class DelegateProcessor : ClassProcessor
     {
         private readonly string fullName;
         private readonly string @namespace;
@@ -17,7 +17,7 @@ namespace LightMock.Generator
         private readonly string returnType;
         private readonly string @return;
 
-        public MockDelegateProcessor(INamedTypeSymbol typeSymbol) : base(typeSymbol)
+        public DelegateProcessor(INamedTypeSymbol typeSymbol) : base(typeSymbol)
         {
             this.fullName = typeSymbol.ToDisplayString(SymbolDisplayFormats.Namespace);
             this.@namespace = typeSymbol.ContainingNamespace.ToDisplayString(SymbolDisplayFormats.Namespace);
