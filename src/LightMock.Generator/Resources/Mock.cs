@@ -17,5 +17,6 @@ namespace LightMock.Generator
         protected override Type GetProtectedContextType() => ContextResolver.GetProtectedContextType(typeof(T));
         protected override Type GetPropertiesContextType() => ContextResolver.GetPropertiesContextType(typeof(T));
         protected override Type GetAssertType() => ContextResolver.GetAssertType(typeof(T));
+        protected override T GetDelegate(Type type) => (T)ContextResolver.GetDelegate(type, this);
     }
 }
