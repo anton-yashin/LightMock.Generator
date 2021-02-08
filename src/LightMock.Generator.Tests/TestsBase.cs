@@ -1,11 +1,9 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using System;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using Xunit;
 using Xunit.Abstractions;
 
 namespace LightMock.Generator.Tests
@@ -52,6 +50,5 @@ namespace LightMock.Generator.Tests
                     MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("netstandard")).Location),
                 },
                 options: new CSharpCompilationOptions(Microsoft.CodeAnalysis.OutputKind.DynamicallyLinkedLibrary));
-
     }
 }

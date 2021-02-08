@@ -36,9 +36,19 @@
     <ProjectReference Include="..\LightMock.Generator\LightMock.Generator.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Remove="Mock\*.test.cs" />
+    <Compile Remove="Interface\*.test.cs" />
+    <Compile Remove="AbstractClass\*.test.cs" />
+    <Compile Remove="Delegate\*.test.cs" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Mock\*.cs" />
+    <EmbeddedResource Include="Interface\*.test.cs" />
+    <EmbeddedResource Include="AbstractClass\*.test.cs" />
+    <EmbeddedResource Include="Delegate\*.test.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="Issues\NamespacesIssue.test.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Issues\NamespacesIssue.test.cs" />
   </ItemGroup>
 </Project>
