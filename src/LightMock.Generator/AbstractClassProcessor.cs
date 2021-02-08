@@ -243,5 +243,11 @@ namespace LightMock.Generator
                 : $"if (contextType == typeof(global::{@namespace}.{baseName})) return typeof(global::{@namespace}.{Prefix.AssertImplementation}{baseName});";
             here.Append(toAppend);
         }
+
+        static IEnumerable<INamedTypeSymbol> GetAllBaseTypes(INamedTypeSymbol type)
+        {
+            for (var bt = type.BaseType; bt != null; bt = bt.BaseType)
+                yield return bt;
+        }
     }
 }
