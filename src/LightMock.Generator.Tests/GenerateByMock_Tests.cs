@@ -743,6 +743,21 @@ namespace LightMock.Generator.Tests
             context.Assert(f => f.Invoke(expectedObject, expectedEventArgs));
         }
 
+        [Fact]
+        public void GenericDelegate()
+        {
+            var (e1, e2, e3, er) = (new object(), 1234, 5678L, 9012L);
+
+            var testScript = LoadAssembly<SomeGenericDelegate<object, int, long, long>>();
+            var context = testScript.Context;
+            var mock = testScript.MockObject;
+
+            context.Arrange(f => f.Invoke(The<object>.IsAnyValue, The<int>.IsAnyValue, The<long>.IsAnyValue)).Returns(er);
+            var result = mock(e1, e2, e3);
+            Assert.Equal(er, result);
+            context.Assert(f => f.Invoke(e1, e2, e3));
+        }
+
         private (ImmutableArray<Diagnostic> diagnostics, bool success, byte[] assembly) DoCompileResource([CallerMemberName]string resourceName = "")
         {
             var fn = "Mock." + resourceName + ".test.cs";
