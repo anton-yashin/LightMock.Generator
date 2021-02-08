@@ -3,7 +3,7 @@ using Microsoft.CodeAnalysis.Diagnostics;
 using System;
 using System.Collections.Immutable;
 
-namespace LightMock.Generator.Tests
+namespace LightMock.Generator.Tests.Mocks
 {
     sealed class MockAnalyzerConfigOptionsProvider : AnalyzerConfigOptionsProvider
     {

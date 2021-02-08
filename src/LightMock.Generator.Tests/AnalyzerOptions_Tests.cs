@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using LightMock.Generator.Tests.Mocks;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;
 using System.Collections.Immutable;
