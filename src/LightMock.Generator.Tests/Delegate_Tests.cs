@@ -1,4 +1,5 @@
 ﻿using LightMock.Generator.Tests.Delegate;
+using LightMock.Generator.Tests.TestAbstractions;
 using System;
 using Xunit;
 using Xunit.Abstractions;

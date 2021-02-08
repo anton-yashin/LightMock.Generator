@@ -8,7 +8,7 @@ using System.Runtime.Loader;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace LightMock.Generator.Tests
+namespace LightMock.Generator.Tests.TestAbstractions
 {
     public abstract class GeneratorTestsBase : TestsBase
     {

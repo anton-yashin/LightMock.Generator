@@ -2,6 +2,7 @@
 using LightMock.Generator.Tests.AbstractClass.EventNamespace2;
 using LightMock.Generator.Tests.AbstractClass.Namespace1;
 using LightMock.Generator.Tests.AbstractClass.Namespace2;
+using LightMock.Generator.Tests.TestAbstractions;
 using System;
 using Xunit;
 using Xunit.Abstractions;

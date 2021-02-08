@@ -6,7 +6,7 @@ using System.Linq;
 using System.Reflection;
 using Xunit.Abstractions;
 
-namespace LightMock.Generator.Tests
+namespace LightMock.Generator.Tests.TestAbstractions
 {
     public abstract class TestsBase
     {

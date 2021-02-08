@@ -1,4 +1,5 @@
 ﻿using LightMock.Generator.Tests.Mocks;
+using LightMock.Generator.Tests.TestAbstractions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System.Collections.Generic;

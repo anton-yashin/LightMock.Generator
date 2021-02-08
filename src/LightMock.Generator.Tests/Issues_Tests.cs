@@ -1,4 +1,5 @@
-﻿using Xunit;
+﻿using LightMock.Generator.Tests.TestAbstractions;
+using Xunit;
 using Xunit.Abstractions;
 
 namespace LightMock.Generator.Tests
