@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using LightMock.Generator.Tests.TestAbstractions;
 
 namespace LightMock.Generator.Tests.Interface
 {

@@ -1,4 +1,4 @@
-﻿namespace LightMock.Generator.Tests
+﻿namespace LightMock.Generator.Tests.TestAbstractions
 {
     public interface ITestScript<T>
         where T : class

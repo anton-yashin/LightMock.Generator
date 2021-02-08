@@ -1,6 +1,7 @@
 ﻿using System;
 using LightMock.Generator;
 using Xunit;
+using LightMock.Generator.Tests.TestAbstractions;
 
 namespace LightMock.Generator.Tests.Interface
 {

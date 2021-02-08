@@ -3,6 +3,7 @@ using LightMock.Generator;
 using LightMock.Generator.Tests;
 using System;
 using Xunit;
+using LightMock.Generator.Tests.TestAbstractions;
 
 namespace Playground
 {

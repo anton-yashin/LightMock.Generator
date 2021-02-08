@@ -1,4 +1,5 @@
 ﻿using System;
+using LightMock.Generator.Tests.TestAbstractions;
 
 namespace LightMock.Generator.Tests.AbstractClass
 {
