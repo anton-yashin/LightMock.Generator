@@ -3,10 +3,10 @@ using System.Text;
 
 namespace LightMock.Generator
 {
-    class AbstractClassSymbolVisitor : SymbolVisitor<string>
+    sealed class AbstractClassSymbolVisitor : SymbolVisitor<string>
     {
-        protected readonly string interfaceNamespace;
-        protected readonly string interfaceName;
+        readonly string interfaceNamespace;
+        readonly string interfaceName;
 
         public AbstractClassSymbolVisitor(string interfaceNamespace, string interfaceName)
         {
@@ -14,10 +14,10 @@ namespace LightMock.Generator
             this.interfaceName = interfaceName;
         }
 
-        protected static bool IsInterfaceRequired(ISymbol symbol)
+        static bool IsInterfaceRequired(ISymbol symbol)
             => IsCanBeOverriden(symbol) && symbol.DeclaredAccessibility == Accessibility.Protected;
 
-        protected static bool IsCanBeOverriden(ISymbol symbol)
+        static bool IsCanBeOverriden(ISymbol symbol)
             => symbol.IsAbstract || symbol.IsVirtual;
 
         public override string? VisitMethod(IMethodSymbol symbol)
@@ -37,7 +37,7 @@ namespace LightMock.Generator
             return result.ToString();
         }
 
-        protected void AddInterfaceImplementation(IMethodSymbol symbol, StringBuilder result)
+        void AddInterfaceImplementation(IMethodSymbol symbol, StringBuilder result)
         {
             result.AppendMethodDeclaration(CombineWithInterface(symbol), symbol)
                 .AppendMethodBody(VariableNames.ProtectedContext, symbol);
@@ -52,6 +52,7 @@ namespace LightMock.Generator
                 .Replace(@namespace + "." + ctn, interfaceNamespace + "." + interfaceName);
         }
 
+
         public override string? VisitProperty(IPropertySymbol symbol)
         {
             if (IsCanBeOverriden(symbol) == false)
@@ -65,12 +66,11 @@ namespace LightMock.Generator
 
             result.Append("override ")
                 .Append(symbol.ToDisplayString(SymbolDisplayFormats.AbstractClass))
-                .AppendGetterAndSetter(isInterfaceRequired ? VariableNames.ProtectedContext : VariableNames.Context, symbol);
-
+                .AppendMockGetterAndSetter(isInterfaceRequired ? VariableNames.ProtectedContext : VariableNames.Context, symbol);
             return result.ToString();
         }
 
-        protected void AddInterfaceImplementation(IPropertySymbol symbol, StringBuilder result)
+        void AddInterfaceImplementation(IPropertySymbol symbol, StringBuilder result)
         {
             result.Append(CombineWithInterface(symbol))
                 .AppendGetterAndSetter(VariableNames.ProtectedContext, symbol);
@@ -78,12 +78,11 @@ namespace LightMock.Generator
 
         public override string? VisitEvent(IEventSymbol symbol)
         {
-            if (symbol.IsAbstract)
+            if (IsCanBeOverriden(symbol))
             {
-                var sdf = symbol.ToDisplayString(SymbolDisplayFormats.AbstractClass);
                 var result = new StringBuilder("override ")
-                    .Append(sdf)
-                    .Append(";");
+                    .Append(symbol.ToDisplayString(SymbolDisplayFormats.AbstractClass))
+                    .AppendEventAddRemove(VariableNames.PropertiesContext, symbol, methodName: "Invoke");
                 return result.ToString();
             }
             return null;

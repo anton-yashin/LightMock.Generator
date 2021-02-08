@@ -1,14 +1,13 @@
 ﻿using Microsoft.CodeAnalysis;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace LightMock.Generator
 {
-    class InterfaceSymbolVisitor : SymbolVisitor<string>
+    sealed class InterfaceSymbolVisitor : SymbolVisitor<string>
     {
-        public InterfaceSymbolVisitor() { }
+        public InterfaceSymbolVisitor()
+        { }
 
         public override string? VisitMethod(IMethodSymbol symbol)
         {
@@ -23,29 +22,14 @@ namespace LightMock.Generator
         public override string? VisitProperty(IPropertySymbol symbol)
         {
             var result = new StringBuilder(symbol.ToDisplayString(SymbolDisplayFormats.Interface))
-                .AppendGetterAndSetter(VariableNames.Context, symbol);
-
+                .AppendMockGetterAndSetter(VariableNames.Context, symbol);
             return result.ToString();
         }
 
         public override string? VisitEvent(IEventSymbol symbol)
         {
-            var localName = symbol.ContainingType.ToDisplayString(SymbolDisplayFormats.Interface)
-                .Replace(".", "")
-                .Replace("<", "_")
-                .Replace(">", "_") + symbol.Name;
-            var result = new StringBuilder("public event ");
-            result.Append(symbol.Type.ToDisplayString(SymbolDisplayFormats.Interface))
-                .Append("? ")
-                .Append(localName)
-                .Append(";\r\n")
-                .Append(symbol.ToDisplayString(SymbolDisplayFormats.Interface))
-                .Append("{ add { ")
-                .Append(localName)
-                .Append(" += value; } remove { ")
-                .Append(localName)
-                .Append(" -= value; } }")
-                ;
+            var result = new StringBuilder(symbol.ToDisplayString(SymbolDisplayFormats.Interface))
+                .AppendEventAddRemove(VariableNames.PropertiesContext, symbol, methodName: "Invoke");
             return result.ToString();
         }
 

@@ -25,6 +25,4 @@ namespace LightMock.Generator.Tests.AbstractClass
         protected abstract void ProtectedBaz();
         public void InvokeProtectedBaz() => ProtectedBaz();
     }
-
 }
-

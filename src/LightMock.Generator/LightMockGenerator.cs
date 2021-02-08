@@ -12,7 +12,6 @@ namespace LightMock.Generator
     [Generator]
     public sealed class LightMockGenerator : ISourceGenerator
     {
-        const string KAttributeName = nameof(GenerateMockAttribute);
         const string KMock = "Mock";
         const string KContextResolver = nameof(ContextResolver);
 
@@ -44,57 +43,6 @@ namespace LightMock.Generator
                 compilation = compilation
                     .AddSyntaxTrees(CSharpSyntaxTree.ParseText(mock.Value, options))
                     .AddSyntaxTrees(CSharpSyntaxTree.ParseText(contextResolver.Value, options));
-
-                var attributeSymbol = compilation.GetTypeByMetadataName(KAttributeName);
-                if (attributeSymbol == null)
-                {
-                    context.ReportDiagnostic(Diagnostic.Create(
-                        DiagnosticsDescriptors.KNoAttributeErrorDescriptor, Location.None, KAttributeName));
-                    return;
-                }
-
-                // process symbols marked by GenerateMockAttribute
-
-                foreach (var candidateClass in receiver.CandidateClasses)
-                {
-                    context.CancellationToken.ThrowIfCancellationRequested();
-                    var model = compilation.GetSemanticModel(candidateClass.SyntaxTree);
-                    var typeSymbol = model.GetDeclaredSymbol(candidateClass);
-                    if (typeSymbol == null)
-                        continue;
-                    var relevantAttribute = typeSymbol.GetAttributes().FirstOrDefault(
-                        a => attributeSymbol.Equals(a.AttributeClass, SymbolEqualityComparer.Default));
-                    if (relevantAttribute == null)
-                        continue;
-
-                    context.CancellationToken.ThrowIfCancellationRequested();
-                    var isPartial = candidateClass
-                        .Modifiers
-                        .Any(modifier => modifier.IsKind(SyntaxKind.PartialKeyword));
-                    if (isPartial == false)
-                    {
-                        context.ReportDiagnostic(Diagnostic.Create(
-                            DiagnosticsDescriptors.KNoPartialKeyworkErrorDescriptor,
-                            Location.Create(candidateClass.SyntaxTree, new TextSpan()),
-                            typeSymbol.Name));
-                        continue;
-                    }
-
-                    context.CancellationToken.ThrowIfCancellationRequested();
-                    var @interface = typeSymbol.Interfaces.FirstOrDefault();
-                    ClassProcessor processor;
-                    if (typeSymbol.BaseType != null && typeSymbol.BaseType.ToDisplayString(SymbolDisplayFormats.Namespace) != "System.Object")
-                        processor = new AbstractClassProcessor(candidateClass, typeSymbol, typeSymbol.BaseType);
-                    else
-                        processor = new InterfaceProcessor(compilation, candidateClass, typeSymbol, @interface);
-
-                    if (EmitDiagnostics(context, processor.GetErrors()))
-                        continue;
-                    context.CancellationToken.ThrowIfCancellationRequested();
-                    EmitDiagnostics(context, processor.GetWarnings());
-                    context.CancellationToken.ThrowIfCancellationRequested();
-                    context.AddSource(processor.FileName, processor.DoGenerate());
-                }
 
                 // process symbols under Mock<> generic
 
@@ -128,12 +76,12 @@ namespace LightMock.Generator
                         if (mtbt != null)
                         {
                             if (mtbt.ToDisplayString(SymbolDisplayFormats.Namespace) == multicastDelegateNameSpaceAndName)
-                                processor = new MockDelegateProcessor(mockedType);
+                                processor = new DelegateProcessor(mockedType);
                             else
-                                processor = new MockAbstractClassProcessor(candidateGeneric, mockedType);
+                                processor = new AbstractClassProcessor(candidateGeneric, mockedType);
                         }
                         else
-                            processor = new MockInterfaceProcessor(mockedType);
+                            processor = new InterfaceProcessor(mockedType);
 
                         context.CancellationToken.ThrowIfCancellationRequested();
                         if (EmitDiagnostics(context, processor.GetErrors()))

@@ -17,7 +17,6 @@ namespace LightMock.Generator.Tests.Interface
         void Baz();
     }
 
-
     public interface IInherittedInterface : IBar, IBaz
     {
         void Quux();

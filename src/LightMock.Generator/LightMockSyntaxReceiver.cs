@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace LightMock.Generator
 {
-    sealed internal class LightMockSyntaxReceiver : CSharpSyntaxVisitor, ISyntaxReceiver
+    sealed class LightMockSyntaxReceiver : CSharpSyntaxVisitor, ISyntaxReceiver
     {
         private CancellationToken cancellationToken;
 
