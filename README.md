@@ -4,7 +4,7 @@ Source generator that generates mocks by provided interfaces, abstract classes a
 You should be familiar with [LightMock](https://github.com/seesharper/LightMock) because this project uses it underhood.
 
 ## How to use
-* Use Mock\<T\> where T is you abstract class, interface or delegate to batch create MockContext\<T\> and mock object.
+* Use Mock\<T\> where T is your abstract class, interface or delegate to batch create MockContext\<T\> and mock object.
 
 ## Example with interface
 
@@ -76,7 +76,7 @@ namespace Playground
             // To invoke a constructor of abstract class place parameters in Mock<T> constructor
             var mock = new Mock<AFoo>(12, 45);
             // To arrange or assert protected members call Protected() extension function.
-            // It and corresponding interface will be generated only for abstract classes
+            // It and corresponding interface will be generated only for classes
             mock.Protected().Arrange(f => f.Quux()).Returns(expected);
 
             Assert.Equal(expected, mock.Object.InvokeQuux());
