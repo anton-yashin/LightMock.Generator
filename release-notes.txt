@@ -1,3 +1,2 @@
-﻿* fix: ILT0005 at uwp release build
-* fix: compatibility with non nullalble projects
-* chore: dependency moved into separate package
+﻿* refactor: obsolete GenerateMockAttribute is now removed
+* feat: added delegate support
