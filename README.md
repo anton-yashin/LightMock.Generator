@@ -1,7 +1,7 @@
 # LightMock.Generator (Beta)
 
 Source generator that generates mocks by provided interfaces and abstract classes. [Available on nuget](https://www.nuget.org/packages/LightMock.Generator/).
-You should be familiar with [LigthMock](https://github.com/seesharper/LightMock) because this project uses it underhood.
+You should be familiar with [LightMock](https://github.com/seesharper/LightMock) because this project uses it underhood.
 
 ## How to use
 * Use Mock\<T\> where T is you abstract class or interface to batch create MockContext\<T\> and mock object.
