@@ -1,4 +1,6 @@
-﻿0.903:
+﻿0.904
+* fix: code generation failed due non-unique hint names
+0.903:
 * refactor: obsolete GenerateMockAttribute is now removed
 * feat: added delegate support
 0.902:

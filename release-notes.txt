@@ -1,2 +1,1 @@
-﻿* refactor: obsolete GenerateMockAttribute is now removed
-* feat: added delegate support
+﻿* fix: code generation failed due non-unique hint names
