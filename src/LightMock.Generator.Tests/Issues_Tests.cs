@@ -1,4 +1,5 @@
-﻿using LightMock.Generator.Tests.TestAbstractions;
+﻿using LightMock.Generator.Tests.Issues;
+using LightMock.Generator.Tests.TestAbstractions;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -16,6 +17,14 @@ namespace LightMock.Generator.Tests
         public void NamespacesIssue()
         {
             var testScript = LoadAssembly<Playground.IFoo>();
+
+            Assert.Equal(KExpected, testScript.DoRun());
+        }
+
+        [Fact]
+        public void HintNames()
+        {
+            var testScript = LoadAssembly<IHintNames>();
 
             Assert.Equal(KExpected, testScript.DoRun());
         }

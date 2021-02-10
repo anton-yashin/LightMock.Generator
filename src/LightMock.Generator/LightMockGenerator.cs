@@ -69,7 +69,7 @@ namespace LightMock.Generator
                     if (mcbt != null
                         && mcbt.ToDisplayString(SymbolDisplayFormats.Namespace) == mockContextNamespaceAndName
                         && mcbt.TypeArguments.FirstOrDefault() is INamedTypeSymbol mockedType
-                        && processedTypes.Contains(mockedType) == false)
+                        && processedTypes.Contains(mockedType.OriginalDefinition) == false)
                     {
                         ClassProcessor processor;
                         var mtbt = mockedType.BaseType;
@@ -100,7 +100,7 @@ namespace LightMock.Generator
                         context.CancellationToken.ThrowIfCancellationRequested();
                         processor.DoGeneratePart_GetDelegate(getDelegateBuilder);
                         context.CancellationToken.ThrowIfCancellationRequested();
-                        processedTypes.Add(mockedType);
+                        processedTypes.Add(mockedType.OriginalDefinition);
                     }
                 }
 
