@@ -1,9 +1,9 @@
 <Project>
   <PropertyGroup>
     <Product>$(AssemblyName) ($(TargetFramework))</Product>
-    <AssemblyVersion>0.903.0.0</AssemblyVersion>
-    <AssemblyFileVersion>0.903.0.0</AssemblyFileVersion>
-    <Version>0.903.0</Version>
+    <AssemblyVersion>0.904.0.0</AssemblyVersion>
+    <AssemblyFileVersion>0.904.0.0</AssemblyFileVersion>
+    <Version>0.904.0</Version>
     <VersionSuffix>-beta</VersionSuffix>
     <PackageVersion>$(Version)$(VersionSuffix)</PackageVersion>
     <Authors>Anton Yashin</Authors>
