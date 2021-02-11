@@ -102,6 +102,16 @@ namespace LightMock.Generator
 
         public static StringBuilder AppendMethodBody(this StringBuilder @this, string contextName, IMethodSymbol symbol)
         {
+            foreach (var i in symbol.Parameters)
+            {
+                var tod = i.Type.OriginalDefinition;
+                if (tod.IsRefLikeType && tod.IsReadOnly)
+                {
+                    return @this.Append("{ throw new global::System.InvalidProgramException(\""
+                        + ExceptionMessages.OnRefStructMethod + "\");}");
+                }
+            }
+
             @this.Append("{");
 
             if (symbol.ReturnsVoid == false)

@@ -423,6 +423,41 @@ namespace LightMock.Generator.Tests
             Assert.Empty(await mock.GetGenericCollectionAsync<int>());
         }
 
+        [Fact]
+        public void AbstractClassThrowsExceptionOnRefStruct()
+        {
+            var testScript = LoadAssembly<AAbstractClassThrowsExceptionOnRefStruct>();
+            var context = testScript.Context;
+            var mock = testScript.MockObject;
+
+            var span = new Span<int>(new int[1024]);
+            InvalidProgramException? exception = null;
+            try
+            {
+                mock.Foo(span);
+            }
+            catch (InvalidProgramException ex)
+            {
+                exception = ex;
+            }
+
+            Assert.NotNull(exception);
+            Assert.Equal(ExceptionMessages.OnRefStructMethod, exception?.Message);
+
+            exception = null;
+            try
+            {
+                mock.Bar(span);
+            }
+            catch (InvalidProgramException ex)
+            {
+                exception = ex;
+            }
+
+            Assert.NotNull(exception);
+            Assert.Equal(ExceptionMessages.OnRefStructMethod, exception?.Message);
+        }
+
         protected override string GetFullResourceName(string resourceName)
             => "AbstractClass." + resourceName + ".test.cs";
     }
