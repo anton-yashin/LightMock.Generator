@@ -4,6 +4,7 @@ using LightMock.Generator.Tests.AbstractClass.Namespace1;
 using LightMock.Generator.Tests.AbstractClass.Namespace2;
 using LightMock.Generator.Tests.TestAbstractions;
 using System;
+using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -400,6 +401,26 @@ namespace LightMock.Generator.Tests
             var (diagnostics, success, assembly) = DoCompileResource();
 
             Assert.Contains(diagnostics, i => i.Id == "SPG005");
+        }
+
+        [Fact]
+        public async Task AbstractClassWithEnumerableResult()
+        {
+            var testScript = LoadAssembly<AAbstractClassWithEnumerableResult>();
+            var context = testScript.Context;
+            var mock = testScript.MockObject;
+
+            Assert.NotNull(mock.CollectionProperty);
+            Assert.NotNull(mock.GetCollection());
+            Assert.NotNull(mock.GetGenericCollection<int>());
+            Assert.NotNull(await mock.GetCollectionAsync());
+            Assert.NotNull(await mock.GetGenericCollectionAsync<int>());
+
+            Assert.Empty(mock.CollectionProperty);
+            Assert.Empty(mock.GetCollection());
+            Assert.Empty(mock.GetGenericCollection<int>());
+            Assert.Empty(await mock.GetCollectionAsync());
+            Assert.Empty(await mock.GetGenericCollectionAsync<int>());
         }
 
         protected override string GetFullResourceName(string resourceName)

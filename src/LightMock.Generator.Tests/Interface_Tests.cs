@@ -4,6 +4,7 @@ using LightMock.Generator.Tests.Interface.Namespace1;
 using LightMock.Generator.Tests.Interface.Namespace2;
 using LightMock.Generator.Tests.TestAbstractions;
 using System;
+using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -326,6 +327,26 @@ namespace LightMock.Generator.Tests
             var bazTask = mock.BazAsync<IInterfaceWithTaskMethod>();
             Assert.True(bazTask.IsCompleted);
             Assert.Equal(default(IInterfaceWithTaskMethod), bazTask.Result);
+        }
+
+        [Fact]
+        public async Task InterfaceWithEnumerableResult()
+        {
+            var testScript = LoadAssembly<IInterfaceWithEnumerableResult>();
+            var context = testScript.Context;
+            var mock = testScript.MockObject;
+
+            Assert.NotNull(mock.CollectionProperty);
+            Assert.NotNull(mock.GetCollection());
+            Assert.NotNull(mock.GetGenericCollection<int>());
+            Assert.NotNull(await mock.GetCollectionAsync());
+            Assert.NotNull(await mock.GetGenericCollectionAsync<int>());
+
+            Assert.Empty(mock.CollectionProperty);
+            Assert.Empty(mock.GetCollection());
+            Assert.Empty(mock.GetGenericCollection<int>());
+            Assert.Empty(await mock.GetCollectionAsync());
+            Assert.Empty(await mock.GetGenericCollectionAsync<int>());
         }
 
         protected override string GetFullResourceName(string resourceName)

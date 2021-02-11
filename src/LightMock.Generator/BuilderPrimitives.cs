@@ -37,11 +37,11 @@ namespace LightMock.Generator
             .Append(".Invoke(f => f.")
             .Append(symbol.Name)
             .Append(Suffix.Getter)
-            .Append("()); return ")
+            .Append("()); return global::LightMock.Generator.Default.Get(() =>")
             .Append(contextName)
             .Append(".Invoke(f => f.")
             .Append(symbol.Name)
-            .Append("); } ");
+            .Append(")); } ");
 
         public static StringBuilder AppendMockSetter(this StringBuilder @this, string contextName, ISymbol symbol)
             => @this.Append("set { ")
