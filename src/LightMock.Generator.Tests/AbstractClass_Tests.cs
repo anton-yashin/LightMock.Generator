@@ -467,6 +467,17 @@ namespace LightMock.Generator.Tests
             Assert.Throws<MockNotGeneratedException>(() => testScript.MockObject);
         }
 
+        [Fact]
+        public void NestedClass()
+        {
+            var testScript = LoadAssembly<XNestedClass.ATest>();
+            var context = testScript.Context;
+            var mock = testScript.MockObject;
+
+            mock.Foo();
+            context.Assert(f => f.Foo());
+        }
+
         protected override string GetFullResourceName(string resourceName)
             => "AbstractClass." + resourceName + ".test.cs";
     }

@@ -14,9 +14,8 @@ namespace LightMock.Generator
         private readonly SymbolVisitor<string> assertImplementationVisitor;
         private readonly string @namespace;
         private readonly SymbolVisitor<string> symbolVisitor;
-        private readonly string baseName;
         private readonly string className;
-        private readonly string interfaceName;
+        private readonly string baseName;
         private readonly string typeArgumentsWithBrackets;
         private readonly string whereClause;
         private readonly string commaArguments;
@@ -33,10 +32,9 @@ namespace LightMock.Generator
             this.propertyDefinitionVisitor = new PropertyDefinitionVisitor();
             this.assertImplementationVisitor = new AssertImplementationVisitor(SymbolDisplayFormats.AbstractClass);
             this.@namespace = typeSymbol.ContainingNamespace.ToDisplayString(SymbolDisplayFormats.Namespace);
-            this.interfaceName = Prefix.ProtectedToPublicInterface + typeSymbol.Name;
-            this.symbolVisitor = new AbstractClassSymbolVisitor(@namespace, interfaceName);
-            this.baseName = typeSymbol.OriginalDefinition.Name;
-            this.className = Prefix.MockClass + typeSymbol.Name;
+            this.className = new StringBuilder().AppendContainingTypes(typeSymbol, "_").Append(typeSymbol.Name).ToString();
+            this.baseName = new StringBuilder().AppendContainingTypes(typeSymbol, ".").Append(typeSymbol.Name).ToString();
+            this.symbolVisitor = new AbstractClassSymbolVisitor(@namespace, Prefix.ProtectedToPublicInterface + className);
 
             var to = typeSymbol.OriginalDefinition;
             var withTypeParams = to.ToDisplayString(SymbolDisplayFormats.WithTypeParams);
@@ -61,9 +59,9 @@ namespace LightMock.Generator
         string GenerateConstructor(string declaration, string call)
         {
             return $@"
-        public {className}(IInvocationContext<{baseName}{typeArgumentsWithBrackets}> {VariableNames.Context},
-            IInvocationContext<{Prefix.PropertyToFuncInterface}{baseName}{typeArgumentsWithBrackets}> {VariableNames.PropertiesContext},
-            IInvocationContext<{interfaceName}{typeArgumentsWithBrackets}> {VariableNames.ProtectedContext},
+        public {Prefix.MockClass}{className}(IInvocationContext<{baseName}{typeArgumentsWithBrackets}> {VariableNames.Context},
+            IInvocationContext<{Prefix.PropertyToFuncInterface}{className}{typeArgumentsWithBrackets}> {VariableNames.PropertiesContext},
+            IInvocationContext<{Prefix.ProtectedToPublicInterface}{className}{typeArgumentsWithBrackets}> {VariableNames.ProtectedContext},
             {declaration})
             : base({call})
         {{
@@ -77,9 +75,9 @@ namespace LightMock.Generator
         string GenerateDefaultConstructor()
         {
             return $@"
-        public {className}(IInvocationContext<{baseName}{typeArgumentsWithBrackets}> {VariableNames.Context},
-            IInvocationContext<{Prefix.PropertyToFuncInterface}{baseName}{typeArgumentsWithBrackets}> {VariableNames.PropertiesContext},
-            IInvocationContext<{interfaceName}{typeArgumentsWithBrackets}> {VariableNames.ProtectedContext})
+        public {Prefix.MockClass}{className}(IInvocationContext<{baseName}{typeArgumentsWithBrackets}> {VariableNames.Context},
+            IInvocationContext<{Prefix.PropertyToFuncInterface}{className}{typeArgumentsWithBrackets}> {VariableNames.PropertiesContext},
+            IInvocationContext<{Prefix.ProtectedToPublicInterface}{className}{typeArgumentsWithBrackets}> {VariableNames.ProtectedContext})
         {{
             this.{VariableNames.Context} = {VariableNames.Context};
             this.{VariableNames.PropertiesContext} = {VariableNames.PropertiesContext};
@@ -101,8 +99,8 @@ namespace LightMock.Generator
         string GenerateAssertConstructor(string declaration, string call)
         {
             return $@"
-        public {Prefix.AssertImplementation}{baseName}(
-            IMockContext<{Prefix.PropertyToFuncInterface}{baseName}{typeArgumentsWithBrackets}> {VariableNames.Context},
+        public {Prefix.AssertImplementation}{className}(
+            IMockContext<{Prefix.PropertyToFuncInterface}{className}{typeArgumentsWithBrackets}> {VariableNames.Context},
             Invoked {VariableNames.Invoked},
             {declaration})
             : base({call})
@@ -116,8 +114,8 @@ namespace LightMock.Generator
         string GenerateAssertDefaultConstructor()
         {
             return $@"
-        public {Prefix.AssertImplementation}{baseName}(
-            IMockContext<{Prefix.PropertyToFuncInterface}{baseName}{typeArgumentsWithBrackets}> {VariableNames.Context},
+        public {Prefix.AssertImplementation}{className}(
+            IMockContext<{Prefix.PropertyToFuncInterface}{className}{typeArgumentsWithBrackets}> {VariableNames.Context},
             Invoked {VariableNames.Invoked})
         {{
             this.{VariableNames.Context} = {VariableNames.Context};
@@ -148,15 +146,15 @@ using System.Linq.Expressions;
 
 namespace {@namespace}
 {{
-    public interface {Prefix.PropertyToFuncInterface}{baseName}{typeArgumentsWithBrackets}
+    public interface {Prefix.PropertyToFuncInterface}{className}{typeArgumentsWithBrackets}
     {{
         {string.Join("\r\n        ", members.Select(i => i.OriginalDefinition.Accept(propertyDefinitionVisitor)))}
     }}
 
-    sealed class {Prefix.AssertImplementation}{baseName}{typeArgumentsWithBrackets} : {baseName}{typeArgumentsWithBrackets}
+    sealed class {Prefix.AssertImplementation}{className}{typeArgumentsWithBrackets} : {baseName}{typeArgumentsWithBrackets}
         {whereClause}
     {{
-        private readonly IMockContext<{Prefix.PropertyToFuncInterface}{baseName}{typeArgumentsWithBrackets}> {VariableNames.Context};
+        private readonly IMockContext<{Prefix.PropertyToFuncInterface}{className}{typeArgumentsWithBrackets}> {VariableNames.Context};
         private readonly Invoked {VariableNames.Invoked};
 
 {string.Join("\r\n", GenerateAssertConstructors())}
@@ -164,19 +162,19 @@ namespace {@namespace}
         {string.Join("\r\n        ", members.Select(i => i.OriginalDefinition.Accept(assertImplementationVisitor)))}
     }}
 
-    public interface {interfaceName}{typeArgumentsWithBrackets}
+    public interface {Prefix.ProtectedToPublicInterface}{className}{typeArgumentsWithBrackets}
         {whereClause}
     {{
         {string.Join("\r\n        ", members.Select(i => i.OriginalDefinition.Accept(protectedVisitor)).SkipWhile(i => string.IsNullOrWhiteSpace(i)))}
     }}
 
 
-    partial class {className}{typeArgumentsWithBrackets} : {baseName}{typeArgumentsWithBrackets}, {interfaceName}{typeArgumentsWithBrackets}
+    partial class {Prefix.MockClass}{className}{typeArgumentsWithBrackets} : {baseName}{typeArgumentsWithBrackets}, {Prefix.ProtectedToPublicInterface}{className}{typeArgumentsWithBrackets}
         {whereClause}
     {{
         private readonly IInvocationContext<{baseName}{typeArgumentsWithBrackets}> {VariableNames.Context};
-        private readonly IInvocationContext<{Prefix.PropertyToFuncInterface}{baseName}{typeArgumentsWithBrackets}> {VariableNames.PropertiesContext};
-        private readonly IInvocationContext<{interfaceName}{typeArgumentsWithBrackets}> {VariableNames.ProtectedContext};
+        private readonly IInvocationContext<{Prefix.PropertyToFuncInterface}{className}{typeArgumentsWithBrackets}> {VariableNames.PropertiesContext};
+        private readonly IInvocationContext<{Prefix.ProtectedToPublicInterface}{className}{typeArgumentsWithBrackets}> {VariableNames.ProtectedContext};
 
 {string.Join("\r\n", GenerateConstructors())}
 
@@ -191,9 +189,9 @@ namespace LightMock.Generator
     public static partial class MockExtensions
     {{
         [DebuggerStepThrough]
-        public static MockContext<global::{@namespace}.{@interfaceName}{typeArgumentsWithBrackets}> Protected{typeArgumentsWithBrackets}(this IProtectedContext<{baseName}{typeArgumentsWithBrackets}> @this)
+        public static MockContext<global::{@namespace}.{Prefix.ProtectedToPublicInterface}{className}{typeArgumentsWithBrackets}> Protected{typeArgumentsWithBrackets}(this IProtectedContext<{baseName}{typeArgumentsWithBrackets}> @this)
             {whereClause}
-            => (MockContext<global::{@namespace}.{@interfaceName}{typeArgumentsWithBrackets}>)@this.{nameof(IProtectedContext<object>.ProtectedContext)};
+            => (MockContext<global::{@namespace}.{Prefix.ProtectedToPublicInterface}{className}{typeArgumentsWithBrackets}>)@this.{nameof(IProtectedContext<object>.ProtectedContext)};
     }}
 }}
 ";
@@ -215,32 +213,32 @@ namespace LightMock.Generator
         public override void DoGeneratePart_GetInstanceType(StringBuilder here)
         {
             var toAppend = typeSymbol.IsGenericType
-                ? $"if (gtd == typeof(global::{@namespace}.{baseName}<{commaArguments}>)) return typeof(global::{@namespace}.{className}<{commaArguments}>).MakeGenericType(contextType.GetGenericArguments());"
-                : $"if (contextType == typeof(global::{@namespace}.{baseName})) return typeof(global::{@namespace}.{className});";
+                ? $"if (gtd == typeof(global::{@namespace}.{baseName}<{commaArguments}>)) return typeof(global::{@namespace}.{Prefix.MockClass}{className}<{commaArguments}>).MakeGenericType(contextType.GetGenericArguments());"
+                : $"if (contextType == typeof(global::{@namespace}.{baseName})) return typeof(global::{@namespace}.{Prefix.MockClass}{className});";
             here.Append(toAppend);
         }
 
         public override void DoGeneratePart_GetProtectedContextType(StringBuilder here)
         {
             var toAppend = typeSymbol.IsGenericType
-                ? $@"if (gtd == typeof(global::{@namespace}.{baseName}<{commaArguments}>)) return MockContextType.MakeGenericType(typeof(global::{@namespace}.{interfaceName}<{commaArguments}>).MakeGenericType(contextType.GetGenericArguments()));"
-                : $@"if (contextType == typeof(global::{@namespace}.{baseName})) return MockContextType.MakeGenericType(typeof(global::{@namespace}.{interfaceName}));";
+                ? $@"if (gtd == typeof(global::{@namespace}.{baseName}<{commaArguments}>)) return MockContextType.MakeGenericType(typeof(global::{@namespace}.{Prefix.ProtectedToPublicInterface}{className}<{commaArguments}>).MakeGenericType(contextType.GetGenericArguments()));"
+                : $@"if (contextType == typeof(global::{@namespace}.{baseName})) return MockContextType.MakeGenericType(typeof(global::{@namespace}.{Prefix.ProtectedToPublicInterface}{className}));";
             here.Append(toAppend);
         }
 
         public override void DoGeneratePart_GetPropertiesContextType(StringBuilder here)
         {
             var toAppend = typeSymbol.IsGenericType
-                ? $@"if (gtd == typeof(global::{@namespace}.{baseName}<{commaArguments}>)) return MockContextType.MakeGenericType(typeof(global::{@namespace}.{Prefix.PropertyToFuncInterface}{baseName}<{commaArguments}>).MakeGenericType(contextType.GetGenericArguments()));"
-                : $@"if (contextType == typeof(global::{@namespace}.{baseName})) return MockContextType.MakeGenericType(typeof(global::{@namespace}.{Prefix.PropertyToFuncInterface}{baseName}));";
+                ? $@"if (gtd == typeof(global::{@namespace}.{baseName}<{commaArguments}>)) return MockContextType.MakeGenericType(typeof(global::{@namespace}.{Prefix.PropertyToFuncInterface}{className}<{commaArguments}>).MakeGenericType(contextType.GetGenericArguments()));"
+                : $@"if (contextType == typeof(global::{@namespace}.{baseName})) return MockContextType.MakeGenericType(typeof(global::{@namespace}.{Prefix.PropertyToFuncInterface}{className}));";
             here.Append(toAppend);
         }
 
         public override void DoGeneratePart_GetAssertType(StringBuilder here)
         {
             var toAppend = typeSymbol.IsGenericType
-                ? $"if (gtd == typeof(global::{@namespace}.{baseName}<{commaArguments}>)) return typeof(global::{@namespace}.{Prefix.AssertImplementation}{baseName}<{commaArguments}>).MakeGenericType(contextType.GetGenericArguments());"
-                : $"if (contextType == typeof(global::{@namespace}.{baseName})) return typeof(global::{@namespace}.{Prefix.AssertImplementation}{baseName});";
+                ? $"if (gtd == typeof(global::{@namespace}.{baseName}<{commaArguments}>)) return typeof(global::{@namespace}.{Prefix.AssertImplementation}{className}<{commaArguments}>).MakeGenericType(contextType.GetGenericArguments());"
+                : $"if (contextType == typeof(global::{@namespace}.{baseName})) return typeof(global::{@namespace}.{Prefix.AssertImplementation}{className});";
             here.Append(toAppend);
         }
 
