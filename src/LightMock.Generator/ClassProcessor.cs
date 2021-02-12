@@ -1,7 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 
 namespace LightMock.Generator
@@ -13,8 +12,9 @@ namespace LightMock.Generator
         protected ClassProcessor(
             INamedTypeSymbol typeSymbol)
         {
-            this.typeSymbol = typeSymbol;
+            this.typeSymbol = typeSymbol.OriginalDefinition;
         }
+
 
         public abstract IEnumerable<Diagnostic> GetErrors();
         public abstract IEnumerable<Diagnostic> GetWarnings();
@@ -26,8 +26,7 @@ namespace LightMock.Generator
         public virtual void DoGeneratePart_GetAssertType(StringBuilder here) { }
         public virtual void DoGeneratePart_GetDelegate(StringBuilder here) { }
 
-        public string FileName => typeSymbol.IsGenericType
-                ? typeSymbol.Name + "{" + string.Join(",", typeSymbol.TypeParameters.Select(i => i.Name)) + "}" + Suffix.FileName
-                : typeSymbol.Name + Suffix.FileName;
+        public string FileName
+            => new StringBuilder().AppendFileName(typeSymbol).ToString();
     }
 }

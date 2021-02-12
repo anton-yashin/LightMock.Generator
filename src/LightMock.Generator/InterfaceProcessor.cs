@@ -15,6 +15,7 @@ namespace LightMock.Generator
         private readonly SymbolVisitor<string> assertImplementationVisitor;
         private readonly string className;
         private readonly string interfaceName;
+        private readonly string baseName;
         private readonly string typeArgumentsWithBrackets;
         private readonly string commaArguments;
         private readonly string whereClause;
@@ -32,7 +33,8 @@ namespace LightMock.Generator
             var typeArguments = withTypeParams.Replace(to.ToDisplayString(SymbolDisplayFormats.Namespace), "");
 
             className = Prefix.MockClass + typeSymbol.Name;
-            interfaceName = typeSymbol.Name;
+            interfaceName = new StringBuilder().AppendContainingTypes(typeSymbol, "_").Append(typeSymbol.Name).ToString();
+            baseName = new StringBuilder().AppendContainingTypes(typeSymbol, ".").Append(typeSymbol.Name).ToString();
             typeArgumentsWithBrackets = typeArguments.Length > 0 ? typeArguments : "";
             commaArguments = string.Join(",", to.TypeArguments.Select(i => " "));
             whereClause = withWhereClause.Replace(withTypeParams, "");
@@ -59,7 +61,7 @@ namespace {@namespace}
         {string.Join("\r\n        ", members.Select(i => i.OriginalDefinition.Accept(propertyDefinitionVisitor)))}
     }}
 
-    sealed class {Prefix.AssertImplementation}{interfaceName}{typeArgumentsWithBrackets} : {interfaceName}{typeArgumentsWithBrackets}
+    sealed class {Prefix.AssertImplementation}{interfaceName}{typeArgumentsWithBrackets} : {baseName}{typeArgumentsWithBrackets}
         {whereClause}
     {{
         private readonly IMockContext<{Prefix.PropertyToFuncInterface}{interfaceName}{typeArgumentsWithBrackets}> {VariableNames.Context};
@@ -76,14 +78,14 @@ namespace {@namespace}
         {string.Join("\r\n        ", members.Select(i => i.OriginalDefinition.Accept(assertImplementationVisitor)))}
     }}
 
-    partial class {className}{typeArgumentsWithBrackets} : {interfaceName}{typeArgumentsWithBrackets}
+    partial class {className}{typeArgumentsWithBrackets} : {baseName}{typeArgumentsWithBrackets}
         {whereClause}
     {{
-        private readonly IInvocationContext<{interfaceName}{typeArgumentsWithBrackets}> {VariableNames.Context};
+        private readonly IInvocationContext<{baseName}{typeArgumentsWithBrackets}> {VariableNames.Context};
         private readonly IInvocationContext<{Prefix.PropertyToFuncInterface}{interfaceName}{typeArgumentsWithBrackets}> {VariableNames.PropertiesContext};
 
         public {className}(
-            IInvocationContext<{interfaceName}{typeArgumentsWithBrackets}> {VariableNames.Context},
+            IInvocationContext<{baseName}{typeArgumentsWithBrackets}> {VariableNames.Context},
             IInvocationContext<{Prefix.PropertyToFuncInterface}{interfaceName}{typeArgumentsWithBrackets}> {VariableNames.PropertiesContext})
         {{
             this.{VariableNames.Context} = {VariableNames.Context};
@@ -91,7 +93,7 @@ namespace {@namespace}
         }}
 
         public {className}(
-            IInvocationContext<{interfaceName}{typeArgumentsWithBrackets}> {VariableNames.Context},
+            IInvocationContext<{baseName}{typeArgumentsWithBrackets}> {VariableNames.Context},
             IInvocationContext<{Prefix.PropertyToFuncInterface}{interfaceName}{typeArgumentsWithBrackets}> {VariableNames.PropertiesContext},
             object unused)
             : this({VariableNames.Context}, {VariableNames.PropertiesContext}) {{ }}
@@ -106,24 +108,24 @@ namespace {@namespace}
         public override void DoGeneratePart_GetInstanceType(StringBuilder here)
         {
             var toAppend = typeSymbol.IsGenericType 
-                ? $"if (gtd == typeof(global::{@namespace}.{interfaceName}<{commaArguments}>)) return typeof(global::{@namespace}.{className}<{commaArguments}>).MakeGenericType(contextType.GetGenericArguments());" 
-                : $"if (contextType == typeof(global::{@namespace}.{interfaceName})) return typeof(global::{@namespace}.{className});";
+                ? $"if (gtd == typeof(global::{@namespace}.{baseName}<{commaArguments}>)) return typeof(global::{@namespace}.{className}<{commaArguments}>).MakeGenericType(contextType.GetGenericArguments());" 
+                : $"if (contextType == typeof(global::{@namespace}.{baseName})) return typeof(global::{@namespace}.{className});";
             here.Append(toAppend);
         }
 
         public override void DoGeneratePart_GetPropertiesContextType(StringBuilder here)
         {
             var toAppend = typeSymbol.IsGenericType
-                ? $"if (gtd == typeof(global::{@namespace}.{interfaceName}<{commaArguments}>)) return MockContextType.MakeGenericType(typeof(global::{@namespace}.{Prefix.PropertyToFuncInterface}{interfaceName}<{commaArguments}>).MakeGenericType(contextType.GetGenericArguments()));"
-                : $"if (contextType == typeof(global::{@namespace}.{interfaceName})) return MockContextType.MakeGenericType(typeof(global::{@namespace}.{Prefix.PropertyToFuncInterface}{interfaceName}));";
+                ? $"if (gtd == typeof(global::{@namespace}.{baseName}<{commaArguments}>)) return MockContextType.MakeGenericType(typeof(global::{@namespace}.{Prefix.PropertyToFuncInterface}{interfaceName}<{commaArguments}>).MakeGenericType(contextType.GetGenericArguments()));"
+                : $"if (contextType == typeof(global::{@namespace}.{baseName})) return MockContextType.MakeGenericType(typeof(global::{@namespace}.{Prefix.PropertyToFuncInterface}{interfaceName}));";
             here.Append(toAppend);
         }
 
         public override void DoGeneratePart_GetAssertType(StringBuilder here)
         {
             var toAppend = typeSymbol.IsGenericType
-                ? $"if (gtd == typeof(global::{@namespace}.{interfaceName}<{commaArguments}>)) return typeof(global::{@namespace}.{Prefix.AssertImplementation}{interfaceName}<{commaArguments}>).MakeGenericType(contextType.GetGenericArguments());"
-                : $"if (contextType == typeof(global::{@namespace}.{interfaceName})) return typeof(global::{@namespace}.{Prefix.AssertImplementation}{interfaceName});";
+                ? $"if (gtd == typeof(global::{@namespace}.{baseName}<{commaArguments}>)) return typeof(global::{@namespace}.{Prefix.AssertImplementation}{interfaceName}<{commaArguments}>).MakeGenericType(contextType.GetGenericArguments());"
+                : $"if (contextType == typeof(global::{@namespace}.{baseName})) return typeof(global::{@namespace}.{Prefix.AssertImplementation}{interfaceName});";
             here.Append(toAppend);
         }
     }

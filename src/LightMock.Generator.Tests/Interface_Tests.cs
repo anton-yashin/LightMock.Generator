@@ -393,6 +393,17 @@ namespace LightMock.Generator.Tests
             Assert.Throws<MockNotGeneratedException>(() => testScript.MockObject);
         }
 
+        [Fact]
+        public void NestedInterface()
+        {
+            var testScript = LoadAssembly<INestedInterface.ITest>();
+            var context = testScript.Context;
+            var mock = testScript.MockObject;
+
+            mock.Foo();
+            context.Assert(f => f.Foo());
+        }
+
         protected override string GetFullResourceName(string resourceName)
             => "Interface." + resourceName + ".test.cs";
     }

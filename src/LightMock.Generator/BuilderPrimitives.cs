@@ -1,5 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
@@ -160,6 +161,36 @@ namespace LightMock.Generator
             if (symbol.RemoveMethod != null)
                 @this.AppendEventRemove(contextName, symbol, methodName);
             @this.Append("}");
+            return @this;
+        }
+
+        public static StringBuilder AppendFileName(this StringBuilder @this, INamedTypeSymbol typeSymbol)
+        {
+            @this.AppendContainingTypes(typeSymbol, "_").Append(typeSymbol.Name);
+            if (typeSymbol.IsGenericType)
+            {
+                @this.Append('{');
+                foreach (var i in typeSymbol.TypeParameters.Select(i => i.Name))
+                    @this.Append(i).Append(",");
+                @this.Remove(@this.Length - 1, 1).Append('}');
+            }
+            @this.Append(Suffix.FileName);
+            return @this;
+        }
+
+        public static StringBuilder AppendContainingTypes(this StringBuilder @this, INamedTypeSymbol typeSymbol, string separator = "")
+        {
+            if (typeSymbol.ContainingType != null)
+            {
+                var stack = new Stack<INamedTypeSymbol>();
+                for (var ts = typeSymbol.ContainingType; ts != null; ts = ts.ContainingType)
+                    stack.Push(ts);
+                while (stack.Count > 0)
+                {
+                    var ts = stack.Pop();
+                    @this.Append(ts.Name).Append(separator);
+                }
+            }
             return @this;
         }
     }
