@@ -1,4 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
+using System;
+using System.Linq;
 using System.Text;
 
 namespace LightMock.Generator
@@ -30,6 +32,9 @@ namespace LightMock.Generator
 
             if (isInterfaceRequired)
                 AddInterfaceImplementation(symbol, result);
+
+            if (symbol.IsObsolete())
+                result.Append("[Obsolete] ");
 
             result.Append("override ")
                 .AppendMethodDeclaration(symbol.ToDisplayString(SymbolDisplayFormats.AbstractClass), symbol)
@@ -63,6 +68,9 @@ namespace LightMock.Generator
             var result = new StringBuilder();
             if (isInterfaceRequired)
                 AddInterfaceImplementation(symbol, result);
+
+            if (symbol.IsObsolete())
+                result.Append("[Obsolete] ");
 
             result.Append("override ")
                 .Append(symbol.ToDisplayString(SymbolDisplayFormats.AbstractClass))

@@ -3,7 +3,12 @@ using LightMock.Generator.Tests.AbstractClass.EventNamespace2;
 using LightMock.Generator.Tests.AbstractClass.Namespace1;
 using LightMock.Generator.Tests.AbstractClass.Namespace2;
 using LightMock.Generator.Tests.TestAbstractions;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using System;
+using System.Collections.Immutable;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
@@ -476,6 +481,23 @@ namespace LightMock.Generator.Tests
 
             mock.Foo();
             context.Assert(f => f.Foo());
+        }
+
+        [Fact]
+        public void ObsoleteSupport()
+        {
+            var fn = GetFullResourceName(nameof(ObsoleteSupport));
+            var source = Utils.LoadResource(fn);
+            var compilation = CreateCompilation(source, fn);
+            var driver = CSharpGeneratorDriver.Create(
+                ImmutableArray.Create(new LightMockGenerator()),
+                Enumerable.Empty<AdditionalText>(),
+                (CSharpParseOptions)compilation.SyntaxTrees.First().Options);
+
+            driver.RunGeneratorsAndUpdateCompilation(compilation, out var updatedCompilation, out var diagnostics);
+            var ms = new MemoryStream();
+            var result = updatedCompilation.Emit(ms);
+            Assert.DoesNotContain(result.Diagnostics, f => f.Id == "CS0672");
         }
 
         protected override string GetFullResourceName(string resourceName)
