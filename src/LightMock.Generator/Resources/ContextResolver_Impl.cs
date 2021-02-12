@@ -11,7 +11,7 @@ namespace LightMock.Generator
 
             /*getInstanceTypeBuilder*/
 
-            throw new NotSupportedException(contextType.FullName + " is not supported " + gtd?.FullName);
+            throw new MockNotGeneratedException(contextType);
         }
 
         public static Type GetProtectedContextType(Type contextType)
@@ -31,7 +31,7 @@ namespace LightMock.Generator
 
             if (contextType.IsSubclassOf(MulticastDelegateType))
                 return typeof(MockContext<object>);
-            throw new NotSupportedException(contextType.FullName + " is not supported " + gtd?.FullName);
+            throw new MockNotGeneratedException(contextType);
         }
 
         public static Type GetAssertType(Type contextType)
@@ -40,7 +40,7 @@ namespace LightMock.Generator
 
             /*getAssertTypeBuilder*/
 
-            throw new NotSupportedException(contextType.FullName + " is not supported " + gtd?.FullName);
+            throw new MockNotGeneratedException(contextType);
         }
 
         public static object GetDelegate(Type contextType, object mockContext)
@@ -49,7 +49,7 @@ namespace LightMock.Generator
 
             /*getDelegateBuilder*/
 
-            throw new NotSupportedException(contextType.FullName + " is not supported " + gtd?.FullName);
+            throw new MockNotGeneratedException(contextType);
         }
     }
 

@@ -42,6 +42,14 @@ namespace LightMock.Generator.Tests
             context.Assert(f => f.Invoke(e1, e2, e3));
         }
 
+        [Fact]
+        public void DelegateNotGenerated()
+        {
+            var testScript = LoadAssembly<EventHandler>();
+
+            Assert.Throws<MockNotGeneratedException>(() => testScript.MockObject);
+        }
+
         protected override string GetFullResourceName(string resourceName)
             => "Delegate." + resourceName + ".test.cs";
     }

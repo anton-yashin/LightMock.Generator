@@ -384,6 +384,15 @@ namespace LightMock.Generator.Tests
             Assert.Equal(ExceptionMessages.OnRefStructMethod, exception?.Message);
         }
 
+        [Fact]
+        public void InterfaceNotGenerated()
+        {
+            var testScript = LoadAssembly<IInterfaceNotGenerated>();
+            
+            Assert.Throws<MockNotGeneratedException>(() => testScript.Context);
+            Assert.Throws<MockNotGeneratedException>(() => testScript.MockObject);
+        }
+
         protected override string GetFullResourceName(string resourceName)
             => "Interface." + resourceName + ".test.cs";
     }

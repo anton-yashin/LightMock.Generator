@@ -458,6 +458,15 @@ namespace LightMock.Generator.Tests
             Assert.Equal(ExceptionMessages.OnRefStructMethod, exception?.Message);
         }
 
+        [Fact]
+        public void AbstractClassNotGenerated()
+        {
+            var testScript = LoadAssembly<AAbstractClassNotGenerated>();
+
+            Assert.Throws<MockNotGeneratedException>(() => testScript.Context);
+            Assert.Throws<MockNotGeneratedException>(() => testScript.MockObject);
+        }
+
         protected override string GetFullResourceName(string resourceName)
             => "AbstractClass." + resourceName + ".test.cs";
     }
