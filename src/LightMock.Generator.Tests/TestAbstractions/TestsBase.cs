@@ -36,7 +36,7 @@ namespace LightMock.Generator.Tests.TestAbstractions
             => CSharpCompilation.Create(compilationName,
                 syntaxTrees: new[]
                 {
-                    CSharpSyntaxTree.ParseText(source, new CSharpParseOptions(LanguageVersion.Preview))
+                    CSharpSyntaxTree.ParseText(source, new CSharpParseOptions(LanguageVersion.Preview), compilationName)
                 },
                 references: new[]
                 {

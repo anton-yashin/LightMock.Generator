@@ -166,7 +166,8 @@ namespace LightMock.Generator
 
         public static StringBuilder AppendFileName(this StringBuilder @this, INamedTypeSymbol typeSymbol)
         {
-            @this.AppendContainingTypes(typeSymbol, "_").Append(typeSymbol.Name);
+            @this.AppendContainingTypes<string>(typeSymbol, (sb, ts) => sb.AppendTypeArguments(ts, i => i.Name, "{", "}"), "_")
+                .Append(typeSymbol.Name);
             if (typeSymbol.IsGenericType)
             {
                 @this.Append('{');
@@ -178,7 +179,11 @@ namespace LightMock.Generator
             return @this;
         }
 
-        public static StringBuilder AppendContainingTypes(this StringBuilder @this, INamedTypeSymbol typeSymbol, string separator = "")
+        public static StringBuilder AppendContainingTypes<TResult>(
+            this StringBuilder @this,
+            INamedTypeSymbol typeSymbol,
+            Action<StringBuilder, INamedTypeSymbol> appendTypeArguments,
+            string separator = "")
         {
             if (typeSymbol.ContainingType != null)
             {
@@ -188,8 +193,26 @@ namespace LightMock.Generator
                 while (stack.Count > 0)
                 {
                     var ts = stack.Pop();
-                    @this.Append(ts.Name).Append(separator);
+                    @this.Append(ts.Name);
+                    appendTypeArguments(@this, ts);
+                    @this.Append(separator);
                 }
+            }
+            return @this;
+        }
+
+        public static StringBuilder AppendTypeArguments<TResult>(
+            this StringBuilder @this,
+            INamedTypeSymbol typeSymbol,
+            Func<ITypeSymbol, TResult> selector,
+            string leftBracket = "<",
+            string rightBracket = ">")
+        {
+            if (typeSymbol.TypeArguments.Any())
+            {
+                @this.Append(leftBracket)
+                    .Append(string.Join(", ", typeSymbol.TypeArguments.Select(selector)))
+                    .Append(rightBracket);
             }
             return @this;
         }

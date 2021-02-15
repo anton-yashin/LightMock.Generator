@@ -32,8 +32,12 @@ namespace LightMock.Generator
             this.propertyDefinitionVisitor = new PropertyDefinitionVisitor();
             this.assertImplementationVisitor = new AssertImplementationVisitor(SymbolDisplayFormats.AbstractClass);
             this.@namespace = typeSymbol.ContainingNamespace.ToDisplayString(SymbolDisplayFormats.Namespace);
-            this.className = new StringBuilder().AppendContainingTypes(typeSymbol, "_").Append(typeSymbol.Name).ToString();
-            this.baseName = new StringBuilder().AppendContainingTypes(typeSymbol, ".").Append(typeSymbol.Name).ToString();
+            this.className = new StringBuilder()
+                .AppendContainingTypes<string>(typeSymbol, (sb, ts) => sb.AppendTypeArguments(ts, i => i.Name), "_")
+                .Append(typeSymbol.Name).ToString();
+            this.baseName = new StringBuilder()
+                .AppendContainingTypes<string>(typeSymbol, (sb, ts) => sb.AppendTypeArguments(ts, i => i.Name), ".")
+                .Append(typeSymbol.Name).ToString();
             this.symbolVisitor = new AbstractClassSymbolVisitor(@namespace, Prefix.ProtectedToPublicInterface + className);
 
             var to = typeSymbol.OriginalDefinition;

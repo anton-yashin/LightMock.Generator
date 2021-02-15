@@ -404,6 +404,27 @@ namespace LightMock.Generator.Tests
             context.Assert(f => f.Foo());
         }
 
+        [Fact]
+        public void NestedGenericInterface()
+        {
+            var testScript = LoadAssembly<INestedGenericInterface<int>.IContainingInterface<long>.ITest<IBar>>();
+            var context = testScript.Context;
+            var mock = testScript.MockObject;
+
+            context.Arrange(f => f.Foo(2345)).Returns(1234);
+            Assert.Equal(1234, mock.Foo(2345));
+            context.Assert(f => f.Foo(2345));
+
+            context.Arrange(f => f.Bar<int>(6789)).Returns(5678);
+            Assert.Equal(5678, mock.Bar<int>(6789));
+            context.Assert(f => f.Bar<int>(6789));
+
+            context.Arrange(f => f.Baz(null)).Returns(9012);
+            Assert.Equal(9012, mock.Baz(null));
+            context.Assert(f => f.Baz(null));
+
+        }
+
         protected override string GetFullResourceName(string resourceName)
             => "Interface." + resourceName + ".test.cs";
     }
