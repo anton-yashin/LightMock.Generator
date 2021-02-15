@@ -15,7 +15,8 @@ namespace LightMock.Generator
         private readonly string @namespace;
         private readonly SymbolVisitor<string> symbolVisitor;
         private readonly string className;
-        private readonly string baseName;
+        private readonly string baseNameWithTypeArguments;
+        private readonly string baseNameWithCommaArguments;
         private readonly string typeArgumentsWithBrackets;
         private readonly string whereClause;
         private readonly string commaArguments;
@@ -27,43 +28,77 @@ namespace LightMock.Generator
             SyntaxNode containingGeneric,
             INamedTypeSymbol typeSymbol) : base(typeSymbol)
         {
+            typeSymbol = typeSymbol.OriginalDefinition;
 
-            this.protectedVisitor = new ProtectedMemberSymbolVisitor();
-            this.propertyDefinitionVisitor = new PropertyDefinitionVisitor();
-            this.assertImplementationVisitor = new AssertImplementationVisitor(SymbolDisplayFormats.AbstractClass);
-            this.@namespace = typeSymbol.ContainingNamespace.ToDisplayString(SymbolDisplayFormats.Namespace);
-            this.className = new StringBuilder()
-                .AppendContainingTypes<string>(typeSymbol, (sb, ts) => sb.AppendTypeArguments(ts, i => i.Name), "_")
-                .Append(typeSymbol.Name).ToString();
-            this.baseName = new StringBuilder()
+            protectedVisitor = new ProtectedMemberSymbolVisitor();
+            propertyDefinitionVisitor = new PropertyDefinitionVisitor();
+            assertImplementationVisitor = new AssertImplementationVisitor(SymbolDisplayFormats.AbstractClass);
+            @namespace = typeSymbol.ContainingNamespace.ToDisplayString(SymbolDisplayFormats.Namespace);
+
+            var (whereClause, typeArguments) = GetArgumens(typeSymbol);
+
+            bool haveTypeArguments = typeSymbol.TypeArguments.Any();
+
+            className = new StringBuilder()
+                .AppendContainingTypes<string>(typeSymbol, (sb, ts) => sb.AppendTypeArguments(ts, i => i.Name, "_", "_"), "_")
+                .Append(typeSymbol.Name)
+                .ToString();
+            baseNameWithTypeArguments = new StringBuilder()
                 .AppendContainingTypes<string>(typeSymbol, (sb, ts) => sb.AppendTypeArguments(ts, i => i.Name), ".")
-                .Append(typeSymbol.Name).ToString();
-            this.symbolVisitor = new AbstractClassSymbolVisitor(@namespace, Prefix.ProtectedToPublicInterface + className);
+                .Append(typeSymbol.Name)
+                .Append(haveTypeArguments ? "<" + string.Join(",", typeSymbol.TypeArguments.Select(i => i.Name)) + ">" : "")
+                .ToString();
+            baseNameWithCommaArguments = new StringBuilder()
+                .AppendContainingTypes<string>(typeSymbol, (sb, ts) => sb.AppendTypeArguments(ts, i => " "), ".")
+                .Append(typeSymbol.Name)
+                .Append(haveTypeArguments ? "<" + string.Join(",", typeSymbol.TypeArguments.Select(i => " ")) + ">" : "")
+                .ToString();
+            symbolVisitor = new AbstractClassSymbolVisitor(@namespace, Prefix.ProtectedToPublicInterface + className);
 
-            var to = typeSymbol.OriginalDefinition;
-            var withTypeParams = to.ToDisplayString(SymbolDisplayFormats.WithTypeParams);
-            var withWhereClause = to.ToDisplayString(SymbolDisplayFormats.WithWhereClause);
-            var typeArguments = withTypeParams.Replace(to.ToDisplayString(SymbolDisplayFormats.Namespace), "");
-
-            this.typeArgumentsWithBrackets = typeArguments.Length > 0 ? typeArguments : "";
-            this.whereClause = withWhereClause.Replace(withTypeParams, "");
-            this.commaArguments = string.Join(",",
-                typeSymbol.OriginalDefinition.TypeArguments.Select(i => " "));
-            this.constructors = new List<string>(
-                to.Constructors.Select(
+            typeArgumentsWithBrackets = string.Join(",", typeArguments.Select(i => i.Name)); ;
+            if (typeArgumentsWithBrackets.Length > 0)
+                typeArgumentsWithBrackets = "<" + typeArgumentsWithBrackets + ">";
+            this.whereClause = whereClause;
+            commaArguments = string.Join(",", typeArguments.Select(i => " "));
+            constructors = new List<string>(
+                typeSymbol.Constructors.Select(
                     i => i.ToDisplayString(SymbolDisplayFormats.ConstructorDecl)
                     .Replace(typeSymbol.Name, "").Trim('(', ')')));
-            this.constructorsCall = new List<string>(
-                to.Constructors.Select(
+            constructorsCall = new List<string>(
+                typeSymbol.Constructors.Select(
                     i => i.ToDisplayString(SymbolDisplayFormats.ConstructorCall)
                     .Replace(typeSymbol.Name, "").Trim('(', ')')));
             this.containingGeneric = containingGeneric;
         }
 
+        static (string whereClause, IEnumerable<ITypeSymbol> typeArguments) GetArgumens(INamedTypeSymbol typeSymbol)
+        {
+            IEnumerable<ITypeSymbol> typeArguments = typeSymbol.TypeArguments;
+            var whereClause = GetWhereClause(typeSymbol);
+
+            for (var tsct = typeSymbol.ContainingType; tsct != null; tsct = tsct.ContainingType)
+            {
+                whereClause = GetWhereClause(tsct) + whereClause;
+                typeArguments = tsct.TypeArguments.Concat(typeArguments);
+            }
+
+            return (whereClause, typeArguments);
+        }
+
+        static string GetWhereClause(INamedTypeSymbol typeSymbol)
+        {
+            var withTypeParams = typeSymbol.ToDisplayString(SymbolDisplayFormats.WithTypeParams);
+            var withWhereClause = typeSymbol.ToDisplayString(SymbolDisplayFormats.WithWhereClause);
+            var whereClause = withWhereClause.Replace(withTypeParams, "");
+            return whereClause;
+        }
+
+
+
         string GenerateConstructor(string declaration, string call)
         {
             return $@"
-        public {Prefix.MockClass}{className}(IInvocationContext<{baseName}{typeArgumentsWithBrackets}> {VariableNames.Context},
+        public {Prefix.MockClass}{className}(IInvocationContext<{baseNameWithTypeArguments}> {VariableNames.Context},
             IInvocationContext<{Prefix.PropertyToFuncInterface}{className}{typeArgumentsWithBrackets}> {VariableNames.PropertiesContext},
             IInvocationContext<{Prefix.ProtectedToPublicInterface}{className}{typeArgumentsWithBrackets}> {VariableNames.ProtectedContext},
             {declaration})
@@ -79,7 +114,7 @@ namespace LightMock.Generator
         string GenerateDefaultConstructor()
         {
             return $@"
-        public {Prefix.MockClass}{className}(IInvocationContext<{baseName}{typeArgumentsWithBrackets}> {VariableNames.Context},
+        public {Prefix.MockClass}{className}(IInvocationContext<{baseNameWithTypeArguments}> {VariableNames.Context},
             IInvocationContext<{Prefix.PropertyToFuncInterface}{className}{typeArgumentsWithBrackets}> {VariableNames.PropertiesContext},
             IInvocationContext<{Prefix.ProtectedToPublicInterface}{className}{typeArgumentsWithBrackets}> {VariableNames.ProtectedContext})
         {{
@@ -155,7 +190,7 @@ namespace {@namespace}
         {string.Join("\r\n        ", members.Select(i => i.OriginalDefinition.Accept(propertyDefinitionVisitor)))}
     }}
 
-    sealed class {Prefix.AssertImplementation}{className}{typeArgumentsWithBrackets} : {baseName}{typeArgumentsWithBrackets}
+    sealed class {Prefix.AssertImplementation}{className}{typeArgumentsWithBrackets} : {baseNameWithTypeArguments}
         {whereClause}
     {{
         private readonly IMockContext<{Prefix.PropertyToFuncInterface}{className}{typeArgumentsWithBrackets}> {VariableNames.Context};
@@ -173,10 +208,10 @@ namespace {@namespace}
     }}
 
 
-    partial class {Prefix.MockClass}{className}{typeArgumentsWithBrackets} : {baseName}{typeArgumentsWithBrackets}, {Prefix.ProtectedToPublicInterface}{className}{typeArgumentsWithBrackets}
+    partial class {Prefix.MockClass}{className}{typeArgumentsWithBrackets} : {baseNameWithTypeArguments}, {Prefix.ProtectedToPublicInterface}{className}{typeArgumentsWithBrackets}
         {whereClause}
     {{
-        private readonly IInvocationContext<{baseName}{typeArgumentsWithBrackets}> {VariableNames.Context};
+        private readonly IInvocationContext<{baseNameWithTypeArguments}> {VariableNames.Context};
         private readonly IInvocationContext<{Prefix.PropertyToFuncInterface}{className}{typeArgumentsWithBrackets}> {VariableNames.PropertiesContext};
         private readonly IInvocationContext<{Prefix.ProtectedToPublicInterface}{className}{typeArgumentsWithBrackets}> {VariableNames.ProtectedContext};
 
@@ -193,7 +228,7 @@ namespace LightMock.Generator
     public static partial class MockExtensions
     {{
         [DebuggerStepThrough]
-        public static MockContext<global::{@namespace}.{Prefix.ProtectedToPublicInterface}{className}{typeArgumentsWithBrackets}> Protected{typeArgumentsWithBrackets}(this IProtectedContext<{baseName}{typeArgumentsWithBrackets}> @this)
+        public static MockContext<global::{@namespace}.{Prefix.ProtectedToPublicInterface}{className}{typeArgumentsWithBrackets}> Protected{typeArgumentsWithBrackets}(this IProtectedContext<{baseNameWithTypeArguments}> @this)
             {whereClause}
             => (MockContext<global::{@namespace}.{Prefix.ProtectedToPublicInterface}{className}{typeArgumentsWithBrackets}>)@this.{nameof(IProtectedContext<object>.ProtectedContext)};
     }}
@@ -217,32 +252,32 @@ namespace LightMock.Generator
         public override void DoGeneratePart_GetInstanceType(StringBuilder here)
         {
             var toAppend = typeSymbol.IsGenericType
-                ? $"if (gtd == typeof(global::{@namespace}.{baseName}<{commaArguments}>)) return typeof(global::{@namespace}.{Prefix.MockClass}{className}<{commaArguments}>).MakeGenericType(contextType.GetGenericArguments());"
-                : $"if (contextType == typeof(global::{@namespace}.{baseName})) return typeof(global::{@namespace}.{Prefix.MockClass}{className});";
+                ? $"if (gtd == typeof(global::{@namespace}.{baseNameWithCommaArguments})) return typeof(global::{@namespace}.{Prefix.MockClass}{className}<{commaArguments}>).MakeGenericType(contextType.GetGenericArguments());"
+                : $"if (contextType == typeof(global::{@namespace}.{baseNameWithCommaArguments})) return typeof(global::{@namespace}.{Prefix.MockClass}{className});";
             here.Append(toAppend);
         }
 
         public override void DoGeneratePart_GetProtectedContextType(StringBuilder here)
         {
             var toAppend = typeSymbol.IsGenericType
-                ? $@"if (gtd == typeof(global::{@namespace}.{baseName}<{commaArguments}>)) return MockContextType.MakeGenericType(typeof(global::{@namespace}.{Prefix.ProtectedToPublicInterface}{className}<{commaArguments}>).MakeGenericType(contextType.GetGenericArguments()));"
-                : $@"if (contextType == typeof(global::{@namespace}.{baseName})) return MockContextType.MakeGenericType(typeof(global::{@namespace}.{Prefix.ProtectedToPublicInterface}{className}));";
+                ? $@"if (gtd == typeof(global::{@namespace}.{baseNameWithCommaArguments})) return MockContextType.MakeGenericType(typeof(global::{@namespace}.{Prefix.ProtectedToPublicInterface}{className}<{commaArguments}>).MakeGenericType(contextType.GetGenericArguments()));"
+                : $@"if (contextType == typeof(global::{@namespace}.{baseNameWithCommaArguments})) return MockContextType.MakeGenericType(typeof(global::{@namespace}.{Prefix.ProtectedToPublicInterface}{className}));";
             here.Append(toAppend);
         }
 
         public override void DoGeneratePart_GetPropertiesContextType(StringBuilder here)
         {
             var toAppend = typeSymbol.IsGenericType
-                ? $@"if (gtd == typeof(global::{@namespace}.{baseName}<{commaArguments}>)) return MockContextType.MakeGenericType(typeof(global::{@namespace}.{Prefix.PropertyToFuncInterface}{className}<{commaArguments}>).MakeGenericType(contextType.GetGenericArguments()));"
-                : $@"if (contextType == typeof(global::{@namespace}.{baseName})) return MockContextType.MakeGenericType(typeof(global::{@namespace}.{Prefix.PropertyToFuncInterface}{className}));";
+                ? $@"if (gtd == typeof(global::{@namespace}.{baseNameWithCommaArguments})) return MockContextType.MakeGenericType(typeof(global::{@namespace}.{Prefix.PropertyToFuncInterface}{className}<{commaArguments}>).MakeGenericType(contextType.GetGenericArguments()));"
+                : $@"if (contextType == typeof(global::{@namespace}.{baseNameWithCommaArguments})) return MockContextType.MakeGenericType(typeof(global::{@namespace}.{Prefix.PropertyToFuncInterface}{className}));";
             here.Append(toAppend);
         }
 
         public override void DoGeneratePart_GetAssertType(StringBuilder here)
         {
             var toAppend = typeSymbol.IsGenericType
-                ? $"if (gtd == typeof(global::{@namespace}.{baseName}<{commaArguments}>)) return typeof(global::{@namespace}.{Prefix.AssertImplementation}{className}<{commaArguments}>).MakeGenericType(contextType.GetGenericArguments());"
-                : $"if (contextType == typeof(global::{@namespace}.{baseName})) return typeof(global::{@namespace}.{Prefix.AssertImplementation}{className});";
+                ? $"if (gtd == typeof(global::{@namespace}.{baseNameWithCommaArguments})) return typeof(global::{@namespace}.{Prefix.AssertImplementation}{className}<{commaArguments}>).MakeGenericType(contextType.GetGenericArguments());"
+                : $"if (contextType == typeof(global::{@namespace}.{baseNameWithCommaArguments})) return typeof(global::{@namespace}.{Prefix.AssertImplementation}{className});";
             here.Append(toAppend);
         }
 

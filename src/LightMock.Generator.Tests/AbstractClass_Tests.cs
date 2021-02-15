@@ -500,6 +500,26 @@ namespace LightMock.Generator.Tests
             Assert.DoesNotContain(result.Diagnostics, f => f.Id == "CS0672");
         }
 
+        [Fact]
+        public void NestedGenericClass()
+        {
+            var testScript = LoadAssembly<ANestedGenericClass<int>.AContainingClass<long>.ATest<AFoo>>();
+            var context = testScript.Context;
+            var mock = testScript.MockObject;
+
+            context.Arrange(f => f.Foo(2345)).Returns(1234);
+            Assert.Equal(1234, mock.Foo(2345));
+            context.Assert(f => f.Foo(2345));
+
+            context.Arrange(f => f.Bar<int>(6789)).Returns(5678);
+            Assert.Equal(5678, mock.Bar<int>(6789));
+            context.Assert(f => f.Bar<int>(6789));
+
+            context.Arrange(f => f.Baz(null)).Returns(9012);
+            Assert.Equal(9012, mock.Baz(null));
+            context.Assert(f => f.Baz(null));
+        }
+
         protected override string GetFullResourceName(string resourceName)
             => "AbstractClass." + resourceName + ".test.cs";
     }

@@ -76,7 +76,6 @@ namespace LightMock.Generator
             return whereClause;
         }
 
-
         public override IEnumerable<Diagnostic> GetErrors()
             => Enumerable.Empty<Diagnostic>();
 
