@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -17,6 +18,7 @@ namespace LightMock.Generator
 
         public List<ClassDeclarationSyntax> CandidateClasses { get; } = new List<ClassDeclarationSyntax>();
         public List<GenericNameSyntax> CandidateMocks { get; } = new List<GenericNameSyntax>();
+        public List<AttributeSyntax> DisableCodeGenerationAttributes { get; } = new List<AttributeSyntax>();
 
         public void OnVisitSyntaxNode(SyntaxNode syntaxNode)
         {
@@ -46,6 +48,25 @@ namespace LightMock.Generator
                     CandidateMocks.Add(gns);
                 }
             }
+        }
+
+        const string KDisableCodeGenerationAttribute = nameof(DisableCodeGenerationAttribute);
+        const string KDisableCodeGeneration = "DisableCodeGeneration";
+
+        public override void VisitAttribute(AttributeSyntax node)
+        {
+#if DEBUG
+            if (KDisableCodeGenerationAttribute != KDisableCodeGeneration + nameof(Attribute))
+                throw new InvalidProgramException($@"constant {nameof(KDisableCodeGeneration)} is invalid");
+#endif
+            switch (node.Name.ToString())
+            {
+                case KDisableCodeGeneration:
+                case KDisableCodeGenerationAttribute:
+                    DisableCodeGenerationAttributes.Add(node);
+                    break;
+            }
+
         }
     }
 }

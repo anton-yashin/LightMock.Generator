@@ -37,6 +37,9 @@ namespace LightMock.Generator
                 context.SyntaxReceiver is LightMockSyntaxReceiver receiver &&
                 compilation.SyntaxTrees.First().Options is CSharpParseOptions options)
             {
+                if (IsDisableCodeGenerationAttributePresent(compilation, receiver))
+                    return;
+
                 context.AddSource(KMock + Suffix.FileName, mock.Value);
                 context.AddSource(KContextResolver + Suffix.FileName, contextResolver.Value);
 
@@ -115,6 +118,25 @@ namespace LightMock.Generator
                 context.CancellationToken.ThrowIfCancellationRequested();
                 context.AddSource(KContextResolver + Suffix.ImplFile + Suffix.FileName, SourceText.From(impl, Encoding.UTF8));
             }
+        }
+
+        private static bool IsDisableCodeGenerationAttributePresent(CSharpCompilation compilation, LightMockSyntaxReceiver receiver)
+        {
+            var disableCodeGenerationAttributeType = typeof(DisableCodeGenerationAttribute);
+            var dcgaName = disableCodeGenerationAttributeType.Name;
+            var dcgaNamespace = disableCodeGenerationAttributeType.Namespace;
+            foreach (var candidateAttribute in receiver.DisableCodeGenerationAttributes)
+            {
+                var model = compilation.GetSemanticModel(candidateAttribute.SyntaxTree);
+                var si = model.GetSymbolInfo(candidateAttribute);
+                if (si.Symbol is IMethodSymbol methodSymbol
+                    && methodSymbol.ToDisplayString(SymbolDisplayFormats.Namespace) == dcgaName
+                    && methodSymbol.ContainingNamespace.ToDisplayString(SymbolDisplayFormats.Namespace) == dcgaNamespace)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         bool EmitDiagnostics(GeneratorExecutionContext context, IEnumerable<Diagnostic> diagnostics)
