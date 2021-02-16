@@ -9,7 +9,9 @@ namespace LightMock.Generator
 {
     sealed class DelegateProcessor : ClassProcessor
     {
-        private readonly string fullName;
+        private readonly string className;
+        private readonly string fullNameWithTypeArguments;
+        private readonly string fullNameWithCommaArguments;
         private readonly string @namespace;
         private readonly string typeArgumentsWithBrackets;
         private readonly string whereClause;
@@ -19,25 +21,63 @@ namespace LightMock.Generator
 
         public DelegateProcessor(INamedTypeSymbol typeSymbol) : base(typeSymbol)
         {
-            this.fullName = typeSymbol.ToDisplayString(SymbolDisplayFormats.Namespace);
-            this.@namespace = typeSymbol.ContainingNamespace.ToDisplayString(SymbolDisplayFormats.Namespace);
+            typeSymbol = typeSymbol.OriginalDefinition;
+            className = new StringBuilder(Prefix.MockClass)
+                .AppendContainingTypes<string>(typeSymbol, (sb, ts) => sb.AppendTypeArguments(ts, i => i.Name, "_", "_"), "_")
+                .Append(typeSymbol.Name)
+                .Append(typeSymbol.TypeArguments.Any() ? "_" + string.Join("_", typeSymbol.TypeArguments.Select(i => i.Name)) + "_" : "")
+                .ToString();
+            fullNameWithTypeArguments = new StringBuilder()
+                .AppendContainingTypes<string>(typeSymbol, (sb, ts) => sb.AppendTypeArguments(ts, i => i.Name), ".")
+                .Append(typeSymbol.Name)
+                .Append(typeSymbol.TypeArguments.Any() ? "<" + string.Join(",", typeSymbol.TypeArguments.Select(i => i.Name)) + ">" : "")
+                .ToString();
+            fullNameWithCommaArguments = new StringBuilder()
+                .AppendContainingTypes<string>(typeSymbol, (sb, ts) => sb.AppendTypeArguments(ts, i => " "), ".")
+                .Append(typeSymbol.Name)
+                .Append(typeSymbol.TypeArguments.Any() ? "<" + string.Join(",", typeSymbol.TypeArguments.Select(i => " ")) + ">" : "")
+                .ToString();
+            @namespace = typeSymbol.ContainingNamespace.ToDisplayString(SymbolDisplayFormats.Namespace);
 
-            var to = typeSymbol.OriginalDefinition;
-            var withTypeParams = to.ToDisplayString(SymbolDisplayFormats.WithTypeParams);
-            var withWhereClause = to.ToDisplayString(SymbolDisplayFormats.WithWhereClause);
-            var typeArguments = withTypeParams.Replace(to.ToDisplayString(SymbolDisplayFormats.Namespace), "");
+            var (whereClause, typeArguments) = GetArgumens(typeSymbol);
 
-            this.typeArgumentsWithBrackets = typeArguments.Length > 0 ? typeArguments : "";
-            this.whereClause = withWhereClause.Replace(withTypeParams, "");
-            this.commaArguments = string.Join(",",
-                typeSymbol.OriginalDefinition.TypeArguments.Select(i => " "));
-            var rt = to.DelegateInvokeMethod?.ReturnType;
+            bool haveTypeArguments = typeSymbol.TypeArguments.Any();
+
+            typeArgumentsWithBrackets = string.Join(",", typeArguments.Select(i => i.Name)); ;
+            if (typeArgumentsWithBrackets.Length > 0)
+                typeArgumentsWithBrackets = "<" + typeArgumentsWithBrackets + ">";
+            this.whereClause = whereClause;
+            this.commaArguments = string.Join(",", typeArguments.Select(i => " "));
+            var rt = typeSymbol.DelegateInvokeMethod?.ReturnType;
             const string @void = "void";
             this.returnType = rt != null ? rt.ToDisplayString(SymbolDisplayFormats.Namespace) : @void;
             if (this.returnType == "System.Void")
                 this.returnType = @void;
             this.@return = this.returnType == @void ? "" : "return ";
         }
+
+        static (string whereClause, IEnumerable<ITypeSymbol> typeArguments) GetArgumens(INamedTypeSymbol typeSymbol)
+        {
+            IEnumerable<ITypeSymbol> typeArguments = typeSymbol.TypeArguments;
+            var whereClause = GetWhereClause(typeSymbol);
+
+            for (var tsct = typeSymbol.ContainingType; tsct != null; tsct = tsct.ContainingType)
+            {
+                whereClause = GetWhereClause(tsct) + whereClause;
+                typeArguments = tsct.TypeArguments.Concat(typeArguments);
+            }
+
+            return (whereClause, typeArguments);
+        }
+
+        static string GetWhereClause(INamedTypeSymbol typeSymbol)
+        {
+            var withTypeParams = typeSymbol.ToDisplayString(SymbolDisplayFormats.WithTypeParams);
+            var withWhereClause = typeSymbol.ToDisplayString(SymbolDisplayFormats.WithWhereClause);
+            var whereClause = withWhereClause.Replace(withTypeParams, "");
+            return whereClause;
+        }
+
 
         public override SourceText DoGenerate()
         {
@@ -48,12 +88,12 @@ using LightMock.Generator;
 
 namespace {@namespace}
 {{
-    sealed class {Prefix.MockClass}{typeSymbol.Name}{typeArgumentsWithBrackets} : IDelegateProvider
+    sealed class {className}{typeArgumentsWithBrackets} : IDelegateProvider
         {whereClause}
     {{
-        private readonly IInvocationContext<{fullName}{typeArgumentsWithBrackets}> {VariableNames.Context};
+        private readonly IInvocationContext<{fullNameWithTypeArguments}> {VariableNames.Context};
 
-        public {Prefix.MockClass}{typeSymbol.Name}(IInvocationContext<{fullName}{typeArgumentsWithBrackets}> {VariableNames.Context})
+        public {className}(IInvocationContext<{fullNameWithTypeArguments}> {VariableNames.Context})
         {{
             this.{VariableNames.Context} = {VariableNames.Context};
         }}
@@ -65,7 +105,7 @@ namespace {@namespace}
 
         public global::System.Delegate GetDelegate()
         {{
-            {fullName}{typeArgumentsWithBrackets} result = Invoke;
+            {fullNameWithTypeArguments} result = Invoke;
             return result;
         }}
     }}
@@ -107,23 +147,23 @@ namespace {@namespace}
         public override void DoGeneratePart_GetInstanceType(StringBuilder here)
         {
             var toAppend = typeSymbol.IsGenericType 
-                ? $"if (gtd == typeof(global::{fullName}<{commaArguments}>)) return contextType;"
-                : $"if (contextType == typeof(global::{fullName})) return contextType;";
+                ? $"if (gtd == typeof(global::{@namespace}.{fullNameWithCommaArguments})) return contextType;"
+                : $"if (contextType == typeof(global::{@namespace}.{fullNameWithCommaArguments})) return contextType;";
             here.Append(toAppend);
         }
 
         public override void DoGeneratePart_GetDelegate(StringBuilder here)
         {
             var toAppend = typeSymbol.IsGenericType 
-                ? $@"if (gtd == typeof(global::{fullName}<{commaArguments}>))
+                ? $@"if (gtd == typeof(global::{@namespace}.{fullNameWithCommaArguments}))
 {{
-                var dp = Activator.CreateInstance(typeof({@namespace}.{Prefix.MockClass}{typeSymbol.Name}<{commaArguments}>).MakeGenericType(contextType.GetGenericArguments()), new object[] {{ mockContext }})
-                    ?? throw new InvalidOperationException(""can't create delegate for {fullName}"");
+                var dp = Activator.CreateInstance(typeof({@namespace}.{className}<{commaArguments}>).MakeGenericType(contextType.GetGenericArguments()), new object[] {{ mockContext }})
+                    ?? throw new InvalidOperationException(""can't create delegate for {fullNameWithTypeArguments}"");
                 return ((IDelegateProvider)dp).GetDelegate();
 }}"
-                : $@"if (contextType == typeof(global::{fullName}))
+                : $@"if (contextType == typeof(global::{@namespace}.{fullNameWithCommaArguments}))
 {{
-    return new global::{@namespace}.{Prefix.MockClass}{typeSymbol.Name}((IInvocationContext<global::{fullName}>)mockContext).GetDelegate();
+    return new global::{@namespace}.{className}((IInvocationContext<global::{@namespace}.{fullNameWithCommaArguments}>)mockContext).GetDelegate();
 }}";
             here.Append(toAppend);
         }

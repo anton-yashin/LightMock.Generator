@@ -62,6 +62,18 @@ namespace LightMock.Generator.Tests
             context.Assert(f => f.Invoke(expected, 1234));
         }
 
+        [Fact]
+        public void NestedDelegateWithGenerics()
+        {
+            object expected = new object();
+            var testScript = LoadAssembly<XNestedInterface<int>.XContainer<long>.SomeDelegate<object>>();
+            var context = testScript.Context;
+            var mock = testScript.MockObject;
+
+            mock(1234, 4567, expected);
+            context.Assert(f => f.Invoke(1234, 4567, expected));
+        }
+
         protected override string GetFullResourceName(string resourceName)
             => "Delegate." + resourceName + ".test.cs";
     }
