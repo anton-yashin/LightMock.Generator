@@ -520,6 +520,31 @@ namespace LightMock.Generator.Tests
             context.Assert(f => f.Baz(null));
         }
 
+        [Fact]
+        public void DontOverrideSupport()
+        {
+            var testScript = LoadAssembly<ADontOverrideSupport>(
+                Params(nameof(DontOverrideSupport),
+                nameof(DontOverrideSupport) + ".AssemblyInfo"));
+            var context = testScript.Context;
+            var mock = testScript.MockObject;
+
+            mock.Baz();
+            mock.Quux();
+            mock.Quuux();
+            mock.Quuuux();
+            mock.Quuuuux();
+
+            context.Assert(f => f.Baz());
+            context.Assert(f => f.Quux());
+            context.Assert(f => f.Quuux());
+            context.Assert(f => f.Quuuux());
+            context.Assert(f => f.Quuuuux());
+
+            Assert.Throws<InvalidProgramException>(() => mock.Foo());
+            Assert.Throws<InvalidProgramException>(() => mock.Bar());
+        }
+
         protected override string GetFullResourceName(string resourceName)
             => "AbstractClass." + resourceName + ".test.cs";
     }

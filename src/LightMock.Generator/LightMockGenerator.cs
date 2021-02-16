@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using Microsoft.CodeAnalysis;
@@ -39,6 +40,8 @@ namespace LightMock.Generator
             {
                 if (IsDisableCodeGenerationAttributePresent(compilation, receiver))
                     return;
+
+                var dontOverrideList = GetClassExclusionList(compilation, receiver);
 
                 context.AddSource(KMock + Suffix.FileName, mock.Value);
                 context.AddSource(KContextResolver + Suffix.FileName, contextResolver.Value);
@@ -81,7 +84,7 @@ namespace LightMock.Generator
                             if (mtbt.ToDisplayString(SymbolDisplayFormats.Namespace) == multicastDelegateNameSpaceAndName)
                                 processor = new DelegateProcessor(mockedType);
                             else
-                                processor = new AbstractClassProcessor(candidateGeneric, mockedType);
+                                processor = new AbstractClassProcessor(candidateGeneric, mockedType, dontOverrideList);
                         }
                         else
                             processor = new InterfaceProcessor(mockedType);
@@ -137,6 +140,28 @@ namespace LightMock.Generator
                 }
             }
             return false;
+        }
+
+        private static IReadOnlyList<INamedTypeSymbol> GetClassExclusionList(CSharpCompilation compilation, LightMockSyntaxReceiver receiver)
+        {
+            var result = new List<INamedTypeSymbol>();
+            var dontOverrideAttributeType = typeof(DontOverrideAttribute);
+            var doatName = dontOverrideAttributeType.Name;
+            var doatNamespace = dontOverrideAttributeType.Namespace;
+            foreach (var candidateAttribute in receiver.DontOverrideAttributes)
+            {
+                TypeSyntax? type;
+                var sm = compilation.GetSemanticModel(candidateAttribute.SyntaxTree);
+                if (sm.GetSymbolInfo(candidateAttribute).Symbol is IMethodSymbol methodSymbol
+                    && methodSymbol.ToDisplayString(SymbolDisplayFormats.Namespace) == doatName
+                    && methodSymbol.ContainingNamespace.ToDisplayString(SymbolDisplayFormats.Namespace) == doatNamespace
+                    && (type = ExclusionTypeFinder.FindAt(candidateAttribute)) != null
+                    && sm.GetSymbolInfo(type).Symbol is INamedTypeSymbol typeSymbol)
+                {
+                    result.Add(typeSymbol);
+                }
+            }
+            return result.ToImmutableArray();
         }
 
         bool EmitDiagnostics(GeneratorExecutionContext context, IEnumerable<Diagnostic> diagnostics)

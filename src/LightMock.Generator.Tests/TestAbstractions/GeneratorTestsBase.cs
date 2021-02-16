@@ -59,6 +59,6 @@ namespace LightMock.Generator.Tests.TestAbstractions
             return (ITestScript<T>)testClass;
         }
 
-        static string[] Params(params string[] @params) => @params;
+        protected static string[] Params(params string[] @params) => @params;
     }
 }

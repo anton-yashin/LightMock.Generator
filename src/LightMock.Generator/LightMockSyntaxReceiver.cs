@@ -19,6 +19,7 @@ namespace LightMock.Generator
         public List<ClassDeclarationSyntax> CandidateClasses { get; } = new List<ClassDeclarationSyntax>();
         public List<GenericNameSyntax> CandidateMocks { get; } = new List<GenericNameSyntax>();
         public List<AttributeSyntax> DisableCodeGenerationAttributes { get; } = new List<AttributeSyntax>();
+        public List<AttributeSyntax> DontOverrideAttributes { get; } = new List<AttributeSyntax>();
 
         public void OnVisitSyntaxNode(SyntaxNode syntaxNode)
         {
@@ -52,18 +53,27 @@ namespace LightMock.Generator
 
         const string KDisableCodeGenerationAttribute = nameof(DisableCodeGenerationAttribute);
         const string KDisableCodeGeneration = "DisableCodeGeneration";
+        const string KDontOverrideAttribute = nameof(DontOverrideAttribute);
+        const string KDontOverride = "DontOverride";
+
 
         public override void VisitAttribute(AttributeSyntax node)
         {
 #if DEBUG
             if (KDisableCodeGenerationAttribute != KDisableCodeGeneration + nameof(Attribute))
-                throw new InvalidProgramException($@"constant {nameof(KDisableCodeGeneration)} is invalid");
+                throw new InvalidProgramException($@"constant {nameof(KDisableCodeGeneration)} is not valid");
+            if (KDontOverrideAttribute != KDontOverride + nameof(Attribute))
+                throw new InvalidProgramException($@"constant {nameof(KDontOverride)} is not valid");
 #endif
             switch (node.Name.ToString())
             {
                 case KDisableCodeGeneration:
                 case KDisableCodeGenerationAttribute:
                     DisableCodeGenerationAttributes.Add(node);
+                    break;
+                case KDontOverride:
+                case KDontOverrideAttribute:
+                    DontOverrideAttributes.Add(node);
                     break;
             }
 
