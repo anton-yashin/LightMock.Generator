@@ -1,5 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
@@ -15,9 +16,12 @@ namespace LightMock.Generator.Tests.TestAbstractions
         public TestsBase(ITestOutputHelper testOutputHelper)
             => this.testOutputHelper = testOutputHelper;
 
-        protected (ImmutableArray<Diagnostic> diagnostics, bool success, byte[] assembly) DoCompile(string source, string compilationName)
+        protected (ImmutableArray<Diagnostic> diagnostics, bool success, byte[] assembly) DoCompile(string sourceCode, string hint)
+            => DoCompile(new TestableSourceText[] { new TestableSourceText(sourceCode, hint) });
+
+        protected (ImmutableArray<Diagnostic> diagnostics, bool success, byte[] assembly) DoCompile(IEnumerable<TestableSourceText> texts)
         {
-            var compilation = CreateCompilation(source, compilationName);
+            var compilation = CreateCompilation(texts);
             var driver = CSharpGeneratorDriver.Create(
                 ImmutableArray.Create(new LightMockGenerator()),
                 Enumerable.Empty<AdditionalText>(),
@@ -31,13 +35,18 @@ namespace LightMock.Generator.Tests.TestAbstractions
             return (diagnostics, result.Success, ms.ToArray());
         }
 
+        protected static CSharpCompilation CreateCompilation(string sourceCode, string hint)
+            => CreateCompilation(new TestableSourceText[] { new TestableSourceText(sourceCode, hint) });
 
-        protected static CSharpCompilation CreateCompilation(string source, string compilationName)
-            => CSharpCompilation.Create(compilationName,
-                syntaxTrees: new[]
-                {
-                    CSharpSyntaxTree.ParseText(source, new CSharpParseOptions(LanguageVersion.Preview), compilationName)
-                },
+        protected static CSharpCompilation CreateCompilation(IEnumerable<TestableSourceText> texts)
+            => CSharpCompilation.Create(
+                
+                assemblyName: texts.First().hint,
+
+                syntaxTrees: texts.Select(i
+                    => CSharpSyntaxTree.ParseText(i.sourceCode, new CSharpParseOptions(LanguageVersion.Preview),
+                        i.hint)),
+                
                 references: new[]
                 {
                     MetadataReference.CreateFromFile(Assembly.GetCallingAssembly().Location),
@@ -49,6 +58,7 @@ namespace LightMock.Generator.Tests.TestAbstractions
                     MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("System.Runtime")).Location),
                     MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("netstandard")).Location),
                 },
+
                 options: new CSharpCompilationOptions(Microsoft.CodeAnalysis.OutputKind.DynamicallyLinkedLibrary));
     }
 }
