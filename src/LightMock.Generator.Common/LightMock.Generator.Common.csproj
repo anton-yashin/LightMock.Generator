@@ -17,10 +17,10 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
 
-  <Import Project="../common.props"/>
+  <Import Project="../common.props" />
 
   <ItemGroup>
-    <PackageReference Include="LightMock" Version="2.0.0" />
+    <PackageReference Include="LightMock" Version="2.0.1" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
