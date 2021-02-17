@@ -29,8 +29,8 @@ namespace LightMock.Generator
             this.symbolVisitor = new InterfaceSymbolVisitor();
             this.propertyDefinitionVisitor = new PropertyDefinitionVisitor();
             this.assertImplementationVisitor = new AssertImplementationVisitor(SymbolDisplayFormats.Interface);
-            
-            var (whereClause, typeArguments) = GetArgumens(typeSymbol);
+
+            var (whereClause, typeArguments) = typeSymbol.GetWhereClauseAndTypeArguments();
 
             bool haveTypeArguments = typeSymbol.TypeArguments.Any();
             interfaceName = new StringBuilder()
@@ -52,28 +52,6 @@ namespace LightMock.Generator
             commaArguments = string.Join(",", typeArguments.Select(i => " "));
             this.whereClause = whereClause;
             @namespace = typeSymbol.ContainingNamespace.ToDisplayString(SymbolDisplayFormats.Namespace);
-        }
-
-        static (string whereClause, IEnumerable<ITypeSymbol> typeArguments) GetArgumens(INamedTypeSymbol typeSymbol)
-        {
-            IEnumerable<ITypeSymbol> typeArguments = typeSymbol.TypeArguments;
-            var whereClause = GetWhereClause(typeSymbol);
-
-            for (var tsct = typeSymbol.ContainingType; tsct != null; tsct = tsct.ContainingType)
-            {
-                whereClause = GetWhereClause(tsct) + whereClause;
-                typeArguments = tsct.TypeArguments.Concat(typeArguments);
-            }
-
-            return (whereClause, typeArguments);
-        }
-
-        static string GetWhereClause(INamedTypeSymbol typeSymbol)
-        {
-            var withTypeParams = typeSymbol.ToDisplayString(SymbolDisplayFormats.WithTypeParams);
-            var withWhereClause = typeSymbol.ToDisplayString(SymbolDisplayFormats.WithWhereClause);
-            var whereClause = withWhereClause.Replace(withTypeParams, "");
-            return whereClause;
         }
 
         public override IEnumerable<Diagnostic> GetErrors()

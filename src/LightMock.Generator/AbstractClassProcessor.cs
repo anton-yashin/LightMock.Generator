@@ -37,7 +37,7 @@ namespace LightMock.Generator
             assertImplementationVisitor = new AssertImplementationVisitor(SymbolDisplayFormats.AbstractClass);
             @namespace = typeSymbol.ContainingNamespace.ToDisplayString(SymbolDisplayFormats.Namespace);
 
-            var (whereClause, typeArguments) = GetArgumens(typeSymbol);
+            var (whereClause, typeArguments) = typeSymbol.GetWhereClauseAndTypeArguments();
 
             bool haveTypeArguments = typeSymbol.TypeArguments.Any();
 
@@ -73,30 +73,6 @@ namespace LightMock.Generator
             this.containingGeneric = containingGeneric;
             this.dontOverrideList = dontOverrideList;
         }
-
-        static (string whereClause, IEnumerable<ITypeSymbol> typeArguments) GetArgumens(INamedTypeSymbol typeSymbol)
-        {
-            IEnumerable<ITypeSymbol> typeArguments = typeSymbol.TypeArguments;
-            var whereClause = GetWhereClause(typeSymbol);
-
-            for (var tsct = typeSymbol.ContainingType; tsct != null; tsct = tsct.ContainingType)
-            {
-                whereClause = GetWhereClause(tsct) + whereClause;
-                typeArguments = tsct.TypeArguments.Concat(typeArguments);
-            }
-
-            return (whereClause, typeArguments);
-        }
-
-        static string GetWhereClause(INamedTypeSymbol typeSymbol)
-        {
-            var withTypeParams = typeSymbol.ToDisplayString(SymbolDisplayFormats.WithTypeParams);
-            var withWhereClause = typeSymbol.ToDisplayString(SymbolDisplayFormats.WithWhereClause);
-            var whereClause = withWhereClause.Replace(withTypeParams, "");
-            return whereClause;
-        }
-
-
 
         string GenerateConstructor(string declaration, string call)
         {
