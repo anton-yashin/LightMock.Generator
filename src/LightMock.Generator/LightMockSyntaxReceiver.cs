@@ -29,20 +29,19 @@ namespace LightMock.Generator
 
         public override void VisitObjectCreationExpression(ObjectCreationExpressionSyntax node)
         {
+            switch (node.Type)
             {
-                if (node.Type is GenericNameSyntax gns && gns.Identifier.ValueText == "Mock" && gns.TypeArgumentList.Arguments.Any())
-                {
+                case GenericNameSyntax gns when IsMock(gns):
                     CandidateMocks.Add(gns);
-                }
-            }
-            {
-                if (node.Type is QualifiedNameSyntax qns && qns.Right is GenericNameSyntax gns
-                    && gns.Identifier.ValueText == "Mock" && gns.TypeArgumentList.Arguments.Any())
-                {
+                    break;
+                case QualifiedNameSyntax qns when qns.Right is GenericNameSyntax gns && IsMock(gns):
                     CandidateMocks.Add(gns);
-                }
+                    break;
             }
         }
+
+        static bool IsMock(GenericNameSyntax gns)
+            => gns.Identifier.ValueText == "Mock" && gns.TypeArgumentList.Arguments.Any();
 
         const string KDisableCodeGenerationAttribute = nameof(DisableCodeGenerationAttribute);
         const string KDisableCodeGeneration = "DisableCodeGeneration";
