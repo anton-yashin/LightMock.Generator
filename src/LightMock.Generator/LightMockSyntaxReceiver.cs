@@ -16,7 +16,6 @@ namespace LightMock.Generator
             this.cancellationToken = cancellationToken;
         }
 
-        public List<ClassDeclarationSyntax> CandidateClasses { get; } = new List<ClassDeclarationSyntax>();
         public List<GenericNameSyntax> CandidateMocks { get; } = new List<GenericNameSyntax>();
         public List<AttributeSyntax> DisableCodeGenerationAttributes { get; } = new List<AttributeSyntax>();
         public List<AttributeSyntax> DontOverrideAttributes { get; } = new List<AttributeSyntax>();
@@ -26,12 +25,6 @@ namespace LightMock.Generator
             cancellationToken.ThrowIfCancellationRequested();
             if (syntaxNode is CSharpSyntaxNode cssn)
                 cssn.Accept(this);
-        }
-
-        public override void VisitClassDeclaration(ClassDeclarationSyntax node)
-        {
-            if (node.AttributeLists.Count > 0)
-                CandidateClasses.Add(node);
         }
 
         public override void VisitObjectCreationExpression(ObjectCreationExpressionSyntax node)
