@@ -15,8 +15,9 @@ namespace LightMock.Generator
         {
             if (type.IsGenericType)
                 type = type.GetGenericTypeDefinition();
-            return $@"Mock for {type.FullName} is not generated.
-Try to place: “new Mock<{type.FullName}>();” somewhere into your project";
+            var tn = type.FullName.Replace("+", ".");
+            return $@"Mock for {tn} is not generated.
+Try to place: “new Mock<{tn}>();” somewhere into your project";
         }
     }
 }
