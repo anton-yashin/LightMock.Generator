@@ -1,4 +1,12 @@
-﻿0.904
+﻿1.0.0-preview.1
+* fix: return empty enumerables by default
+* fix: throw exception on ref-struct methods
+* feat: more informative exception when mock isn't found
+* feat: support for nested classes, interfaces and delegates
+* feat: emit Obsolete attribute when overriding obsolete class members
+* feat: new attribute DisableCodeGenerationAttribute.
+* feat: new attribute DontOverrideAttribute.
+0.904
 * fix: code generation failed due non-unique hint names
 0.903:
 * refactor: obsolete GenerateMockAttribute is now removed

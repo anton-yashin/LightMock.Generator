@@ -4,7 +4,7 @@ Source generator that generates mocks by provided interfaces, abstract classes a
 You should be familiar with [LightMock](https://github.com/seesharper/LightMock) because this project uses it underhood.
 
 ## How to use
-* Use Mock\<T\> where T is your abstract class, interface or delegate to batch create MockContext\<T\> and mock object.
+Use Mock\<T\> where T is your abstract class, interface or delegate to batch create MockContext\<T\> and mock object.
 
 ## Example with interface
 
@@ -120,3 +120,17 @@ namespace Playground
 }
 
 ```
+
+## Additional information
+
+### DisableCodeGenerationAttribute
+Place the attribute to your assembly to disable the source code generator.
+It can be useful if you moving mocks to separate assembly.
+
+### DontOverrideAttribute
+Use the attribute with class type whose virtual members should not be overridden
+
+### LightMockGenerator_Enable
+Use the compiler property in your csproj file with "false" value to disable the source code generator.
+It can be useful if you moving mocks to separate assembly. Be aware: the compiler property 
+will work if you install a nuget package of the generator into your project.
