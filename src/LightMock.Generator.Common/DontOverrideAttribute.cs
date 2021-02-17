@@ -2,7 +2,7 @@
 
 namespace LightMock.Generator
 {
-    [AttributeUsage(validOn: AttributeTargets.Assembly, AllowMultiple = false, Inherited = false)]
+    [AttributeUsage(validOn: AttributeTargets.Assembly, AllowMultiple = true, Inherited = false)]
     public sealed class DontOverrideAttribute : Attribute
     {
         /// <summary>
