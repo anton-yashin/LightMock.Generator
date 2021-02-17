@@ -1,10 +1,10 @@
 <Project>
   <PropertyGroup>
     <Product>$(AssemblyName) ($(TargetFramework))</Product>
-    <AssemblyVersion>0.904.0.0</AssemblyVersion>
-    <AssemblyFileVersion>0.904.0.0</AssemblyFileVersion>
-    <Version>0.904.0</Version>
-    <VersionSuffix>-beta</VersionSuffix>
+    <AssemblyVersion>0.905.0.0</AssemblyVersion>
+    <AssemblyFileVersion>0.905.0.0</AssemblyFileVersion>
+    <Version>1.0.0</Version>
+    <VersionSuffix>-preview.1</VersionSuffix>
     <PackageVersion>$(Version)$(VersionSuffix)</PackageVersion>
     <Authors>Anton Yashin</Authors>
     <NeutralLanguage>en</NeutralLanguage>
