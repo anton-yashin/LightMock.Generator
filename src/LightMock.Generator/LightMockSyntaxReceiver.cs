@@ -47,6 +47,7 @@ namespace LightMock.Generator
         const string KDisableCodeGeneration = "DisableCodeGeneration";
         const string KDontOverrideAttribute = nameof(DontOverrideAttribute);
         const string KDontOverride = "DontOverride";
+        const string KMock = "Mock";
 
 
         public override void VisitAttribute(AttributeSyntax node)
