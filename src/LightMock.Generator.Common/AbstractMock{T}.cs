@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq.Expressions;
 using System.Threading;
 
 namespace LightMock.Generator
 {
-    public abstract class AbstractMock<T> : MockContext<T>, IProtectedContext<T>, IMock<T>
+    public abstract class AbstractMock<T> : IProtectedContext<T>, IMock<T>, IMockContext<T>
         where T : class
     {
         T? instance;
@@ -16,6 +17,7 @@ namespace LightMock.Generator
         {
             prms = Array.Empty<object>();
 
+            PublicContext = new MockContext<T>();
             protectedContext = CreateProtectedContext();
             propertiesContext = CreatePropertiesContext();
         }
@@ -28,6 +30,7 @@ namespace LightMock.Generator
         public T Object => LazyInitializer.EnsureInitialized(ref instance!, CreateMockInstance);
 
         object IProtectedContext<T>.ProtectedContext => protectedContext;
+        protected MockContext<T> PublicContext { get; }
 
         static Type? mockInstanceType;
         static Type? protectedContextType;
@@ -38,7 +41,7 @@ namespace LightMock.Generator
         {
             const int offset = 3;
             var args = new object[prms.Length + offset];
-            args[0] = this;
+            args[0] = PublicContext;
             args[1] = propertiesContext;
             args[2] = protectedContext;
             for (int i = 0; i < prms.Length; i++)
@@ -133,5 +136,24 @@ namespace LightMock.Generator
 
         void AssertUsingAssertInstance(Action<T> expression, Invoked times)
             => expression(CreateAssertInstance(times));
+
+        #region IMockContext<T> implementation
+
+        public Arrangement Arrange(Expression<Action<T>> matchExpression)
+            => PublicContext.Arrange(matchExpression);
+
+        public Arrangement<TResult> Arrange<TResult>(Expression<Func<T, TResult>> matchExpression)
+            => PublicContext.Arrange(matchExpression);
+
+        public PropertyArrangement<TResult> ArrangeProperty<TResult>(Expression<Func<T, TResult>> matchExpression)
+            => PublicContext.ArrangeProperty(matchExpression);
+
+        public void Assert(Expression<Action<T>> matchExpression)
+            => PublicContext.Assert(matchExpression);
+
+        public void Assert(Expression<Action<T>> matchExpression, Invoked invoked)
+            => PublicContext.Assert(matchExpression, invoked);
+
+        #endregion
     }
 }
