@@ -98,39 +98,27 @@ namespace LightMock.Generator
         protected abstract Type GetAssertType();
         protected abstract T GetDelegate(Type type);
 
-        [DebuggerStepThrough]
         public void AssertGet<TProperty>(Func<T, TProperty> expression)
-        {
-            AssertGet(expression, Invoked.Once);
-        }
+            => AssertGet(expression, Invoked.Once);
 
-        [DebuggerStepThrough]
         public void AssertGet<TProperty>(Func<T, TProperty> expression, Invoked times)
-        {
-            expression(CreateAssertInstance(times));
-        }
+            => expression(CreateAssertInstance(times));
 
-        [DebuggerStepThrough]
         public void AssertSet(Action<T> expression)
             => AssertUsingAssertInstance(expression, Invoked.Once);
 
-        [DebuggerStepThrough]
         public void AssertSet(Action<T> expression, Invoked times)
             => AssertUsingAssertInstance(expression, times);
 
-        [DebuggerStepThrough]
         public void AssertAdd(Action<T> expression)
             => AssertUsingAssertInstance(expression, Invoked.Once);
 
-        [DebuggerStepThrough]
         public void AssertAdd(Action<T> expression, Invoked times)
             => AssertUsingAssertInstance(expression, times);
 
-        [DebuggerStepThrough]
         public void AssertRemove(Action<T> expression)
             => AssertUsingAssertInstance(expression, Invoked.Once);
 
-        [DebuggerStepThrough]
         public void AssertRemove(Action<T> expression, Invoked times)
             => AssertUsingAssertInstance(expression, times);
 
