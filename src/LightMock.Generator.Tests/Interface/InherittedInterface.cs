@@ -8,6 +8,7 @@ namespace LightMock.Generator.Tests.Interface
     {
         void Foo();
         IFooResult GetResult();
+        IFooResult Result { get; }
     }
 
     public interface IBarResult { }
@@ -16,6 +17,7 @@ namespace LightMock.Generator.Tests.Interface
     {
         void Bar();
         new IBarResult GetResult();
+        new IBarResult Result { get; }
     }
 
     public interface IBazResult { }
@@ -24,6 +26,7 @@ namespace LightMock.Generator.Tests.Interface
     {
         void Baz();
         IBazResult GetResult();
+        IBazResult Result { get; }
     }
 
     public interface IQuuxResult { }
@@ -32,5 +35,6 @@ namespace LightMock.Generator.Tests.Interface
     {
         void Quux();
         new IQuuxResult GetResult();
+        new IQuuxResult Result { get; }
     }
 }

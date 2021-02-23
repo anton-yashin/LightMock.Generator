@@ -291,6 +291,10 @@ namespace LightMock.Generator.Tests
             ((IFoo)mock).GetResult();
             ((IBar)mock).GetResult();
             ((IBaz)mock).GetResult();
+            _ = mock.Result;
+            _ = ((IFoo)mock).Result;
+            _ = ((IBar)mock).Result;
+            _ = ((IBaz)mock).Result;
 
             context.Assert(f => f.Foo());
             context.Assert(f => f.Bar());
@@ -300,6 +304,10 @@ namespace LightMock.Generator.Tests
             context.Assert(f => ((IFoo)f).GetResult());
             context.Assert(f => ((IBar)f).GetResult());
             context.Assert(f => ((IBaz)f).GetResult());
+            context.AssertGet(f => f.Result);
+            context.AssertGet(f => ((IFoo)f).Result);
+            context.AssertGet(f => ((IBar)f).Result);
+            context.AssertGet(f => ((IBaz)f).Result);
 
             Assert.Equal(expected: KExpected, testScript.DoRun());
         }

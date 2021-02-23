@@ -32,37 +32,62 @@ namespace LightMock.Generator
             return @this.Append("}");
         }
 
-        public static StringBuilder AppendMockGetter(this StringBuilder @this, string contextName, ISymbol symbol)
-            => @this.Append(" get { ")
-            .Append(VariableNames.PropertiesContext)
-            .Append(".Invoke(f => f.")
-            .Append(symbol.Name)
-            .Append(Suffix.Getter)
-            .Append("()); return global::LightMock.Generator.Default.Get(() =>")
-            .Append(contextName)
-            .Append(".Invoke(f => f.")
-            .Append(symbol.Name)
-            .Append(")); } ");
-
-        public static StringBuilder AppendMockSetter(this StringBuilder @this, string contextName, ISymbol symbol)
-            => @this.Append("set { ")
-            .Append(VariableNames.PropertiesContext)
-            .Append(".Invoke(f => f.")
-            .Append(symbol.Name)
-            .Append(Suffix.Setter)
-            .Append("(value)); ")
-            .Append(contextName)
-            .Append(".InvokeSetter(f => f.")
-            .Append(symbol.Name)
-            .Append(", value); } ");
-
-        public static StringBuilder AppendMockGetterAndSetter(this StringBuilder @this, string contextName, IPropertySymbol symbol)
+        public static StringBuilder AppendMockGetterAndSetter(
+            this StringBuilder @this,
+            string contextName,
+            IPropertySymbol symbol)
         {
+            return @this.AppendMockGetterAndSetter(contextName, symbol, sb => sb.Append(".Invoke(f => f."));
+        }
+
+        public static StringBuilder AppendMockGetterAndSetter(
+            this StringBuilder @this,
+            string contextName,
+            IPropertySymbol symbol,
+            string invocationType)
+        {
+            return @this.AppendMockGetterAndSetter(contextName, symbol,
+                sb => sb.Append(".Invoke(f => ((").Append(invocationType).Append(")f)."));
+        }
+
+        static StringBuilder AppendMockGetterAndSetter(
+            this StringBuilder @this,
+            string contextName,
+            IPropertySymbol symbol,
+            Func<StringBuilder, StringBuilder> appendGetInvocation)
+        {
+            var typePart = symbol.ContainingType.ToDisplayString(SymbolDisplayFormats.Namespace).Replace(".", "_");
             @this.Append(" {");
             if (symbol.GetMethod != null)
-                @this.AppendMockGetter(contextName, symbol);
+            {
+                @this.Append(" get { ")
+                    .Append(VariableNames.PropertiesContext)
+                    .Append(".Invoke(f => f.")
+                    .Append(symbol.Name)
+                    .Append('_')
+                    .Append(typePart)
+                    .Append(Suffix.Getter)
+                    .Append("()); return global::LightMock.Generator.Default.Get(() =>")
+                    .Append(contextName);
+                appendGetInvocation(@this)
+                    .Append(symbol.Name)
+                    .Append(")); } ");
+            }
             if (symbol.SetMethod != null)
-                @this.AppendMockSetter(contextName, symbol);
+            {
+                @this.Append("set { ")
+                    .Append(VariableNames.PropertiesContext)
+                    .Append(".Invoke(f => f.")
+                    .Append(symbol.Name)
+                    .Append('_')
+                    .Append(typePart)
+                    .Append(Suffix.Setter)
+                    .Append("(value)); ")
+                    .Append(contextName)
+                    .Append(".InvokeSetter(f => f.")
+                    .Append(symbol.Name)
+                    .Append(", value); } ");
+            }
             return @this.Append("}");
         }
 
