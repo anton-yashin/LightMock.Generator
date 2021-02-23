@@ -10,13 +10,16 @@ namespace LightMock.Generator
         public override string? VisitProperty(IPropertySymbol symbol)
         {
             var result = new StringBuilder();
+            var type = symbol.ContainingType.ToDisplayString(SymbolDisplayFormats.Namespace).Replace(".", "_");
 
             if (symbol.GetMethod != null)
             {
                 result
                     .Append(symbol.Type.ToDisplayString(SymbolDisplayFormats.Interface))
-                    .Append(" ")
+                    .Append(' ')
                     .Append(symbol.Name)
+                    .Append('_')
+                    .Append(type)
                     .Append(Suffix.Getter)
                     .Append("();");
             }
@@ -25,6 +28,8 @@ namespace LightMock.Generator
                 result
                     .Append("void ")
                     .Append(symbol.Name)
+                    .Append('_')
+                    .Append(type)
                     .Append(Suffix.Setter)
                     .Append("(")
                     .Append(symbol.Type.ToDisplayString(SymbolDisplayFormats.Interface))

@@ -49,12 +49,16 @@ namespace LightMock.Generator
                 .Append(symbol.ToDisplayString(definitionFormat))
                 .Append("{");
 
+            var type = symbol.ContainingType.ToDisplayString(SymbolDisplayFormats.Namespace).Replace(".", "_");
+
             if (symbol.GetMethod != null)
             {
                 result.Append("get { ")
                     .Append(VariableNames.Context)
                     .Append(".Assert(f => f.")
                     .Append(symbol.Name)
+                    .Append('_')
+                    .Append(type)
                     .Append(Suffix.Getter)
                     .Append("(), ")
                     .Append(VariableNames.Invoked)
@@ -68,6 +72,8 @@ namespace LightMock.Generator
                     .Append(VariableNames.Context)
                     .Append(".Assert(f => f.")
                     .Append(symbol.Name)
+                    .Append('_')
+                    .Append(type)
                     .Append(Suffix.Setter)
                     .Append("(value), ")
                     .Append(VariableNames.Invoked)

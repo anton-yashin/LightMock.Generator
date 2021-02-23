@@ -13,16 +13,19 @@ namespace LightMock.Generator
         {
             if (symbol.MethodKind != MethodKind.Ordinary)
                 return null;
+
             var result = new StringBuilder()
                 .AppendMethodDeclaration(symbol.ToDisplayString(SymbolDisplayFormats.Interface), symbol)
-                .AppendMethodBody(VariableNames.Context, symbol);
+                .AppendMethodBody(VariableNames.Context, symbol,
+                symbol.ContainingType.ToDisplayString(SymbolDisplayFormats.WithTypeParams));
             return result.ToString();
         }
 
         public override string? VisitProperty(IPropertySymbol symbol)
         {
             var result = new StringBuilder(symbol.ToDisplayString(SymbolDisplayFormats.Interface))
-                .AppendMockGetterAndSetter(VariableNames.Context, symbol);
+                .AppendMockGetterAndSetter(VariableNames.Context,
+                symbol, symbol.ContainingType.ToDisplayString(SymbolDisplayFormats.WithTypeParams));
             return result.ToString();
         }
 
