@@ -287,11 +287,19 @@ namespace LightMock.Generator.Tests
             mock.Bar();
             mock.Baz();
             mock.Quux();
+            mock.GetResult();
+            ((IFoo)mock).GetResult();
+            ((IBar)mock).GetResult();
+            ((IBaz)mock).GetResult();
 
             context.Assert(f => f.Foo());
             context.Assert(f => f.Bar());
             context.Assert(f => f.Baz());
             context.Assert(f => f.Quux());
+            context.Assert(f => f.GetResult());
+            context.Assert(f => ((IFoo)f).GetResult());
+            context.Assert(f => ((IBar)f).GetResult());
+            context.Assert(f => ((IBaz)f).GetResult());
 
             Assert.Equal(expected: KExpected, testScript.DoRun());
         }

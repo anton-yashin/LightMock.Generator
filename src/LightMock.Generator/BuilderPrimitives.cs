@@ -101,17 +101,20 @@ namespace LightMock.Generator
             return @this;
         }
 
+        public static StringBuilder AppendMethodBody(this StringBuilder @this, string contextName, IMethodSymbol symbol, string invocationType)
+            => AppendMethodBody(@this, contextName, symbol,
+                sb => sb.Append(".Invoke(f => ((")
+                .Append(invocationType)
+                .Append(")f).")
+                );
+
         public static StringBuilder AppendMethodBody(this StringBuilder @this, string contextName, IMethodSymbol symbol)
+            => AppendMethodBody(@this, contextName, symbol, sb => sb.Append(".Invoke(f => f."));
+
+        private static StringBuilder AppendMethodBody(StringBuilder @this, string contextName, IMethodSymbol symbol, Func<StringBuilder, StringBuilder> appendInvocation)
         {
-            foreach (var i in symbol.Parameters)
-            {
-                var tod = i.Type.OriginalDefinition;
-                if (tod.IsRefLikeType && tod.IsReadOnly)
-                {
-                    return @this.Append("{ throw new global::System.InvalidProgramException(\""
-                        + ExceptionMessages.OnRefStructMethod + "\");}");
-                }
-            }
+            if (IsHaveRefStructParameters(symbol))
+                return @this.AppendRefStructException();
 
             @this.Append("{");
 
@@ -119,9 +122,8 @@ namespace LightMock.Generator
                 @this.Append("return ");
 
             @this.Append("global::LightMock.Generator.Default.Get(() =>")
-                .Append(contextName)
-                .Append(".Invoke(f => f.")
-                .Append(symbol.Name);
+                .Append(contextName);
+            appendInvocation(@this).Append(symbol.Name);
             if (symbol.IsGenericMethod)
             {
                 @this.Append("<")
@@ -132,6 +134,16 @@ namespace LightMock.Generator
                 .Append(string.Join(", ", symbol.Parameters.Select(i => i.Name)))
                 .Append(")));}");
         }
+
+        static bool IsHaveRefStructParameters(IMethodSymbol symbol)
+            => (from i in symbol.Parameters
+                let tod = i.Type.OriginalDefinition
+                where tod.IsRefLikeType && tod.IsReadOnly
+                select new { }).Any();
+
+        static StringBuilder AppendRefStructException(this StringBuilder @this)
+            => @this.Append("{ throw new global::System.InvalidProgramException(\""
+                + ExceptionMessages.OnRefStructMethod + "\");}");
 
         public static StringBuilder AppendEventAdd(this StringBuilder @this, string contextName, IEventSymbol symbol, string methodName)
             => @this.Append("add{")
