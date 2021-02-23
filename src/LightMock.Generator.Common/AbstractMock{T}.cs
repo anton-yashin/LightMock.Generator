@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
 using System.Threading;
 
 namespace LightMock.Generator
@@ -97,6 +98,7 @@ namespace LightMock.Generator
         protected abstract Type GetPropertiesContextType();
         protected abstract Type GetAssertType();
         protected abstract T GetDelegate(Type type);
+        protected abstract Expression<Action<T>> ExchangeForExpression(string token);
 
         public void AssertGet<TProperty>(Func<T, TProperty> expression)
             => AssertGet(expression, Invoked.Once);
@@ -124,6 +126,9 @@ namespace LightMock.Generator
 
         void AssertUsingAssertInstance(Action<T> expression, Invoked times)
             => expression(CreateAssertInstance(times));
+
+        public Arrangement ArrangeSetter(Action<T> expression, [CallerFilePath] string idPart1 = "", [CallerLineNumber] int idPart2 = 0)
+            => Arrange(ExchangeForExpression(idPart1 + idPart2.ToString()));
 
         #region IMockContext<T> implementation
 

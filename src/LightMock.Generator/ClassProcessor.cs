@@ -25,6 +25,7 @@ namespace LightMock.Generator
         public virtual void DoGeneratePart_GetPropertiesContextType(StringBuilder here) { }
         public virtual void DoGeneratePart_GetAssertType(StringBuilder here) { }
         public virtual void DoGeneratePart_GetDelegate(StringBuilder here) { }
+        public virtual void DoGeneratePart_ExchangeForExpression(StringBuilder here) { }
 
         public string FileName
             => new StringBuilder().AppendFileName(typeSymbol).ToString();

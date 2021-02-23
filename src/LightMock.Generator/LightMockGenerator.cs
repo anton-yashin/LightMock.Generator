@@ -59,6 +59,7 @@ namespace LightMock.Generator
                 var getPropertiesContextTypeBuilder = new StringBuilder();
                 var getAssertTypeBuilder = new StringBuilder();
                 var getDelegateBuilder = new StringBuilder();
+                var exchangeForExpressionBuilder = new StringBuilder();
                 var processedTypes = new List<INamedTypeSymbol>();
                 var multicastDelegateType = typeof(MulticastDelegate);
                 var multicastDelegateNameSpaceAndName = multicastDelegateType.Namespace + "." + multicastDelegateType.Name;
@@ -106,6 +107,8 @@ namespace LightMock.Generator
                         context.CancellationToken.ThrowIfCancellationRequested();
                         processor.DoGeneratePart_GetDelegate(getDelegateBuilder);
                         context.CancellationToken.ThrowIfCancellationRequested();
+                        processor.DoGeneratePart_ExchangeForExpression(exchangeForExpressionBuilder);
+                        context.CancellationToken.ThrowIfCancellationRequested();
                         processedTypes.Add(mockedType.OriginalDefinition);
                     }
                 }
@@ -116,7 +119,8 @@ namespace LightMock.Generator
                     .Replace("/*getProtectedContextTypeBuilder*/", getProtectedContextTypeBuilder.ToString())
                     .Replace("/*getPropertiesContextTypeBuilder*/", getPropertiesContextTypeBuilder.ToString())
                     .Replace("/*getAssertTypeBuilder*/", getAssertTypeBuilder.ToString())
-                    .Replace("/*getDelegateBuilder*/", getDelegateBuilder.ToString());
+                    .Replace("/*getDelegateBuilder*/", getDelegateBuilder.ToString())
+                    .Replace("/*exchangeForExpressionBuilder*/", exchangeForExpressionBuilder.ToString());
 
                 context.CancellationToken.ThrowIfCancellationRequested();
                 context.AddSource(KContextResolver + Suffix.ImplFile + Suffix.FileName, SourceText.From(impl, Encoding.UTF8));
