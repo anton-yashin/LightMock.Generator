@@ -63,10 +63,7 @@ namespace LightMock.Generator
                 @this.Append(" get { ")
                     .Append(VariableNames.PropertiesContext)
                     .Append(".Invoke(f => f.")
-                    .Append(symbol.Name)
-                    .Append('_')
-                    .Append(typePart)
-                    .Append(Suffix.Getter)
+                    .AppendP2FGetter(symbol, typePart)
                     .Append("()); return global::LightMock.Generator.Default.Get(() =>")
                     .Append(contextName);
                 appendGetInvocation(@this)
@@ -78,10 +75,7 @@ namespace LightMock.Generator
                 @this.Append("set { ")
                     .Append(VariableNames.PropertiesContext)
                     .Append(".Invoke(f => f.")
-                    .Append(symbol.Name)
-                    .Append('_')
-                    .Append(typePart)
-                    .Append(Suffix.Setter)
+                    .AppendP2FSetter(symbol, typePart)
                     .Append("(value)); ");
                 if (symbol.GetMethod != null)
                 {
@@ -99,7 +93,7 @@ namespace LightMock.Generator
             this StringBuilder @this,
             IPropertySymbol symbol)
         {
-            var type = symbol.ContainingType.ToDisplayString(SymbolDisplayFormats.Namespace).Replace(".", "_");
+            var typePart = symbol.ContainingType.ToDisplayString(SymbolDisplayFormats.Namespace).Replace(".", "_");
             @this.Append("{");
 
             if (symbol.GetMethod != null)
@@ -107,10 +101,7 @@ namespace LightMock.Generator
                 @this.Append("get { ")
                     .Append(VariableNames.Context)
                     .Append(".Assert(f => f.")
-                    .Append(symbol.Name)
-                    .Append('_')
-                    .Append(type)
-                    .Append(Suffix.Getter)
+                    .AppendP2FGetter(symbol, typePart)
                     .Append("(), ")
                     .Append(VariableNames.Invoked)
                     .Append("); return default(")
@@ -122,10 +113,7 @@ namespace LightMock.Generator
                 @this.Append("set {")
                     .Append(VariableNames.Context)
                     .Append(".Assert(f => f.")
-                    .Append(symbol.Name)
-                    .Append('_')
-                    .Append(type)
-                    .Append(Suffix.Setter)
+                    .AppendP2FSetter(symbol, typePart)
                     .Append("(value), ")
                     .Append(VariableNames.Invoked)
                     .Append("); }");
@@ -137,32 +125,44 @@ namespace LightMock.Generator
 
         public static StringBuilder AppendPropertyDefinition(this StringBuilder @this, IPropertySymbol symbol)
         {
-            var type = symbol.ContainingType.ToDisplayString(SymbolDisplayFormats.Namespace).Replace(".", "_");
+            var typePart = symbol.ContainingType.ToDisplayString(SymbolDisplayFormats.Namespace).Replace(".", "_");
 
             if (symbol.GetMethod != null)
             {
                 @this
                     .Append(symbol.Type.ToDisplayString(SymbolDisplayFormats.Interface))
                     .Append(' ')
-                    .Append(symbol.Name)
-                    .Append('_')
-                    .Append(type)
-                    .Append(Suffix.Getter)
+                    .AppendP2FGetter(symbol, typePart)
                     .Append("();");
             }
             if (symbol.SetMethod != null)
             {
                 @this
                     .Append("void ")
-                    .Append(symbol.Name)
-                    .Append('_')
-                    .Append(type)
-                    .Append(Suffix.Setter)
+                    .AppendP2FSetter(symbol, typePart)
                     .Append("(")
                     .Append(symbol.Type.ToDisplayString(SymbolDisplayFormats.Interface))
                     .Append(" prm);");
             }
             return @this;
+        }
+
+        public static StringBuilder AppendP2FGetter(this StringBuilder @this, IPropertySymbol symbol, string typePart)
+            => @this.AppendP2FName(symbol, typePart, Suffix.Getter);
+
+        public static StringBuilder AppendP2FSetter(this StringBuilder @this, IPropertySymbol symbol, string typePart)
+            => @this.AppendP2FName(symbol, typePart, Suffix.Setter);
+
+        static StringBuilder AppendP2FName(
+            this StringBuilder @this,
+            IPropertySymbol symbol,
+            string typePart,
+            string suffix)
+        {
+            return @this.Append(symbol.Name)
+                               .Append('_')
+                               .Append(typePart)
+                               .Append(suffix);
         }
 
         static readonly string[] whereSeparator = new string[] { "where" };
