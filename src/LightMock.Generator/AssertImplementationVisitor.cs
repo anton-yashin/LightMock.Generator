@@ -47,40 +47,7 @@ namespace LightMock.Generator
 
             var result = new StringBuilder(GetObsoleteAndOrOverrideChunkFor(symbol))
                 .Append(symbol.ToDisplayString(definitionFormat))
-                .Append("{");
-
-            var type = symbol.ContainingType.ToDisplayString(SymbolDisplayFormats.Namespace).Replace(".", "_");
-
-            if (symbol.GetMethod != null)
-            {
-                result.Append("get { ")
-                    .Append(VariableNames.Context)
-                    .Append(".Assert(f => f.")
-                    .Append(symbol.Name)
-                    .Append('_')
-                    .Append(type)
-                    .Append(Suffix.Getter)
-                    .Append("(), ")
-                    .Append(VariableNames.Invoked)
-                    .Append("); return default(")
-                    .Append(symbol.Type.ToDisplayString(SymbolDisplayFormats.WithTypeParams))
-                    .Append(");}");
-            }
-            if (symbol.SetMethod != null)
-            {
-                result.Append("set {")
-                    .Append(VariableNames.Context)
-                    .Append(".Assert(f => f.")
-                    .Append(symbol.Name)
-                    .Append('_')
-                    .Append(type)
-                    .Append(Suffix.Setter)
-                    .Append("(value), ")
-                    .Append(VariableNames.Invoked)
-                    .Append("); }");
-            }
-
-            result.Append("}");
+                .AppendAssertGetterAndSetter(symbol);
 
             return result.ToString();
         }

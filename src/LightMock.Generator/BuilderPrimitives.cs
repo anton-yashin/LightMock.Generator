@@ -95,6 +95,76 @@ namespace LightMock.Generator
             return @this.Append("}");
         }
 
+        public static StringBuilder AppendAssertGetterAndSetter(
+            this StringBuilder @this,
+            IPropertySymbol symbol)
+        {
+            var type = symbol.ContainingType.ToDisplayString(SymbolDisplayFormats.Namespace).Replace(".", "_");
+            @this.Append("{");
+
+            if (symbol.GetMethod != null)
+            {
+                @this.Append("get { ")
+                    .Append(VariableNames.Context)
+                    .Append(".Assert(f => f.")
+                    .Append(symbol.Name)
+                    .Append('_')
+                    .Append(type)
+                    .Append(Suffix.Getter)
+                    .Append("(), ")
+                    .Append(VariableNames.Invoked)
+                    .Append("); return default(")
+                    .Append(symbol.Type.ToDisplayString(SymbolDisplayFormats.WithTypeParams))
+                    .Append(");}");
+            }
+            if (symbol.SetMethod != null)
+            {
+                @this.Append("set {")
+                    .Append(VariableNames.Context)
+                    .Append(".Assert(f => f.")
+                    .Append(symbol.Name)
+                    .Append('_')
+                    .Append(type)
+                    .Append(Suffix.Setter)
+                    .Append("(value), ")
+                    .Append(VariableNames.Invoked)
+                    .Append("); }");
+            }
+
+            @this.Append("}");
+            return @this;
+        }
+
+        public static StringBuilder AppendPropertyDefinition(this StringBuilder @this, IPropertySymbol symbol)
+        {
+            var type = symbol.ContainingType.ToDisplayString(SymbolDisplayFormats.Namespace).Replace(".", "_");
+
+            if (symbol.GetMethod != null)
+            {
+                @this
+                    .Append(symbol.Type.ToDisplayString(SymbolDisplayFormats.Interface))
+                    .Append(' ')
+                    .Append(symbol.Name)
+                    .Append('_')
+                    .Append(type)
+                    .Append(Suffix.Getter)
+                    .Append("();");
+            }
+            if (symbol.SetMethod != null)
+            {
+                @this
+                    .Append("void ")
+                    .Append(symbol.Name)
+                    .Append('_')
+                    .Append(type)
+                    .Append(Suffix.Setter)
+                    .Append("(")
+                    .Append(symbol.Type.ToDisplayString(SymbolDisplayFormats.Interface))
+                    .Append(" prm);");
+            }
+            return @this;
+        }
+
         static readonly string[] whereSeparator = new string[] { "where" };
 
         public static StringBuilder AppendMethodDeclaration(this StringBuilder @this, string declaration, IMethodSymbol symbol)
