@@ -441,6 +441,18 @@ namespace LightMock.Generator.Tests
 
         }
 
+        [Fact]
+        public void ArrangeSetter()
+        {
+            var testScript = LoadAssembly<IArrangeSetter>();
+            var context = testScript.Context;
+            var mock = testScript.MockObject;
+
+            Assert.Equal(KExpected, testScript.DoRun());
+            Assert.Throws<ValidProgramException>(() => mock.GetAndSet = "1234");
+            Assert.Throws<ValidProgramException>(() => mock.Set = "4567");
+        }
+
         protected override string GetFullResourceName(string resourceName)
             => "Interface." + resourceName + ".test.cs";
     }

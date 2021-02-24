@@ -127,8 +127,12 @@ namespace LightMock.Generator
         void AssertUsingAssertInstance(Action<T> expression, Invoked times)
             => expression(CreateAssertInstance(times));
 
-        public Arrangement ArrangeSetter(Action<T> expression, [CallerFilePath] string idPart1 = "", [CallerLineNumber] int idPart2 = 0)
-            => Arrange(ExchangeForExpression(idPart1 + idPart2.ToString()));
+        public Arrangement ArrangeSetter(Action<T> expression, [CallerFilePath] string uidPart1 = "", [CallerLineNumber] int uidPart2 = 0)
+        {
+            if (string.IsNullOrWhiteSpace(uidPart1))
+                throw new ArgumentException("you must provide part of unique identifier", nameof(uidPart1));
+            return Arrange(ExchangeForExpression(uidPart1 + uidPart2.ToString()));
+        }
 
         #region IMockContext<T> implementation
 

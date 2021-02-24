@@ -82,11 +82,15 @@ namespace LightMock.Generator
                     .Append('_')
                     .Append(typePart)
                     .Append(Suffix.Setter)
-                    .Append("(value)); ")
-                    .Append(contextName)
-                    .Append(".InvokeSetter(f => f.")
-                    .Append(symbol.Name)
-                    .Append(", value); } ");
+                    .Append("(value)); ");
+                if (symbol.GetMethod != null)
+                {
+                    @this.Append(contextName)
+                        .Append(".InvokeSetter(f => f.")
+                        .Append(symbol.Name)
+                        .Append(", value); ");
+                }
+                @this.Append("} ");
             }
             return @this.Append("}");
         }
