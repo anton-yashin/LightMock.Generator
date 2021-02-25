@@ -444,6 +444,7 @@ namespace LightMock.Generator.Tests
         [Fact]
         public void ArrangeSetter()
         {
+            //Interface.ArrangeSetter.test.cs18
             var testScript = LoadAssembly<IArrangeSetter>();
             var context = testScript.Context;
             var mock = testScript.MockObject;

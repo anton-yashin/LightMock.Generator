@@ -19,6 +19,7 @@ namespace LightMock.Generator
         public List<GenericNameSyntax> CandidateMocks { get; } = new List<GenericNameSyntax>();
         public List<AttributeSyntax> DisableCodeGenerationAttributes { get; } = new List<AttributeSyntax>();
         public List<AttributeSyntax> DontOverrideAttributes { get; } = new List<AttributeSyntax>();
+        public List<InvocationExpressionSyntax> ArrangeInvocations { get; } = new();
 
         public void OnVisitSyntaxNode(SyntaxNode syntaxNode)
         {
@@ -69,7 +70,15 @@ namespace LightMock.Generator
                     DontOverrideAttributes.Add(node);
                     break;
             }
+        }
 
+        public override void VisitInvocationExpression(InvocationExpressionSyntax node)
+        {
+            if (node.Expression is MemberAccessExpressionSyntax maes
+                && maes.Name.ToString() == nameof(AbstractMockNameofProvider.ArrangeSetter))
+            {
+                ArrangeInvocations.Add(node);
+            }
         }
     }
 }

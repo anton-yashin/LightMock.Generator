@@ -131,6 +131,8 @@ namespace LightMock.Generator
         {
             if (string.IsNullOrWhiteSpace(uidPart1))
                 throw new ArgumentException("you must provide part of unique identifier", nameof(uidPart1));
+            // FIXME: propertyContext.Arrange
+            throw new NotImplementedException("FIXME: propertyContext.Arrange");
             return Arrange(ExchangeForExpression(uidPart1 + uidPart2.ToString()));
         }
 

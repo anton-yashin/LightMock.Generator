@@ -20,6 +20,7 @@ namespace LightMock.Generator
             () => SourceText.From(Utils.LoadResource(KMock + Suffix.CSharpFile), Encoding.UTF8));
         readonly Lazy<SourceText> contextResolver = new(
             () => SourceText.From(Utils.LoadResource(KContextResolver + Suffix.CSharpFile), Encoding.UTF8));
+        HashSet<string> expressionUids = new();
 
         public LightMockGenerator()
         {
@@ -109,6 +110,29 @@ namespace LightMock.Generator
                         processor.DoGeneratePart_ExchangeForExpression(exchangeForExpressionBuilder);
                         context.CancellationToken.ThrowIfCancellationRequested();
                         processedTypes.Add(mockedType.OriginalDefinition);
+                    }
+                }
+
+                foreach (var candidateInvocation in receiver.ArrangeInvocations)
+                {
+                    context.CancellationToken.ThrowIfCancellationRequested();
+                    var methodSymbol = compilation.GetSemanticModel(candidateInvocation.SyntaxTree)
+                        .GetSymbolInfo(candidateInvocation).Symbol as IMethodSymbol;
+                    context.CancellationToken.ThrowIfCancellationRequested();
+
+                    if (methodSymbol != null 
+                        && methodSymbol.Name == nameof(AbstractMockNameofProvider.ArrangeSetter)
+                        && mockContextMatcher.IsMatch(methodSymbol.ContainingType))
+                    {
+                        var processor = new ExpressionRewirter(methodSymbol, candidateInvocation, compilation, expressionUids);
+
+                        context.CancellationToken.ThrowIfCancellationRequested();
+                        if (EmitDiagnostics(context, processor.GetErrors()))
+                            continue;
+                        context.CancellationToken.ThrowIfCancellationRequested();
+                        EmitDiagnostics(context, processor.GetWarnings());
+
+                        processor.AppendExpression(exchangeForExpressionBuilder);
                     }
                 }
 

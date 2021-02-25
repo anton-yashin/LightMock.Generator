@@ -61,7 +61,7 @@ namespace LightMock.Generator
 #pragma warning restore CS1522 // Empty switch block
                 /*exchangeForExpressionBuilder*/
             }
-            throw new ArgumentException("expression for provided token is not found");
+            throw new ArgumentException($"expression for provided token [{token}] is not found");
         }
     }
 
