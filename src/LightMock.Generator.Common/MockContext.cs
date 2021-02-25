@@ -26,6 +26,7 @@
 ******************************************************************************/
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
 
@@ -158,6 +159,7 @@ namespace LightMock
         /// represents the method that has been invoked.</param>
         /// <returns>An instance of <typeparamref name="TResult"/> or possibly null 
         /// if <typeparamref name="TResult"/> a reference type.</returns>
+        [return: MaybeNull]
         TResult IInvocationContext<TMock>.Invoke<TResult>(Expression<Func<TMock, TResult>> expression)
         {
             var invocationInfo = expression.ToInvocationInfo();

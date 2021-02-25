@@ -43,7 +43,7 @@ namespace ExpressionReflect
 		/// </summary>
 		/// <param name="expression">The root of the expression tree.</param>
 		/// <returns>A new tree with sub-trees evaluated and replaced.</returns>
-		public static Expression PartialEval(this Expression expression)
+		public static Expression? PartialEval(this Expression expression)
 		{
 			return PartialEval(expression, Evaluator.CanBeEvaluatedLocally);
 		}
@@ -54,7 +54,7 @@ namespace ExpressionReflect
 		/// <param name="expression">The root of the expression tree.</param>
 		/// <param name="fnCanBeEvaluated">A function that decides whether a given expression node can be part of the local function.</param>
 		/// <returns>A new tree with sub-trees evaluated and replaced.</returns>
-		public static Expression PartialEval(this Expression expression, Func<Expression, bool> fnCanBeEvaluated)
+		public static Expression? PartialEval(this Expression expression, Func<Expression, bool> fnCanBeEvaluated)
 		{
 			return new SubtreeEvaluator(new Nominator(fnCanBeEvaluated).Nominate(expression)).Eval(expression);
 		}
@@ -76,12 +76,12 @@ namespace ExpressionReflect
 				this.candidates = candidates;
 			}
 
-			internal Expression Eval(Expression exp)
+			internal Expression? Eval(Expression exp)
 			{
 				return this.Visit(exp);
 			}
 
-			public override Expression Visit(Expression exp)
+			public override Expression? Visit(Expression exp)
 			{
 				if (exp == null)
 				{
@@ -119,17 +119,17 @@ namespace ExpressionReflect
 
 			internal Nominator(Func<Expression, bool> fnCanBeEvaluated)
 			{
+				this.candidates = new Dictionary<Expression, Expression>();
 				this.fnCanBeEvaluated = fnCanBeEvaluated;
 			}
 
 			internal IDictionary<Expression, Expression> Nominate(Expression expression)
 			{
-				this.candidates = new Dictionary<Expression, Expression>();
 				this.Visit(expression);
 				return this.candidates;
 			}
 
-			public override Expression Visit(Expression expression)
+			public override Expression? Visit(Expression expression)
 			{
 				if (expression != null)
 				{

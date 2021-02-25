@@ -36,7 +36,7 @@ namespace LightMock
     {
         private readonly LambdaExpression expression;                
         private Action throwAction;
-        private Action<object[]> callback;
+        private Action<object[]?> callback;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Arrangement"/> class.
@@ -178,7 +178,7 @@ namespace LightMock
         /// </summary>
         /// <param name="arguments">The arguments used to invoke the mocked method.</param>
         /// <returns>The registered return value, if any, otherwise, the default value.</returns>
-        internal virtual object Execute(object[] arguments)
+        internal virtual object? Execute(object[]? arguments)
         {
             callback(arguments);
             throwAction();

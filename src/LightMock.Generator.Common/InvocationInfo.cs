@@ -65,7 +65,7 @@ namespace LightMock
         /// <summary>
         /// Gets the arguments used to invoke the method.
         /// </summary>
-        public object[] Arguments { get; private set; }
+        public object[]? Arguments { get; private set; }
 
         /// <summary>
         /// Gets the expression type.

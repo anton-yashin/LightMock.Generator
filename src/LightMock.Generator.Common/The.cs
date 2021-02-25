@@ -41,7 +41,7 @@ namespace LightMock
         {
             get
             {
-                return default(TValue);
+                return default(TValue)!;
             }
         }
         
@@ -52,7 +52,7 @@ namespace LightMock
         /// <returns>default(<typeparamref name="TValue"/>)</returns>
         public static TValue Is(Func<TValue, bool> predicate)
         {
-            return default(TValue);
+            return default(TValue)!;
         }
         
     }

@@ -40,7 +40,7 @@ namespace LightMock
     {
         private readonly MemberInfo member;
 
-        private readonly LambdaExpression[] matchExpressions;
+        private readonly LambdaExpression[]? matchExpressions;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MatchInfo"/> class.
@@ -53,8 +53,8 @@ namespace LightMock
             this.member = method;
             this.matchExpressions = matchExpressions;
             ExpressionType = ExpressionType.Call;
-        }  
-        
+        }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="MatchInfo"/> class.
         /// </summary>
@@ -74,7 +74,7 @@ namespace LightMock
         public bool Matches(InvocationInfo invocationInfo)
         {
             if (ExpressionType != invocationInfo.ExpressionType) return false;
-            
+
             if (member != invocationInfo.Member)
             {
                 return false;
@@ -82,7 +82,7 @@ namespace LightMock
 
             if (ExpressionType == ExpressionType.MemberAccess) return true;
 
-            if (matchExpressions.Length != invocationInfo.Arguments.Length)
+            if (matchExpressions?.Length != invocationInfo.Arguments?.Length)
             {
                 return false;
             }
@@ -104,7 +104,7 @@ namespace LightMock
         /// <param name="x">The first collection of lambda expressions to compare.</param>
         /// <param name="y">The second collection of lambda expressions to compare.</param>
         /// <returns>true if the specified collections are equal; otherwise, false.</returns>
-        static bool Equals(IReadOnlyCollection<LambdaExpression> x, IReadOnlyCollection<LambdaExpression> y)
+        static bool Equals(IReadOnlyCollection<LambdaExpression>? x, IReadOnlyCollection<LambdaExpression>? y)
         {
             if (x == null && y == null)
                 return true;

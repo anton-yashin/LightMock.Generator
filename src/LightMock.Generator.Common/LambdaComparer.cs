@@ -35,8 +35,8 @@ namespace LightMock
 {
     internal class LambdaComparer : IEqualityComparer<Expression>
     {
-        static LambdaComparer instance;
-        public static LambdaComparer Instance => LazyInitializer.EnsureInitialized(ref instance);
+        static LambdaComparer? instance;
+        public static LambdaComparer Instance => LazyInitializer.EnsureInitialized(ref instance!);
 
         public bool Equals(Expression x, Expression y)
         {

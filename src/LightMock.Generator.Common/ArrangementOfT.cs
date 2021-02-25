@@ -37,9 +37,9 @@ namespace LightMock
     /// <typeparam name="TResult">The type of the return value of the mocked method.</typeparam>
     public class Arrangement<TResult> : Arrangement
     {
-        private TResult result;
+        private object? result;
 
-        private Func<object[], TResult> getResult;
+        private Func<object[]?, TResult>? getResult;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Arrangement{TResult}"/> class.
@@ -125,9 +125,11 @@ namespace LightMock
         /// </summary>
         /// <param name="arguments">The arguments used to invoke the mocked method.</param>
         /// <returns>The registered return value, if any, otherwise, the default value.</returns>
-        internal override object Execute(object[] arguments)
+        internal override object? Execute(object[]? arguments)
         {
             base.Execute(arguments);
+
+            var getResult = this.getResult;
 
             if (getResult != null)
             {

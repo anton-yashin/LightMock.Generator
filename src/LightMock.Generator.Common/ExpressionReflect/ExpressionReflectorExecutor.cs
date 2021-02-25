@@ -39,12 +39,12 @@ namespace ExpressionReflect
     [ExcludeFromCodeCoverage]
 	internal sealed class ExpressionReflectionExecutor : ExpressionVisitor
 	{
-		private IDictionary<string, object> args = new Dictionary<string, object>();
-		private readonly Stack<object> data = new Stack<object>();
+		private IDictionary<string, object?> args = new Dictionary<string, object?>();
+		private readonly Stack<object?> data = new Stack<object?>();
 		private readonly Stack<LambdaExpression> nestedLambdas = new Stack<LambdaExpression>();
 
 		private readonly Expression targetExpression;
-		private object[] passedArgumentValues;
+		private object?[]? passedArgumentValues;
 
 
 		public ExpressionReflectionExecutor(Expression targetExpression)
@@ -57,7 +57,7 @@ namespace ExpressionReflect
 		/// </summary>
 		/// <param name="returnsValue">Flag, indicating if the expression returns a value. The default is <c>true</c>.</param>
 		/// <returns>The result of the expression.</returns>
-		internal object Execute(object[] passedArgumentValues, bool returnsValue = true)
+		internal object? Execute(object?[] passedArgumentValues, bool returnsValue = true)
 		{
 			this.passedArgumentValues = passedArgumentValues;
 			Initialize();
@@ -72,7 +72,7 @@ namespace ExpressionReflect
 				throw new ExpressionExecutionException("The stack contained too few elements.");
 			}
 
-			object value = null;
+			object? value = null;
 
 			if (returnsValue)
 			{
@@ -84,10 +84,7 @@ namespace ExpressionReflect
 
 		protected override Expression VisitLambda<T>(Expression<T> node)
 		{
-
-			Delegate @delegate = null;
-
-			string methodName = null;
+			string? methodName = null;
 
 			Type type = node.Type;
 			if (type.IsFunc())
@@ -102,8 +99,7 @@ namespace ExpressionReflect
 			{
 				methodName = "Predicate";
 			}
-
-			if (string.IsNullOrWhiteSpace(methodName))
+			else
 			{
 				throw new ExpressionExecutionException(string.Format("No wrapper method available for delegate type '{0}'", type.Name));
 			}
@@ -111,8 +107,8 @@ namespace ExpressionReflect
 			var executor = new ExpressionReflectionExecutor(node);
 
             Type[] genericArguments = type.GenericTypeArguments;
-            MethodInfo methodInfo = this.FindMethod(methodName, genericArguments);
-            @delegate = methodInfo.CreateDelegate(type, executor);
+            MethodInfo? methodInfo = this.FindMethod(methodName, genericArguments);
+            Delegate? @delegate = methodInfo?.CreateDelegate(type, executor);
 
 			return this.VisitConstant(Expression.Constant(@delegate));
 
@@ -123,7 +119,7 @@ namespace ExpressionReflect
 		{
 			Expression expression = base.VisitParameter(p);
 
-			object argument = this.args[p.Name];
+			object? argument = this.args[p.Name];
 			this.data.Push(argument);
 
 			return expression;
@@ -134,25 +130,23 @@ namespace ExpressionReflect
 			Expression expression = base.VisitMember(node);
 			MemberInfo memberInfo = node.Member;
 
-			if (memberInfo is PropertyInfo)
+			if (memberInfo is PropertyInfo propertyInfo)
 			{
-				object target = null;
-				if (!((PropertyInfo)memberInfo).GetMethod.IsStatic)
+				object? target = null;
+				if (!propertyInfo.GetMethod.IsStatic)
 				{
 					target = this.GetValueFromStack();
 				}
-				PropertyInfo propertyInfo = (PropertyInfo)memberInfo;
 				object value = propertyInfo.GetValue(target, null);
 				this.data.Push(value);
 			}
-			if (memberInfo is FieldInfo)
+			if (memberInfo is FieldInfo fieldInfo)
 			{
-				object target = null;
-				if (!((FieldInfo)memberInfo).IsStatic)
+				object? target = null;
+				if (!fieldInfo.IsStatic)
 				{
 					target = this.GetValueFromStack();
 				}
-				FieldInfo fieldInfo = (FieldInfo)memberInfo;
 				object value = fieldInfo.GetValue(target);
 				this.data.Push(value);
 			}
@@ -164,8 +158,8 @@ namespace ExpressionReflect
 		{
 			Expression expression = base.VisitMethodCall(m);
 
-			object target = null;
-			object[] parameterValues = this.GetValuesFromStack(m.Arguments.Count);
+			object? target = null;
+			object?[] parameterValues = this.GetValuesFromStack(m.Arguments.Count);
 
 			if (m.Object != null)
 			{
@@ -191,11 +185,11 @@ namespace ExpressionReflect
 		{
 			Expression expression = base.VisitInvocation(node);
 
-			object value = null;
+			object? value = null;
 
 			if (node.Expression is MemberExpression)
 			{
-				object[] arguments = this.GetValuesFromStack(node.Arguments.Count);
+				object?[] arguments = this.GetValuesFromStack(node.Arguments.Count);
 
 				// Use the delegate on the stack. The constant expression visitor pushed it there.
 				value = this.GetValueFromStack();
@@ -217,7 +211,7 @@ namespace ExpressionReflect
 			Expression expression = base.VisitNew(nex);
 
 			ConstructorInfo constructorInfo = nex.Constructor;
-			object[] parameterValues = this.GetValuesFromStack(nex.Arguments.Count);
+			object?[] parameterValues = this.GetValuesFromStack(nex.Arguments.Count);
 
 			object value = constructorInfo.Invoke(parameterValues.ToArray());
 			this.data.Push(value);
@@ -229,9 +223,9 @@ namespace ExpressionReflect
 		{
 			Expression expression = base.VisitBinary(b);
 
-			object value;
+			object? value;
 
-			object[] values = this.GetValuesFromStack(2);
+			object?[] values = this.GetValuesFromStack(2);
 
 			MethodInfo methodInfo = b.Method;
 			if (methodInfo != null)
@@ -271,7 +265,7 @@ namespace ExpressionReflect
 						value = Equals(values.First(), values.Last());
 						break;
 					case ExpressionType.NotEqual:
-						value = !(values.First().Equals(values.Last()));
+						value = Equals(values.First(), values.Last()) == false;
 						break;
 					case ExpressionType.And:
 						value = Convert.ToBoolean(values.First()) & Convert.ToBoolean(values.Last());
@@ -310,8 +304,8 @@ namespace ExpressionReflect
 						value = values.First() ?? values.Last();
 						break;
 					case ExpressionType.ArrayIndex:
-						var array = (IList)values.First();
-						value = array[Convert.ToInt32(values.Last())];
+						var array = (IList?)values.First();
+						value = array?[Convert.ToInt32(values.Last())];
 						break;
 					default:
 						throw new ArgumentOutOfRangeException();
@@ -329,7 +323,7 @@ namespace ExpressionReflect
 		{
 			Expression expression = base.VisitTypeBinary(b);
 
-			object target = this.GetValueFromStack();
+			object? target = this.GetValueFromStack();
 			Type isType = b.TypeOperand;
 
 			bool value = isType.IsInstanceOfType(target);
@@ -342,14 +336,14 @@ namespace ExpressionReflect
 		{
 			Expression expression = base.VisitUnary(u);
 
-			object result;
-			object value = this.GetValueFromStack();
+			object? result;
+			object? value = this.GetValueFromStack();
 
 			MethodInfo methodInfo = u.Method;
 			if (methodInfo != null)
 			{
 				// If an operator method is available use it.
-				result = methodInfo.Invoke(null, new object[] { value });
+				result = methodInfo.Invoke(null, new object?[] { value });
 			}
 			else
 			{
@@ -379,6 +373,8 @@ namespace ExpressionReflect
 						result = checked(Convert.ChangeType(value, u.Type, CultureInfo.InvariantCulture));
 						break;
 					case ExpressionType.ArrayLength:
+						if (value == null || value is Array == false)
+							throw new InvalidOperationException("expected Array value");
 						result = ((Array)value).Length;
 						break;
 					case ExpressionType.TypeAs:
@@ -406,11 +402,14 @@ namespace ExpressionReflect
 		{
 			Expression expression = base.VisitConditional(c);
 
-			object ifFalse = this.GetValueFromStack();
-			object ifTrue = this.GetValueFromStack();
-			bool test = (bool)this.GetValueFromStack();
+			object? ifFalse = this.GetValueFromStack();
+			object? ifTrue = this.GetValueFromStack();
+			var testValue = this.GetValueFromStack();
+			if (testValue == null || (testValue is bool == false))
+				throw new InvalidOperationException("expected bool at stack");
+			bool test = (bool)testValue;
 
-			object value = test ? ifTrue : ifFalse;
+			object? value = test ? ifTrue : ifFalse;
 			this.data.Push(value);
 
 			return expression;
@@ -432,7 +431,10 @@ namespace ExpressionReflect
 			switch (na.NodeType)
 			{
 				case ExpressionType.NewArrayBounds:
-					int length = (int)this.GetValueFromStack();
+					var lengthValue = this.GetValueFromStack();
+					if (lengthValue == null || (lengthValue is int == false))
+						throw new InvalidOperationException("expected int");
+					int length = (int)lengthValue;
 					newArray = Array.CreateInstance(type, length);
 					break;
 				case ExpressionType.NewArrayInit:
@@ -454,26 +456,24 @@ namespace ExpressionReflect
 			Expression expression = base.VisitMemberInit(init);
 
 			// Step 1: Get all values for the initialization
-			object[] values = this.GetValuesFromStack(init.Bindings.Count);
+			object?[] values = this.GetValuesFromStack(init.Bindings.Count);
 
 			// Set 2: Get target from stack
-			object target = this.GetValueFromStack();
+			object? target = this.GetValueFromStack();
 
 			// Set 3: Initialize the properties.
 			for (int index = 0; index < init.Bindings.Count; index++)
 			{
 				MemberBinding binding = init.Bindings[index];
 				MemberInfo memberInfo = binding.Member;
-				if (memberInfo is PropertyInfo)
+				if (memberInfo is PropertyInfo propertyInfo)
 				{
-					PropertyInfo propertyInfo = (PropertyInfo)memberInfo;
-					object value = values[index];
+					object? value = values[index];
 					propertyInfo.SetValue(target, value, null);
 				}
-				else if (memberInfo is FieldInfo)
+				else if (memberInfo is FieldInfo fieldInfo)
 				{
-					FieldInfo fieldInfo = (FieldInfo)memberInfo;
-					object value = values[index];
+					object? value = values[index];
 					fieldInfo.SetValue(target, value);
 				}
 			}
@@ -491,21 +491,21 @@ namespace ExpressionReflect
 			// Set 1: Get all values for initialization
 			int initializerArgumentCount = init.Initializers.First().Arguments.Count;
 			int initializerCount = init.Initializers.Count;
-			object[] values = this.GetValuesFromStack(initializerCount * initializerArgumentCount);
+			object?[] values = this.GetValuesFromStack(initializerCount * initializerArgumentCount);
 
 			// Set 2: Get target from stack
-			object target = this.GetValueFromStack();
+			object? target = this.GetValueFromStack();
 
 			// Set 3: Add the values
 			for (int i = 0; i < initializerCount; i++)
 			{
 				ElementInit initializer = init.Initializers[i];
 
-				object[] argumentValues = new object[initializerArgumentCount];
+				object?[] argumentValues = new object[initializerArgumentCount];
 				for (int j = 0; j < initializerArgumentCount; j++)
 				{
 					int index = (i * initializerArgumentCount) + j;
-					object arg = values[index];
+					object? arg = values[index];
 					argumentValues[j] = arg;
 				}
 
@@ -519,13 +519,13 @@ namespace ExpressionReflect
 			return expression;
 		}
 
-		private object[] GetValuesFromStack(int count)
+		private object?[] GetValuesFromStack(int count)
 		{
-			IList<object> parameterValues = new List<object>();
+			IList<object?> parameterValues = new List<object?>();
 
 			for (int i = 0; i < count; i++)
 			{
-				object parameterValue = this.GetValueFromStack();
+				object? parameterValue = this.GetValueFromStack();
 				parameterValues.Add(parameterValue);
 			}
 
@@ -536,9 +536,9 @@ namespace ExpressionReflect
 		/// Gets a single value from the stack.
 		/// </summary>
 		/// <returns>The element.</returns>
-		private object GetValueFromStack()
+		private object? GetValueFromStack()
 		{
-			object parameterValue = this.data.Pop();
+			object? parameterValue = this.data.Pop();
 			return parameterValue;
 		}
 
@@ -547,9 +547,9 @@ namespace ExpressionReflect
 			this.args = InitializeArgs((LambdaExpression)this.targetExpression, this.passedArgumentValues);
 		}
 
-		private static IDictionary<string, object> InitializeArgs(LambdaExpression lambdaExpression, object[] parameterValues)
+		private static IDictionary<string, object?> InitializeArgs(LambdaExpression lambdaExpression, object?[] parameterValues)
 		{
-			IDictionary<string, object> arguments = new Dictionary<string, object>();
+			IDictionary<string, object?> arguments = new Dictionary<string, object?>();
 
 			int index = 0;
 			foreach (ParameterExpression parameter in lambdaExpression.Parameters)
@@ -561,9 +561,9 @@ namespace ExpressionReflect
 			return arguments;
 		}
 
-		private MethodInfo FindMethod(string name, Type[] genericArguments)
+		private MethodInfo? FindMethod(string name, Type[] genericArguments)
 		{
-			MethodInfo result = null;
+			MethodInfo? result = null;
 
             IEnumerable<MethodInfo> methods = this.GetType().GetTypeInfo().DeclaredMethods.Where(m => m.Name == name);
             foreach (MethodInfo method in methods)
@@ -581,21 +581,25 @@ namespace ExpressionReflect
 			return result;
 		}
 
+		[return: MaybeNull]
 		private TResult Func<T, TResult>(T arg)
 		{
 			return (TResult)this.ExecuteReflector(arg);
 		}
 
+		[return: MaybeNull]
 		private TResult Func<T1, T2, TResult>(T1 arg1, T2 arg2)
 		{
 			return (TResult)this.ExecuteReflector(arg1, arg2);
 		}
 
+		[return: MaybeNull]
 		private TResult Func<T1, T2, T3, TResult>(T1 arg1, T2 arg2, T3 arg3)
 		{
 			return (TResult)this.ExecuteReflector(arg1, arg2, arg3);
 		}
 
+		[return: MaybeNull]
 		private TResult Func<T1, T2, T3, T4, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4)
 		{
 			return (TResult)this.ExecuteReflector(arg1, arg2, arg3, arg4);
@@ -631,9 +635,9 @@ namespace ExpressionReflect
 			return (bool)this.ExecuteReflector(arg);
 		}
 
-		private object ExecuteReflector(params object[] arguments)
+		private object? ExecuteReflector(params object?[] arguments)
 		{
-			object result = Execute(arguments);
+			object? result = Execute(arguments);
 			return result;
 		}
 	}
