@@ -56,7 +56,7 @@ namespace LightMock.Generator
             IPropertySymbol symbol,
             Func<StringBuilder, StringBuilder> appendGetInvocation)
         {
-            var typePart = symbol.ContainingType.ToDisplayString(SymbolDisplayFormats.Namespace).Replace(".", "_");
+            var typePart = GetPropertyTypePart(symbol);
             @this.Append(" {");
             if (symbol.GetMethod != null)
             {
@@ -93,7 +93,7 @@ namespace LightMock.Generator
             this StringBuilder @this,
             IPropertySymbol symbol)
         {
-            var typePart = symbol.ContainingType.ToDisplayString(SymbolDisplayFormats.Namespace).Replace(".", "_");
+            var typePart = GetPropertyTypePart(symbol);
             @this.Append("{");
 
             if (symbol.GetMethod != null)
@@ -125,7 +125,7 @@ namespace LightMock.Generator
 
         public static StringBuilder AppendPropertyDefinition(this StringBuilder @this, IPropertySymbol symbol)
         {
-            var typePart = symbol.ContainingType.ToDisplayString(SymbolDisplayFormats.Namespace).Replace(".", "_");
+            var typePart = GetPropertyTypePart(symbol);
 
             if (symbol.GetMethod != null)
             {
@@ -153,6 +153,12 @@ namespace LightMock.Generator
         public static StringBuilder AppendP2FSetter(this StringBuilder @this, IPropertySymbol symbol, string typePart)
             => @this.AppendP2FName(symbol, typePart, Suffix.Setter);
 
+        public static StringBuilder AppendP2FGetter(this StringBuilder @this, IPropertySymbol symbol)
+            => @this.AppendP2FName(symbol, GetPropertyTypePart(symbol), Suffix.Getter);
+
+        public static StringBuilder AppendP2FSetter(this StringBuilder @this, IPropertySymbol symbol)
+            => @this.AppendP2FName(symbol, GetPropertyTypePart(symbol), Suffix.Setter);
+
         static StringBuilder AppendP2FName(
             this StringBuilder @this,
             IPropertySymbol symbol,
@@ -164,6 +170,9 @@ namespace LightMock.Generator
                                .Append(typePart)
                                .Append(suffix);
         }
+
+        static string GetPropertyTypePart(IPropertySymbol symbol)
+            => symbol.ContainingType.ToDisplayString(SymbolDisplayFormats.Namespace).Replace(".", "_");
 
         static readonly string[] whereSeparator = new string[] { "where" };
 
