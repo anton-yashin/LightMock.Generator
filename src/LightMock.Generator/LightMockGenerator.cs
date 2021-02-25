@@ -52,8 +52,7 @@ namespace LightMock.Generator
 
                 // process symbols under Mock<> generic
 
-                var mockContextType = typeof(AbstractMock<>);
-                var mockContextNamespaceAndName = mockContextType.Namespace + "." + mockContextType.Name.Replace("`1", "");
+                var mockContextMatcher = new TypeMatcher(typeof(AbstractMock<>));
                 var getInstanceTypeBuilder = new StringBuilder();
                 var getProtectedContextTypeBuilder = new StringBuilder();
                 var getPropertiesContextTypeBuilder = new StringBuilder();
@@ -74,7 +73,7 @@ namespace LightMock.Generator
                     context.CancellationToken.ThrowIfCancellationRequested();
                     var mcbt = mockContainer?.BaseType;
                     if (mcbt != null
-                        && mcbt.ToDisplayString(SymbolDisplayFormats.Namespace) == mockContextNamespaceAndName
+                        && mockContextMatcher.IsMatch(mcbt)
                         && mcbt.TypeArguments.FirstOrDefault() is INamedTypeSymbol mockedType
                         && processedTypes.Contains(mockedType.OriginalDefinition) == false)
                     {
