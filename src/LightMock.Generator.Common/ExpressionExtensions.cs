@@ -24,6 +24,7 @@
     https://github.com/seesharper/LightMock
     http://twitter.com/bernhardrichter
 ******************************************************************************/
+using System;
 using System.Linq.Expressions;
 using ExpressionReflect;
 
@@ -55,8 +56,16 @@ namespace LightMock
         /// <returns><see cref="InvocationInfo"/>.</returns>
         public static InvocationInfo ToInvocationInfo(this LambdaExpression expression)
         {
-            var invocationVisitor = new InvocationInfoBuilder();
-            return invocationVisitor.Build(expression.Simplify());
+            expression = expression.Simplify();
+            switch (expression.Body)
+            {
+                case MethodCallExpression methodCallExpresssion:
+                    return new InvocationInfo(methodCallExpresssion.Method,
+                        ConstantExpressionValuesLocator.Locate(expression));
+                case MemberExpression memberExpression:
+                    return new InvocationInfo(memberExpression.Member);
+            }
+            throw new NotSupportedException($"Expression type ({expression.Body.NodeType}) not supported.");
         }
 
         /// <summary>
