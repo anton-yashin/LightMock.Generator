@@ -24,8 +24,7 @@ namespace LightMock.Tests
         /// <returns>A list of <see cref="Expression"/> instances that matches the given predicate.</returns>
         public static IEnumerable<TExpression> Find<TExpression>(this Expression expression, Func<TExpression, bool> predicate) where TExpression : Expression
         {
-            var finder = new ExpressionFinder<TExpression>();
-            return finder.Find(expression, predicate);
+            return ExpressionFinder<TExpression>.Find(expression, predicate);
         }
 
         /// <summary>
@@ -38,10 +37,9 @@ namespace LightMock.Tests
         /// <param name="predicate">The <see cref="Func{T,TResult}"/> used to filter the result</param>
         /// <param name="replaceWith">The <see cref="Func{T,TResult}"/> used to specify the replacement expression.</param>
         /// <returns>The modified <see cref="Expression"/> tree.</returns>
-        public static Expression Replace<TTargetExpression>(this Expression expression, Func<TTargetExpression, bool> predicate, Func<TTargetExpression, Expression> replaceWith) where TTargetExpression : Expression
+        public static Expression? Replace<TTargetExpression>(this Expression expression, Func<TTargetExpression, bool> predicate, Func<TTargetExpression, Expression> replaceWith) where TTargetExpression : Expression
         {
-            var replacer = new ExpressionReplacer<TTargetExpression>();
-            return replacer.Replace(expression, predicate, replaceWith);
+            return ExpressionReplacer<TTargetExpression>.Replace(expression, predicate, replaceWith);
         }
 
         /// <summary>
@@ -54,8 +52,7 @@ namespace LightMock.Tests
         /// <returns>A list of <see cref="Expression"/> instances that matches the given predicate.</returns>
         public static bool Contains<TExpression>(this Expression expression, Func<TExpression, bool> predicate) where TExpression : Expression
         {
-            var finder = new ExpressionFinder<TExpression>();
-            return finder.Find(expression, predicate).Any();
+            return ExpressionFinder<TExpression>.Find(expression, predicate).Any();
         }
 
         /// <summary>
@@ -114,8 +111,13 @@ namespace LightMock.Tests
     /// <typeparam name="TExpression">The type of <see cref="Expression"/> to search for.</typeparam>
     public class ExpressionFinder<TExpression> : ExpressionVisitor where TExpression : Expression
     {
-        private readonly IList<TExpression> _result = new List<TExpression>();
-        private Func<TExpression, bool> _predicate;
+        private readonly IList<TExpression> result = new List<TExpression>();
+        private readonly Func<TExpression, bool> predicate;
+
+        private ExpressionFinder(Func<TExpression, bool> predicate)
+        {
+            this.predicate = predicate;
+        }
 
         /// <summary>
         /// Returns a list of <typeparamref name="TExpression"/> instances that matches the <paramref name="predicate"/>.
@@ -123,12 +125,11 @@ namespace LightMock.Tests
         /// <param name="expression">The <see cref="Expression"/> that represents the sub tree for which to start searching.</param>
         /// <param name="predicate">The <see cref="Func{T,TResult}"/> used to filter the result</param>
         /// <returns>A list of <see cref="Expression"/> instances that matches the given predicate.</returns>
-        public IEnumerable<TExpression> Find(Expression expression, Func<TExpression, bool> predicate)
+        public static IEnumerable<TExpression> Find(Expression expression, Func<TExpression, bool> predicate)
         {
-            _result.Clear();
-            _predicate = predicate;
-            Visit(expression);
-            return _result;
+            var @this = new ExpressionFinder<TExpression>(predicate);
+            @this.Visit(expression);
+            return @this.result;
         }
 
         /// <summary>
@@ -137,21 +138,20 @@ namespace LightMock.Tests
         /// </summary>
         /// <param name="expression">The <see cref="Expression"/> currently being visited.</param>
         /// <returns><see cref="Expression"/></returns>
-        public override Expression Visit(Expression expression)
+        public override Expression? Visit(Expression? expression)
         {
-            if (IsTargetExpressionType(expression) && MatchesExpressionPredicate(expression))
-                _result.Add((TExpression)expression);
+            switch (expression)
+            {
+                case TExpression expr when MatchesExpressionPredicate(expr):
+                    result.Add(expr);
+                    break;
+            }
             return base.Visit(expression);
         }
 
         private bool MatchesExpressionPredicate(Expression expression)
         {
-            return _predicate((TExpression)expression);
-        }
-
-        private static bool IsTargetExpressionType(Expression expression)
-        {
-            return expression is TExpression;
+            return predicate((TExpression)expression);
         }
     }
 
@@ -161,10 +161,15 @@ namespace LightMock.Tests
     /// <typeparam name="TExpression">The type of <see cref="Expression"/> to find and replace.</typeparam>
     public class ExpressionReplacer<TExpression> : ExpressionVisitor where TExpression : Expression
     {
+        private readonly Func<TExpression, Expression> replaceWith;
+        private readonly Func<TExpression, bool> predicate;
 
-        private Func<TExpression, Expression> _replaceWith;
-        private Func<TExpression, bool> _predicate;
-
+        private ExpressionReplacer(Func<TExpression, bool> predicate,
+            Func<TExpression, Expression> replaceWith)
+        {
+            this.predicate = predicate;
+            this.replaceWith = replaceWith;
+        }
 
         /// <summary>
         /// Searches for expressions using the given <paramref name="predicate"/> and 
@@ -176,12 +181,11 @@ namespace LightMock.Tests
         /// <param name="replaceWith">The <see cref="Func{T,TResult}"/> 
         /// used to specify the replacement expression.</param>
         /// <returns>The modified <see cref="Expression"/> tree.</returns>
-        public Expression Replace(Expression expression, Func<TExpression, bool> predicate,
+        public static Expression? Replace(Expression expression, Func<TExpression, bool> predicate,
             Func<TExpression, Expression> replaceWith)
         {
-            _replaceWith = replaceWith;
-            _predicate = predicate;
-            return Visit(expression);
+            var @this = new ExpressionReplacer<TExpression>(predicate, replaceWith);
+            return @this.Visit(expression);
         }
 
         /// <summary>
@@ -191,11 +195,11 @@ namespace LightMock.Tests
         /// </summary>
         /// <param name="expression">The <see cref="Expression"/> currently being visited.</param>
         /// <returns><see cref="Expression"/></returns>        
-        public override Expression Visit(Expression expression)
+        public override Expression? Visit(Expression? expression)
         {
-            if (expression is TExpression)
-                if (_predicate((TExpression)expression))
-                    return _replaceWith((TExpression)expression);
+            if (expression is TExpression expr)
+                if (predicate(expr))
+                    return replaceWith(expr);
             return base.Visit(expression);
         }
     }
