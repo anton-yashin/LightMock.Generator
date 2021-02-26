@@ -12,16 +12,17 @@ namespace LightMock
     /// </summary>
     public class MatchExpressionRewriter : ExpressionVisitor
     {
-
+        private MatchExpressionRewriter() { }
         /// <summary>
         /// Replaces references to the <see cref="The{TValue}.IsAnyValue"/> with a <see cref="MethodCallExpression"/>
         /// that represents calling the <see cref="The{TValue}.Is"/> method.
         /// </summary>
         /// <param name="expression">The <see cref="LambdaExpression"/> to visit.</param>
         /// <returns><see cref="Expression"/>.</returns>
-        public LambdaExpression Rewrite(LambdaExpression expression)
+        public static LambdaExpression Rewrite(LambdaExpression expression)
         {
-            return (LambdaExpression)Visit(expression);
+            var @this = new MatchExpressionRewriter();
+            return (LambdaExpression)@this.Visit(expression);
         }
                 
         /// <summary>

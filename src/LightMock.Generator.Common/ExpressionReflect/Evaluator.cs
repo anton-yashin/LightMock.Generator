@@ -102,7 +102,7 @@ namespace ExpressionReflect
 				}
 
 				LambdaExpression lambda = Expression.Lambda(e);
-				object value = lambda.Execute();
+				object? value = lambda.Execute();
 				return Expression.Constant(value, e.Type);
 			}
 		}

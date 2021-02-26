@@ -42,7 +42,7 @@ namespace LightMock
         /// <returns>A simplified version of the target <paramref name="expression"/></returns>
         public static LambdaExpression Simplify(this LambdaExpression expression)
         {            
-            expression = new MatchExpressionRewriter().Rewrite(expression);
+            expression = MatchExpressionRewriter.Rewrite(expression);
             
             return
                 (LambdaExpression)expression.PartialEval(
