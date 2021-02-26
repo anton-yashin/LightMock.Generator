@@ -40,7 +40,7 @@ namespace LightMock
     {
         private readonly MemberInfo member;
 
-        private readonly LambdaExpression[]? matchExpressions;
+        private readonly IReadOnlyList<LambdaExpression>? matchExpressions;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MatchInfo"/> class.
@@ -48,7 +48,7 @@ namespace LightMock
         /// <param name="method">The target method to match.</param>
         /// <param name="matchExpressions">An <see cref="LambdaExpression"/> array that 
         /// represents matching argument values.</param>
-        public MatchInfo(MethodInfo method, LambdaExpression[] matchExpressions)
+        public MatchInfo(MethodInfo method, IReadOnlyList<LambdaExpression> matchExpressions)
         {
             this.member = method;
             this.matchExpressions = matchExpressions;
@@ -82,7 +82,7 @@ namespace LightMock
 
             if (ExpressionType == ExpressionType.MemberAccess) return true;
 
-            if (matchExpressions?.Length != invocationInfo.Arguments?.Length)
+            if (matchExpressions?.Count != invocationInfo.Arguments?.Length)
             {
                 return false;
             }

@@ -40,12 +40,12 @@ namespace LightMock
         /// </summary>
         /// <param name="expression">The <see cref="LambdaExpression"/> to simplify.</param>
         /// <returns>A simplified version of the target <paramref name="expression"/></returns>
-        public static LambdaExpression Simplify(this LambdaExpression expression)
+        public static LambdaExpression? Simplify(this LambdaExpression expression)
         {            
             expression = MatchExpressionRewriter.Rewrite(expression);
             
             return
-                (LambdaExpression)expression.PartialEval(
+                (LambdaExpression?)expression.PartialEval(
                     e => e.NodeType != ExpressionType.Parameter && e.NodeType != ExpressionType.Lambda);
         }
 
@@ -56,16 +56,16 @@ namespace LightMock
         /// <returns><see cref="InvocationInfo"/>.</returns>
         public static InvocationInfo ToInvocationInfo(this LambdaExpression expression)
         {
-            expression = expression.Simplify();
-            switch (expression.Body)
+            var simplified = expression.Simplify();
+            switch (simplified?.Body)
             {
                 case MethodCallExpression methodCallExpresssion:
                     return new InvocationInfo(methodCallExpresssion.Method,
-                        ConstantExpressionValuesLocator.Locate(expression));
+                        ConstantExpressionValuesLocator.Locate(simplified));
                 case MemberExpression memberExpression:
                     return new InvocationInfo(memberExpression.Member);
             }
-            throw new NotSupportedException($"Expression type ({expression.Body.NodeType}) not supported.");
+            throw new NotSupportedException($"Expression type ({simplified?.Body.NodeType}) not supported.");
         }
 
         /// <summary>
@@ -74,9 +74,18 @@ namespace LightMock
         /// <param name="expression">The <see cref="LambdaExpression"/> from which to create a <see cref="MatchInfo"/> instance.</param>
         /// <returns><see cref="MatchInfo"/>.</returns>
         public static MatchInfo ToMatchInfo(this LambdaExpression expression)
-        {                        
-            var invocationVisitor = new MatchInfoBuilder();
-            return invocationVisitor.Build(expression.Simplify());
-        }                   
+        {
+            var simplified = expression.Simplify();
+            if (simplified == null)
+                throw new InvalidOperationException($"Simplified expression for {expression.Body.NodeType} is null");
+            switch (simplified.Body)
+            {
+                case MethodCallExpression methodCallExpression:
+                    return new MatchInfo(methodCallExpression.Method, MethodCallToLambdas.Convert(methodCallExpression));
+                case MemberExpression memberExpression:
+                    return new MatchInfo(memberExpression.Member);
+            }
+            throw new NotSupportedException($"Expression type ({simplified.Body.NodeType}) not supported.");
+        }
     }    
 }
