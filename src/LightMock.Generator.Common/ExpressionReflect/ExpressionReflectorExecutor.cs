@@ -59,8 +59,7 @@ namespace ExpressionReflect
 		/// <returns>The result of the expression.</returns>
 		internal object? Execute(object?[] passedArgumentValues, bool returnsValue = true)
 		{
-			this.passedArgumentValues = passedArgumentValues;
-			Initialize();
+			this.args = InitializeArgs((LambdaExpression)this.targetExpression, passedArgumentValues);
 			this.Visit(((LambdaExpression)targetExpression).Body);
 
 			if (this.data.Count > 1)
@@ -540,11 +539,6 @@ namespace ExpressionReflect
 		{
 			object? parameterValue = this.data.Pop();
 			return parameterValue;
-		}
-
-		private void Initialize()
-		{
-			this.args = InitializeArgs((LambdaExpression)this.targetExpression, this.passedArgumentValues);
 		}
 
 		private static IDictionary<string, object?> InitializeArgs(LambdaExpression lambdaExpression, object?[] parameterValues)
