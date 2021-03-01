@@ -81,7 +81,7 @@ namespace LightMock
             switch (simplified.Body)
             {
                 case MethodCallExpression methodCallExpression:
-                    return new MethodMatchInfo(methodCallExpression.Method, MethodCallToLambdas.Convert(methodCallExpression));
+                    return new MethodMatchInfo(methodCallExpression.Method, MethodArgumentsToVerifiers.Convert(methodCallExpression));
                 case MemberExpression memberExpression:
                     return new MemberMatchInfo(memberExpression.Member);
             }

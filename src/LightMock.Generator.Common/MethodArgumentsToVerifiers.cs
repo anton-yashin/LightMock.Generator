@@ -30,24 +30,28 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Text;
 
 namespace LightMock
 {
-    sealed class MethodCallToLambdas : ExpressionVisitor
+    sealed class MethodArgumentsToVerifiers : ExpressionVisitor
     {
         private readonly MethodInfo method;
         private readonly List<LambdaExpression> lambdas;
 
-        private MethodCallToLambdas(MethodInfo method)
+        private MethodArgumentsToVerifiers(MethodInfo method)
         {
             this.method = method;
             this.lambdas = new List<LambdaExpression>();
         }
 
+        /// <summary>
+        /// Creates list of <see cref="LambdaExpression"/> that can be used to check method arguments.
+        /// </summary>
+        /// <param name="expression">Method to process</param>
+        /// <returns>List of lambda</returns>
         public static IReadOnlyList<LambdaExpression> Convert(MethodCallExpression expression)
         {
-            var @this = new MethodCallToLambdas(expression.Method);
+            var @this = new MethodArgumentsToVerifiers(expression.Method);
             @this.Visit(expression);
             return @this.lambdas.ToImmutableList();
         }
