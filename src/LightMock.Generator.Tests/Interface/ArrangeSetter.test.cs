@@ -15,9 +15,9 @@ namespace LightMock.Generator.Tests.Interface
 
         public int DoRun()
         {
-            mock.ArrangeSetter(f => f.GetAndSet = The<string>.IsAnyValue)
+            mock.ArrangeSetter(f => f.GetAndSet = The<string>.Is(s => s == "1234"))
                 .Throws(() => new ValidProgramException(nameof(IArrangeSetter.GetAndSet)));
-            mock.ArrangeSetter(f => f.Set = The<string>.IsAnyValue)
+            mock.ArrangeSetter(f => f.Set = The<string>.Is(s => s == "4567"))
                 .Throws(() => new ValidProgramException(nameof(IArrangeSetter.Set)));
             return 42;
         }

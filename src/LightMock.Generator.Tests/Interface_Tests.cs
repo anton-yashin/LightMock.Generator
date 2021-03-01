@@ -444,12 +444,13 @@ namespace LightMock.Generator.Tests
         [Fact]
         public void ArrangeSetter()
         {
-            //Interface.ArrangeSetter.test.cs18
             var testScript = LoadAssembly<IArrangeSetter>();
             var context = testScript.Context;
             var mock = testScript.MockObject;
 
             Assert.Equal(KExpected, testScript.DoRun());
+            mock.GetAndSet = "4567";
+            mock.Set = "1234";
             Assert.Throws<ValidProgramException>(() => mock.GetAndSet = "1234");
             Assert.Throws<ValidProgramException>(() => mock.Set = "4567");
         }
