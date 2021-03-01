@@ -50,10 +50,10 @@ namespace LightMock
         }
 
         /// <summary>
-        /// Creates an <see cref="InvocationInfo"/> instance from the target <paramref name="expression"/>.
+        /// Creates an <see cref="IInvocationInfo"/> instance from the target <paramref name="expression"/>.
         /// </summary>
-        /// <param name="expression">The <see cref="LambdaExpression"/> from which to create an <see cref="InvocationInfo"/> instance.</param>
-        /// <returns><see cref="InvocationInfo"/>.</returns>
+        /// <param name="expression">The <see cref="LambdaExpression"/> from which to create an <see cref="IInvocationInfo"/> instance.</param>
+        /// <returns><see cref="IInvocationInfo"/>.</returns>
         public static IInvocationInfo ToInvocationInfo(this LambdaExpression expression)
         {
             var simplified = expression.Simplify();
@@ -69,10 +69,10 @@ namespace LightMock
         }
 
         /// <summary>
-        /// Creates a <see cref="MatchInfo"/> instance from the target <paramref name="expression"/>.
+        /// Creates a <see cref="IMatchInfo"/> instance from the target <paramref name="expression"/>.
         /// </summary>
-        /// <param name="expression">The <see cref="LambdaExpression"/> from which to create a <see cref="MatchInfo"/> instance.</param>
-        /// <returns><see cref="MatchInfo"/>.</returns>
+        /// <param name="expression">The <see cref="LambdaExpression"/> from which to create a <see cref="IMatchInfo"/> instance.</param>
+        /// <returns><see cref="IMatchInfo"/>.</returns>
         public static IMatchInfo ToMatchInfo(this LambdaExpression expression)
         {
             var simplified = expression.Simplify();

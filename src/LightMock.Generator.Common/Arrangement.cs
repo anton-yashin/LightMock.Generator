@@ -156,7 +156,7 @@ namespace LightMock
         /// <summary>
         /// Determines if the <paramref name="invocationInfo"/> matches this <see cref="Arrangement"/>.
         /// </summary>
-        /// <param name="invocationInfo">The <see cref="InvocationInfo"/> that represents the method invocation.</param>
+        /// <param name="invocationInfo">The <see cref="IInvocationInfo"/> that represents the method invocation.</param>
         /// <returns><b>True</b> if the <paramref name="invocationInfo"/> matches this <see cref="Arrangement"/>, otherwise, <b>False</b>.</returns>
         public bool Matches(IInvocationInfo invocationInfo)
         {
@@ -166,7 +166,7 @@ namespace LightMock
         /// <summary>
         /// Determines if the <paramref name="matchInfo"/> matches this <see cref="Arrangement"/>.
         /// </summary>
-        /// <param name="matchInfo">The <see cref="MatchInfo"/> that represents the method invocation.</param>
+        /// <param name="matchInfo">The <see cref="IMatchInfo"/> that represents the method invocation.</param>
         /// <returns><b>True</b> if the <paramref name="matchInfo"/> matches this <see cref="Arrangement"/>, otherwise, <b>False</b>.</returns>
         public bool Matches(IMatchInfo matchInfo)
         {
