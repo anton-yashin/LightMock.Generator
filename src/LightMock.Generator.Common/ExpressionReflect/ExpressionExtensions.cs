@@ -28,7 +28,7 @@ using System.Linq.Expressions;
 namespace ExpressionReflect
 {
     [ExcludeFromCodeCoverage]
-    public static class ExpressionExtensions
+    static class ExpressionExtensions
     {
         public static object? Execute(this Expression expression, params object[] values)
         {

@@ -28,7 +28,7 @@ using System.Diagnostics.CodeAnalysis;
 namespace ExpressionReflect
 {
     [ExcludeFromCodeCoverage]
-	public class ExpressionExecutionException : Exception
+	class ExpressionExecutionException : Exception
 	{
 		public ExpressionExecutionException()
 		{

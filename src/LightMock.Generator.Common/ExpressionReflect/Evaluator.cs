@@ -36,7 +36,7 @@ namespace ExpressionReflect
 	/// From http://msdn.microsoft.com/en-us/library/bb546158.aspx
 	/// </remarks>
 	[ExcludeFromCodeCoverage]
-	public static class Evaluator
+	static class Evaluator
 	{
 		/// <summary>
 		/// Performs evaluation & replacement of independent sub-trees

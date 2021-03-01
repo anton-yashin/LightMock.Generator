@@ -37,7 +37,7 @@ namespace ExpressionReflect
     /// An expression visitor that translates the expression tree to reflection calls.
     /// </summary>
     [ExcludeFromCodeCoverage]
-	internal sealed class ExpressionReflectionExecutor : ExpressionVisitor
+	sealed class ExpressionReflectionExecutor : ExpressionVisitor
 	{
 		private IDictionary<string, object?> args = new Dictionary<string, object?>();
 		private readonly Stack<object?> data = new Stack<object?>();

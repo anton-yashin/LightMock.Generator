@@ -29,7 +29,7 @@ using System.Reflection;
 namespace ExpressionReflect
 {
     [ExcludeFromCodeCoverage]
-    internal static class TypeExtensions
+    static class TypeExtensions
     {
         internal static bool IsFunc(this Type type)
         {
