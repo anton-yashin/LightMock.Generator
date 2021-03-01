@@ -24,10 +24,10 @@
     https://github.com/seesharper/LightMock
     http://twitter.com/bernhardrichter
 ******************************************************************************/
+using System;
+
 namespace LightMock
 {
-    using System;
-
     /// <summary>
     /// Specifies an argument match.
     /// </summary>

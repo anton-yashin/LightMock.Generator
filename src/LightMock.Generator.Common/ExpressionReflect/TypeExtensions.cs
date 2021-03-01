@@ -22,12 +22,12 @@
 ******************************************************************************    
 	https://github.com/mgernand
 ******************************************************************************/
+using System;
+using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
+
 namespace ExpressionReflect
 {
-    using System;
-    using System.Diagnostics.CodeAnalysis;
-    using System.Reflection;
-
     [ExcludeFromCodeCoverage]
     internal static class TypeExtensions
     {

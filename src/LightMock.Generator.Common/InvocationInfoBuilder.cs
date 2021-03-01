@@ -26,14 +26,13 @@
 ******************************************************************************/
 
 using System;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 
 namespace LightMock
 {
-    using System.Collections.ObjectModel;
-    using System.Linq;
-    using System.Linq.Expressions;
-    using System.Reflection;
-
     /// <summary>
     /// An <see cref="ExpressionVisitor"/> that extracts 
     /// the target <see cref="MethodInfo"/> along with the 

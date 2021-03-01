@@ -24,10 +24,10 @@
     https://github.com/seesharper/LightMock
     http://twitter.com/bernhardrichter
 ******************************************************************************/
+using System.Linq.Expressions;
+
 namespace LightMock
 {
-    using System.Linq.Expressions;
-
     /// <summary>
     /// Represents a class that is capable of building 
     /// a set of lambda expressions used to match argument values.

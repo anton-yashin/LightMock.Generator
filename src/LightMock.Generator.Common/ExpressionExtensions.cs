@@ -24,12 +24,11 @@
     https://github.com/seesharper/LightMock
     http://twitter.com/bernhardrichter
 ******************************************************************************/
+using System.Linq.Expressions;
+using ExpressionReflect;
+
 namespace LightMock
 {
-    using System.Linq.Expressions;
-    using ExpressionReflect;
-    
-
     /// <summary>
     /// A set of <see cref="LambdaExpression"/> extension methods.
     /// </summary>

@@ -26,11 +26,10 @@
 ******************************************************************************/
 
 using System;
+using System.Linq.Expressions;
 
 namespace LightMock
 {
-    using System.Linq.Expressions;
-
     /// <summary>
     /// A class that represents an arrangement of a mocked method that 
     /// returns a value of type <typeparamref name="TResult"/>.

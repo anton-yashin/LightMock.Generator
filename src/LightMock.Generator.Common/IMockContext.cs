@@ -1,8 +1,8 @@
-﻿namespace LightMock
-{
-    using System;
-    using System.Linq.Expressions;
+﻿using System;
+using System.Linq.Expressions;
 
+namespace LightMock
+{
     /// <summary>
     /// Represents a class that is capable of verifying method 
     /// invocations made to a mock object.

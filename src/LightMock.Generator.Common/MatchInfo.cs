@@ -24,15 +24,15 @@
     https://github.com/seesharper/LightMock
     http://twitter.com/bernhardrichter
 ******************************************************************************/
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
+using ExpressionReflect;
+
 namespace LightMock
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Linq.Expressions;
-    using System.Reflection;
-    using ExpressionReflect;
-
     /// <summary>
     /// A class that is used to match a method invocation.
     /// </summary>

@@ -24,13 +24,13 @@
     https://github.com/seesharper/LightMock
     http://twitter.com/bernhardrichter
 ******************************************************************************/
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Linq.Expressions;
+
 namespace LightMock
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Linq.Expressions;
-
     /// <summary>
     /// A class that represents the mock context for a given <typeparamref name="TMock"/> type.
     /// </summary>

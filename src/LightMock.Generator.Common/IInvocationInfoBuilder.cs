@@ -24,10 +24,10 @@
     https://github.com/seesharper/LightMock
     http://twitter.com/bernhardrichter
 ******************************************************************************/
+using System.Linq.Expressions;
+
 namespace LightMock
 {
-    using System.Linq.Expressions;
-
     /// <summary>
     /// Represents a class that is capable of building 
     /// an <see cref="InvocationInfo"/> that represents information 

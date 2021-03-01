@@ -22,11 +22,11 @@
 ******************************************************************************    
 	https://github.com/mgernand
 ******************************************************************************/
+using System.Diagnostics.CodeAnalysis;
+using System.Linq.Expressions;
+
 namespace ExpressionReflect
 {
-    using System.Diagnostics.CodeAnalysis;
-    using System.Linq.Expressions;
-
     [ExcludeFromCodeCoverage]
     public static class ExpressionExtensions
     {

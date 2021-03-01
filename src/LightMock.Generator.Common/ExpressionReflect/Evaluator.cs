@@ -22,13 +22,13 @@
 ******************************************************************************    
 	https://github.com/mgernand
 ******************************************************************************/
+using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq.Expressions;
+
 namespace ExpressionReflect
 {
-	using System;
-	using System.Collections.Generic;
-    using System.Diagnostics.CodeAnalysis;
-    using System.Linq.Expressions;
-
 	/// <summary>
 	/// Enables the partial evaluation of queries.
 	/// </summary>

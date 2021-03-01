@@ -24,12 +24,11 @@
     https://github.com/seesharper/LightMock
     http://twitter.com/bernhardrichter
 ******************************************************************************/
+using System;
+using System.Linq.Expressions;
+
 namespace LightMock
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq.Expressions;
-
     /// <summary>
     /// A class that represents an arrangement of a mocked method.
     /// </summary>

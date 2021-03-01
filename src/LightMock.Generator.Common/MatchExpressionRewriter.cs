@@ -1,10 +1,10 @@
-﻿namespace LightMock
-{
-    using System;
-    using System.Linq;
-    using System.Linq.Expressions;
-    using System.Reflection;
+using System;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 
+namespace LightMock
+{
     /// <summary>
     /// An <see cref="ExpressionVisitor"/> that replaces references to the 
     /// <see cref="The{TValue}.IsAnyValue"/> with a <see cref="MethodCallExpression"/> 

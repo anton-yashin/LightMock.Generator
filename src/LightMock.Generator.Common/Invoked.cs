@@ -24,10 +24,10 @@
     https://github.com/seesharper/LightMock
     http://twitter.com/bernhardrichter
 ******************************************************************************/
+using System;
+
 namespace LightMock
 {
-    using System;
-
     /// <summary>
     /// A class used to specify the number of times 
     /// we expect a method to be invoked.

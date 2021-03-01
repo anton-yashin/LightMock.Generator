@@ -26,14 +26,13 @@
 ******************************************************************************/
 
 using System;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 
 namespace LightMock
 {
-    using System.Collections.ObjectModel;
-    using System.Linq;
-    using System.Linq.Expressions;
-    using System.Reflection;
-
     /// <summary>
     /// A class that is capable of building a set of 
     /// lambda expressions used to match argument values.    

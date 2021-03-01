@@ -24,11 +24,11 @@
     https://github.com/seesharper/LightMock
     http://twitter.com/bernhardrichter
 ******************************************************************************/
+using System;
+using System.Linq.Expressions;
+
 namespace LightMock
 {
-    using System;
-    using System.Linq.Expressions;
-    
     /// <summary>
     /// Represents a class that keeps track of method invocations made to 
     /// a manual mock object. 

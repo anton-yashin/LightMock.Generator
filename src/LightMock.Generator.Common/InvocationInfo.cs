@@ -26,11 +26,10 @@
 ******************************************************************************/
 
 using System.Linq.Expressions;
+using System.Reflection;
 
 namespace LightMock
 {
-    using System.Reflection;
-
     /// <summary>
     /// A class that represents a method invocations.
     /// </summary>

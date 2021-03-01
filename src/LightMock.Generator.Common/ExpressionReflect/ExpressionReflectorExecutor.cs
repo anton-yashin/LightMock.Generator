@@ -23,17 +23,16 @@
 	https://github.com/mgernand
 ******************************************************************************/
 using System.Collections;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Reflection;
 
 namespace ExpressionReflect
 {
-	using System;
-	using System.Collections.Generic;
-    using System.Diagnostics.CodeAnalysis;
-    using System.Globalization;
-	using System.Linq;
-	using System.Linq.Expressions;
-	using System.Reflection;
-
     /// <summary>
     /// An expression visitor that translates the expression tree to reflection calls.
     /// </summary>
