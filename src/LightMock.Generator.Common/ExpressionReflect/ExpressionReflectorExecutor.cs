@@ -44,8 +44,6 @@ namespace ExpressionReflect
 		private readonly Stack<LambdaExpression> nestedLambdas = new Stack<LambdaExpression>();
 
 		private readonly Expression targetExpression;
-		private object?[]? passedArgumentValues;
-
 
 		public ExpressionReflectionExecutor(Expression targetExpression)
 		{
