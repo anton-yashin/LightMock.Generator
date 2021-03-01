@@ -2,6 +2,7 @@
     The MIT License (MIT)
 
     Copyright (c) 2014 bernhard.richter@gmail.com
+    Copyright (c) 2021 Anton Yashin
 
     Permission is hereby granted, free of charge, to any person obtaining a copy
     of this software and associated documentation files (the "Software"), to deal
@@ -23,6 +24,7 @@
 ******************************************************************************    
     https://github.com/seesharper/LightMock
     http://twitter.com/bernhardrichter
+    https://github.com/anton-yashin/
 ******************************************************************************/
 using System;
 using System.Collections.Generic;
@@ -36,7 +38,7 @@ namespace LightMock
     /// A class that represents the mock context for a given <typeparamref name="TMock"/> type.
     /// </summary>
     /// <typeparam name="TMock">The target mock type.</typeparam>
-    public class MockContext<TMock> : IMockContext<TMock>, IInvocationContext<TMock>
+    public class MockContext<TMock> : IMockContext<TMock>, IInvocationContext<TMock>, IMockContextInternal
     {
         private readonly List<IInvocationInfo> invocations = new List<IInvocationInfo>();
         private readonly List<Arrangement> arrangements = new List<Arrangement>();
@@ -48,6 +50,9 @@ namespace LightMock
         /// this <see cref="Arrangement"/> will be applied.</param>
         /// <returns>A new <see cref="Arrangement"/> used to apply method behavior.</returns>
         public IArrangement Arrange(Expression<Action<TMock>> matchExpression)
+            => ArrangeAction(matchExpression);
+
+        IArrangement ArrangeAction(LambdaExpression matchExpression)
         {
             var matchInfo = matchExpression.ToMatchInfo();
             var arrangement = (from i in arrangements
@@ -70,6 +75,9 @@ namespace LightMock
         /// this <see cref="FunctionArrangement{TResult}"/> will be applied.</param>
         /// <returns>A new <see cref="FunctionArrangement{TResult}"/> used to apply method behavior.</returns>
         public IArrangement<TResult> Arrange<TResult>(Expression<Func<TMock, TResult>> matchExpression)
+            => ArrangeFunction<TResult>(matchExpression);
+
+        IArrangement<TResult> ArrangeFunction<TResult>(LambdaExpression matchExpression)
         {
             var matchInfo = matchExpression.ToMatchInfo();
             var arrangement = (from i in arrangements
@@ -92,15 +100,18 @@ namespace LightMock
         /// this <see cref="PropertyArrangement{TResult}"/> will be applied.</param>
         /// <returns>A new <see cref="PropertyArrangement{TResult}"/> used to apply property behavior.</returns>
         public IArrangement ArrangeProperty<TResult>(Expression<Func<TMock, TResult>> matchExpression)
+            => ArrangePropertyInternal<TResult>(matchExpression);
+
+        public IArrangement ArrangePropertyInternal<TProperty>(LambdaExpression matchExpression)
         {
             var matchInfo = matchExpression.ToMatchInfo();
             var arrangement = (from i in arrangements
-                               let a = i as PropertyArrangement<TResult>
+                               let a = i as PropertyArrangement<TProperty>
                                where a != null && a.Matches(matchInfo)
                                select a).FirstOrDefault();
             if (arrangement == null)
             {
-                arrangement = new PropertyArrangement<TResult>(matchExpression);
+                arrangement = new PropertyArrangement<TProperty>(matchExpression);
                 arrangements.Add(arrangement);
             }
             return arrangement;
@@ -207,5 +218,15 @@ namespace LightMock
             }
         }
 
+        #region IMockContextInternal implementation
+
+        IArrangement IMockContextInternal.ArrangeAction(LambdaExpression matchExpression) 
+            => ArrangeAction(matchExpression);
+        IArrangement<TResult> IMockContextInternal.ArrangeFunction<TResult>(LambdaExpression matchExpression)
+            => ArrangeFunction<TResult>(matchExpression);
+        IArrangement IMockContextInternal.ArrangeProperty<TProperty>(LambdaExpression matchExpression)
+            => ArrangePropertyInternal<TProperty>(matchExpression);
+
+        #endregion
     }
 }

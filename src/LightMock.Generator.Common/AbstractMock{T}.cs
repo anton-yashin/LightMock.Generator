@@ -38,7 +38,7 @@ namespace LightMock.Generator
         T? instance;
         readonly object[] prms;
         readonly object protectedContext;
-        readonly object propertiesContext;
+        readonly IMockContextInternal propertiesContext;
 
         public AbstractMock()
         {
@@ -111,9 +111,9 @@ namespace LightMock.Generator
             return (T)result;
         }
 
-        object CreatePropertiesContext()
+        IMockContextInternal CreatePropertiesContext()
         {
-            return Activator.CreateInstance(LazyInitializer.EnsureInitialized(ref propertiesType,
+            return (IMockContextInternal)Activator.CreateInstance(LazyInitializer.EnsureInitialized(ref propertiesType,
                 GetPropertiesContextType))
                 ?? throw new InvalidOperationException("can't create property context for: " + typeof(T).FullName);
         }
