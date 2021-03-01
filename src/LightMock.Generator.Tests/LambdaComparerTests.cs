@@ -16,7 +16,7 @@ namespace LightMock.Tests
 
         public static IEnumerable<object[]> AreEqualTestData()
         {
-            yield return new object[] { null, null };
+            yield return new object[] { null!, null! };
             yield return new object[] { GetBazAction(f => f.Method()), GetBazAction(f => f.Method()) };
             yield return new object[] { GetBazAction(f => f.Method(1)), GetBazAction(f => f.Method(1)) };
             yield return new object[] { GetBazFunc(f => f.Func()), GetBazFunc(f => f.Func()) };
@@ -33,8 +33,8 @@ namespace LightMock.Tests
 
         public static IEnumerable<object[]> AreNotEqualTestData()
         {
-            yield return new object[] { null, GetBazAction(f => f.Method(1)) };
-            yield return new object[] { GetBazAction(f => f.Method(1)), null };
+            yield return new object[] { null!, GetBazAction(f => f.Method(1)) };
+            yield return new object[] { GetBazAction(f => f.Method(1)), null! };
             yield return new object[] { GetBazAction(f => f.Method(1)), GetBazAction(f => f.Method()) };
             yield return new object[] { GetBazAction(f => f.Method()), GetBazAction(f => f.Method(1)) };
             yield return new object[] { GetBazAction(f => f.Method(1)), GetBazAction(f => f.Method(2)) };

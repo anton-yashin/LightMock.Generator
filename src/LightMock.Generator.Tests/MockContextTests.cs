@@ -228,9 +228,9 @@ namespace LightMock.Tests
             var mockContext = new MockContext<IFoo>();
             var fooMock = new FooMock(mockContext);
 
-            fooMock.Execute((string)null);
+            fooMock.Execute((string)null!);
 
-            mockContext.Assert(f => f.Execute((string)null));
+            mockContext.Assert(f => f.Execute((string)null!));
         }
 
         [Fact]
