@@ -16,8 +16,8 @@ namespace LightMock.Tests
             var matchInfo = expression.ToMatchInfo();
 
 
-            var invocationInfo = new InvocationInfo(
-                typeof(IFoo).GetMethod("Execute", new Type[] { typeof(string) }),
+            var invocationInfo = new MethodInvocationInfo(
+                GetMethod<IFoo>(nameof(IFoo.Execute)),
                 new[] { "SomeValue" });
 
             Assert.True(matchInfo.Matches(invocationInfo));
@@ -30,8 +30,8 @@ namespace LightMock.Tests
 
             var matchInfo = expression.ToMatchInfo();
 
-            var invocationInfo = new InvocationInfo(
-                typeof(IFoo).GetMethod("Execute", new Type[] { typeof(string) }),
+            var invocationInfo = new MethodInvocationInfo(
+                GetMethod<IFoo>(nameof(IFoo.Execute)),
                 new[] { "AnotherValue" });
 
             Assert.False(matchInfo.Matches(invocationInfo));
@@ -44,8 +44,8 @@ namespace LightMock.Tests
 
             var matchInfo = expression.ToMatchInfo();
 
-            var invocationInfo = new InvocationInfo(
-                typeof(IBar).GetMethod("Execute", new Type[] { typeof(string) }),
+            var invocationInfo = new MethodInvocationInfo(
+                GetMethod<IBar>(nameof(IBar.Execute)),
                 new[] { "SomeValue" });
 
             Assert.False(matchInfo.Matches(invocationInfo));
@@ -58,8 +58,8 @@ namespace LightMock.Tests
 
             var matchInfo = expression.ToMatchInfo();
 
-            var invocationInfo = new InvocationInfo(
-                typeof(IFoo).GetMethod("Execute", new Type[] { typeof(string) }),
+            var invocationInfo = new MethodInvocationInfo(
+                GetMethod<IFoo>(nameof(IFoo.Execute)),
                 new[] { "SomeValue", "AnotherValue" });
 
             Assert.False(matchInfo.Matches(invocationInfo));
@@ -105,5 +105,9 @@ namespace LightMock.Tests
         static Expression<Action<IFoo>> GetFooAction(Expression<Action<IFoo>> expression) => expression;
         static Expression<Action<IBaz>> GetBazAction(Expression<Action<IBaz>> expression) => expression;
         static Expression<Func<IBaz, T>> GetBazFunc<T>(Expression<Func<IBaz, T>> expression) => expression;
+
+        static MethodInfo GetMethod<T>(string methodName)
+            => typeof(T).GetMethod(methodName, new Type[] { typeof(string) })
+            ?? throw new InvalidOperationException("method not found");
     }
 }

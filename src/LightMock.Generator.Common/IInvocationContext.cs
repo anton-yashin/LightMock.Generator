@@ -62,6 +62,6 @@ namespace LightMock
         /// <param name="expression">The <see cref="Expression{TDelegate}"/> that 
         /// represents the setter that has been invoked.</param>
         /// <param name="value">The value</param>
-        void InvokeSetter<TResult>(Expression<Func<TMock, TResult>> expression, object value);
+        void InvokeSetter<TResult>(Expression<Func<TMock, TResult>> expression, TResult value);
     }
 }

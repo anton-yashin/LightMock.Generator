@@ -32,7 +32,7 @@ namespace LightMock
     /// <summary>
     /// A class that represents an arrangement of a mocked method.
     /// </summary>
-    public class Arrangement
+    abstract class Arrangement : IArrangement
     {
         private readonly LambdaExpression expression;                
         private Action throwAction;
@@ -43,7 +43,7 @@ namespace LightMock
         /// </summary>
         /// <param name="expression">The <see cref="LambdaExpression"/> that specifies
         /// where to apply this <see cref="Arrangement"/>.</param>
-        public Arrangement(LambdaExpression expression)
+        protected Arrangement(LambdaExpression expression)
         {
             this.expression = expression;
             throwAction = () => { };
@@ -158,7 +158,7 @@ namespace LightMock
         /// </summary>
         /// <param name="invocationInfo">The <see cref="InvocationInfo"/> that represents the method invocation.</param>
         /// <returns><b>True</b> if the <paramref name="invocationInfo"/> matches this <see cref="Arrangement"/>, otherwise, <b>False</b>.</returns>
-        internal bool Matches(InvocationInfo invocationInfo)
+        public bool Matches(IInvocationInfo invocationInfo)
         {
             return expression.ToMatchInfo().Matches(invocationInfo);
         }
@@ -168,22 +168,14 @@ namespace LightMock
         /// </summary>
         /// <param name="matchInfo">The <see cref="MatchInfo"/> that represents the method invocation.</param>
         /// <returns><b>True</b> if the <paramref name="matchInfo"/> matches this <see cref="Arrangement"/>, otherwise, <b>False</b>.</returns>
-        internal bool Matches(MatchInfo matchInfo)
+        public bool Matches(IMatchInfo matchInfo)
         {
             return expression.ToMatchInfo().Equals(matchInfo);
         }
 
-        /// <summary>
-        /// Executes the arrangement.
-        /// </summary>
-        /// <param name="arguments">The arguments used to invoke the mocked method.</param>
-        /// <returns>The registered return value, if any, otherwise, the default value.</returns>
-        internal virtual object? Execute(object[]? arguments)
-        {
-            callback(arguments);
-            throwAction();
+        protected void InvokeThrowAction() => throwAction();
 
-            return null;
-        }
+        protected void InvokeCallback(IInvocationInfo invocationInfo)
+            => invocationInfo.Invoke(callback);
     }
 }

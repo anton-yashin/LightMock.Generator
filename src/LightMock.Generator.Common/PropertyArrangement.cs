@@ -1,4 +1,4 @@
-﻿
+using System;
 using System.Linq.Expressions;
 
 namespace LightMock
@@ -8,9 +8,11 @@ namespace LightMock
     /// returns a value of type <typeparamref name="TResult"/>.
     /// </summary>
     /// <typeparam name="TResult">The type of the return value of the mocked property.</typeparam>
-    public class PropertyArrangement<TResult> : Arrangement
+    sealed class PropertyArrangement<TResult> : Arrangement,
+        IPropertyArrangementInvocation<TResult>,
+        IArrangementInvocation<TResult>
     {
-        private object? result;
+        private TResult result;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="PropertyArrangement{TResult}"/> class.
@@ -20,20 +22,12 @@ namespace LightMock
         public PropertyArrangement(LambdaExpression expression)
             : base(expression)
         {
+            result = default!;
         }
 
-        /// <summary>
-        /// Executes the arrangement.
-        /// </summary>
-        /// <param name="arguments">The arguments used to invoke the mocked method.</param>
-        /// <returns>The registered return value, if any, otherwise, the default value.</returns>
-        internal override object? Execute(object[]? arguments)
-        {
-            base.Execute(arguments);
+        TResult IArrangementInvocation<TResult>.Invoke(IInvocationInfo invocation) => result;
 
-            if (arguments != null && arguments.Length > 0) result = arguments[0];
+        void IPropertyArrangementInvocation<TResult>.Invoke(TResult value) => result = value;
 
-            return result;
-        }
     }
 }

@@ -38,7 +38,7 @@ namespace LightMock
     /// <typeparam name="TMock">The target mock type.</typeparam>
     public class MockContext<TMock> : IMockContext<TMock>, IInvocationContext<TMock>
     {
-        private readonly List<InvocationInfo> invocations = new List<InvocationInfo>();        
+        private readonly List<IInvocationInfo> invocations = new List<IInvocationInfo>();
         private readonly List<Arrangement> arrangements = new List<Arrangement>();
 
         /// <summary>
@@ -47,13 +47,16 @@ namespace LightMock
         /// <param name="matchExpression">The match expression that describes where 
         /// this <see cref="Arrangement"/> will be applied.</param>
         /// <returns>A new <see cref="Arrangement"/> used to apply method behavior.</returns>
-        public Arrangement Arrange(Expression<Action<TMock>> matchExpression)
+        public IArrangement Arrange(Expression<Action<TMock>> matchExpression)
         {
             var matchInfo = matchExpression.ToMatchInfo();
-            var arrangement = arrangements.FirstOrDefault(a => a.Matches(matchInfo));
+            var arrangement = (from i in arrangements
+                               let a = i as ActionArrangement
+                               where a != null && a.Matches(matchInfo)
+                               select a).FirstOrDefault();
             if (arrangement == null)
             {
-                arrangement = new Arrangement(matchExpression);
+                arrangement = new ActionArrangement(matchExpression);
                 arrangements.Add(arrangement);
             }
             return arrangement;
@@ -64,18 +67,18 @@ namespace LightMock
         /// </summary>
         /// <typeparam name="TResult">The type of value returned from the mocked method.</typeparam>
         /// <param name="matchExpression">The match expression that describes where 
-        /// this <see cref="Arrangement{TResult}"/> will be applied.</param>
-        /// <returns>A new <see cref="Arrangement{TResult}"/> used to apply method behavior.</returns>
-        public Arrangement<TResult> Arrange<TResult>(Expression<Func<TMock, TResult>> matchExpression)
+        /// this <see cref="FunctionArrangement{TResult}"/> will be applied.</param>
+        /// <returns>A new <see cref="FunctionArrangement{TResult}"/> used to apply method behavior.</returns>
+        public IArrangement<TResult> Arrange<TResult>(Expression<Func<TMock, TResult>> matchExpression)
         {
             var matchInfo = matchExpression.ToMatchInfo();
             var arrangement = (from i in arrangements
-                               let a = i as Arrangement<TResult>
+                               let a = i as FunctionArrangement<TResult>
                                where a != null && a.Matches(matchInfo)
                                select a).FirstOrDefault();
             if (arrangement == null)
             {
-                arrangement = new Arrangement<TResult>(matchExpression);
+                arrangement = new FunctionArrangement<TResult>(matchExpression);
                 arrangements.Add(arrangement);
             }
             return arrangement;
@@ -88,7 +91,7 @@ namespace LightMock
         /// <param name="matchExpression">The match expression that describes where 
         /// this <see cref="PropertyArrangement{TResult}"/> will be applied.</param>
         /// <returns>A new <see cref="PropertyArrangement{TResult}"/> used to apply property behavior.</returns>
-        public PropertyArrangement<TResult> ArrangeProperty<TResult>(Expression<Func<TMock, TResult>> matchExpression)
+        public IArrangement ArrangeProperty<TResult>(Expression<Func<TMock, TResult>> matchExpression)
         {
             var matchInfo = matchExpression.ToMatchInfo();
             var arrangement = (from i in arrangements
@@ -142,11 +145,15 @@ namespace LightMock
         {
             var invocationInfo = expression.ToInvocationInfo();
             invocations.Add(invocationInfo);
-           
-            var arrangement = arrangements.FirstOrDefault(a => a.Matches(invocationInfo));
+
+            var arrangement = (from i in arrangements 
+                               let a = i as IArrangementInvocation
+                               where a != null && a.Matches(invocationInfo)
+                               select a).FirstOrDefault();
+
             if (arrangement != null)
             {
-                arrangement.Execute(invocationInfo.Arguments);
+                arrangement.Invoke(invocationInfo);
             }            
         }
 
@@ -165,10 +172,13 @@ namespace LightMock
             var invocationInfo = expression.ToInvocationInfo();
             invocations.Add(invocationInfo);
 
-            var arrangement = arrangements.FirstOrDefault(a => a.Matches(invocationInfo));
+            var arrangement = (from i in arrangements
+                               let a = i as IArrangementInvocation<TResult>
+                               where a != null && a.Matches(invocationInfo)
+                               select a).FirstOrDefault();
             if (arrangement != null)
             {
-                return (TResult)arrangement.Execute(invocationInfo.Arguments);
+                return arrangement.Invoke(invocationInfo);
             }
 
             return default(TResult);
@@ -181,15 +191,19 @@ namespace LightMock
         /// <param name="expression">The <see cref="Expression{TDelegate}"/> that 
         /// represents the setter that has been invoked.</param>
         /// <param name="value">The value</param>
-        void IInvocationContext<TMock>.InvokeSetter<TResult>(Expression<Func<TMock, TResult>> expression, object value)
+        void IInvocationContext<TMock>.InvokeSetter<TResult>(Expression<Func<TMock, TResult>> expression, TResult value)
         {
             var invocationInfo = expression.ToInvocationInfo();
             invocations.Add(invocationInfo);
 
-            var arrangement = arrangements.FirstOrDefault(a => a.Matches(invocationInfo));
+            var arrangement = (from i in arrangements
+                               let a = i as IPropertyArrangementInvocation<TResult>
+                               where a != null && a.Matches(invocationInfo)
+                               select a).FirstOrDefault();
+
             if (arrangement != null)
             {
-                arrangement.Execute(new[] { value });
+                arrangement.Invoke(value);
             }
         }
 

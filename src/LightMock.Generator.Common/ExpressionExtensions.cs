@@ -54,16 +54,16 @@ namespace LightMock
         /// </summary>
         /// <param name="expression">The <see cref="LambdaExpression"/> from which to create an <see cref="InvocationInfo"/> instance.</param>
         /// <returns><see cref="InvocationInfo"/>.</returns>
-        public static InvocationInfo ToInvocationInfo(this LambdaExpression expression)
+        public static IInvocationInfo ToInvocationInfo(this LambdaExpression expression)
         {
             var simplified = expression.Simplify();
             switch (simplified?.Body)
             {
                 case MethodCallExpression methodCallExpresssion:
-                    return new InvocationInfo(methodCallExpresssion.Method,
+                    return new MethodInvocationInfo(methodCallExpresssion.Method,
                         ConstantExpressionValuesLocator.Locate(simplified));
                 case MemberExpression memberExpression:
-                    return new InvocationInfo(memberExpression.Member);
+                    return new MemberInvocationInfo(memberExpression.Member);
             }
             throw new NotSupportedException($"Expression type ({simplified?.Body.NodeType}) not supported.");
         }
@@ -73,7 +73,7 @@ namespace LightMock
         /// </summary>
         /// <param name="expression">The <see cref="LambdaExpression"/> from which to create a <see cref="MatchInfo"/> instance.</param>
         /// <returns><see cref="MatchInfo"/>.</returns>
-        public static MatchInfo ToMatchInfo(this LambdaExpression expression)
+        public static IMatchInfo ToMatchInfo(this LambdaExpression expression)
         {
             var simplified = expression.Simplify();
             if (simplified == null)
@@ -81,9 +81,9 @@ namespace LightMock
             switch (simplified.Body)
             {
                 case MethodCallExpression methodCallExpression:
-                    return new MatchInfo(methodCallExpression.Method, MethodCallToLambdas.Convert(methodCallExpression));
+                    return new MethodMatchInfo(methodCallExpression.Method, MethodCallToLambdas.Convert(methodCallExpression));
                 case MemberExpression memberExpression:
-                    return new MatchInfo(memberExpression.Member);
+                    return new MemberMatchInfo(memberExpression.Member);
             }
             throw new NotSupportedException($"Expression type ({simplified.Body.NodeType}) not supported.");
         }

@@ -35,20 +35,21 @@ namespace LightMock
     /// returns a value of type <typeparamref name="TResult"/>.
     /// </summary>
     /// <typeparam name="TResult">The type of the return value of the mocked method.</typeparam>
-    public class Arrangement<TResult> : Arrangement
+    sealed class FunctionArrangement<TResult> : Arrangement, IArrangement<TResult>, IArrangementInvocation<TResult>
     {
-        private object? result;
+        private TResult result;
 
         private Func<object[]?, TResult>? getResult;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Arrangement{TResult}"/> class.
+        /// Initializes a new instance of the <see cref="FunctionArrangement{TResult}"/> class.
         /// </summary>
         /// <param name="expression">The <see cref="LambdaExpression"/> that specifies
         /// where to apply this <see cref="Arrangement"/>.</param>
-        public Arrangement(LambdaExpression expression)
+        public FunctionArrangement(LambdaExpression expression)
             : base(expression)
         {
+            result = default!;
         }
 
         /// <summary>
@@ -120,22 +121,13 @@ namespace LightMock
             getResult = args => (TResult)getResultFunc.DynamicInvoke(args);
         }
 
-        /// <summary>
-        /// Executes the arrangement.
-        /// </summary>
-        /// <param name="arguments">The arguments used to invoke the mocked method.</param>
-        /// <returns>The registered return value, if any, otherwise, the default value.</returns>
-        internal override object? Execute(object[]? arguments)
+        TResult IArrangementInvocation<TResult>.Invoke(IInvocationInfo invocation)
         {
-            base.Execute(arguments);
-
             var getResult = this.getResult;
-
             if (getResult != null)
-            {
-                result = getResult(arguments);
-            }
-
+                result = invocation.Invoke(getResult);
+            InvokeCallback(invocation);
+            InvokeThrowAction();
             return result;
         }
     }

@@ -153,7 +153,7 @@ namespace LightMock.Generator
         void AssertUsingAssertInstance(Action<T> expression, Invoked times)
             => expression(CreateAssertInstance(times));
 
-        public Arrangement ArrangeSetter(Action<T> expression, [CallerFilePath] string uidPart1 = "", [CallerLineNumber] int uidPart2 = 0)
+        public IArrangement ArrangeSetter(Action<T> expression, [CallerFilePath] string uidPart1 = "", [CallerLineNumber] int uidPart2 = 0)
         {
             if (string.IsNullOrWhiteSpace(uidPart1))
                 throw new ArgumentException("you must provide part of unique identifier", nameof(uidPart1));
@@ -164,13 +164,13 @@ namespace LightMock.Generator
 
         #region IMockContext<T> implementation
 
-        public Arrangement Arrange(Expression<Action<T>> matchExpression)
+        public IArrangement Arrange(Expression<Action<T>> matchExpression)
             => PublicContext.Arrange(matchExpression);
 
-        public Arrangement<TResult> Arrange<TResult>(Expression<Func<T, TResult>> matchExpression)
+        public IArrangement<TResult> Arrange<TResult>(Expression<Func<T, TResult>> matchExpression)
             => PublicContext.Arrange(matchExpression);
 
-        public PropertyArrangement<TResult> ArrangeProperty<TResult>(Expression<Func<T, TResult>> matchExpression)
+        public IArrangement ArrangeProperty<TResult>(Expression<Func<T, TResult>> matchExpression)
             => PublicContext.ArrangeProperty(matchExpression);
 
         public void Assert(Expression<Action<T>> matchExpression)
