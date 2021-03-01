@@ -36,12 +36,12 @@ namespace LightMock
     sealed class MethodMatchInfo : IMatchInfo<MethodInvocationInfo>, IMatchInfo, IEquatable<MethodMatchInfo>
     {
         private readonly MethodInfo methodInfo;
-        private readonly IReadOnlyList<LambdaExpression> lambdaExpressions;
+        private readonly IReadOnlyList<LambdaExpression> argumentVerifiers;
 
-        public MethodMatchInfo(MethodInfo methodInfo, IReadOnlyList<LambdaExpression> lambdaExpressions)
+        public MethodMatchInfo(MethodInfo methodInfo, IReadOnlyList<LambdaExpression> argumentVerifiers)
         {
             this.methodInfo = methodInfo;
-            this.lambdaExpressions = lambdaExpressions;
+            this.argumentVerifiers = argumentVerifiers;
         }
 
         public bool Equals(IMatchInfo other) => Equals(other as MethodMatchInfo);
@@ -49,7 +49,7 @@ namespace LightMock
         public bool Equals(MethodMatchInfo? other)
         {
             return other != null && methodInfo == other.methodInfo &&
-                Equals(lambdaExpressions, other.lambdaExpressions);
+                Equals(argumentVerifiers, other.argumentVerifiers);
         }
 
         static bool Equals(IReadOnlyCollection<LambdaExpression>? x, IReadOnlyCollection<LambdaExpression>? y)
@@ -67,10 +67,18 @@ namespace LightMock
         public bool Matches(MethodInvocationInfo? invocationInfo)
         {
             return invocationInfo != null
-                && lambdaExpressions.Count == invocationInfo.Arguments.Length
+                && argumentVerifiers.Count == invocationInfo.Arguments.Length
                 && methodInfo == invocationInfo.Method
-                && lambdaExpressions.Where((lambda, i)
-                => (bool)lambda.Execute(invocationInfo.Arguments[i]) == false).Any() == false;
+                && argumentVerifiers.Where((verifier, i)
+                => VerifyArgument(invocationInfo.Arguments[i], verifier) == false).Any() == false;
+        }
+
+        static bool VerifyArgument(object argument, LambdaExpression verifier)
+        {
+            var value = verifier.Execute(argument);
+            if (value is bool result)
+                return result;
+            throw new InvalidOperationException("expected bool value");
         }
 
         public bool Matches(IInvocationInfo? invocationInfo)
