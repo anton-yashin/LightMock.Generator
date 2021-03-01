@@ -34,7 +34,7 @@ namespace LightMock.Generator
     /// </summary>
     internal sealed class AbstractMockNameofProvider : AbstractMock<IDelegateProvider>
     {
-        protected override Expression<Action<IDelegateProvider>> ExchangeForExpression(string token)
+        protected override LambdaExpression ExchangeForExpression(string token)
             => throw new NotImplementedException();
 
         protected override Type GetAssertType()

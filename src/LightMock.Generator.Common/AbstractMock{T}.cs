@@ -124,7 +124,7 @@ namespace LightMock.Generator
         protected abstract Type GetPropertiesContextType();
         protected abstract Type GetAssertType();
         protected abstract T GetDelegate(Type type);
-        protected abstract Expression<Action<T>> ExchangeForExpression(string token);
+        protected abstract LambdaExpression ExchangeForExpression(string token);
 
         public void AssertGet<TProperty>(Func<T, TProperty> expression)
             => AssertGet(expression, Invoked.Once);
@@ -157,9 +157,7 @@ namespace LightMock.Generator
         {
             if (string.IsNullOrWhiteSpace(uidPart1))
                 throw new ArgumentException("you must provide part of unique identifier", nameof(uidPart1));
-            // FIXME: propertyContext.Arrange
-            throw new NotImplementedException("FIXME: propertyContext.Arrange");
-            return Arrange(ExchangeForExpression(uidPart1 + uidPart2.ToString()));
+            return propertiesContext.ArrangeAction(ExchangeForExpression(uidPart1 + uidPart2.ToString()));
         }
 
         #region IMockContext<T> implementation
