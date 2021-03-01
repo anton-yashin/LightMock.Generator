@@ -624,7 +624,10 @@ namespace ExpressionReflect
 
 		private bool Predicate<T>(T arg)
 		{
-			return (bool)this.ExecuteReflector(arg);
+			var value = this.ExecuteReflector(arg);
+			if (value is bool result)
+				return result;
+			throw new InvalidOperationException("expected bool result");
 		}
 
 		private object? ExecuteReflector(params object?[] arguments)
