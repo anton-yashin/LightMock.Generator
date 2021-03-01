@@ -19,7 +19,7 @@ namespace LightMock.Tests
             var mockContext = new MockContext<IFoo>();
             var fooMock = new FooMock(mockContext);
             fooMock.Execute("SomeValue");
-            Assert.Throws<InvalidOperationException>(() => mockContext.Assert(f => f.Execute("SomeValue"), Invoked.Never));
+            Assert.Throws<MockException>(() => mockContext.Assert(f => f.Execute("SomeValue"), Invoked.Never));
         }
 
         [Fact]
@@ -45,14 +45,14 @@ namespace LightMock.Tests
         public void Assert_WithoutInvocation_ThrowsException()
         {
             var mockContext = new MockContext<IFoo>();
-            Assert.Throws<InvalidOperationException>(() => mockContext.Assert(f => f.Execute("SomeValue")));
+            Assert.Throws<MockException>(() => mockContext.Assert(f => f.Execute("SomeValue")));
         }
 
         [Fact]
         public void Assert_ExpectedOnceWithoutInvocation_ThrowsException()
         {
             var mockContext = new MockContext<IFoo>();
-            Assert.Throws<InvalidOperationException>(() => mockContext.Assert(f => f.Execute("SomeValue"), Invoked.Once));
+            Assert.Throws<MockException>(() => mockContext.Assert(f => f.Execute("SomeValue"), Invoked.Once));
         }
 
         [Fact]
@@ -71,7 +71,7 @@ namespace LightMock.Tests
             var fooMock = new FooMock(mockContext);
             fooMock.Execute("SomeValue");
             fooMock.Execute("SomeValue");
-            Assert.Throws<InvalidOperationException>(() => mockContext.Assert(f => f.Execute("SomeValue"), Invoked.Once));
+            Assert.Throws<MockException>(() => mockContext.Assert(f => f.Execute("SomeValue"), Invoked.Once));
         }
 
         [Fact]
@@ -89,7 +89,7 @@ namespace LightMock.Tests
             var mockContext = new MockContext<IFoo>();
             var fooMock = new FooMock(mockContext);
             fooMock.Execute("SomeValue");
-            Assert.Throws<InvalidOperationException>(()
+            Assert.Throws<MockException>(()
                 => mockContext.Assert(f => f.Execute(The<string>.Is(s => s == "AnotherValue")), Invoked.Once));
         }
 
@@ -100,7 +100,7 @@ namespace LightMock.Tests
             var fooMock = new FooMock(mockContext);
             fooMock.Execute("SomeValue");
             fooMock.Execute("SomeValue");
-            Assert.Throws<InvalidOperationException>(() => mockContext.Assert(f => f.Execute("SomeValue"), Invoked.AtLeast(3)));
+            Assert.Throws<MockException>(() => mockContext.Assert(f => f.Execute("SomeValue"), Invoked.AtLeast(3)));
         }
 
         [Fact]
@@ -133,7 +133,7 @@ namespace LightMock.Tests
             var fooMock = new FooMock(mockContext);
             fooMock.Execute("SomeValue");
             fooMock.Execute("SomeValue");
-            Assert.Throws<InvalidOperationException>(() => mockContext.Assert(f => f.Execute("SomeValue"), Invoked.Exactly(3)));
+            Assert.Throws<MockException>(() => mockContext.Assert(f => f.Execute("SomeValue"), Invoked.Exactly(3)));
         }
 
         [Fact]
@@ -156,7 +156,7 @@ namespace LightMock.Tests
             fooMock.Execute("SomeValue");
             fooMock.Execute("SomeValue");
             fooMock.Execute("SomeValue");
-            Assert.Throws<InvalidOperationException>(() => mockContext.Assert(f => f.Execute("SomeValue"), Invoked.Exactly(3)));
+            Assert.Throws<MockException>(() => mockContext.Assert(f => f.Execute("SomeValue"), Invoked.Exactly(3)));
         }
 
         [Fact]

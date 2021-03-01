@@ -131,7 +131,7 @@ namespace LightMock
                         
             if (!invoked.Verify(callCount))
             {
-                throw new InvalidOperationException(string.Format("The method {0} was called {1} times", matchExpression.Simplify(), callCount));
+                throw new MockException(string.Format("The method {0} was called {1} times", matchExpression.Simplify(), callCount));
             }
         }
 
