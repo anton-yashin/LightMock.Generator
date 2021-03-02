@@ -545,6 +545,20 @@ namespace LightMock.Generator.Tests
             Assert.Throws<InvalidProgramException>(() => mock.Bar());
         }
 
+        [Fact]
+        public void ArrangeSetter()
+        {
+            var testScript = LoadAssembly<AArrangeSetter>();
+            var context = testScript.Context;
+            var mock = testScript.MockObject;
+
+            Assert.Equal(KExpected, testScript.DoRun());
+            mock.GetAndSet = "4567";
+            mock.Set = "1234";
+            Assert.Throws<ValidProgramException>(() => mock.GetAndSet = "1234");
+            Assert.Throws<ValidProgramException>(() => mock.Set = "4567");
+        }
+
         protected override string GetFullResourceName(string resourceName)
             => "AbstractClass." + resourceName + ".test.cs";
     }
