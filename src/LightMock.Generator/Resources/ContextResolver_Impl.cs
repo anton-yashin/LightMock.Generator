@@ -57,11 +57,10 @@ namespace LightMock.Generator
         {
             switch (token)
             {
-/*exchangeForExpressionBuilder*/
+                /*exchangeForExpressionBuilder*/
                 default:
-                    break;
+                    throw new ArgumentException($"expression for provided token [{token}] is not found");
             }
-            throw new ArgumentException($"expression for provided token [{token}] is not found");
         }
     }
 
