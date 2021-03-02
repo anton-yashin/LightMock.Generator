@@ -56,10 +56,10 @@ namespace LightMock.Generator
         public static LambdaExpression ExchangeForExpression(string token)
         {
             switch (token)
-#pragma warning disable CS1522 // Empty switch block
             {
-#pragma warning restore CS1522 // Empty switch block
-                /*exchangeForExpressionBuilder*/
+/*exchangeForExpressionBuilder*/
+                default:
+                    break;
             }
             throw new ArgumentException($"expression for provided token [{token}] is not found");
         }

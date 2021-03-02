@@ -30,6 +30,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Text;
 
@@ -78,26 +79,47 @@ namespace LightMock.Generator
             const int KEditorFirstLineNumber = 1;
             var location = invocationExpressionSyntax.GetLocation();
             var lineSpan = location.GetLineSpan();
-            var uid = lineSpan.Path + (lineSpan.StartLinePosition.Line + KEditorFirstLineNumber).ToString();
+            var al = invocationExpressionSyntax.ArgumentList;
+            var (lambdaSyntax, syntaxUidPart1, syntaxUidPart2) =
+                (al.GetArgument("expression", 0),
+                al.GetArgument("uidPart1", 1),
+                al.GetArgument("uidPart2", 2));
+
+            LiteralExpressionSyntax? le;
+            var uidPart1 = syntaxUidPart1 == null || (le = LiteralExpressionLocator.Locate(syntaxUidPart1)) == null
+                ? lineSpan.Path
+                : le.ToString()
+                    // unescape string
+                    .Replace("\"", "")
+                    .Replace(@"\\", @"\");
+
+            var uidPart2 = syntaxUidPart2 == null || (le = LiteralExpressionLocator.Locate(syntaxUidPart2)) == null
+                ? (lineSpan.StartLinePosition.Line + KEditorFirstLineNumber).ToString()
+                : le.ToString();
+
+            var uid = uidPart1 + uidPart2;
             if (uids.Contains(uid))
+            {
                 NotifyUniqueIdError(method, invocationExpressionSyntax, errors);
+            }
             else
             {
-                uids.Add(uid);
-                var (lambda, parameter) = LambdaLocator.Locate(invocationExpressionSyntax);
+                var (lambda, parameter) = LambdaLocator.Locate(lambdaSyntax);
                 var assignment = AssignmentLocator.Locate(lambda);
                 if (lambda != null && parameter != null && assignment != null && lineSpan.IsValid)
                 {
                     var leftPart = compilation.GetSemanticModel(assignment.Left.SyntaxTree)
                         .GetSymbolInfo(assignment.Left).Symbol as IPropertySymbol;
                     if (leftPart == null)
+                    {
                         NotifyPropertyAssignmentError(errors, location);
+                    }
                     else
                     {
                         var typeSymbol = leftPart.ContainingType;
                         var parameterText = parameter.ToString();
                         here.Append("case \"")
-                            .Append(uid)
+                            .Append(uid.Replace(@"\", @"\\"))
                             .AppendLine("\":")
                             .Append("return ExpressionUtils.Get<global::")
                             .Append(typeSymbol.ContainingNamespace.ToDisplayString(SymbolDisplayFormats.Namespace))
@@ -115,6 +137,7 @@ namespace LightMock.Generator
                             .Append(assignment.Right.ToString())
                             .AppendLine("));");
                         var str = here.ToString();
+                        uids.Add(uid);
                     }
                 }
                 else if (assignment == null)
@@ -142,8 +165,15 @@ namespace LightMock.Generator
                 if (result == null)
                     base.DefaultVisit(node);
             }
-        }
 
+            public static T? Locate<TLocator>(SyntaxNode? node)
+                where TLocator : NodeLocator<T>, new()
+            {
+                var @this = new TLocator();
+                @this.Visit(node);
+                return @this.result;
+            }
+        }
 
         sealed class LambdaLocator : NodeLocator<LambdaExpressionSyntax>
         {
@@ -186,11 +216,19 @@ namespace LightMock.Generator
             }
 
             public static AssignmentExpressionSyntax? Locate(SyntaxNode? at)
+                => Locate<AssignmentLocator>(at);
+        }
+
+        sealed class LiteralExpressionLocator : NodeLocator<LiteralExpressionSyntax>
+        {
+            public override void VisitLiteralExpression(LiteralExpressionSyntax node)
             {
-                var @this = new AssignmentLocator();
-                @this.Visit(at);
-                return @this.result;
+                result = node;
+                base.VisitLiteralExpression(node);
             }
+
+            public static LiteralExpressionSyntax? Locate(SyntaxNode? at)
+                => Locate<LiteralExpressionLocator>(at);
         }
 
         #endregion
