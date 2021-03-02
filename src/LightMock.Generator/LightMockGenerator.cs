@@ -46,7 +46,6 @@ namespace LightMock.Generator
             () => SourceText.From(Utils.LoadResource(KMock + Suffix.CSharpFile), Encoding.UTF8));
         readonly Lazy<SourceText> contextResolver = new(
             () => SourceText.From(Utils.LoadResource(KContextResolver + Suffix.CSharpFile), Encoding.UTF8));
-        HashSet<string> expressionUids = new();
 
         public LightMockGenerator()
         {
@@ -139,6 +138,7 @@ namespace LightMock.Generator
                     }
                 }
 
+                var expressionUids = new HashSet<string>();
                 foreach (var candidateInvocation in receiver.ArrangeInvocations)
                 {
                     context.CancellationToken.ThrowIfCancellationRequested();
