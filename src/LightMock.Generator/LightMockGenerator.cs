@@ -141,6 +141,7 @@ namespace LightMock.Generator
                 // process symbols under ArrangeSetter
                 
                 var expressionUids = new HashSet<string>();
+                var mockInterfaceMatcher = new TypeMatcher(typeof(IMock<>));
                 foreach (var candidateInvocation in receiver.ArrangeInvocations)
                 {
                     context.CancellationToken.ThrowIfCancellationRequested();
@@ -150,7 +151,8 @@ namespace LightMock.Generator
 
                     if (methodSymbol != null 
                         && methodSymbol.Name == nameof(AbstractMockNameofProvider.ArrangeSetter)
-                        && mockContextMatcher.IsMatch(methodSymbol.ContainingType))
+                        && (mockContextMatcher.IsMatch(methodSymbol.ContainingType)
+                            || mockInterfaceMatcher.IsMatch(methodSymbol.ContainingType)))
                     {
                         var processor = new ExpressionRewirter(methodSymbol, candidateInvocation, compilation, expressionUids);
 

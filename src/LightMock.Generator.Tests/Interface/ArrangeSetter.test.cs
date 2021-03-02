@@ -5,7 +5,7 @@ namespace LightMock.Generator.Tests.Interface
 {
     public class ArrangeSetter : ITestScript<IArrangeSetter>
     {
-        private readonly Mock<IArrangeSetter> mock;
+        private readonly IMock<IArrangeSetter> mock;
 
         public ArrangeSetter() => mock = new Mock<IArrangeSetter>();
 
