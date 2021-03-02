@@ -85,6 +85,19 @@ namespace LightMock.Generator
         /// <param name="times">The number of times a method is expected to be called.</param>
         void AssertRemove(Action<T> expression);
 
+        /// <summary>
+        /// Arranges a property setter.
+        /// </summary>
+        /// <param name="expression">The match expression that describes where this <see cref="IArrangement"/> will be applied.</param>
+        /// <param name="uidPart1">First part of uid.</param>
+        /// <param name="uidPart2">Secod part of uid.</param>
+        /// <returns>A new <see cref="IArrangement"/> used to apply method behavior.</returns>
+        /// <remarks>
+        /// Usage restrictions:<br/>
+        /// * All arguments MUST be available on compile time and be plain and simple;<br/>
+        /// * Only one call per source code line allowed;<br/>
+        /// * Do not place on same line <see cref="AssertSet(Action{T})"/>.
+        /// </remarks>
         IArrangement ArrangeSetter(Action<T> expression, [CallerFilePath] string uidPart1 = "", [CallerLineNumber] int uidPart2 = 0);
     }
 }
