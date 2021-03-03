@@ -44,8 +44,6 @@ namespace LightMock.Generator
 
         readonly Lazy<SourceText> mock = new(
             () => SourceText.From(Utils.LoadResource(KMock + Suffix.CSharpFile), Encoding.UTF8));
-        readonly Lazy<SourceText> contextResolver = new(
-            () => SourceText.From(Utils.LoadResource(KContextResolver + Suffix.CSharpFile), Encoding.UTF8));
 
         public LightMockGenerator()
         {
@@ -70,11 +68,8 @@ namespace LightMock.Generator
                 var dontOverrideList = GetClassExclusionList(compilation, receiver);
 
                 context.AddSource(KMock + Suffix.FileName, mock.Value);
-                context.AddSource(KContextResolver + Suffix.FileName, contextResolver.Value);
 
-                compilation = compilation
-                    .AddSyntaxTrees(CSharpSyntaxTree.ParseText(mock.Value, options))
-                    .AddSyntaxTrees(CSharpSyntaxTree.ParseText(contextResolver.Value, options));
+                compilation = compilation.AddSyntaxTrees(CSharpSyntaxTree.ParseText(mock.Value, options));
 
                 // process symbols under Mock<> generic
 
@@ -167,7 +162,7 @@ namespace LightMock.Generator
                 }
 
                 context.CancellationToken.ThrowIfCancellationRequested();
-                var impl = Utils.LoadResource(KContextResolver + Suffix.ImplFile + Suffix.CSharpFile)
+                var impl = Utils.LoadResource(KContextResolver + Suffix.CSharpFile)
                     .Replace("/*getInstanceTypeBuilder*/", getInstanceTypeBuilder.ToString())
                     .Replace("/*getProtectedContextTypeBuilder*/", getProtectedContextTypeBuilder.ToString())
                     .Replace("/*getPropertiesContextTypeBuilder*/", getPropertiesContextTypeBuilder.ToString())
