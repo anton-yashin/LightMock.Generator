@@ -25,6 +25,7 @@
     http://twitter.com/bernhardrichter
 ******************************************************************************/
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 
 namespace LightMock
@@ -53,6 +54,7 @@ namespace LightMock
         /// represents the method that has been invoked.</param>
         /// <returns>An instance of <typeparamref name="TResult"/> or possibly null 
         /// if <typeparamref name="TResult"/> a reference type.</returns>
+        [return: MaybeNull]
         TResult Invoke<TResult>(Expression<Func<TMock, TResult>> expression);
 
         /// <summary>
