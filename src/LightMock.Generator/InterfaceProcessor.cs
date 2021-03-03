@@ -155,8 +155,8 @@ namespace {@namespace}
         public override void DoGeneratePart_GetPropertiesContextType(StringBuilder here)
         {
             var toAppend = typeSymbol.IsGenericType
-                ? $"if (gtd == typeof(global::{@namespace}.{baseNameWithCommaArguments})) return MockContextType.MakeGenericType(typeof(global::{@namespace}.{Prefix.PropertyToFuncInterface}{interfaceName}<{commaArguments}>).MakeGenericType(contextType.GetGenericArguments()));"
-                : $"if (contextType == typeof(global::{@namespace}.{baseNameWithCommaArguments})) return MockContextType.MakeGenericType(typeof(global::{@namespace}.{Prefix.PropertyToFuncInterface}{interfaceName}));";
+                ? $"if (gtd == typeof(global::{@namespace}.{baseNameWithCommaArguments})) return defaults.MockContextType.MakeGenericType(typeof(global::{@namespace}.{Prefix.PropertyToFuncInterface}{interfaceName}<{commaArguments}>).MakeGenericType(contextType.GetGenericArguments()));"
+                : $"if (contextType == typeof(global::{@namespace}.{baseNameWithCommaArguments})) return defaults.MockContextType.MakeGenericType(typeof(global::{@namespace}.{Prefix.PropertyToFuncInterface}{interfaceName}));";
             here.Append(toAppend);
         }
 

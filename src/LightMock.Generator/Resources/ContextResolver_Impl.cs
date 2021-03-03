@@ -6,7 +6,7 @@ namespace LightMock.Generator
 {
     public static partial class ContextResolver
     {
-        public static Type GetInstanceType(Type contextType)
+        public static Type GetInstanceType(Type contextType, IContextResolverDefaults defaults)
         {
             var gtd = contextType.IsGenericType ? contextType.GetGenericTypeDefinition() : null;
 
@@ -15,27 +15,27 @@ namespace LightMock.Generator
             throw new MockNotGeneratedException(contextType);
         }
 
-        public static Type GetProtectedContextType(Type contextType)
+        public static Type GetProtectedContextType(Type contextType, IContextResolverDefaults defaults)
         {
             var gtd = contextType.IsGenericType ? contextType.GetGenericTypeDefinition() : null;
 
             /*getProtectedContextTypeBuilder*/
 
-            return DefaultProtectedContextType;
+            return defaults.DefaultProtectedContextType;
         }
 
-        public static Type GetPropertiesContextType(Type contextType)
+        public static Type GetPropertiesContextType(Type contextType, IContextResolverDefaults defaults)
         {
             var gtd = contextType.IsGenericType ? contextType.GetGenericTypeDefinition() : null;
 
             /*getPropertiesContextTypeBuilder*/
 
-            if (contextType.IsSubclassOf(MulticastDelegateType))
-                return typeof(MockContext<object>);
+            if (contextType.IsSubclassOf(defaults.MulticastDelegateType))
+                return defaults.MulticastDelegateContextType;
             throw new MockNotGeneratedException(contextType);
         }
 
-        public static Type GetAssertType(Type contextType)
+        public static Type GetAssertType(Type contextType, IContextResolverDefaults defaults)
         {
             var gtd = contextType.IsGenericType ? contextType.GetGenericTypeDefinition() : null;
 
@@ -44,7 +44,7 @@ namespace LightMock.Generator
             throw new MockNotGeneratedException(contextType);
         }
 
-        public static object GetDelegate(Type contextType, object mockContext)
+        public static object GetDelegate(Type contextType, object mockContext, IContextResolverDefaults defaults)
         {
             var gtd = contextType.IsGenericType ? contextType.GetGenericTypeDefinition() : null;
 
@@ -53,7 +53,7 @@ namespace LightMock.Generator
             throw new MockNotGeneratedException(contextType);
         }
 
-        public static LambdaExpression ExchangeForExpression(string token)
+        public static LambdaExpression ExchangeForExpression(string token, IContextResolverDefaults defaults)
         {
             switch (token)
             {

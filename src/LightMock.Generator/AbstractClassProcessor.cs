@@ -270,16 +270,16 @@ namespace LightMock.Generator
         public override void DoGeneratePart_GetProtectedContextType(StringBuilder here)
         {
             var toAppend = typeSymbol.IsGenericType
-                ? $@"if (gtd == typeof(global::{@namespace}.{baseNameWithCommaArguments})) return MockContextType.MakeGenericType(typeof(global::{@namespace}.{Prefix.ProtectedToPublicInterface}{className}<{commaArguments}>).MakeGenericType(contextType.GetGenericArguments()));"
-                : $@"if (contextType == typeof(global::{@namespace}.{baseNameWithCommaArguments})) return MockContextType.MakeGenericType(typeof(global::{@namespace}.{Prefix.ProtectedToPublicInterface}{className}));";
+                ? $@"if (gtd == typeof(global::{@namespace}.{baseNameWithCommaArguments})) return defaults.MockContextType.MakeGenericType(typeof(global::{@namespace}.{Prefix.ProtectedToPublicInterface}{className}<{commaArguments}>).MakeGenericType(contextType.GetGenericArguments()));"
+                : $@"if (contextType == typeof(global::{@namespace}.{baseNameWithCommaArguments})) return defaults.MockContextType.MakeGenericType(typeof(global::{@namespace}.{Prefix.ProtectedToPublicInterface}{className}));";
             here.Append(toAppend);
         }
 
         public override void DoGeneratePart_GetPropertiesContextType(StringBuilder here)
         {
             var toAppend = typeSymbol.IsGenericType
-                ? $@"if (gtd == typeof(global::{@namespace}.{baseNameWithCommaArguments})) return MockContextType.MakeGenericType(typeof(global::{@namespace}.{Prefix.PropertyToFuncInterface}{className}<{commaArguments}>).MakeGenericType(contextType.GetGenericArguments()));"
-                : $@"if (contextType == typeof(global::{@namespace}.{baseNameWithCommaArguments})) return MockContextType.MakeGenericType(typeof(global::{@namespace}.{Prefix.PropertyToFuncInterface}{className}));";
+                ? $@"if (gtd == typeof(global::{@namespace}.{baseNameWithCommaArguments})) return defaults.MockContextType.MakeGenericType(typeof(global::{@namespace}.{Prefix.PropertyToFuncInterface}{className}<{commaArguments}>).MakeGenericType(contextType.GetGenericArguments()));"
+                : $@"if (contextType == typeof(global::{@namespace}.{baseNameWithCommaArguments})) return defaults.MockContextType.MakeGenericType(typeof(global::{@namespace}.{Prefix.PropertyToFuncInterface}{className}));";
             here.Append(toAppend);
         }
 
