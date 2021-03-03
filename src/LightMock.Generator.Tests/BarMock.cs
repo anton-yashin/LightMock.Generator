@@ -14,7 +14,7 @@
             context.Invoke(f => f.Execute(value));
         }
 
-        public string Execute()
+        public string? Execute()
         {
             return context.Invoke(f => f.Execute());
         }

@@ -3,8 +3,8 @@ namespace LightMock.Tests
 {
     public interface IProp
     {
-        string ReadOnlyProperty { get; }
-        string TwoWayProperty { get; set; }
+        string? ReadOnlyProperty { get; }
+        string? TwoWayProperty { get; set; }
     }
 
     public class PropMock : IProp
@@ -16,7 +16,7 @@ namespace LightMock.Tests
             _context = context;
         }
 
-        public string ReadOnlyProperty
+        public string? ReadOnlyProperty
         {
             get
             {
@@ -24,7 +24,7 @@ namespace LightMock.Tests
             }
         }
 
-        public string TwoWayProperty
+        public string? TwoWayProperty
         {
             get
             {
