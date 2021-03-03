@@ -1,4 +1,30 @@
-﻿using System;
+﻿/******************************************************************************
+    MIT License
+
+    Copyright (c) 2021 Anton Yashin
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
+
+*******************************************************************************
+    https://github.com/anton-yashin/
+*******************************************************************************/
+using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
@@ -52,13 +78,13 @@ namespace LightMock.Generator
 
                 // process symbols under Mock<> generic
 
-                var mockContextType = typeof(AbstractMock<>);
-                var mockContextNamespaceAndName = mockContextType.Namespace + "." + mockContextType.Name.Replace("`1", "");
+                var mockContextMatcher = new TypeMatcher(typeof(AbstractMock<>));
                 var getInstanceTypeBuilder = new StringBuilder();
                 var getProtectedContextTypeBuilder = new StringBuilder();
                 var getPropertiesContextTypeBuilder = new StringBuilder();
                 var getAssertTypeBuilder = new StringBuilder();
                 var getDelegateBuilder = new StringBuilder();
+                var exchangeForExpressionBuilder = new StringBuilder();
                 var processedTypes = new List<INamedTypeSymbol>();
                 var multicastDelegateType = typeof(MulticastDelegate);
                 var multicastDelegateNameSpaceAndName = multicastDelegateType.Namespace + "." + multicastDelegateType.Name;
@@ -73,7 +99,7 @@ namespace LightMock.Generator
                     context.CancellationToken.ThrowIfCancellationRequested();
                     var mcbt = mockContainer?.BaseType;
                     if (mcbt != null
-                        && mcbt.ToDisplayString(SymbolDisplayFormats.Namespace) == mockContextNamespaceAndName
+                        && mockContextMatcher.IsMatch(mcbt)
                         && mcbt.TypeArguments.FirstOrDefault() is INamedTypeSymbol mockedType
                         && processedTypes.Contains(mockedType.OriginalDefinition) == false)
                     {
@@ -106,7 +132,37 @@ namespace LightMock.Generator
                         context.CancellationToken.ThrowIfCancellationRequested();
                         processor.DoGeneratePart_GetDelegate(getDelegateBuilder);
                         context.CancellationToken.ThrowIfCancellationRequested();
+                        processor.DoGeneratePart_ExchangeForExpression(exchangeForExpressionBuilder);
+                        context.CancellationToken.ThrowIfCancellationRequested();
                         processedTypes.Add(mockedType.OriginalDefinition);
+                    }
+                }
+
+                // process symbols under ArrangeSetter
+                
+                var expressionUids = new HashSet<string>();
+                var mockInterfaceMatcher = new TypeMatcher(typeof(IMock<>));
+                foreach (var candidateInvocation in receiver.ArrangeInvocations)
+                {
+                    context.CancellationToken.ThrowIfCancellationRequested();
+                    var methodSymbol = compilation.GetSemanticModel(candidateInvocation.SyntaxTree)
+                        .GetSymbolInfo(candidateInvocation).Symbol as IMethodSymbol;
+                    context.CancellationToken.ThrowIfCancellationRequested();
+
+                    if (methodSymbol != null 
+                        && methodSymbol.Name == nameof(AbstractMockNameofProvider.ArrangeSetter)
+                        && (mockContextMatcher.IsMatch(methodSymbol.ContainingType)
+                            || mockInterfaceMatcher.IsMatch(methodSymbol.ContainingType)))
+                    {
+                        var processor = new ExpressionRewirter(methodSymbol, candidateInvocation, compilation, expressionUids);
+
+                        context.CancellationToken.ThrowIfCancellationRequested();
+                        if (EmitDiagnostics(context, processor.GetErrors()))
+                            continue;
+                        context.CancellationToken.ThrowIfCancellationRequested();
+                        EmitDiagnostics(context, processor.GetWarnings());
+
+                        processor.AppendExpression(exchangeForExpressionBuilder);
                     }
                 }
 
@@ -116,7 +172,8 @@ namespace LightMock.Generator
                     .Replace("/*getProtectedContextTypeBuilder*/", getProtectedContextTypeBuilder.ToString())
                     .Replace("/*getPropertiesContextTypeBuilder*/", getPropertiesContextTypeBuilder.ToString())
                     .Replace("/*getAssertTypeBuilder*/", getAssertTypeBuilder.ToString())
-                    .Replace("/*getDelegateBuilder*/", getDelegateBuilder.ToString());
+                    .Replace("/*getDelegateBuilder*/", getDelegateBuilder.ToString())
+                    .Replace("/*exchangeForExpressionBuilder*/", exchangeForExpressionBuilder.ToString());
 
                 context.CancellationToken.ThrowIfCancellationRequested();
                 context.AddSource(KContextResolver + Suffix.ImplFile + Suffix.FileName, SourceText.From(impl, Encoding.UTF8));

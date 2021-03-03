@@ -1,6 +1,33 @@
-﻿using System;
+﻿/******************************************************************************
+    MIT License
+
+    Copyright (c) 2021 Anton Yashin
+
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
+
+    The above copyright notice and this permission notice shall be included in all
+    copies or substantial portions of the Software.
+
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+    SOFTWARE.
+
+*******************************************************************************
+    https://github.com/anton-yashin/
+*******************************************************************************/
+using System;
 using System.Diagnostics;
 using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
 using System.Threading;
 
 namespace LightMock.Generator
@@ -11,7 +38,7 @@ namespace LightMock.Generator
         T? instance;
         readonly object[] prms;
         readonly object protectedContext;
-        readonly object propertiesContext;
+        readonly IMockContextInternal propertiesContext;
 
         public AbstractMock()
         {
@@ -84,9 +111,9 @@ namespace LightMock.Generator
             return (T)result;
         }
 
-        object CreatePropertiesContext()
+        IMockContextInternal CreatePropertiesContext()
         {
-            return Activator.CreateInstance(LazyInitializer.EnsureInitialized(ref propertiesType,
+            return (IMockContextInternal)Activator.CreateInstance(LazyInitializer.EnsureInitialized(ref propertiesType,
                 GetPropertiesContextType))
                 ?? throw new InvalidOperationException("can't create property context for: " + typeof(T).FullName);
         }
@@ -97,6 +124,7 @@ namespace LightMock.Generator
         protected abstract Type GetPropertiesContextType();
         protected abstract Type GetAssertType();
         protected abstract T GetDelegate(Type type);
+        protected abstract LambdaExpression ExchangeForExpression(string token);
 
         public void AssertGet<TProperty>(Func<T, TProperty> expression)
             => AssertGet(expression, Invoked.Once);
@@ -125,15 +153,22 @@ namespace LightMock.Generator
         void AssertUsingAssertInstance(Action<T> expression, Invoked times)
             => expression(CreateAssertInstance(times));
 
+        public IArrangement ArrangeSetter(Action<T> expression, [CallerFilePath] string uidPart1 = "", [CallerLineNumber] int uidPart2 = 0)
+        {
+            if (string.IsNullOrWhiteSpace(uidPart1))
+                throw new ArgumentException("you must provide part of unique identifier", nameof(uidPart1));
+            return propertiesContext.ArrangeAction(ExchangeForExpression(uidPart1 + uidPart2.ToString()));
+        }
+
         #region IMockContext<T> implementation
 
-        public Arrangement Arrange(Expression<Action<T>> matchExpression)
+        public IArrangement Arrange(Expression<Action<T>> matchExpression)
             => PublicContext.Arrange(matchExpression);
 
-        public Arrangement<TResult> Arrange<TResult>(Expression<Func<T, TResult>> matchExpression)
+        public IArrangement<TResult> Arrange<TResult>(Expression<Func<T, TResult>> matchExpression)
             => PublicContext.Arrange(matchExpression);
 
-        public PropertyArrangement<TResult> ArrangeProperty<TResult>(Expression<Func<T, TResult>> matchExpression)
+        public IArrangement ArrangeProperty<TResult>(Expression<Func<T, TResult>> matchExpression)
             => PublicContext.ArrangeProperty(matchExpression);
 
         public void Assert(Expression<Action<T>> matchExpression)

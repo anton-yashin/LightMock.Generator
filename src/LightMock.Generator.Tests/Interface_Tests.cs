@@ -39,9 +39,9 @@ namespace LightMock.Generator.Tests
             var context = testScript.Context;
             var mock = testScript.MockObject;
 
-            Assert.Throws<InvalidOperationException>(() => context.AssertGet(f => f.OnlyGet));
-            Assert.Throws<InvalidOperationException>(() => context.AssertSet(f => f.GetAndSet = 5678));
-            Assert.Throws<InvalidOperationException>(() => context.AssertGet(f => f.GetAndSet));
+            Assert.Throws<MockException>(() => context.AssertGet(f => f.OnlyGet));
+            Assert.Throws<MockException>(() => context.AssertSet(f => f.GetAndSet = 5678));
+            Assert.Throws<MockException>(() => context.AssertGet(f => f.GetAndSet));
 
             context.Arrange(f => f.OnlyGet).Returns(1234);
             Assert.Equal(1234, mock.OnlyGet);
@@ -53,15 +53,15 @@ namespace LightMock.Generator.Tests
             context.AssertSet(f => f.GetAndSet = 5678);
             context.AssertGet(f => f.GetAndSet);
 
-            Assert.Throws<InvalidOperationException>(() => context.AssertSet(f => f.GetAndSet = 1234));
+            Assert.Throws<MockException>(() => context.AssertSet(f => f.GetAndSet = 1234));
 
-            Assert.Throws<InvalidOperationException>(() => context.AssertGet(f => f.OnlyGet, Invoked.Never));
-            Assert.Throws<InvalidOperationException>(() => context.AssertSet(f => f.GetAndSet = 5678, Invoked.Never));
-            Assert.Throws<InvalidOperationException>(() => context.AssertGet(f => f.GetAndSet, Invoked.Never));
+            Assert.Throws<MockException>(() => context.AssertGet(f => f.OnlyGet, Invoked.Never));
+            Assert.Throws<MockException>(() => context.AssertSet(f => f.GetAndSet = 5678, Invoked.Never));
+            Assert.Throws<MockException>(() => context.AssertGet(f => f.GetAndSet, Invoked.Never));
 
-            Assert.Throws<InvalidOperationException>(() => context.AssertGet(f => f.OnlyGet, Invoked.Exactly(2)));
-            Assert.Throws<InvalidOperationException>(() => context.AssertSet(f => f.GetAndSet = 5678, Invoked.Exactly(2)));
-            Assert.Throws<InvalidOperationException>(() => context.AssertGet(f => f.GetAndSet, Invoked.Exactly(2)));
+            Assert.Throws<MockException>(() => context.AssertGet(f => f.OnlyGet, Invoked.Exactly(2)));
+            Assert.Throws<MockException>(() => context.AssertSet(f => f.GetAndSet = 5678, Invoked.Exactly(2)));
+            Assert.Throws<MockException>(() => context.AssertGet(f => f.GetAndSet, Invoked.Exactly(2)));
         }
 
         [Fact]
@@ -105,25 +105,25 @@ namespace LightMock.Generator.Tests
             Assert.Equal(5678, mock.GetSomething());
 
 
-            Assert.Throws<InvalidOperationException>(() => context.AssertGet(f => f.OnlyGet));
+            Assert.Throws<MockException>(() => context.AssertGet(f => f.OnlyGet));
             context.Arrange(f => f.OnlyGet).Returns(9012);
             Assert.Equal(9012, mock.OnlyGet);
             context.AssertGet(f => f.OnlyGet);
-            Assert.Throws<InvalidOperationException>(() => context.AssertGet(f => f.OnlyGet, Invoked.Never));
-            Assert.Throws<InvalidOperationException>(() => context.AssertGet(f => f.OnlyGet, Invoked.Exactly(2)));
+            Assert.Throws<MockException>(() => context.AssertGet(f => f.OnlyGet, Invoked.Never));
+            Assert.Throws<MockException>(() => context.AssertGet(f => f.OnlyGet, Invoked.Exactly(2)));
 
-            Assert.Throws<InvalidOperationException>(() => context.AssertGet(f => f.GetAndSet));
-            Assert.Throws<InvalidOperationException>(() => context.AssertSet(f => f.GetAndSet = 3456));
+            Assert.Throws<MockException>(() => context.AssertGet(f => f.GetAndSet));
+            Assert.Throws<MockException>(() => context.AssertSet(f => f.GetAndSet = 3456));
             context.ArrangeProperty(f => f.GetAndSet);
             mock.GetAndSet = 3456;
             Assert.Equal(3456, mock.GetAndSet);
             context.AssertGet(f => f.GetAndSet);
             context.AssertSet(f => f.GetAndSet = 3456);
-            Assert.Throws<InvalidOperationException>(() => context.AssertSet(f => f.GetAndSet = 1234));
-            Assert.Throws<InvalidOperationException>(() => context.AssertGet(f => f.GetAndSet, Invoked.Never));
-            Assert.Throws<InvalidOperationException>(() => context.AssertSet(f => f.GetAndSet = 3456, Invoked.Never));
-            Assert.Throws<InvalidOperationException>(() => context.AssertGet(f => f.GetAndSet, Invoked.Exactly(2)));
-            Assert.Throws<InvalidOperationException>(() => context.AssertSet(f => f.GetAndSet = 3456, Invoked.Exactly(2)));
+            Assert.Throws<MockException>(() => context.AssertSet(f => f.GetAndSet = 1234));
+            Assert.Throws<MockException>(() => context.AssertGet(f => f.GetAndSet, Invoked.Never));
+            Assert.Throws<MockException>(() => context.AssertSet(f => f.GetAndSet = 3456, Invoked.Never));
+            Assert.Throws<MockException>(() => context.AssertGet(f => f.GetAndSet, Invoked.Exactly(2)));
+            Assert.Throws<MockException>(() => context.AssertSet(f => f.GetAndSet = 3456, Invoked.Exactly(2)));
         }
 
         [Fact]
@@ -141,25 +141,25 @@ namespace LightMock.Generator.Tests
             context.Arrange(f => f.GetSomething()).Returns(5678);
             Assert.Equal(5678, mock.GetSomething());
 
-            Assert.Throws<InvalidOperationException>(() => context.AssertGet(f => f.OnlyGet));
+            Assert.Throws<MockException>(() => context.AssertGet(f => f.OnlyGet));
             context.Arrange(f => f.OnlyGet).Returns(9012);
             Assert.Equal(9012, mock.OnlyGet);
             context.AssertGet(f => f.OnlyGet);
-            Assert.Throws<InvalidOperationException>(() => context.AssertGet(f => f.OnlyGet, Invoked.Never));
-            Assert.Throws<InvalidOperationException>(() => context.AssertGet(f => f.OnlyGet, Invoked.Exactly(2)));
+            Assert.Throws<MockException>(() => context.AssertGet(f => f.OnlyGet, Invoked.Never));
+            Assert.Throws<MockException>(() => context.AssertGet(f => f.OnlyGet, Invoked.Exactly(2)));
 
-            Assert.Throws<InvalidOperationException>(() => context.AssertGet(f => f.GetAndSet));
-            Assert.Throws<InvalidOperationException>(() => context.AssertSet(f => f.GetAndSet = 3456));
+            Assert.Throws<MockException>(() => context.AssertGet(f => f.GetAndSet));
+            Assert.Throws<MockException>(() => context.AssertSet(f => f.GetAndSet = 3456));
             context.ArrangeProperty(f => f.GetAndSet);
             mock.GetAndSet = 3456;
             Assert.Equal(3456, mock.GetAndSet);
             context.AssertGet(f => f.GetAndSet);
             context.AssertSet(f => f.GetAndSet = 3456);
-            Assert.Throws<InvalidOperationException>(() => context.AssertSet(f => f.GetAndSet = 1234));
-            Assert.Throws<InvalidOperationException>(() => context.AssertGet(f => f.GetAndSet, Invoked.Never));
-            Assert.Throws<InvalidOperationException>(() => context.AssertSet(f => f.GetAndSet = 3456, Invoked.Never));
-            Assert.Throws<InvalidOperationException>(() => context.AssertGet(f => f.GetAndSet, Invoked.Exactly(2)));
-            Assert.Throws<InvalidOperationException>(() => context.AssertSet(f => f.GetAndSet = 3456, Invoked.Exactly(2)));
+            Assert.Throws<MockException>(() => context.AssertSet(f => f.GetAndSet = 1234));
+            Assert.Throws<MockException>(() => context.AssertGet(f => f.GetAndSet, Invoked.Never));
+            Assert.Throws<MockException>(() => context.AssertSet(f => f.GetAndSet = 3456, Invoked.Never));
+            Assert.Throws<MockException>(() => context.AssertGet(f => f.GetAndSet, Invoked.Exactly(2)));
+            Assert.Throws<MockException>(() => context.AssertSet(f => f.GetAndSet = 3456, Invoked.Exactly(2)));
 
             Assert.Equal(KExpected, testScript.DoRun());
         }
@@ -180,17 +180,17 @@ namespace LightMock.Generator.Tests
             Assert.Same(expected: arg2, mock.GetSomething());
 
             var arg3 = new MultipleNamespacesArgument();
-            Assert.Throws<InvalidOperationException>(() => context.AssertGet(f => f.SomeProperty));
-            Assert.Throws<InvalidOperationException>(() => context.AssertSet(f => f.SomeProperty = arg3));
+            Assert.Throws<MockException>(() => context.AssertGet(f => f.SomeProperty));
+            Assert.Throws<MockException>(() => context.AssertSet(f => f.SomeProperty = arg3));
             context.ArrangeProperty(f => f.SomeProperty);
             mock.SomeProperty = arg3;
             Assert.Same(expected: arg3, mock.SomeProperty);
             context.AssertGet(f => f.SomeProperty);
             context.AssertSet(f => f.SomeProperty = arg3);
-            Assert.Throws<InvalidOperationException>(() => context.AssertGet(f => f.SomeProperty, Invoked.Never));
-            Assert.Throws<InvalidOperationException>(() => context.AssertSet(f => f.SomeProperty = arg3, Invoked.Never));
-            Assert.Throws<InvalidOperationException>(() => context.AssertGet(f => f.SomeProperty, Invoked.Exactly(2)));
-            Assert.Throws<InvalidOperationException>(() => context.AssertSet(f => f.SomeProperty = arg3, Invoked.Exactly(2)));
+            Assert.Throws<MockException>(() => context.AssertGet(f => f.SomeProperty, Invoked.Never));
+            Assert.Throws<MockException>(() => context.AssertSet(f => f.SomeProperty = arg3, Invoked.Never));
+            Assert.Throws<MockException>(() => context.AssertGet(f => f.SomeProperty, Invoked.Exactly(2)));
+            Assert.Throws<MockException>(() => context.AssertSet(f => f.SomeProperty = arg3, Invoked.Exactly(2)));
         }
 
         [Fact]
@@ -205,8 +205,8 @@ namespace LightMock.Generator.Tests
 
             context.AssertAdd(f => f.OnEvent += ExpectedEventHandler);
             context.AssertRemove(f => f.OnEvent -= ExpectedEventHandler);
-            Assert.Throws<InvalidOperationException>(() => context.AssertAdd(f => f.OnEvent += UnexpectedEventHandler));
-            Assert.Throws<InvalidOperationException>(() => context.AssertRemove(f => f.OnEvent -= UnexpectedEventHandler));
+            Assert.Throws<MockException>(() => context.AssertAdd(f => f.OnEvent += UnexpectedEventHandler));
+            Assert.Throws<MockException>(() => context.AssertRemove(f => f.OnEvent -= UnexpectedEventHandler));
 
             Assert.Equal(expected: KExpected, testScript.DoRun());
 
@@ -226,8 +226,8 @@ namespace LightMock.Generator.Tests
 
             context.AssertAdd(f => f.OnEvent += ExpectedEventHandler);
             context.AssertRemove(f => f.OnEvent -= ExpectedEventHandler);
-            Assert.Throws<InvalidOperationException>(() => context.AssertAdd(f => f.OnEvent += UnexpectedEventHandler));
-            Assert.Throws<InvalidOperationException>(() => context.AssertRemove(f => f.OnEvent -= UnexpectedEventHandler));
+            Assert.Throws<MockException>(() => context.AssertAdd(f => f.OnEvent += UnexpectedEventHandler));
+            Assert.Throws<MockException>(() => context.AssertRemove(f => f.OnEvent -= UnexpectedEventHandler));
 
             Assert.Equal(expected: KExpected, testScript.DoRun());
 
@@ -247,8 +247,8 @@ namespace LightMock.Generator.Tests
 
             context.AssertAdd(f => f.OnEvent += ExpectedEventHandler);
             context.AssertRemove(f => f.OnEvent -= ExpectedEventHandler);
-            Assert.Throws<InvalidOperationException>(() => context.AssertAdd(f => f.OnEvent += UnexpectedEventHandler));
-            Assert.Throws<InvalidOperationException>(() => context.AssertRemove(f => f.OnEvent -= UnexpectedEventHandler));
+            Assert.Throws<MockException>(() => context.AssertAdd(f => f.OnEvent += UnexpectedEventHandler));
+            Assert.Throws<MockException>(() => context.AssertRemove(f => f.OnEvent -= UnexpectedEventHandler));
 
             Assert.Equal(expected: KExpected, testScript.DoRun());
 
@@ -439,6 +439,20 @@ namespace LightMock.Generator.Tests
             Assert.Equal(9012, mock.Baz(null));
             context.Assert(f => f.Baz(null));
 
+        }
+
+        [Fact]
+        public void ArrangeSetter()
+        {
+            var testScript = LoadAssembly<IArrangeSetter>();
+            var context = testScript.Context;
+            var mock = testScript.MockObject;
+
+            Assert.Equal(KExpected, testScript.DoRun());
+            mock.GetAndSet = "4567";
+            mock.Set = "1234";
+            Assert.Throws<ValidProgramException>(() => mock.GetAndSet = "1234");
+            Assert.Throws<ValidProgramException>(() => mock.Set = "4567");
         }
 
         protected override string GetFullResourceName(string resourceName)
