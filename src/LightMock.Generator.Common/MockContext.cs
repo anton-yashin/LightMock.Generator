@@ -40,8 +40,8 @@ namespace LightMock
     /// <typeparam name="TMock">The target mock type.</typeparam>
     public class MockContext<TMock> : IMockContext<TMock>, IInvocationContext<TMock>, IMockContextInternal
     {
-        private readonly List<IInvocationInfo> invocations = new List<IInvocationInfo>();
-        private readonly List<Arrangement> arrangements = new List<Arrangement>();
+        private readonly ILockedCollection<IInvocationInfo> invocations = new LockedCollection<IInvocationInfo>();
+        private readonly ILockedCollection<Arrangement> arrangements = new LockedCollection<Arrangement>();
 
         /// <summary>
         /// Arranges a mocked method. 
@@ -55,10 +55,11 @@ namespace LightMock
         IArrangement ArrangeAction(LambdaExpression matchExpression)
         {
             var matchInfo = matchExpression.ToMatchInfo();
-            var arrangement = (from i in arrangements
-                               let a = i as ActionArrangement
-                               where a != null && a.Matches(matchInfo)
-                               select a).FirstOrDefault();
+            var arrangement = arrangements.InvokeLocked(
+                c => (from i in c
+                      let a = i as ActionArrangement
+                      where a != null && a.Matches(matchInfo)
+                      select a).FirstOrDefault());
             if (arrangement == null)
             {
                 arrangement = new ActionArrangement(matchExpression);
@@ -80,10 +81,11 @@ namespace LightMock
         IArrangement<TResult> ArrangeFunction<TResult>(LambdaExpression matchExpression)
         {
             var matchInfo = matchExpression.ToMatchInfo();
-            var arrangement = (from i in arrangements
-                               let a = i as FunctionArrangement<TResult>
-                               where a != null && a.Matches(matchInfo)
-                               select a).FirstOrDefault();
+            var arrangement = arrangements.InvokeLocked(
+                c => (from i in c
+                     let a = i as FunctionArrangement<TResult>
+                     where a != null && a.Matches(matchInfo)
+                     select a).FirstOrDefault());
             if (arrangement == null)
             {
                 arrangement = new FunctionArrangement<TResult>(matchExpression);
@@ -105,10 +107,11 @@ namespace LightMock
         public IArrangement ArrangePropertyInternal<TProperty>(LambdaExpression matchExpression)
         {
             var matchInfo = matchExpression.ToMatchInfo();
-            var arrangement = (from i in arrangements
-                               let a = i as PropertyArrangement<TProperty>
-                               where a != null && a.Matches(matchInfo)
-                               select a).FirstOrDefault();
+            var arrangement = arrangements.InvokeLocked(
+                c => (from i in arrangements
+                      let a = i as PropertyArrangement<TProperty>
+                      where a != null && a.Matches(matchInfo)
+                      select a).FirstOrDefault());
             if (arrangement == null)
             {
                 arrangement = new PropertyArrangement<TProperty>(matchExpression);
@@ -138,7 +141,7 @@ namespace LightMock
         public void Assert(Expression<Action<TMock>> matchExpression, Invoked invoked)
         {
             var matchInfo = matchExpression.ToMatchInfo();
-            var callCount = invocations.Count(matchInfo.Matches);
+            var callCount = invocations.InvokeLocked(c => c.Count(matchInfo.Matches));
                         
             if (!invoked.Verify(callCount))
             {
@@ -157,10 +160,11 @@ namespace LightMock
             var invocationInfo = expression.ToInvocationInfo();
             invocations.Add(invocationInfo);
 
-            var arrangement = (from i in arrangements 
-                               let a = i as IArrangementInvocation
-                               where a != null && a.Matches(invocationInfo)
-                               select a).FirstOrDefault();
+            var arrangement = arrangements.InvokeLocked(
+                c => (from i in arrangements
+                      let a = i as IArrangementInvocation
+                      where a != null && a.Matches(invocationInfo)
+                      select a).FirstOrDefault());
 
             if (arrangement != null)
             {
@@ -183,10 +187,11 @@ namespace LightMock
             var invocationInfo = expression.ToInvocationInfo();
             invocations.Add(invocationInfo);
 
-            var arrangement = (from i in arrangements
-                               let a = i as IArrangementInvocation<TResult>
-                               where a != null && a.Matches(invocationInfo)
-                               select a).FirstOrDefault();
+            var arrangement = arrangements.InvokeLocked(
+                c => (from i in c
+                      let a = i as IArrangementInvocation<TResult>
+                      where a != null && a.Matches(invocationInfo)
+                      select a).FirstOrDefault());
             if (arrangement != null)
             {
                 return arrangement.Invoke(invocationInfo);
@@ -207,10 +212,11 @@ namespace LightMock
             var invocationInfo = expression.ToInvocationInfo();
             invocations.Add(invocationInfo);
 
-            var arrangement = (from i in arrangements
-                               let a = i as IPropertyArrangementInvocation<TResult>
-                               where a != null && a.Matches(invocationInfo)
-                               select a).FirstOrDefault();
+            var arrangement = arrangements.InvokeLocked(
+                c => (from i in arrangements
+                      let a = i as IPropertyArrangementInvocation<TResult>
+                      where a != null && a.Matches(invocationInfo)
+                      select a).FirstOrDefault());
 
             if (arrangement != null)
             {
