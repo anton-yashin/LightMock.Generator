@@ -57,7 +57,7 @@ namespace LightMock.Generator
         public T Object => LazyInitializer.EnsureInitialized(ref instance!, CreateMockInstance);
 
         object IProtectedContext<T>.ProtectedContext => protectedContext;
-        protected MockContext<T> PublicContext { get; }
+        protected IMockContext<T> PublicContext { get; }
 
         static Type? mockInstanceType;
         static Type? protectedContextType;
