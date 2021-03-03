@@ -77,7 +77,7 @@ namespace LightMock.Generator
         public void AppendExpression(StringBuilder here)
         {
             const int KEditorFirstLineNumber = 1;
-            var location = invocationExpressionSyntax.GetLocation();
+            var location = invocationExpressionSyntax.ArgumentList.GetLocation();
             var lineSpan = location.GetLineSpan();
             var al = invocationExpressionSyntax.ArgumentList;
             var (lambdaSyntax, syntaxUidPart1, syntaxUidPart2) =
