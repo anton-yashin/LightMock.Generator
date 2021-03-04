@@ -30,12 +30,12 @@ using System;
 
 namespace LightMock.Generator.Locators
 {
-    abstract class NodeLocator<T> : CSharpSyntaxWalker
+    abstract class SyntaxLocator<T> : CSharpSyntaxWalker
         where T : SyntaxNode
     {
         protected T? result;
 
-        protected NodeLocator() { }
+        protected SyntaxLocator() { }
 
         public override void DefaultVisit(SyntaxNode node)
         {
@@ -44,7 +44,7 @@ namespace LightMock.Generator.Locators
         }
 
         public static T? Locate<TLocator>(SyntaxNode? node)
-            where TLocator : NodeLocator<T>, new()
+            where TLocator : SyntaxLocator<T>, new()
         {
             var @this = new TLocator();
             @this.Visit(node);

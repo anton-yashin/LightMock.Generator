@@ -30,7 +30,7 @@ using System;
 
 namespace LightMock.Generator.Locators
 {
-    sealed class AssignmentLocator : NodeLocator<AssignmentExpressionSyntax>
+    sealed class AssignmentLocator : SyntaxLocator<AssignmentExpressionSyntax>
     {
         public override void VisitAssignmentExpression(AssignmentExpressionSyntax node)
         {

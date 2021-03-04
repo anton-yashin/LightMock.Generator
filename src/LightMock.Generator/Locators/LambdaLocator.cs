@@ -31,7 +31,7 @@ using System;
 
 namespace LightMock.Generator.Locators
 {
-    sealed class LambdaLocator : NodeLocator<LambdaExpressionSyntax>
+    sealed class LambdaLocator : SyntaxLocator<LambdaExpressionSyntax>
     {
         ParameterSyntax? parameter;
 
