@@ -24,14 +24,12 @@
 *******************************************************************************
     https://github.com/anton-yashin/
 *******************************************************************************/
+using LightMock.Generator.Locators;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Text;
 
 namespace LightMock.Generator
@@ -150,87 +148,5 @@ namespace LightMock.Generator
         public IEnumerable<Diagnostic> GetErrors() => errors;
 
         public IEnumerable<Diagnostic> GetWarnings() => warnings;
-
-        #region locators
-
-        abstract class NodeLocator<T> : CSharpSyntaxWalker
-            where T : SyntaxNode
-        {
-            protected T? result;
-
-            protected NodeLocator() { }
-
-            public override void DefaultVisit(SyntaxNode node)
-            {
-                if (result == null)
-                    base.DefaultVisit(node);
-            }
-
-            public static T? Locate<TLocator>(SyntaxNode? node)
-                where TLocator : NodeLocator<T>, new()
-            {
-                var @this = new TLocator();
-                @this.Visit(node);
-                return @this.result;
-            }
-        }
-
-        sealed class LambdaLocator : NodeLocator<LambdaExpressionSyntax>
-        {
-            ParameterSyntax? parameter;
-
-            public override void VisitParenthesizedLambdaExpression(ParenthesizedLambdaExpressionSyntax node)
-            {
-                if (node.Parent.IsKind(SyntaxKind.Argument))
-                {
-                    result = node;
-                    parameter = node.ParameterList.Parameters.FirstOrDefault();
-                }
-                base.VisitParenthesizedLambdaExpression(node);
-            }
-
-            public override void VisitSimpleLambdaExpression(SimpleLambdaExpressionSyntax node)
-            {
-                if (node.Parent.IsKind(SyntaxKind.Argument))
-                {
-                    result = node;
-                    parameter = node.Parameter;
-                }
-                base.VisitSimpleLambdaExpression(node);
-            }
-
-            public static (LambdaExpressionSyntax?, ParameterSyntax?) Locate(SyntaxNode? at)
-            {
-                var @this = new LambdaLocator();
-                @this.Visit(at);
-                return (@this.result, @this.parameter);
-            }
-        }
-
-        sealed class AssignmentLocator : NodeLocator<AssignmentExpressionSyntax>
-        {
-            public override void VisitAssignmentExpression(AssignmentExpressionSyntax node)
-            {
-                result = node;
-                base.VisitAssignmentExpression(node);
-            }
-
-            public static AssignmentExpressionSyntax? Locate(SyntaxNode? at)
-                => Locate<AssignmentLocator>(at);
-        }
-
-        sealed class LiteralExpressionLocator : NodeLocator<LiteralExpressionSyntax>
-        {
-            public override void VisitLiteralExpression(LiteralExpressionSyntax node)
-            {
-                result = node;
-                base.VisitLiteralExpression(node);
-            }
-
-            public static LiteralExpressionSyntax? Locate(SyntaxNode? at)
-                => Locate<LiteralExpressionLocator>(at);
-        }
-
-        #endregion
     }
 }
