@@ -45,7 +45,7 @@ namespace LightMock
 
         private static bool RepresentsIsAnyValueProperty(MemberInfo member)
         {
-            return member.Name == "IsAnyValue";
+            return member.Name == nameof(The<object>.IsAnyValue);
         }
 
         private static Expression CreateMethodCallExpression(MemberInfo member)
@@ -60,7 +60,7 @@ namespace LightMock
         private static MethodInfo GetIsMethod(MemberInfo member)
         {
             // ReSharper disable once PossibleNullReferenceException
-            return member.DeclaringType.GetTypeInfo().DeclaredMethods.Single(m => m.Name == "Is");	        
+            return member.DeclaringType.GetTypeInfo().DeclaredMethods.Single(m => m.Name == nameof(The<object>.Is));
         }
 
         private static Type GetParameterType(MemberInfo member)
