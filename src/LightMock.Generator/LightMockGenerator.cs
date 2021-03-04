@@ -29,6 +29,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -62,14 +63,15 @@ namespace LightMock.Generator
                 context.SyntaxReceiver is LightMockSyntaxReceiver receiver &&
                 compilation.SyntaxTrees.First().Options is CSharpParseOptions options)
             {
-                if (IsDisableCodeGenerationAttributePresent(compilation, receiver))
+                if (IsDisableCodeGenerationAttributePresent(compilation, receiver, context.CancellationToken))
                     return;
 
-                var dontOverrideList = GetClassExclusionList(compilation, receiver);
+                var dontOverrideList = GetClassExclusionList(compilation, receiver, context.CancellationToken);
 
                 context.AddSource(KMock + Suffix.FileName, mock.Value);
 
-                compilation = compilation.AddSyntaxTrees(CSharpSyntaxTree.ParseText(mock.Value, options));
+                compilation = compilation.AddSyntaxTrees(CSharpSyntaxTree.ParseText(
+                    mock.Value, options, cancellationToken: context.CancellationToken));
 
                 // process symbols under Mock<> generic
 
@@ -89,7 +91,7 @@ namespace LightMock.Generator
                     context.CancellationToken.ThrowIfCancellationRequested();
                     var mockContainer = compilation
                         .GetSemanticModel(candidateGeneric.SyntaxTree)
-                        .GetSymbolInfo(candidateGeneric).Symbol
+                        .GetSymbolInfo(candidateGeneric, context.CancellationToken).Symbol
                         as INamedTypeSymbol;
                     context.CancellationToken.ThrowIfCancellationRequested();
                     var mcbt = mockContainer?.BaseType;
@@ -141,7 +143,7 @@ namespace LightMock.Generator
                 {
                     context.CancellationToken.ThrowIfCancellationRequested();
                     var methodSymbol = compilation.GetSemanticModel(candidateInvocation.SyntaxTree)
-                        .GetSymbolInfo(candidateInvocation).Symbol as IMethodSymbol;
+                        .GetSymbolInfo(candidateInvocation, context.CancellationToken).Symbol as IMethodSymbol;
                     context.CancellationToken.ThrowIfCancellationRequested();
 
                     if (methodSymbol != null 
@@ -175,15 +177,19 @@ namespace LightMock.Generator
             }
         }
 
-        private static bool IsDisableCodeGenerationAttributePresent(CSharpCompilation compilation, LightMockSyntaxReceiver receiver)
+        private static bool IsDisableCodeGenerationAttributePresent(
+            CSharpCompilation compilation,
+            LightMockSyntaxReceiver receiver,
+            CancellationToken cancellationToken)
         {
             var disableCodeGenerationAttributeType = typeof(DisableCodeGenerationAttribute);
             var dcgaName = disableCodeGenerationAttributeType.Name;
             var dcgaNamespace = disableCodeGenerationAttributeType.Namespace;
             foreach (var candidateAttribute in receiver.DisableCodeGenerationAttributes)
             {
+                cancellationToken.ThrowIfCancellationRequested();
                 var model = compilation.GetSemanticModel(candidateAttribute.SyntaxTree);
-                var si = model.GetSymbolInfo(candidateAttribute);
+                var si = model.GetSymbolInfo(candidateAttribute, cancellationToken);
                 if (si.Symbol is IMethodSymbol methodSymbol
                     && methodSymbol.ToDisplayString(SymbolDisplayFormats.Namespace) == dcgaName
                     && methodSymbol.ContainingNamespace.ToDisplayString(SymbolDisplayFormats.Namespace) == dcgaNamespace)
@@ -194,7 +200,10 @@ namespace LightMock.Generator
             return false;
         }
 
-        private static IReadOnlyList<INamedTypeSymbol> GetClassExclusionList(CSharpCompilation compilation, LightMockSyntaxReceiver receiver)
+        private static IReadOnlyList<INamedTypeSymbol> GetClassExclusionList(
+            CSharpCompilation compilation,
+            LightMockSyntaxReceiver receiver,
+            CancellationToken cancellationToken)
         {
             var result = new List<INamedTypeSymbol>();
             var dontOverrideAttributeType = typeof(DontOverrideAttribute);
@@ -203,12 +212,13 @@ namespace LightMock.Generator
             foreach (var candidateAttribute in receiver.DontOverrideAttributes)
             {
                 TypeSyntax? type;
+                cancellationToken.ThrowIfCancellationRequested();
                 var sm = compilation.GetSemanticModel(candidateAttribute.SyntaxTree);
-                if (sm.GetSymbolInfo(candidateAttribute).Symbol is IMethodSymbol methodSymbol
+                if (sm.GetSymbolInfo(candidateAttribute, cancellationToken).Symbol is IMethodSymbol methodSymbol
                     && methodSymbol.ToDisplayString(SymbolDisplayFormats.Namespace) == doatName
                     && methodSymbol.ContainingNamespace.ToDisplayString(SymbolDisplayFormats.Namespace) == doatNamespace
                     && (type = ExclusionTypeFinder.FindAt(candidateAttribute)) != null
-                    && sm.GetSymbolInfo(type).Symbol is INamedTypeSymbol typeSymbol)
+                    && sm.GetSymbolInfo(type, cancellationToken).Symbol is INamedTypeSymbol typeSymbol)
                 {
                     result.Add(typeSymbol);
                 }
