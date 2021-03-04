@@ -30,6 +30,7 @@ using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 using System.Threading;
+using LightMock.Generator.Locators;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -217,7 +218,7 @@ namespace LightMock.Generator
                 if (sm.GetSymbolInfo(candidateAttribute, cancellationToken).Symbol is IMethodSymbol methodSymbol
                     && methodSymbol.ToDisplayString(SymbolDisplayFormats.Namespace) == doatName
                     && methodSymbol.ContainingNamespace.ToDisplayString(SymbolDisplayFormats.Namespace) == doatNamespace
-                    && (type = ExclusionTypeFinder.FindAt(candidateAttribute)) != null
+                    && (type = TypeOfLocator.Locate(candidateAttribute)?.Type) != null
                     && sm.GetSymbolInfo(type, cancellationToken).Symbol is INamedTypeSymbol typeSymbol)
                 {
                     result.Add(typeSymbol);
