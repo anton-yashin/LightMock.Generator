@@ -35,6 +35,8 @@ namespace LightMock.Generator
         public static IContextResolverDefaults Instance
             => LazyInitializer.EnsureInitialized(ref instance!, () => new ContextResolverDefaults());
 
+        private ContextResolverDefaults() { }
+
         public Type DefaultProtectedContextType { get; } = typeof(object);
         public Type MockContextType { get; } = typeof(MockContext<>);
         public Type DefaultPropertiesContextType { get; } = typeof(MockContext<object>);
