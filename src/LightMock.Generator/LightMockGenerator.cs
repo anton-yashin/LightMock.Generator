@@ -174,7 +174,7 @@ namespace LightMock.Generator
                     .Replace("/*exchangeForExpressionBuilder*/", exchangeForExpressionBuilder.ToString());
 
                 context.CancellationToken.ThrowIfCancellationRequested();
-                context.AddSource(KContextResolver + Suffix.ImplFile + Suffix.FileName, SourceText.From(impl, Encoding.UTF8));
+                context.AddSource(KContextResolver + Suffix.FileName, SourceText.From(impl, Encoding.UTF8));
             }
         }
 
