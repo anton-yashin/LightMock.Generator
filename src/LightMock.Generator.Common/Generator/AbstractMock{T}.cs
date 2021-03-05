@@ -57,7 +57,7 @@ namespace LightMock.Generator
         public T Object => LazyInitializer.EnsureInitialized(ref instance!, CreateMockInstance);
 
         object IProtectedContext<T>.ProtectedContext => protectedContext;
-        protected MockContext<T> PublicContext { get; }
+        protected IMockContext<T> PublicContext { get; }
 
         static Type? mockInstanceType;
         static Type? protectedContextType;
@@ -118,13 +118,25 @@ namespace LightMock.Generator
                 ?? throw new InvalidOperationException("can't create property context for: " + typeof(T).FullName);
         }
 
+        Type GetInstanceType()
+            => GetInstanceType(ContextResolverDefaults.Instance);
+        Type GetProtectedContextType()
+            => GetProtectedContextType(ContextResolverDefaults.Instance);
+        Type GetPropertiesContextType()
+            => GetPropertiesContextType(ContextResolverDefaults.Instance);
+        Type GetAssertType()
+            => GetAssertType(ContextResolverDefaults.Instance);
+        T GetDelegate(Type type)
+            => GetDelegate(type, ContextResolverDefaults.Instance);
+        LambdaExpression ExchangeForExpression(string token)
+            => ExchangeForExpression(token, ContextResolverDefaults.Instance);
 
-        protected abstract Type GetInstanceType();
-        protected abstract Type GetProtectedContextType();
-        protected abstract Type GetPropertiesContextType();
-        protected abstract Type GetAssertType();
-        protected abstract T GetDelegate(Type type);
-        protected abstract LambdaExpression ExchangeForExpression(string token);
+        protected abstract Type GetInstanceType(IContextResolverDefaults defaults);
+        protected abstract Type GetProtectedContextType(IContextResolverDefaults defaults);
+        protected abstract Type GetPropertiesContextType(IContextResolverDefaults defaults);
+        protected abstract Type GetAssertType(IContextResolverDefaults defaults);
+        protected abstract T GetDelegate(Type type, IContextResolverDefaults defaults);
+        protected abstract LambdaExpression ExchangeForExpression(string token, IContextResolverDefaults defaults);
 
         public void AssertGet<TProperty>(Func<T, TProperty> expression)
             => AssertGet(expression, Invoked.Once);

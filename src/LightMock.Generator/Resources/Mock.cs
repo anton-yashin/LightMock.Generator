@@ -14,12 +14,17 @@ namespace LightMock.Generator
             : base(prms)
         { }
 
-        protected override Type GetInstanceType() => ContextResolver.GetInstanceType(typeof(T));
-        protected override Type GetProtectedContextType() => ContextResolver.GetProtectedContextType(typeof(T));
-        protected override Type GetPropertiesContextType() => ContextResolver.GetPropertiesContextType(typeof(T));
-        protected override Type GetAssertType() => ContextResolver.GetAssertType(typeof(T));
-        protected override T GetDelegate(Type type) => (T)ContextResolver.GetDelegate(type, PublicContext);
-        protected override LambdaExpression ExchangeForExpression(string token)
-            => ContextResolver.ExchangeForExpression(token);
+        protected override Type GetInstanceType(IContextResolverDefaults defaults)
+            => ContextResolver.GetInstanceType(typeof(T), defaults);
+        protected override Type GetProtectedContextType(IContextResolverDefaults defaults)
+            => ContextResolver.GetProtectedContextType(typeof(T), defaults);
+        protected override Type GetPropertiesContextType(IContextResolverDefaults defaults)
+            => ContextResolver.GetPropertiesContextType(typeof(T), defaults);
+        protected override Type GetAssertType(IContextResolverDefaults defaults)
+            => ContextResolver.GetAssertType(typeof(T), defaults);
+        protected override T GetDelegate(Type type, IContextResolverDefaults defaults)
+            => (T)ContextResolver.GetDelegate(type, PublicContext, defaults);
+        protected override LambdaExpression ExchangeForExpression(string token, IContextResolverDefaults defaults)
+            => ContextResolver.ExchangeForExpression(token, defaults);
     }
 }

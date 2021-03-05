@@ -1,7 +1,5 @@
-﻿namespace LightMock.Tests
+﻿namespace LightMock.Generator.Tests.BaseTests
 {
-    using LightMock;
-
     public class FooMock : IFoo
     {
         private readonly IInvocationContext<IFoo> context;
@@ -11,7 +9,7 @@
             this.context = context;
         }
 
-        public string Execute(string value)
+        public string? Execute(string value)
         {
             return context.Invoke(f => f.Execute(value));
         }
@@ -45,27 +43,27 @@
             context.Invoke(f => f.Execute(first, second, third, fourth, fifth, sixth));
         }
 
-        public string Execute()
+        public string? Execute()
         {
             return context.Invoke(f => f.Execute());
         }
 
-        public string Execute(string first, string second)
+        public string? Execute(string first, string second)
         {
             return context.Invoke(f => f.Execute(first, second));
         }
 
-        public string Execute(string first, string second, string third)
+        public string? Execute(string first, string second, string third)
         {
             return context.Invoke(f => f.Execute(first, second, third));
         }
 
-        public string Execute(string first, string second, string third, string fourth)
+        public string? Execute(string first, string second, string third, string fourth)
         {
             return context.Invoke(f => f.Execute(first, second, third, fourth));
         }
 
-        public byte[] Execute(byte[] array)
+        public byte[]? Execute(byte[] array)
         {
             return context.Invoke((f => f.Execute(array)));
         }

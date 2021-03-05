@@ -24,30 +24,32 @@
 *******************************************************************************
     https://github.com/anton-yashin/
 *******************************************************************************/
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
+using System.Linq.Expressions;
 
 namespace LightMock.Generator
 {
-    sealed class ExclusionTypeFinder : CSharpSyntaxWalker
+    /// <summary>
+    /// Use this class with nameof operator
+    /// </summary>
+    internal sealed class AbstractMockNameofProvider : AbstractMock<IDelegateProvider>
     {
-        TypeSyntax? type;
+        protected override LambdaExpression ExchangeForExpression(string token, IContextResolverDefaults defaults)
+            => throw new NotImplementedException();
 
-        private ExclusionTypeFinder() { }
+        protected override Type GetAssertType(IContextResolverDefaults defaults)
+            => throw new NotImplementedException();
 
-        public override void VisitTypeOfExpression(TypeOfExpressionSyntax node)
-        {
-            type = node.Type;
-            base.VisitTypeOfExpression(node);
-        }
+        protected override IDelegateProvider GetDelegate(Type type, IContextResolverDefaults defaults)
+            => throw new NotImplementedException();
 
-        public static TypeSyntax? FindAt(SyntaxNode node)
-        {
-            var @this = new ExclusionTypeFinder();
-            @this.Visit(node);
-            return @this.type;
-        }
+        protected override Type GetInstanceType(IContextResolverDefaults defaults)
+            => throw new NotImplementedException();
+
+        protected override Type GetPropertiesContextType(IContextResolverDefaults defaults)
+            => throw new NotImplementedException();
+
+        protected override Type GetProtectedContextType(IContextResolverDefaults defaults)
+            => throw new NotImplementedException();
     }
 }

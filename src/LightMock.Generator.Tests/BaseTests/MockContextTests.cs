@@ -2,7 +2,7 @@
 using System.Linq;
 using Xunit;
 
-namespace LightMock.Tests
+namespace LightMock.Generator.Tests.BaseTests
 {
     public class MockContextTests
     {
@@ -206,7 +206,7 @@ namespace LightMock.Tests
             var mockContext = new MockContext<IFoo>();
             var fooMock = new FooMock(mockContext);
 
-            string result = fooMock.Execute();
+            string? result = fooMock.Execute();
 
             Assert.Equal(default(string), result);
         }

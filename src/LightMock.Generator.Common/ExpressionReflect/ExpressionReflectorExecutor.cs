@@ -81,7 +81,7 @@ namespace ExpressionReflect
 
 		protected override Expression VisitLambda<T>(Expression<T> node)
 		{
-			string? methodName = null;
+			string methodName;
 
 			Type type = node.Type;
 			if (type.IsFunc())
@@ -573,29 +573,27 @@ namespace ExpressionReflect
 			return result;
 		}
 
-		[return: MaybeNull]
+#nullable disable
 		private TResult Func<T, TResult>(T arg)
 		{
 			return (TResult)this.ExecuteReflector(arg);
 		}
 
-		[return: MaybeNull]
 		private TResult Func<T1, T2, TResult>(T1 arg1, T2 arg2)
 		{
 			return (TResult)this.ExecuteReflector(arg1, arg2);
 		}
 
-		[return: MaybeNull]
 		private TResult Func<T1, T2, T3, TResult>(T1 arg1, T2 arg2, T3 arg3)
 		{
 			return (TResult)this.ExecuteReflector(arg1, arg2, arg3);
 		}
 
-		[return: MaybeNull]
 		private TResult Func<T1, T2, T3, T4, TResult>(T1 arg1, T2 arg2, T3 arg3, T4 arg4)
 		{
 			return (TResult)this.ExecuteReflector(arg1, arg2, arg3, arg4);
 		}
+#nullable restore
 
 		private void Action()
 		{

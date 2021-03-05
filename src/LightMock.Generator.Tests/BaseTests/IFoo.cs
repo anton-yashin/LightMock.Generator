@@ -1,4 +1,4 @@
-﻿namespace LightMock.Tests
+﻿namespace LightMock.Generator.Tests.BaseTests
 {
     public interface IFoo
     {
@@ -9,18 +9,18 @@
         void Execute(int first, int second, int third, int fourth, int fifth);
         void Execute(int first, int second, int third, int fourth, int fifth, int sixth);
 
-        string Execute();
-        string Execute(string value);
-        string Execute(string first, string second);
-        string Execute(string first, string second, string third);
-        string Execute(string first, string second, string third, string fourth);
+        string? Execute();
+        string? Execute(string value);
+        string? Execute(string first, string second);
+        string? Execute(string first, string second, string third);
+        string? Execute(string first, string second, string third, string fourth);
 
-        byte[] Execute(byte[] array);
+        byte[]? Execute(byte[] array);
     }
 
     public interface IBar
     {
         void Execute(string value);
-        string Execute();
+        string? Execute();
     }
 }

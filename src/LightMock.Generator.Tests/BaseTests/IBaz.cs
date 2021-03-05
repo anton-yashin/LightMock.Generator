@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace LightMock.Tests
+namespace LightMock.Generator.Tests.BaseTests
 {
     interface IBaz
     {

@@ -4,7 +4,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Xunit;
 
-namespace LightMock.Tests
+namespace LightMock.Generator.Tests.BaseTests
 {
     public class MatchInfoTests
     {

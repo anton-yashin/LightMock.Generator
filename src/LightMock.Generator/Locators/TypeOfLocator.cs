@@ -24,32 +24,21 @@
 *******************************************************************************
     https://github.com/anton-yashin/
 *******************************************************************************/
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
-using System.Linq.Expressions;
 
-namespace LightMock.Generator
+namespace LightMock.Generator.Locators
 {
-    /// <summary>
-    /// Use this class with nameof operator
-    /// </summary>
-    internal sealed class AbstractMockNameofProvider : AbstractMock<IDelegateProvider>
+    sealed class TypeOfLocator : SyntaxLocator<TypeOfExpressionSyntax>
     {
-        protected override LambdaExpression ExchangeForExpression(string token)
-            => throw new NotImplementedException();
+        public override void VisitTypeOfExpression(TypeOfExpressionSyntax node)
+        {
+            result = node;
+            base.VisitTypeOfExpression(node);
+        }
 
-        protected override Type GetAssertType()
-            => throw new NotImplementedException();
-
-        protected override IDelegateProvider GetDelegate(Type type)
-            => throw new NotImplementedException();
-
-        protected override Type GetInstanceType()
-            => throw new NotImplementedException();
-
-        protected override Type GetPropertiesContextType()
-            => throw new NotImplementedException();
-
-        protected override Type GetProtectedContextType()
-            => throw new NotImplementedException();
+        public static TypeOfExpressionSyntax? Locate(SyntaxNode? at)
+            => Locate<TypeOfLocator>(at);
     }
 }

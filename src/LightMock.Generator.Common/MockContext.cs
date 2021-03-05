@@ -38,7 +38,7 @@ namespace LightMock
     /// A class that represents the mock context for a given <typeparamref name="TMock"/> type.
     /// </summary>
     /// <typeparam name="TMock">The target mock type.</typeparam>
-    public class MockContext<TMock> : IMockContext<TMock>, IInvocationContext<TMock>, IMockContextInternal
+    sealed class MockContext<TMock> : IMockContext<TMock>, IInvocationContext<TMock>, IMockContextInternal
     {
         private readonly ILockedCollection<IInvocationInfo> invocations = new LockedCollection<IInvocationInfo>();
         private readonly ILockedCollection<Arrangement> arrangements = new LockedCollection<Arrangement>();
@@ -47,8 +47,8 @@ namespace LightMock
         /// Arranges a mocked method. 
         /// </summary>
         /// <param name="matchExpression">The match expression that describes where 
-        /// this <see cref="Arrangement"/> will be applied.</param>
-        /// <returns>A new <see cref="Arrangement"/> used to apply method behavior.</returns>
+        /// this <see cref="IArrangement"/> will be applied.</param>
+        /// <returns>A new <see cref="IArrangement"/> used to apply method behavior.</returns>
         public IArrangement Arrange(Expression<Action<TMock>> matchExpression)
             => ArrangeAction(matchExpression);
 
@@ -73,8 +73,8 @@ namespace LightMock
         /// </summary>
         /// <typeparam name="TResult">The type of value returned from the mocked method.</typeparam>
         /// <param name="matchExpression">The match expression that describes where 
-        /// this <see cref="FunctionArrangement{TResult}"/> will be applied.</param>
-        /// <returns>A new <see cref="FunctionArrangement{TResult}"/> used to apply method behavior.</returns>
+        /// this <see cref="IArrangement{TResult}"/> will be applied.</param>
+        /// <returns>A new <see cref="IArrangement{TResult}"/> used to apply method behavior.</returns>
         public IArrangement<TResult> Arrange<TResult>(Expression<Func<TMock, TResult>> matchExpression)
             => ArrangeFunction<TResult>(matchExpression);
 
@@ -99,8 +99,8 @@ namespace LightMock
         /// </summary>
         /// <typeparam name="TResult">The type of value returned from the mocked property.</typeparam>
         /// <param name="matchExpression">The match expression that describes where 
-        /// this <see cref="PropertyArrangement{TResult}"/> will be applied.</param>
-        /// <returns>A new <see cref="PropertyArrangement{TResult}"/> used to apply property behavior.</returns>
+        /// this <see cref="IArrangement{TResult}"/> will be applied.</param>
+        /// <returns>A new <see cref="IArrangement{TResult}"/> used to apply property behavior.</returns>
         public IArrangement ArrangeProperty<TResult>(Expression<Func<TMock, TResult>> matchExpression)
             => ArrangePropertyInternal<TResult>(matchExpression);
 

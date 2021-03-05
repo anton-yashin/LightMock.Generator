@@ -1,4 +1,4 @@
-﻿namespace LightMock.Tests
+﻿namespace LightMock.Generator.Tests.BaseTests
 {
     public class BarMock : IBar
     {
@@ -14,7 +14,7 @@
             context.Invoke(f => f.Execute(value));
         }
 
-        public string Execute()
+        public string? Execute()
         {
             return context.Invoke(f => f.Execute());
         }

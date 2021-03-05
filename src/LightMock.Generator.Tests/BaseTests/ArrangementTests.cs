@@ -1,6 +1,6 @@
 ﻿using Xunit;
 
-namespace LightMock.Tests
+namespace LightMock.Generator.Tests.BaseTests
 {
     public class ArrangementTests
     {
