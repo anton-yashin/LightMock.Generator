@@ -30,6 +30,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 
 namespace LightMock.Generator
@@ -85,17 +86,17 @@ namespace LightMock.Generator
 
             LiteralExpressionSyntax? le;
             var uidPart1 = syntaxUidPart1 == null || (le = LiteralExpressionLocator.Locate(syntaxUidPart1)) == null
-                ? lineSpan.Path
-                : le.ToString()
+                ? Path.GetFullPath(lineSpan.Path)
+                : (le.ToString()
                     // unescape string
                     .Replace("\"", "")
-                    .Replace(@"\\", @"\");
+                    .Replace(@"\\", @"\"));
 
             var uidPart2 = syntaxUidPart2 == null || (le = LiteralExpressionLocator.Locate(syntaxUidPart2)) == null
                 ? (lineSpan.StartLinePosition.Line + KEditorFirstLineNumber).ToString()
                 : le.ToString();
 
-            var uid = uidPart1 + uidPart2;
+            var uid = uidPart2 + uidPart1;
             if (uids.Contains(uid))
             {
                 NotifyUniqueIdError(method, invocationExpressionSyntax, errors);
@@ -143,7 +144,7 @@ namespace LightMock.Generator
                     NotifyPropertyAssignmentError(errors, location);
                 }
             }
-        }
+        } 
 
         public IEnumerable<Diagnostic> GetErrors() => errors;
 

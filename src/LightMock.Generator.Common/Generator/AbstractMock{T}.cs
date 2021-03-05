@@ -169,7 +169,7 @@ namespace LightMock.Generator
         {
             if (string.IsNullOrWhiteSpace(uidPart1))
                 throw new ArgumentException("you must provide part of unique identifier", nameof(uidPart1));
-            return propertiesContext.ArrangeAction(ExchangeForExpression(uidPart1 + uidPart2.ToString()));
+            return propertiesContext.ArrangeAction(ExchangeForExpression(uidPart2 + uidPart1));
         }
 
         #region IMockContext<T> implementation

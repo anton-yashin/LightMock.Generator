@@ -45,7 +45,7 @@ namespace LightMock.Generator.Tests.TestAbstractions
 
                 syntaxTrees: texts.Select(i
                     => CSharpSyntaxTree.ParseText(i.sourceCode, new CSharpParseOptions(LanguageVersion.Preview),
-                        i.hint)),
+                        Path.GetFullPath(i.hint))),
                 
                 references: new[]
                 {
