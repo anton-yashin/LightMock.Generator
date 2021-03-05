@@ -139,25 +139,25 @@ namespace LightMock.Generator
         protected abstract LambdaExpression ExchangeForExpression(string token, IContextResolverDefaults defaults);
 
         public void AssertGet<TProperty>(Func<T, TProperty> expression)
-            => AssertGet(expression, Invoked.Once);
+            => AssertGet(expression, Invoked.AtLeast(1));
 
         public void AssertGet<TProperty>(Func<T, TProperty> expression, Invoked times)
             => expression(CreateAssertInstance(times));
 
         public void AssertSet(Action<T> expression)
-            => AssertUsingAssertInstance(expression, Invoked.Once);
+            => AssertUsingAssertInstance(expression, Invoked.AtLeast(1));
 
         public void AssertSet(Action<T> expression, Invoked times)
             => AssertUsingAssertInstance(expression, times);
 
         public void AssertAdd(Action<T> expression)
-            => AssertUsingAssertInstance(expression, Invoked.Once);
+            => AssertUsingAssertInstance(expression, Invoked.AtLeast(1));
 
         public void AssertAdd(Action<T> expression, Invoked times)
             => AssertUsingAssertInstance(expression, times);
 
         public void AssertRemove(Action<T> expression)
-            => AssertUsingAssertInstance(expression, Invoked.Once);
+            => AssertUsingAssertInstance(expression, Invoked.AtLeast(1));
 
         public void AssertRemove(Action<T> expression, Invoked times)
             => AssertUsingAssertInstance(expression, times);
