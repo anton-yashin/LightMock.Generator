@@ -1,5 +1,5 @@
 ﻿
-namespace LightMock.Tests
+namespace LightMock.Generator.Tests.BaseTests
 {
     public interface IProp
     {

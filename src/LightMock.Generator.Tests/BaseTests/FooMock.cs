@@ -1,7 +1,5 @@
-﻿namespace LightMock.Tests
+﻿namespace LightMock.Generator.Tests.BaseTests
 {
-    using LightMock;
-
     public class FooMock : IFoo
     {
         private readonly IInvocationContext<IFoo> context;

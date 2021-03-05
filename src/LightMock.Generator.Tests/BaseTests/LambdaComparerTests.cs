@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using Xunit;
 
-namespace LightMock.Tests
+namespace LightMock.Generator.Tests.BaseTests
 {
     public class LambdaComparerTests
     {

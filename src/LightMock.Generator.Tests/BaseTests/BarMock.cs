@@ -1,4 +1,4 @@
-﻿namespace LightMock.Tests
+﻿namespace LightMock.Generator.Tests.BaseTests
 {
     public class BarMock : IBar
     {
