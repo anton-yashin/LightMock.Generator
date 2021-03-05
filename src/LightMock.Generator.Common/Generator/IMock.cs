@@ -54,13 +54,13 @@ namespace LightMock.Generator
         /// Verifies that a property was set on the mock.
         /// </summary>
         /// <param name="expression">Expression to verify.</param>
-        void AssertSet(Action<T> expression);
+        void AssertSet_Simple(Action<T> expression);
         /// <summary>
         /// Verifies that a property was set on the mock.
         /// </summary>
         /// <param name="expression">Expression to verify.</param>
         /// <param name="times">The number of times a method is expected to be called.</param>
-        void AssertSet(Action<T> expression, Invoked times);
+        void AssertSet_Simple(Action<T> expression, Invoked times);
         /// <summary>
         /// Verifies that an event was added to the mock.
         /// </summary>
@@ -96,7 +96,7 @@ namespace LightMock.Generator
         /// Usage restrictions:<br/>
         /// * All arguments MUST be available on compile time and be plain and simple;<br/>
         /// * Only one call per source code line allowed;<br/>
-        /// * Do not place on same line <see cref="AssertSet(Action{T})"/>.
+        /// * Do not place on same line <see cref="AssertSet_Simple(Action{T})"/>.
         /// </remarks>
         IArrangement ArrangeSetter(Action<T> expression, [CallerFilePath] string uidPart1 = "", [CallerLineNumber] int uidPart2 = 0);
     }
