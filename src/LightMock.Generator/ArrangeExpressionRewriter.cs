@@ -24,18 +24,31 @@
 *******************************************************************************
     https://github.com/anton-yashin/
 *******************************************************************************/
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
-using System.Text;
 
-namespace LightMock
+namespace LightMock.Generator
 {
-    internal interface IMockContextInternal
+    sealed class ArrangeExpressionRewriter : ExpressionRewriter
     {
-        IArrangement ArrangeAction(LambdaExpression matchExpression);
-        IArrangement<TResult> ArrangeFunction<TResult>(LambdaExpression matchExpression);
-        IArrangement ArrangeProperty<TProperty>(LambdaExpression matchExpression);
-        void AssertInternal(LambdaExpression matchExpression, Invoked invoked);
+        public ArrangeExpressionRewriter(
+            IMethodSymbol method,
+            InvocationExpressionSyntax invocationExpressionSyntax,
+            CSharpCompilation compilation,
+            ICollection<string> uids)
+            : base(method, invocationExpressionSyntax, compilation, uids)
+        { }
+
+        protected override ArgumentSyntax? GetLambda(ArgumentListSyntax argumentList)
+            => argumentList.GetArgument("expression", 0);
+
+        protected override ArgumentSyntax? GetUidPart1(ArgumentListSyntax argumentList)
+            => argumentList.GetArgument("uidPart1", 1);
+
+        protected override ArgumentSyntax? GetUidPart2(ArgumentListSyntax argumentList)
+            => argumentList.GetArgument("uidPart2", 2);
     }
 }

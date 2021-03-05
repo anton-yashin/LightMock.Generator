@@ -100,10 +100,16 @@ namespace LightMock.Generator
 
         public override void VisitInvocationExpression(InvocationExpressionSyntax node)
         {
-            if (node.Expression is MemberAccessExpressionSyntax maes
-                && maes.Name.ToString() == nameof(AbstractMockNameofProvider.ArrangeSetter))
+            if (node.Expression is MemberAccessExpressionSyntax maes)
             {
-                ArrangeInvocations.Add(node);
+                switch (maes.Name.ToString())
+                {
+                    case nameof(AbstractMockNameofProvider.ArrangeSetter):
+                    case nameof(AbstractMockNameofProvider.AssertSet):
+                        ArrangeInvocations.Add(node);
+                        break;
+                }
+
             }
         }
     }

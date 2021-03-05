@@ -61,6 +61,8 @@ namespace LightMock.Generator
         /// <param name="expression">Expression to verify.</param>
         /// <param name="times">The number of times a method is expected to be called.</param>
         void AssertSet_Simple(Action<T> expression, Invoked times);
+        void AssertSet(Action<T> expression, [CallerFilePath] string uidPart1 = "", [CallerLineNumber] int uidPart2 = 0);
+        void AssertSet(Action<T> expression, Invoked times, [CallerFilePath] string uidPart1 = "", [CallerLineNumber] int uidPart2 = 0);
         /// <summary>
         /// Verifies that an event was added to the mock.
         /// </summary>

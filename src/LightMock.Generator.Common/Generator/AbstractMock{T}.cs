@@ -165,11 +165,23 @@ namespace LightMock.Generator
         void AssertUsingAssertInstance(Action<T> expression, Invoked times)
             => expression(CreateAssertInstance(times));
 
+        const string KUidExceptionMessage = "you must provide part of unique identifier";
+
         public IArrangement ArrangeSetter(Action<T> expression, [CallerFilePath] string uidPart1 = "", [CallerLineNumber] int uidPart2 = 0)
         {
             if (string.IsNullOrWhiteSpace(uidPart1))
-                throw new ArgumentException("you must provide part of unique identifier", nameof(uidPart1));
+                throw new ArgumentException(KUidExceptionMessage, nameof(uidPart1));
             return propertiesContext.ArrangeAction(ExchangeForExpression(uidPart2 + uidPart1));
+        }
+
+        public void AssertSet(Action<T> expression, [CallerFilePath] string uidPart1 = "", [CallerLineNumber] int uidPart2 = 0)
+            => AssertSet(expression, Invoked.AtLeast(1), uidPart1, uidPart2);
+
+        public void AssertSet(Action<T> expression, Invoked times, [CallerFilePath] string uidPart1 = "", [CallerLineNumber] int uidPart2 = 0)
+        {
+            if (string.IsNullOrWhiteSpace(uidPart1))
+                throw new ArgumentException(KUidExceptionMessage, nameof(uidPart1));
+            propertiesContext.AssertInternal(ExchangeForExpression(uidPart2 + uidPart1), times);
         }
 
         #region IMockContext<T> implementation

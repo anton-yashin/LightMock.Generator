@@ -148,19 +148,31 @@ namespace LightMock.Generator
                     context.CancellationToken.ThrowIfCancellationRequested();
 
                     if (methodSymbol != null 
-                        && methodSymbol.Name == nameof(AbstractMockNameofProvider.ArrangeSetter)
                         && (mockContextMatcher.IsMatch(methodSymbol.ContainingType)
                             || mockInterfaceMatcher.IsMatch(methodSymbol.ContainingType)))
                     {
-                        var processor = new ExpressionRewirter(methodSymbol, candidateInvocation, compilation, expressionUids);
+                        ExpressionRewriter processor;
+                        switch (methodSymbol.Name)
+                        {
+                            case nameof(AbstractMockNameofProvider.ArrangeSetter):
+                                processor = new ArrangeExpressionRewriter(methodSymbol, candidateInvocation, compilation, expressionUids);
+                                break;
+                            case nameof(AbstractMockNameofProvider.AssertSet):
+                                processor = new AssertExpressionRewriter(methodSymbol, candidateInvocation, compilation, expressionUids);
+                                break;
+                            default:
+                                continue;
+                        }
 
+                        context.CancellationToken.ThrowIfCancellationRequested();
+
+                        processor.AppendExpression(exchangeForExpressionBuilder);
                         context.CancellationToken.ThrowIfCancellationRequested();
                         if (EmitDiagnostics(context, processor.GetErrors()))
                             continue;
                         context.CancellationToken.ThrowIfCancellationRequested();
                         EmitDiagnostics(context, processor.GetWarnings());
 
-                        processor.AppendExpression(exchangeForExpressionBuilder);
                     }
                 }
 

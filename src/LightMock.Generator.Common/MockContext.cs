@@ -140,9 +140,14 @@ namespace LightMock
         /// <param name="invoked">Specifies the number of times we expect the mocked method to be invoked.</param>
         public void Assert(Expression<Action<TMock>> matchExpression, Invoked invoked)
         {
+            AssertInternal(matchExpression, invoked);
+        }
+
+        public void AssertInternal(LambdaExpression matchExpression, Invoked invoked)
+        {
             var matchInfo = matchExpression.ToMatchInfo();
             var callCount = invocations.InvokeLocked(c => c.Count(matchInfo.Matches));
-                        
+
             if (!invoked.Verify(callCount))
             {
                 throw new MockException(string.Format("The method {0} was called {1} times", matchExpression.Simplify(), callCount));
