@@ -96,7 +96,7 @@ namespace LightMock.Generator
                 ? (lineSpan.StartLinePosition.Line + KEditorFirstLineNumber).ToString()
                 : le.ToString();
 
-            var uid = uidPart1 + uidPart2;
+            var uid = uidPart2 + uidPart1;
             if (uids.Contains(uid))
             {
                 NotifyUniqueIdError(method, invocationExpressionSyntax, errors);
