@@ -155,10 +155,10 @@ namespace LightMock.Generator
         public void AssertGet<TProperty>(Func<T, TProperty> expression, Invoked times)
             => expression(CreateAssertInstance(times));
 
-        public void AssertSet_Simple(Action<T> expression)
+        public void AssertSet_NoAot(Action<T> expression)
             => AssertUsingAssertInstance(expression, Invoked.AtLeast(1));
 
-        public void AssertSet_Simple(Action<T> expression, Invoked times)
+        public void AssertSet_NoAot(Action<T> expression, Invoked times)
             => AssertUsingAssertInstance(expression, times);
 
         public void AssertAdd(Action<T> expression)
