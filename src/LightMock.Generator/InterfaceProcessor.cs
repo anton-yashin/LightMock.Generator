@@ -39,6 +39,7 @@ namespace LightMock.Generator
         private readonly SymbolVisitor<string> symbolVisitor;
         private readonly SymbolVisitor<string> propertyDefinitionVisitor;
         private readonly SymbolVisitor<string> assertImplementationVisitor;
+        private readonly SymbolVisitor<string> assertIsAnyImplementationVisitor;
         private readonly string interfaceName;
         private readonly string baseNameWithTypeArguments;
         private readonly string baseNameWithCommaArguments;
@@ -55,6 +56,7 @@ namespace LightMock.Generator
             this.symbolVisitor = new InterfaceSymbolVisitor();
             this.propertyDefinitionVisitor = new PropertyDefinitionVisitor();
             this.assertImplementationVisitor = new AssertImplementationVisitor(SymbolDisplayFormats.Interface);
+            this.assertIsAnyImplementationVisitor = new AssertIsAnyImplementationVisitor(SymbolDisplayFormats.Interface);
 
             var (whereClause, typeArguments) = typeSymbol.GetWhereClauseAndTypeArguments();
 
@@ -117,6 +119,23 @@ namespace {@namespace}
         {string.Join("\r\n        ", members.Select(i => i.OriginalDefinition.Accept(assertImplementationVisitor)))}
     }}
 
+    sealed class {Prefix.AssertIsAnyImplementation}{interfaceName}{typeArgumentsWithBrackets} : {baseNameWithTypeArguments}
+        {whereClause}
+    {{
+        private readonly IMockContext<{Prefix.PropertyToFuncInterface}{interfaceName}{typeArgumentsWithBrackets}> {VariableNames.Context};
+        private readonly Invoked {VariableNames.Invoked};
+
+        public {Prefix.AssertIsAnyImplementation}{interfaceName}(
+            IMockContext<{Prefix.PropertyToFuncInterface}{interfaceName}{typeArgumentsWithBrackets}> {VariableNames.Context},
+            Invoked {VariableNames.Invoked})
+        {{
+            this.{VariableNames.Context} = {VariableNames.Context};
+            this.{VariableNames.Invoked} = {VariableNames.Invoked};
+        }}
+
+        {string.Join("\r\n        ", members.Select(i => i.OriginalDefinition.Accept(assertIsAnyImplementationVisitor)))}
+    }}
+
     partial class {Prefix.MockClass}{interfaceName}{typeArgumentsWithBrackets} : {baseNameWithTypeArguments}
         {whereClause}
     {{
@@ -165,6 +184,14 @@ namespace {@namespace}
             var toAppend = typeSymbol.IsGenericType
                 ? $"if (gtd == typeof(global::{@namespace}.{baseNameWithCommaArguments})) return typeof(global::{@namespace}.{Prefix.AssertImplementation}{interfaceName}<{commaArguments}>).MakeGenericType(contextType.GetGenericArguments());"
                 : $"if (contextType == typeof(global::{@namespace}.{baseNameWithCommaArguments})) return typeof(global::{@namespace}.{Prefix.AssertImplementation}{interfaceName});";
+            here.Append(toAppend);
+        }
+
+        public override void DoGeneratePart_GetAssertIsAnyType(StringBuilder here)
+        {
+            var toAppend = typeSymbol.IsGenericType
+                ? $"if (gtd == typeof(global::{@namespace}.{baseNameWithCommaArguments})) return typeof(global::{@namespace}.{Prefix.AssertIsAnyImplementation}{interfaceName}<{commaArguments}>).MakeGenericType(contextType.GetGenericArguments());"
+                : $"if (contextType == typeof(global::{@namespace}.{baseNameWithCommaArguments})) return typeof(global::{@namespace}.{Prefix.AssertIsAnyImplementation}{interfaceName});";
             here.Append(toAppend);
         }
     }

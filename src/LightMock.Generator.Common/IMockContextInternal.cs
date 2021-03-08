@@ -36,5 +36,6 @@ namespace LightMock
         IArrangement ArrangeAction(LambdaExpression matchExpression);
         IArrangement<TResult> ArrangeFunction<TResult>(LambdaExpression matchExpression);
         IArrangement ArrangeProperty<TProperty>(LambdaExpression matchExpression);
+        void AssertInternal(LambdaExpression matchExpression, Invoked invoked);
     }
 }

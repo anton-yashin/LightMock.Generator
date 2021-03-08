@@ -28,24 +28,23 @@ using LightMock.Generator.Locators;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
 namespace LightMock.Generator
 {
-    sealed class ExpressionRewirter
+    abstract class ExpressionRewriter
     {
-        private readonly IMethodSymbol method;
+        protected readonly IMethodSymbol method;
         private readonly InvocationExpressionSyntax invocationExpressionSyntax;
         private readonly CSharpCompilation compilation;
         private readonly ICollection<string> uids;
         private readonly ICollection<Diagnostic> errors;
         private readonly ICollection<Diagnostic> warnings;
 
-        public ExpressionRewirter(
-            IMethodSymbol method, 
+        protected ExpressionRewriter(
+            IMethodSymbol method,
             InvocationExpressionSyntax invocationExpressionSyntax,
             CSharpCompilation compilation,
             ICollection<string> uids)
@@ -57,7 +56,6 @@ namespace LightMock.Generator
 
             this.errors = new List<Diagnostic>();
             this.warnings = new List<Diagnostic>();
-
         }
 
         private static void NotifyUniqueIdError(
@@ -79,10 +77,7 @@ namespace LightMock.Generator
             var location = invocationExpressionSyntax.ArgumentList.GetLocation();
             var lineSpan = location.GetLineSpan();
             var al = invocationExpressionSyntax.ArgumentList;
-            var (lambdaSyntax, syntaxUidPart1, syntaxUidPart2) =
-                (al.GetArgument("expression", 0),
-                al.GetArgument("uidPart1", 1),
-                al.GetArgument("uidPart2", 2));
+            var (lambdaSyntax, syntaxUidPart1, syntaxUidPart2) = (GetLambda(al), GetUidPart1(al), GetUidPart2(al));
 
             LiteralExpressionSyntax? le;
             var uidPart1 = syntaxUidPart1 == null || (le = LiteralExpressionLocator.Locate(syntaxUidPart1)) == null
@@ -144,10 +139,14 @@ namespace LightMock.Generator
                     NotifyPropertyAssignmentError(errors, location);
                 }
             }
-        } 
+        }
 
         public IEnumerable<Diagnostic> GetErrors() => errors;
 
         public IEnumerable<Diagnostic> GetWarnings() => warnings;
+
+        protected abstract ArgumentSyntax? GetLambda(ArgumentListSyntax argumentList);
+        protected abstract ArgumentSyntax? GetUidPart1(ArgumentListSyntax argumentList);
+        protected abstract ArgumentSyntax? GetUidPart2(ArgumentListSyntax argumentList);
     }
 }

@@ -37,6 +37,9 @@ namespace LightMock.Generator
         protected override LambdaExpression ExchangeForExpression(string token, IContextResolverDefaults defaults)
             => throw new NotImplementedException();
 
+        protected override Type GetAssertIsAnyType(IContextResolverDefaults defaults)
+            => throw new NotImplementedException();
+
         protected override Type GetAssertType(IContextResolverDefaults defaults)
             => throw new NotImplementedException();
 

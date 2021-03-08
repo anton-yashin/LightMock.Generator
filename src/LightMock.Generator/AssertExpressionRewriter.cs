@@ -24,14 +24,33 @@
 *******************************************************************************
     https://github.com/anton-yashin/
 *******************************************************************************/
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System;
+using System.Collections.Generic;
+
 namespace LightMock.Generator
 {
-    static class Prefix
+    sealed class AssertExpressionRewriter : ExpressionRewriter
     {
-        public const string ProtectedToPublicInterface = "IP2P_";
-        public const string MockClass = "Mock_";
-        public const string PropertyToFuncInterface = "Property_";
-        public const string AssertImplementation = "Assert_";
-        public const string AssertIsAnyImplementation = "Assert_IsAny_";
+        public AssertExpressionRewriter(
+            IMethodSymbol method,
+            InvocationExpressionSyntax invocationExpressionSyntax,
+            CSharpCompilation compilation,
+            ICollection<string> uids)
+            : base(method, invocationExpressionSyntax, compilation, uids)
+        { }
+
+        protected override ArgumentSyntax? GetLambda(ArgumentListSyntax argumentList)
+            => argumentList.GetArgument("expression", 0);
+
+        protected override ArgumentSyntax? GetUidPart1(ArgumentListSyntax argumentList)
+            => argumentList.GetArgument("uidPart1", 1 + UidPartOffset);
+
+        protected override ArgumentSyntax? GetUidPart2(ArgumentListSyntax argumentList)
+            => argumentList.GetArgument("uidPart2", 2 + UidPartOffset);
+
+        int UidPartOffset => method.Parameters.Length == 4 ? 1 : 0;
     }
 }

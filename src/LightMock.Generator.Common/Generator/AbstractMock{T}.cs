@@ -111,6 +111,14 @@ namespace LightMock.Generator
             return (T)result;
         }
 
+        T CreateAssertIsAnyInstance(Invoked invoked)
+        {
+            var result = Activator.CreateInstance(LazyInitializer.EnsureInitialized(ref assertType,
+                GetAssertIsAnyType), args: GetAssertArgs(invoked))
+                ?? throw new InvalidOperationException("can't create assert for: " + typeof(T).FullName);
+            return (T)result;
+        }
+
         IMockContextInternal CreatePropertiesContext()
         {
             return (IMockContextInternal)Activator.CreateInstance(LazyInitializer.EnsureInitialized(ref propertiesType,
@@ -126,6 +134,8 @@ namespace LightMock.Generator
             => GetPropertiesContextType(ContextResolverDefaults.Instance);
         Type GetAssertType()
             => GetAssertType(ContextResolverDefaults.Instance);
+        Type GetAssertIsAnyType()
+            => GetAssertIsAnyType(ContextResolverDefaults.Instance);
         T GetDelegate(Type type)
             => GetDelegate(type, ContextResolverDefaults.Instance);
         LambdaExpression ExchangeForExpression(string token)
@@ -135,6 +145,7 @@ namespace LightMock.Generator
         protected abstract Type GetProtectedContextType(IContextResolverDefaults defaults);
         protected abstract Type GetPropertiesContextType(IContextResolverDefaults defaults);
         protected abstract Type GetAssertType(IContextResolverDefaults defaults);
+        protected abstract Type GetAssertIsAnyType(IContextResolverDefaults defaults);
         protected abstract T GetDelegate(Type type, IContextResolverDefaults defaults);
         protected abstract LambdaExpression ExchangeForExpression(string token, IContextResolverDefaults defaults);
 
@@ -144,10 +155,10 @@ namespace LightMock.Generator
         public void AssertGet<TProperty>(Func<T, TProperty> expression, Invoked times)
             => expression(CreateAssertInstance(times));
 
-        public void AssertSet(Action<T> expression)
+        public void AssertSet_NoAot(Action<T> expression)
             => AssertUsingAssertInstance(expression, Invoked.AtLeast(1));
 
-        public void AssertSet(Action<T> expression, Invoked times)
+        public void AssertSet_NoAot(Action<T> expression, Invoked times)
             => AssertUsingAssertInstance(expression, times);
 
         public void AssertAdd(Action<T> expression)
@@ -165,12 +176,30 @@ namespace LightMock.Generator
         void AssertUsingAssertInstance(Action<T> expression, Invoked times)
             => expression(CreateAssertInstance(times));
 
+        const string KUidExceptionMessage = "you must provide part of unique identifier";
+
         public IArrangement ArrangeSetter(Action<T> expression, [CallerFilePath] string uidPart1 = "", [CallerLineNumber] int uidPart2 = 0)
         {
             if (string.IsNullOrWhiteSpace(uidPart1))
-                throw new ArgumentException("you must provide part of unique identifier", nameof(uidPart1));
+                throw new ArgumentException(KUidExceptionMessage, nameof(uidPart1));
             return propertiesContext.ArrangeAction(ExchangeForExpression(uidPart2 + uidPart1));
         }
+
+        public void AssertSet(Action<T> expression, [CallerFilePath] string uidPart1 = "", [CallerLineNumber] int uidPart2 = 0)
+            => AssertSet(expression, Invoked.AtLeast(1), uidPart1, uidPart2);
+
+        public void AssertSet(Action<T> expression, Invoked times, [CallerFilePath] string uidPart1 = "", [CallerLineNumber] int uidPart2 = 0)
+        {
+            if (string.IsNullOrWhiteSpace(uidPart1))
+                throw new ArgumentException(KUidExceptionMessage, nameof(uidPart1));
+            propertiesContext.AssertInternal(ExchangeForExpression(uidPart2 + uidPart1), times);
+        }
+
+        public void AssertSet_IsAny(Action<T> expression)
+            => AssertSet_IsAny(expression, Invoked.AtLeast(1));
+
+        public void AssertSet_IsAny(Action<T> expression, Invoked times)
+            => expression(CreateAssertIsAnyInstance(times));
 
         #region IMockContext<T> implementation
 

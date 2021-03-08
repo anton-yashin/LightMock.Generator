@@ -81,6 +81,7 @@ namespace LightMock.Generator
                 var getProtectedContextTypeBuilder = new StringBuilder();
                 var getPropertiesContextTypeBuilder = new StringBuilder();
                 var getAssertTypeBuilder = new StringBuilder();
+                var getAssertIsAnyTypeBuilder = new StringBuilder();
                 var getDelegateBuilder = new StringBuilder();
                 var exchangeForExpressionBuilder = new StringBuilder();
                 var processedTypes = new List<INamedTypeSymbol>();
@@ -128,6 +129,8 @@ namespace LightMock.Generator
                         context.CancellationToken.ThrowIfCancellationRequested();
                         processor.DoGeneratePart_GetAssertType(getAssertTypeBuilder);
                         context.CancellationToken.ThrowIfCancellationRequested();
+                        processor.DoGeneratePart_GetAssertIsAnyType(getAssertIsAnyTypeBuilder);
+                        context.CancellationToken.ThrowIfCancellationRequested();
                         processor.DoGeneratePart_GetDelegate(getDelegateBuilder);
                         context.CancellationToken.ThrowIfCancellationRequested();
                         processor.DoGeneratePart_ExchangeForExpression(exchangeForExpressionBuilder);
@@ -148,19 +151,31 @@ namespace LightMock.Generator
                     context.CancellationToken.ThrowIfCancellationRequested();
 
                     if (methodSymbol != null 
-                        && methodSymbol.Name == nameof(AbstractMockNameofProvider.ArrangeSetter)
                         && (mockContextMatcher.IsMatch(methodSymbol.ContainingType)
                             || mockInterfaceMatcher.IsMatch(methodSymbol.ContainingType)))
                     {
-                        var processor = new ExpressionRewirter(methodSymbol, candidateInvocation, compilation, expressionUids);
+                        ExpressionRewriter processor;
+                        switch (methodSymbol.Name)
+                        {
+                            case nameof(AbstractMockNameofProvider.ArrangeSetter):
+                                processor = new ArrangeExpressionRewriter(methodSymbol, candidateInvocation, compilation, expressionUids);
+                                break;
+                            case nameof(AbstractMockNameofProvider.AssertSet):
+                                processor = new AssertExpressionRewriter(methodSymbol, candidateInvocation, compilation, expressionUids);
+                                break;
+                            default:
+                                continue;
+                        }
 
+                        context.CancellationToken.ThrowIfCancellationRequested();
+
+                        processor.AppendExpression(exchangeForExpressionBuilder);
                         context.CancellationToken.ThrowIfCancellationRequested();
                         if (EmitDiagnostics(context, processor.GetErrors()))
                             continue;
                         context.CancellationToken.ThrowIfCancellationRequested();
                         EmitDiagnostics(context, processor.GetWarnings());
 
-                        processor.AppendExpression(exchangeForExpressionBuilder);
                     }
                 }
 
@@ -170,6 +185,7 @@ namespace LightMock.Generator
                     .Replace("/*getProtectedContextTypeBuilder*/", getProtectedContextTypeBuilder.ToString())
                     .Replace("/*getPropertiesContextTypeBuilder*/", getPropertiesContextTypeBuilder.ToString())
                     .Replace("/*getAssertTypeBuilder*/", getAssertTypeBuilder.ToString())
+                    .Replace("/*getAssertIsAnyTypeBuilder*/", getAssertIsAnyTypeBuilder.ToString())
                     .Replace("/*getDelegateBuilder*/", getDelegateBuilder.ToString())
                     .Replace("/*exchangeForExpressionBuilder*/", exchangeForExpressionBuilder.ToString());
 
