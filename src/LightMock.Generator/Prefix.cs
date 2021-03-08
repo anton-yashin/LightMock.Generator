@@ -33,5 +33,6 @@ namespace LightMock.Generator
         public const string PropertyToFuncInterface = "Property_";
         public const string AssertImplementation = "Assert_";
         public const string AssertIsAnyImplementation = "Assert_IsAny_";
+        public const string TypeByType = "TypeByType_";
     }
 }

@@ -40,6 +40,7 @@ namespace LightMock.Generator
         private readonly string fullNameWithCommaArguments;
         private readonly string @namespace;
         private readonly string typeArgumentsWithBrackets;
+        private readonly string typeArgumentsWithUnderlines;
         private readonly string whereClause;
         private readonly string commaArguments;
         private readonly string returnType;
@@ -72,6 +73,7 @@ namespace LightMock.Generator
             typeArgumentsWithBrackets = string.Join(",", typeArguments.Select(i => i.Name)); ;
             if (typeArgumentsWithBrackets.Length > 0)
                 typeArgumentsWithBrackets = "<" + typeArgumentsWithBrackets + ">";
+            typeArgumentsWithUnderlines = string.Join("_", typeArguments.Select(i => i.Name));
             this.whereClause = whereClause;
             this.commaArguments = string.Join(",", typeArguments.Select(i => " "));
             var rt = typeSymbol.DelegateInvokeMethod?.ReturnType;
@@ -91,6 +93,23 @@ using LightMock.Generator;
 
 namespace {@namespace}
 {{
+    sealed class {Prefix.TypeByType}{className}{typeArgumentsWithUnderlines} : global::LightMock.Generator.TypeResolver
+    {{
+        public {Prefix.TypeByType}{className}{typeArgumentsWithUnderlines}(global::System.Type contextType)
+            : base(contextType)
+        {{ }}
+
+        public override global::System.Type GetInstanceType()
+        {{
+            return ContextType;
+        }}
+
+        public override object GetDelegate(object mockContext)
+        {{
+            {GetDelegate()}
+        }}
+    }}
+
     sealed class {className}{typeArgumentsWithBrackets} : IDelegateProvider
         {whereClause}
     {{
@@ -147,28 +166,22 @@ namespace {@namespace}
         public override IEnumerable<Diagnostic> GetWarnings()
             => Enumerable.Empty<Diagnostic>();
 
-        public override void DoGeneratePart_GetInstanceType(StringBuilder here)
+        public override void DoGeneratePart_TypeByType(StringBuilder here)
         {
-            var toAppend = typeSymbol.IsGenericType 
-                ? $"if (gtd == typeof(global::{@namespace}.{fullNameWithCommaArguments})) return contextType;"
-                : $"if (contextType == typeof(global::{@namespace}.{fullNameWithCommaArguments})) return contextType;";
+            var toAppend = $"{{ typeof(global::{@namespace}.{fullNameWithCommaArguments}), typeof(global::{@namespace}.{Prefix.TypeByType}{className}{typeArgumentsWithUnderlines}) }},";
             here.Append(toAppend);
         }
 
-        public override void DoGeneratePart_GetDelegate(StringBuilder here)
+        string GetDelegate()
         {
-            var toAppend = typeSymbol.IsGenericType 
-                ? $@"if (gtd == typeof(global::{@namespace}.{fullNameWithCommaArguments}))
-{{
-                var dp = Activator.CreateInstance(typeof({@namespace}.{className}<{commaArguments}>).MakeGenericType(contextType.GetGenericArguments()), new object[] {{ mockContext }})
-                    ?? throw new InvalidOperationException(""can't create delegate for {fullNameWithTypeArguments}"");
-                return ((IDelegateProvider)dp).GetDelegate();
-}}"
-                : $@"if (contextType == typeof(global::{@namespace}.{fullNameWithCommaArguments}))
-{{
-    return new global::{@namespace}.{className}((IInvocationContext<global::{@namespace}.{fullNameWithCommaArguments}>)mockContext).GetDelegate();
-}}";
-            here.Append(toAppend);
+            return typeSymbol.IsGenericType
+                ? $@"
+                var dp = global::System.Activator.CreateInstance(typeof({@namespace}.{className}<{commaArguments}>).MakeGenericType(ContextType.GetGenericArguments()), new object[] {{ mockContext }})
+                    ?? throw new global::System.InvalidOperationException(""can't create delegate for {fullNameWithTypeArguments}"");
+                return ((IDelegateProvider)dp).GetDelegate();"
+                : $@"
+                return new global::{@namespace}.{className}((IInvocationContext<global::{@namespace}.{fullNameWithCommaArguments}>)mockContext).GetDelegate();
+";
         }
     }
 }

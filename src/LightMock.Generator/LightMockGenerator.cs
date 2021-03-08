@@ -77,12 +77,7 @@ namespace LightMock.Generator
                 // process symbols under Mock<> generic
 
                 var mockContextMatcher = new TypeMatcher(typeof(AbstractMock<>));
-                var getInstanceTypeBuilder = new StringBuilder();
-                var getProtectedContextTypeBuilder = new StringBuilder();
-                var getPropertiesContextTypeBuilder = new StringBuilder();
-                var getAssertTypeBuilder = new StringBuilder();
-                var getAssertIsAnyTypeBuilder = new StringBuilder();
-                var getDelegateBuilder = new StringBuilder();
+                var typeByTypeBuilder = new StringBuilder();
                 var exchangeForExpressionBuilder = new StringBuilder();
                 var processedTypes = new List<INamedTypeSymbol>();
                 var multicastDelegateType = typeof(MulticastDelegate);
@@ -121,19 +116,7 @@ namespace LightMock.Generator
                         EmitDiagnostics(context, processor.GetWarnings());
                         context.AddSource(processor.FileName, processor.DoGenerate());
                         context.CancellationToken.ThrowIfCancellationRequested();
-                        processor.DoGeneratePart_GetInstanceType(getInstanceTypeBuilder);
-                        context.CancellationToken.ThrowIfCancellationRequested();
-                        processor.DoGeneratePart_GetProtectedContextType(getProtectedContextTypeBuilder);
-                        context.CancellationToken.ThrowIfCancellationRequested();
-                        processor.DoGeneratePart_GetPropertiesContextType(getPropertiesContextTypeBuilder);
-                        context.CancellationToken.ThrowIfCancellationRequested();
-                        processor.DoGeneratePart_GetAssertType(getAssertTypeBuilder);
-                        context.CancellationToken.ThrowIfCancellationRequested();
-                        processor.DoGeneratePart_GetAssertIsAnyType(getAssertIsAnyTypeBuilder);
-                        context.CancellationToken.ThrowIfCancellationRequested();
-                        processor.DoGeneratePart_GetDelegate(getDelegateBuilder);
-                        context.CancellationToken.ThrowIfCancellationRequested();
-                        processor.DoGeneratePart_ExchangeForExpression(exchangeForExpressionBuilder);
+                        processor.DoGeneratePart_TypeByType(typeByTypeBuilder);
                         context.CancellationToken.ThrowIfCancellationRequested();
                         processedTypes.Add(mockedType.OriginalDefinition);
                     }
@@ -181,12 +164,7 @@ namespace LightMock.Generator
 
                 context.CancellationToken.ThrowIfCancellationRequested();
                 var impl = Utils.LoadResource(KContextResolver + Suffix.CSharpFile)
-                    .Replace("/*getInstanceTypeBuilder*/", getInstanceTypeBuilder.ToString())
-                    .Replace("/*getProtectedContextTypeBuilder*/", getProtectedContextTypeBuilder.ToString())
-                    .Replace("/*getPropertiesContextTypeBuilder*/", getPropertiesContextTypeBuilder.ToString())
-                    .Replace("/*getAssertTypeBuilder*/", getAssertTypeBuilder.ToString())
-                    .Replace("/*getAssertIsAnyTypeBuilder*/", getAssertIsAnyTypeBuilder.ToString())
-                    .Replace("/*getDelegateBuilder*/", getDelegateBuilder.ToString())
+                    .Replace("/*typeByTypeBuilder*/", typeByTypeBuilder.ToString())
                     .Replace("/*exchangeForExpressionBuilder*/", exchangeForExpressionBuilder.ToString());
 
                 context.CancellationToken.ThrowIfCancellationRequested();

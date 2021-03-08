@@ -25,6 +25,7 @@
     https://github.com/anton-yashin/
 *******************************************************************************/
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
@@ -37,13 +38,17 @@ namespace LightMock.Generator
     {
         T? instance;
         readonly object[] prms;
+        readonly TypeResolver typeResolver;
         readonly object protectedContext;
         readonly IMockContextInternal propertiesContext;
 
         public AbstractMock()
         {
-            prms = Array.Empty<object>();
+            if (ContextResolverTable.TryGetValue(resolverType, out var t) == false)
+                throw new MockNotGeneratedException(contextType);
 
+            prms = Array.Empty<object>();
+            typeResolver = (TypeResolver)Activator.CreateInstance(t, contextType);
             PublicContext = new MockContext<T>();
             protectedContext = CreateProtectedContext();
             propertiesContext = CreatePropertiesContext();
@@ -59,6 +64,8 @@ namespace LightMock.Generator
         object IProtectedContext<T>.ProtectedContext => protectedContext;
         protected IMockContext<T> PublicContext { get; }
 
+        static Type contextType = typeof(T);
+        static Type resolverType = contextType.IsGenericType ? contextType.GetGenericTypeDefinition() : contextType;
         static Type? mockInstanceType;
         static Type? protectedContextType;
         static Type? propertiesType;
@@ -84,6 +91,14 @@ namespace LightMock.Generator
             for (int i = 0; i < prms.Length; i++)
                 args[i + 2] = prms[i];
             return args;
+        }
+
+        static Type GetGenericContextType()
+        {
+            var contextType = typeof(T);
+            if (contextType.IsGenericType)
+                return contextType.GetGenericTypeDefinition();
+            return contextType;
         }
 
         T CreateMockInstance()
@@ -127,27 +142,22 @@ namespace LightMock.Generator
         }
 
         Type GetInstanceType()
-            => GetInstanceType(ContextResolverDefaults.Instance);
+            => typeResolver.GetInstanceType();
         Type GetProtectedContextType()
-            => GetProtectedContextType(ContextResolverDefaults.Instance);
+            => typeResolver.GetProtectedContextType();
         Type GetPropertiesContextType()
-            => GetPropertiesContextType(ContextResolverDefaults.Instance);
+            => typeResolver.GetPropertiesContextType();
         Type GetAssertType()
-            => GetAssertType(ContextResolverDefaults.Instance);
+            => typeResolver.GetAssertType();
         Type GetAssertIsAnyType()
-            => GetAssertIsAnyType(ContextResolverDefaults.Instance);
+            => typeResolver.GetAssertIsAnyType();
         T GetDelegate(Type type)
-            => GetDelegate(type, ContextResolverDefaults.Instance);
+            => (T)typeResolver.GetDelegate(PublicContext);
         LambdaExpression ExchangeForExpression(string token)
             => ExchangeForExpression(token, ContextResolverDefaults.Instance);
 
-        protected abstract Type GetInstanceType(IContextResolverDefaults defaults);
-        protected abstract Type GetProtectedContextType(IContextResolverDefaults defaults);
-        protected abstract Type GetPropertiesContextType(IContextResolverDefaults defaults);
-        protected abstract Type GetAssertType(IContextResolverDefaults defaults);
-        protected abstract Type GetAssertIsAnyType(IContextResolverDefaults defaults);
-        protected abstract T GetDelegate(Type type, IContextResolverDefaults defaults);
         protected abstract LambdaExpression ExchangeForExpression(string token, IContextResolverDefaults defaults);
+        protected abstract IReadOnlyDictionary<Type, Type> ContextResolverTable { get; }
 
         public void AssertGet<TProperty>(Func<T, TProperty> expression)
             => AssertGet(expression, Invoked.AtLeast(1));
