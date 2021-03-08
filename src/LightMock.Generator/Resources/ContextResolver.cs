@@ -44,6 +44,15 @@ namespace LightMock.Generator
             throw new MockNotGeneratedException(contextType);
         }
 
+        public static Type GetAssertIsAnyType(Type contextType, IContextResolverDefaults defaults)
+        {
+            var gtd = contextType.IsGenericType ? contextType.GetGenericTypeDefinition() : null;
+
+            /*getAssertIsAnyTypeBuilder*/
+
+            throw new MockNotGeneratedException(contextType);
+        }
+
         public static object GetDelegate(Type contextType, object mockContext, IContextResolverDefaults defaults)
         {
             var gtd = contextType.IsGenericType ? contextType.GetGenericTypeDefinition() : null;

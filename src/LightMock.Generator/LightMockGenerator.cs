@@ -81,6 +81,7 @@ namespace LightMock.Generator
                 var getProtectedContextTypeBuilder = new StringBuilder();
                 var getPropertiesContextTypeBuilder = new StringBuilder();
                 var getAssertTypeBuilder = new StringBuilder();
+                var getAssertIsAnyTypeBuilder = new StringBuilder();
                 var getDelegateBuilder = new StringBuilder();
                 var exchangeForExpressionBuilder = new StringBuilder();
                 var processedTypes = new List<INamedTypeSymbol>();
@@ -127,6 +128,8 @@ namespace LightMock.Generator
                         processor.DoGeneratePart_GetPropertiesContextType(getPropertiesContextTypeBuilder);
                         context.CancellationToken.ThrowIfCancellationRequested();
                         processor.DoGeneratePart_GetAssertType(getAssertTypeBuilder);
+                        context.CancellationToken.ThrowIfCancellationRequested();
+                        processor.DoGeneratePart_GetAssertIsAnyType(getAssertIsAnyTypeBuilder);
                         context.CancellationToken.ThrowIfCancellationRequested();
                         processor.DoGeneratePart_GetDelegate(getDelegateBuilder);
                         context.CancellationToken.ThrowIfCancellationRequested();
@@ -182,6 +185,7 @@ namespace LightMock.Generator
                     .Replace("/*getProtectedContextTypeBuilder*/", getProtectedContextTypeBuilder.ToString())
                     .Replace("/*getPropertiesContextTypeBuilder*/", getPropertiesContextTypeBuilder.ToString())
                     .Replace("/*getAssertTypeBuilder*/", getAssertTypeBuilder.ToString())
+                    .Replace("/*getAssertIsAnyTypeBuilder*/", getAssertIsAnyTypeBuilder.ToString())
                     .Replace("/*getDelegateBuilder*/", getDelegateBuilder.ToString())
                     .Replace("/*exchangeForExpressionBuilder*/", exchangeForExpressionBuilder.ToString());
 

@@ -149,6 +149,42 @@ namespace LightMock.Generator
             return @this;
         }
 
+        public static StringBuilder AppendAssertIsAnyGetterAndSetter(
+            this StringBuilder @this,
+            IPropertySymbol symbol)
+        {
+            var typePart = GetPropertyTypePart(symbol);
+            @this.Append("{");
+
+            if (symbol.GetMethod != null)
+            {
+                @this.Append("get { ")
+                    .Append(VariableNames.Context)
+                    .Append(".Assert(f => f.")
+                    .AppendP2FGetter(symbol, typePart)
+                    .Append("(), ")
+                    .Append(VariableNames.Invoked)
+                    .Append("); return default(")
+                    .Append(symbol.Type.ToDisplayString(SymbolDisplayFormats.WithTypeParams))
+                    .Append(");}");
+            }
+            if (symbol.SetMethod != null)
+            {
+                @this.Append("set {")
+                    .Append(VariableNames.Context)
+                    .Append(".Assert(f => f.")
+                    .AppendP2FSetter(symbol, typePart)
+                    .Append("(The<")
+                    .Append(symbol.Type.ToDisplayString(SymbolDisplayFormats.WithTypeParams))
+                    .Append(">.IsAnyValue), ")
+                    .Append(VariableNames.Invoked)
+                    .Append("); }");
+            }
+
+            @this.Append("}");
+            return @this;
+        }
+
         public static StringBuilder AppendPropertyDefinition(this StringBuilder @this, IPropertySymbol symbol)
         {
             var typePart = GetPropertyTypePart(symbol);

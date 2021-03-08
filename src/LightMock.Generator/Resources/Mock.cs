@@ -22,6 +22,8 @@ namespace LightMock.Generator
             => ContextResolver.GetPropertiesContextType(typeof(T), defaults);
         protected override Type GetAssertType(IContextResolverDefaults defaults)
             => ContextResolver.GetAssertType(typeof(T), defaults);
+        protected override Type GetAssertIsAnyType(IContextResolverDefaults defaults)
+            => ContextResolver.GetAssertIsAnyType(typeof(T), defaults);
         protected override T GetDelegate(Type type, IContextResolverDefaults defaults)
             => (T)ContextResolver.GetDelegate(type, PublicContext, defaults);
         protected override LambdaExpression ExchangeForExpression(string token, IContextResolverDefaults defaults)

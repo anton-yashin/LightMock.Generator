@@ -470,6 +470,24 @@ namespace LightMock.Generator.Tests
             Assert.Equal(KExpected, testScript.DoRun());
         }
 
+        [Fact]
+        public void AssertSet_IsAny()
+        {
+            var testScript = LoadAssembly<IAssertSet_IsAny>();
+            var context = testScript.Context;
+            var mock = testScript.MockObject;
+
+            mock.GetAndSet = Guid.NewGuid().ToString();
+            mock.SetOnly = Guid.NewGuid().ToString();
+
+            context.AssertSet_IsAny(f => f.GetAndSet = "");
+            context.AssertSet_IsAny(f => f.GetAndSet = "", Invoked.Once);
+            context.AssertSet_IsAny(f => f.SetOnly = "");
+            context.AssertSet_IsAny(f => f.SetOnly = "", Invoked.Once);
+
+            Assert.Equal(KExpected, testScript.DoRun());
+        }
+
         protected override string GetFullResourceName(string resourceName)
             => "Interface." + resourceName + ".test.cs";
     }

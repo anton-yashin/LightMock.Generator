@@ -111,6 +111,14 @@ namespace LightMock.Generator
             return (T)result;
         }
 
+        T CreateAssertIsAnyInstance(Invoked invoked)
+        {
+            var result = Activator.CreateInstance(LazyInitializer.EnsureInitialized(ref assertType,
+                GetAssertIsAnyType), args: GetAssertArgs(invoked))
+                ?? throw new InvalidOperationException("can't create assert for: " + typeof(T).FullName);
+            return (T)result;
+        }
+
         IMockContextInternal CreatePropertiesContext()
         {
             return (IMockContextInternal)Activator.CreateInstance(LazyInitializer.EnsureInitialized(ref propertiesType,
@@ -126,6 +134,8 @@ namespace LightMock.Generator
             => GetPropertiesContextType(ContextResolverDefaults.Instance);
         Type GetAssertType()
             => GetAssertType(ContextResolverDefaults.Instance);
+        Type GetAssertIsAnyType()
+            => GetAssertIsAnyType(ContextResolverDefaults.Instance);
         T GetDelegate(Type type)
             => GetDelegate(type, ContextResolverDefaults.Instance);
         LambdaExpression ExchangeForExpression(string token)
@@ -135,6 +145,7 @@ namespace LightMock.Generator
         protected abstract Type GetProtectedContextType(IContextResolverDefaults defaults);
         protected abstract Type GetPropertiesContextType(IContextResolverDefaults defaults);
         protected abstract Type GetAssertType(IContextResolverDefaults defaults);
+        protected abstract Type GetAssertIsAnyType(IContextResolverDefaults defaults);
         protected abstract T GetDelegate(Type type, IContextResolverDefaults defaults);
         protected abstract LambdaExpression ExchangeForExpression(string token, IContextResolverDefaults defaults);
 
@@ -183,6 +194,12 @@ namespace LightMock.Generator
                 throw new ArgumentException(KUidExceptionMessage, nameof(uidPart1));
             propertiesContext.AssertInternal(ExchangeForExpression(uidPart2 + uidPart1), times);
         }
+
+        public void AssertSet_IsAny(Action<T> expression)
+            => AssertSet_IsAny(expression, Invoked.AtLeast(1));
+
+        public void AssertSet_IsAny(Action<T> expression, Invoked times)
+            => expression(CreateAssertIsAnyInstance(times));
 
         #region IMockContext<T> implementation
 
