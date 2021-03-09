@@ -93,14 +93,6 @@ namespace LightMock.Generator
             return args;
         }
 
-        static Type GetGenericContextType()
-        {
-            var contextType = typeof(T);
-            if (contextType.IsGenericType)
-                return contextType.GetGenericTypeDefinition();
-            return contextType;
-        }
-
         T CreateMockInstance()
         {
             var type = LazyInitializer.EnsureInitialized(ref mockInstanceType!, typeResolver.GetInstanceType);
