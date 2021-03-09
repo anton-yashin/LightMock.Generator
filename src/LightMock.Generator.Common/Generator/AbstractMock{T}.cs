@@ -39,6 +39,7 @@ namespace LightMock.Generator
         T? instance;
         readonly object[] prms;
         readonly TypeResolver typeResolver;
+        readonly IMockContext<T> publicContext;
         readonly object protectedContext;
         readonly IMockContextInternal propertiesContext;
 
@@ -49,7 +50,7 @@ namespace LightMock.Generator
 
             prms = Array.Empty<object>();
             typeResolver = (TypeResolver)Activator.CreateInstance(t, contextType);
-            PublicContext = new MockContext<T>();
+            publicContext = new MockContext<T>();
             protectedContext = CreateProtectedContext();
             propertiesContext = CreatePropertiesContext();
         }
@@ -62,7 +63,6 @@ namespace LightMock.Generator
         public T Object => LazyInitializer.EnsureInitialized(ref instance!, CreateMockInstance);
 
         object IProtectedContext<T>.ProtectedContext => protectedContext;
-        protected IMockContext<T> PublicContext { get; }
 
         static Type contextType = typeof(T);
         static Type resolverType = contextType.IsGenericType ? contextType.GetGenericTypeDefinition() : contextType;
@@ -75,7 +75,7 @@ namespace LightMock.Generator
         {
             const int offset = 3;
             var args = new object[prms.Length + offset];
-            args[0] = PublicContext;
+            args[0] = publicContext;
             args[1] = propertiesContext;
             args[2] = protectedContext;
             for (int i = 0; i < prms.Length; i++)
@@ -97,7 +97,7 @@ namespace LightMock.Generator
         {
             var type = LazyInitializer.EnsureInitialized(ref mockInstanceType!, typeResolver.GetInstanceType);
             if (type.IsDelegate())
-                return (T)typeResolver.GetDelegate(PublicContext);
+                return (T)typeResolver.GetDelegate(publicContext);
             var result = Activator.CreateInstance(type, args: GetArgs())
                 ?? throw new InvalidOperationException("can't create context for: " + typeof(T).FullName);
             return (T)result;
@@ -194,19 +194,19 @@ namespace LightMock.Generator
         #region IMockContext<T> implementation
 
         public IArrangement Arrange(Expression<Action<T>> matchExpression)
-            => PublicContext.Arrange(matchExpression);
+            => publicContext.Arrange(matchExpression);
 
         public IArrangement<TResult> Arrange<TResult>(Expression<Func<T, TResult>> matchExpression)
-            => PublicContext.Arrange(matchExpression);
+            => publicContext.Arrange(matchExpression);
 
         public IArrangement ArrangeProperty<TResult>(Expression<Func<T, TResult>> matchExpression)
-            => PublicContext.ArrangeProperty(matchExpression);
+            => publicContext.ArrangeProperty(matchExpression);
 
         public void Assert(Expression<Action<T>> matchExpression)
-            => PublicContext.Assert(matchExpression);
+            => publicContext.Assert(matchExpression);
 
         public void Assert(Expression<Action<T>> matchExpression, Invoked invoked)
-            => PublicContext.Assert(matchExpression, invoked);
+            => publicContext.Assert(matchExpression, invoked);
 
         #endregion
     }
