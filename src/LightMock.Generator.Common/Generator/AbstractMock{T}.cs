@@ -103,9 +103,9 @@ namespace LightMock.Generator
 
         T CreateMockInstance()
         {
-            var type = LazyInitializer.EnsureInitialized(ref mockInstanceType!, GetInstanceType);
+            var type = LazyInitializer.EnsureInitialized(ref mockInstanceType!, typeResolver.GetInstanceType);
             if (type.IsDelegate())
-                return GetDelegate(type);
+                return (T)typeResolver.GetDelegate(PublicContext);
             var result = Activator.CreateInstance(type, args: GetArgs())
                 ?? throw new InvalidOperationException("can't create context for: " + typeof(T).FullName);
             return (T)result;
@@ -114,14 +114,14 @@ namespace LightMock.Generator
         object CreateProtectedContext()
         {
             return Activator.CreateInstance(LazyInitializer.EnsureInitialized(ref protectedContextType,
-                GetProtectedContextType))
+                typeResolver.GetProtectedContextType))
                 ?? throw new InvalidOperationException("can't create protected context for: " + typeof(T).FullName);
         }
 
         T CreateAssertInstance(Invoked invoked)
         {
             var result = Activator.CreateInstance(LazyInitializer.EnsureInitialized(ref assertType,
-                GetAssertType), args: GetAssertArgs(invoked))
+                typeResolver.GetAssertType), args: GetAssertArgs(invoked))
                 ?? throw new InvalidOperationException("can't create assert for: " + typeof(T).FullName);
             return (T)result;
         }
@@ -129,7 +129,7 @@ namespace LightMock.Generator
         T CreateAssertIsAnyInstance(Invoked invoked)
         {
             var result = Activator.CreateInstance(LazyInitializer.EnsureInitialized(ref assertType,
-                GetAssertIsAnyType), args: GetAssertArgs(invoked))
+                typeResolver.GetAssertIsAnyType), args: GetAssertArgs(invoked))
                 ?? throw new InvalidOperationException("can't create assert for: " + typeof(T).FullName);
             return (T)result;
         }
@@ -137,22 +137,10 @@ namespace LightMock.Generator
         IMockContextInternal CreatePropertiesContext()
         {
             return (IMockContextInternal)Activator.CreateInstance(LazyInitializer.EnsureInitialized(ref propertiesType,
-                GetPropertiesContextType))
+                typeResolver.GetPropertiesContextType))
                 ?? throw new InvalidOperationException("can't create property context for: " + typeof(T).FullName);
         }
 
-        Type GetInstanceType()
-            => typeResolver.GetInstanceType();
-        Type GetProtectedContextType()
-            => typeResolver.GetProtectedContextType();
-        Type GetPropertiesContextType()
-            => typeResolver.GetPropertiesContextType();
-        Type GetAssertType()
-            => typeResolver.GetAssertType();
-        Type GetAssertIsAnyType()
-            => typeResolver.GetAssertIsAnyType();
-        T GetDelegate(Type type)
-            => (T)typeResolver.GetDelegate(PublicContext);
         LambdaExpression ExchangeForExpression(string token)
             => ExchangeForExpression(token, ContextResolverDefaults.Instance);
 
