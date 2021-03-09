@@ -85,11 +85,12 @@ namespace LightMock.Generator
 
         object[] GetAssertArgs(Invoked invoked)
         {
-            var args = new object[prms.Length + 2];
+            const int offset = 2;
+            var args = new object[prms.Length + offset];
             args[0] = propertiesContext;
             args[1] = invoked;
             for (int i = 0; i < prms.Length; i++)
-                args[i + 2] = prms[i];
+                args[i + offset] = prms[i];
             return args;
         }
 
