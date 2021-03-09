@@ -25,6 +25,7 @@
     https://github.com/anton-yashin/
 *******************************************************************************/
 using System;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 
 namespace LightMock.Generator
@@ -34,25 +35,10 @@ namespace LightMock.Generator
     /// </summary>
     internal sealed class AbstractMockNameofProvider : AbstractMock<IDelegateProvider>
     {
+        protected override IReadOnlyDictionary<Type, Type> ContextResolverTable
+            => throw new NotImplementedException();
+
         protected override LambdaExpression ExchangeForExpression(string token, IContextResolverDefaults defaults)
-            => throw new NotImplementedException();
-
-        protected override Type GetAssertIsAnyType(IContextResolverDefaults defaults)
-            => throw new NotImplementedException();
-
-        protected override Type GetAssertType(IContextResolverDefaults defaults)
-            => throw new NotImplementedException();
-
-        protected override IDelegateProvider GetDelegate(Type type, IContextResolverDefaults defaults)
-            => throw new NotImplementedException();
-
-        protected override Type GetInstanceType(IContextResolverDefaults defaults)
-            => throw new NotImplementedException();
-
-        protected override Type GetPropertiesContextType(IContextResolverDefaults defaults)
-            => throw new NotImplementedException();
-
-        protected override Type GetProtectedContextType(IContextResolverDefaults defaults)
             => throw new NotImplementedException();
     }
 }

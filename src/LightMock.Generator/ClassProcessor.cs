@@ -46,13 +46,7 @@ namespace LightMock.Generator
         public abstract IEnumerable<Diagnostic> GetWarnings();
         public abstract SourceText DoGenerate();
 
-        public virtual void DoGeneratePart_GetInstanceType(StringBuilder here) { }
-        public virtual void DoGeneratePart_GetProtectedContextType(StringBuilder here) { }
-        public virtual void DoGeneratePart_GetPropertiesContextType(StringBuilder here) { }
-        public virtual void DoGeneratePart_GetAssertType(StringBuilder here) { }
-        public virtual void DoGeneratePart_GetAssertIsAnyType(StringBuilder here) { }
-        public virtual void DoGeneratePart_GetDelegate(StringBuilder here) { }
-        public virtual void DoGeneratePart_ExchangeForExpression(StringBuilder here) { }
+        public virtual void DoGeneratePart_TypeByType(StringBuilder here) { }
 
         public string FileName
             => new StringBuilder().AppendFileName(typeSymbol).ToString();
