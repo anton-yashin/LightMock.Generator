@@ -46,5 +46,21 @@ namespace LightMock.Generator
         {
             throw new global::System.NotSupportedException();
         }
+
+        protected object CreateGenericDelegate(Type delegateType, object mockContext, string fullName)
+        {
+            var dp = Activator.CreateInstance(delegateType.MakeGenericType(ContextType.GetGenericArguments()), new object[] { mockContext } )
+                ?? throw new InvalidOperationException($"can't create delegate for {fullName}");
+            return ((IDelegateProvider)dp).GetDelegate();
+        }
+
+        protected Type MakeGenericType(Type genericType) 
+            => genericType.MakeGenericType(ContextType.GetGenericArguments());
+
+        protected Type MakeMockContextType(Type type)
+            => Defaults.MockContextType.MakeGenericType(type);
+
+        protected Type MakeGenericMockContextType(Type genericType)
+            => Defaults.MockContextType.MakeGenericType(genericType.MakeGenericType(ContextType.GetGenericArguments()));
     }
 }

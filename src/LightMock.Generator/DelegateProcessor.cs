@@ -175,13 +175,8 @@ namespace {@namespace}
         string GetDelegate()
         {
             return typeSymbol.IsGenericType
-                ? $@"
-                var dp = global::System.Activator.CreateInstance(typeof({@namespace}.{className}<{commaArguments}>).MakeGenericType(ContextType.GetGenericArguments()), new object[] {{ mockContext }})
-                    ?? throw new global::System.InvalidOperationException(""can't create delegate for {fullNameWithTypeArguments}"");
-                return ((IDelegateProvider)dp).GetDelegate();"
-                : $@"
-                return new global::{@namespace}.{className}((IInvocationContext<global::{@namespace}.{fullNameWithCommaArguments}>)mockContext).GetDelegate();
-";
+                ? $"return CreateGenericDelegate(typeof({@namespace}.{className}<{commaArguments}>), mockContext, \"{fullNameWithTypeArguments}\");"
+                : $"return new global::{@namespace}.{className}((IInvocationContext<global::{@namespace}.{fullNameWithCommaArguments}>)mockContext).GetDelegate();";
         }
     }
 }

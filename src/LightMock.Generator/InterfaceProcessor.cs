@@ -198,28 +198,28 @@ namespace {@namespace}
         string GetInstanceType()
         {
             return typeSymbol.IsGenericType
-                ? $"return typeof(global::{@namespace}.{Prefix.MockClass}{interfaceName}<{commaArguments}>).MakeGenericType(ContextType.GetGenericArguments());"
+                ? $"return MakeGenericType(typeof(global::{@namespace}.{Prefix.MockClass}{interfaceName}<{commaArguments}>));"
                 : $"return typeof(global::{@namespace}.{Prefix.MockClass}{interfaceName});";
         }
 
         string GetPropertiesContextType()
         {
             return typeSymbol.IsGenericType
-                ? $"return Defaults.MockContextType.MakeGenericType(typeof(global::{@namespace}.{Prefix.PropertyToFuncInterface}{interfaceName}<{commaArguments}>).MakeGenericType(ContextType.GetGenericArguments()));"
-                : $"return Defaults.MockContextType.MakeGenericType(typeof(global::{@namespace}.{Prefix.PropertyToFuncInterface}{interfaceName}));";
+                ? $"return MakeGenericMockContextType(typeof(global::{@namespace}.{Prefix.PropertyToFuncInterface}{interfaceName}<{commaArguments}>));"
+                : $"return MakeMockContextType(typeof(global::{@namespace}.{Prefix.PropertyToFuncInterface}{interfaceName}));";
         }
 
         string GetAssertType()
         {
             return typeSymbol.IsGenericType
-                ? $"return typeof(global::{@namespace}.{Prefix.AssertImplementation}{interfaceName}<{commaArguments}>).MakeGenericType(ContextType.GetGenericArguments());"
+                ? $"return MakeGenericType(typeof(global::{@namespace}.{Prefix.AssertImplementation}{interfaceName}<{commaArguments}>));"
                 : $"return typeof(global::{@namespace}.{Prefix.AssertImplementation}{interfaceName});";
         }
 
         string GetAssertIsAnyType()
         {
             return typeSymbol.IsGenericType
-                ? $"return typeof(global::{@namespace}.{Prefix.AssertIsAnyImplementation}{interfaceName}<{commaArguments}>).MakeGenericType(ContextType.GetGenericArguments());"
+                ? $"return MakeGenericType(typeof(global::{@namespace}.{Prefix.AssertIsAnyImplementation}{interfaceName}<{commaArguments}>));"
                 : $"return typeof(global::{@namespace}.{Prefix.AssertIsAnyImplementation}{interfaceName});";
         }
     }
