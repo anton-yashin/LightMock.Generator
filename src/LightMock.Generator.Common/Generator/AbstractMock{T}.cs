@@ -70,6 +70,7 @@ namespace LightMock.Generator
         static Type? protectedContextType;
         static Type? propertiesType;
         static Type? assertType;
+        static Type? assertIsAnyType;
 
         object[] GetMockInstanceArgs()
         {
@@ -121,7 +122,7 @@ namespace LightMock.Generator
 
         T CreateAssertIsAnyInstance(Invoked invoked)
         {
-            var result = Activator.CreateInstance(LazyInitializer.EnsureInitialized(ref assertType,
+            var result = Activator.CreateInstance(LazyInitializer.EnsureInitialized(ref assertIsAnyType,
                 typeResolver.GetAssertIsAnyType), args: GetAssertArgs(invoked))
                 ?? throw new InvalidOperationException("can't create assert for: " + typeof(T).FullName);
             return (T)result;
