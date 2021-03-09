@@ -71,7 +71,7 @@ namespace LightMock.Generator
         static Type? propertiesType;
         static Type? assertType;
 
-        object[] GetArgs()
+        object[] GetMockInstanceArgs()
         {
             const int offset = 3;
             var args = new object[prms.Length + offset];
@@ -98,7 +98,7 @@ namespace LightMock.Generator
             var type = LazyInitializer.EnsureInitialized(ref mockInstanceType!, typeResolver.GetInstanceType);
             if (type.IsDelegate())
                 return (T)typeResolver.GetDelegate(publicContext);
-            var result = Activator.CreateInstance(type, args: GetArgs())
+            var result = Activator.CreateInstance(type, args: GetMockInstanceArgs())
                 ?? throw new InvalidOperationException("can't create context for: " + typeof(T).FullName);
             return (T)result;
         }
