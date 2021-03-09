@@ -185,6 +185,35 @@ namespace LightMock.Generator
             return @this;
         }
 
+        public static StringBuilder AppendArrangeOnAnyGetterAndSetter(
+            this StringBuilder @this,
+            IPropertySymbol symbol,
+            string propertyToFuncInterfaceName)
+        {
+            var typePart = GetPropertyTypePart(symbol);
+            @this.Append("{");
+
+            if (symbol.GetMethod != null)
+            {
+                @this.Append("get { return default(")
+                    .Append(symbol.Type.ToDisplayString(SymbolDisplayFormats.WithTypeParams))
+                    .Append("); }");
+            }
+            if (symbol.SetMethod != null)
+            {
+                @this.Append("set { request.SetResult(ExpressionUtils.Get<")
+                    .Append(propertyToFuncInterfaceName)
+                    .Append(">(f => f.")
+                    .AppendP2FSetter(symbol, typePart)
+                    .Append("(The<")
+                    .Append(symbol.Type.ToDisplayString(SymbolDisplayFormats.WithTypeParams))
+                    .Append(">.IsAnyValue))); }");
+            }
+
+            @this.Append("}");
+            return @this;
+        }
+
         public static StringBuilder AppendPropertyDefinition(this StringBuilder @this, IPropertySymbol symbol)
         {
             var typePart = GetPropertyTypePart(symbol);
@@ -342,6 +371,17 @@ namespace LightMock.Generator
                 @this.AppendEventAdd(contextName, symbol, methodName);
             if (symbol.RemoveMethod != null)
                 @this.AppendEventRemove(contextName, symbol, methodName);
+            @this.Append("}");
+            return @this;
+        }
+
+        public static StringBuilder AppendDummyEventAddRemove(this StringBuilder @this, IEventSymbol symbol)
+        {
+            @this.Append("{");
+            if (symbol.AddMethod != null)
+                @this.Append("add { }");
+            if (symbol.RemoveMethod != null)
+                @this.Append("remove { }");
             @this.Append("}");
             return @this;
         }

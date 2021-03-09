@@ -42,6 +42,11 @@ namespace LightMock.Generator
             throw new global::System.NotSupportedException();
         }
 
+        public virtual Type GetArrangeOnAnyType()
+        {
+            throw new NotSupportedException();
+        }
+
         public virtual object GetDelegate(object mockContext)
         {
             throw new global::System.NotSupportedException();

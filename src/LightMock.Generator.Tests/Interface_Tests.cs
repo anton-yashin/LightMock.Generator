@@ -488,6 +488,22 @@ namespace LightMock.Generator.Tests
             Assert.Equal(KExpected, testScript.DoRun());
         }
 
+        [Fact]
+        public void ArrangeSetter_OnAny()
+        {
+            var expected = Guid.NewGuid().ToString();
+            var testScript = LoadAssembly<IArrangeSetter_OnAny>();
+            var context = testScript.Context;
+            var mock = testScript.MockObject;
+            string actual = "";
+
+            context.ArrangeSetter_OnAny(f => f.SetOnly = "").Callback<string>(s => actual = s);
+
+            mock.SetOnly = expected;
+
+            Assert.Equal(expected, actual);
+        }
+
         protected override string GetFullResourceName(string resourceName)
             => "Interface." + resourceName + ".test.cs";
     }
