@@ -232,29 +232,29 @@ namespace {@namespace}
         {string.Join("\r\n        ", members.Select(i => i.OriginalDefinition.Accept(protectedVisitor)).SkipWhile(i => string.IsNullOrWhiteSpace(i)))}
     }}
 
-    sealed class {Prefix.TypeByType}{className}{typeArgumentsWithUnderlines} : global::LightMock.Generator.TypeResolver
+    sealed class {Prefix.TypeByType}{className}{typeArgumentsWithUnderlines} : global::LightMock.Generator.{nameof(TypeResolver)}
     {{
         public {Prefix.TypeByType}{className}{typeArgumentsWithUnderlines}(global::System.Type contextType)
             : base(contextType)
         {{ }}
 
-        public override global::System.Type GetInstanceType()
+        public override global::System.Type {nameof(TypeResolver.GetInstanceType)}()
         {{
             {GetInstanceType()};
         }}
-        public override global::System.Type GetProtectedContextType()
+        public override global::System.Type {nameof(TypeResolver.GetProtectedContextType)}()
         {{
             {GetProtectedContextType()}
         }}
-        public override global::System.Type GetPropertiesContextType()
+        public override global::System.Type {nameof(TypeResolver.GetPropertiesContextType)}()
         {{
             {GetPropertiesContextType()};
         }}
-        public override global::System.Type GetAssertType()
+        public override global::System.Type {nameof(TypeResolver.GetAssertType)}()
         {{
             {GetAssertType()};
         }}
-        public override global::System.Type GetAssertIsAnyType()
+        public override global::System.Type {nameof(TypeResolver.GetAssertIsAnyType)}()
         {{
             {GetAssertIsAnyType()};
         }}

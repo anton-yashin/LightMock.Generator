@@ -93,24 +93,24 @@ using LightMock.Generator;
 
 namespace {@namespace}
 {{
-    sealed class {Prefix.TypeByType}{className}{typeArgumentsWithUnderlines} : global::LightMock.Generator.TypeResolver
+    sealed class {Prefix.TypeByType}{className}{typeArgumentsWithUnderlines} : global::LightMock.Generator.{nameof(TypeResolver)}
     {{
         public {Prefix.TypeByType}{className}{typeArgumentsWithUnderlines}(global::System.Type contextType)
             : base(contextType)
         {{ }}
 
-        public override global::System.Type GetInstanceType()
+        public override global::System.Type {nameof(TypeResolver.GetInstanceType)}()
         {{
             return ContextType;
         }}
 
-        public override object GetDelegate(object mockContext)
+        public override object {nameof(TypeResolver.GetDelegate)}(object mockContext)
         {{
             {GetDelegate()}
         }}
     }}
 
-    sealed class {className}{typeArgumentsWithBrackets} : IDelegateProvider
+    sealed class {className}{typeArgumentsWithBrackets} : {nameof(IDelegateProvider)}
         {whereClause}
     {{
         private readonly IInvocationContext<{fullNameWithTypeArguments}> {VariableNames.Context};
@@ -125,7 +125,7 @@ namespace {@namespace}
             {@return}{VariableNames.Context}.Invoke(f => f.Invoke({string.Join(", ", GetParameters())}));
         }}
 
-        public global::System.Delegate GetDelegate()
+        public global::System.Delegate {nameof(IDelegateProvider.GetDelegate)}()
         {{
             {fullNameWithTypeArguments} result = Invoke;
             return result;
