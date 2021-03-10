@@ -147,5 +147,6 @@ namespace LightMock.Generator
         /// </remarks>
         IArrangement ArrangeSetter(Action<T> expression, [CallerFilePath] string uidPart1 = "", [CallerLineNumber] int uidPart2 = 0);
         IArrangement ArrangeSetter_OnAny(Action<T> expression);
+        IArrangement ArrangeSetter_On(Action<T> expression);
     }
 }

@@ -49,6 +49,7 @@ namespace LightMock.Generator
         private readonly string whereClause;
         private readonly string @namespace;
         private readonly SymbolVisitor<string> arrangeOnAnyImplementationVisitor;
+        private readonly SymbolVisitor<string> arrangeOnImplementationVisitor;
 
         public InterfaceProcessor(
             INamedTypeSymbol typeSymbol) : base(typeSymbol)
@@ -85,6 +86,9 @@ namespace LightMock.Generator
             @namespace = typeSymbol.ContainingNamespace.ToDisplayString(SymbolDisplayFormats.Namespace);
             this.arrangeOnAnyImplementationVisitor = new ArrangeOnAnyImplementationVisitor(
                 SymbolDisplayFormats.Interface, 
+                Prefix.PropertyToFuncInterface + interfaceName + typeArgumentsWithBrackets);
+            this.arrangeOnImplementationVisitor = new ArrangeOnImplementationVisitor(
+                SymbolDisplayFormats.Interface,
                 Prefix.PropertyToFuncInterface + interfaceName + typeArgumentsWithBrackets);
         }
 
@@ -156,6 +160,20 @@ namespace {@namespace}
         {string.Join("\r\n        ", members.Select(i => i.OriginalDefinition.Accept(arrangeOnAnyImplementationVisitor)))}
     }}
 
+    sealed class {Prefix.ArrangeOnImplementation}{interfaceName}{typeArgumentsWithBrackets} : {baseNameWithTypeArguments}
+        {whereClause}
+    {{
+        private readonly global::LightMock.Generator.ILambdaRequest {VariableNames.Request};
+
+        public {Prefix.ArrangeOnImplementation}{interfaceName}(
+            global::LightMock.Generator.ILambdaRequest {VariableNames.Request})
+        {{
+            this.{VariableNames.Request} = {VariableNames.Request};
+        }}
+
+        {string.Join("\r\n        ", members.Select(i => i.OriginalDefinition.Accept(arrangeOnImplementationVisitor)))}
+    }}
+
     sealed class {Prefix.TypeByType}{interfaceName}{typeArgumentsWithUnderlines} : global::LightMock.Generator.TypeResolver
     {{
         public {Prefix.TypeByType}{interfaceName}{typeArgumentsWithUnderlines}(global::System.Type contextType)
@@ -181,6 +199,10 @@ namespace {@namespace}
         public override global::System.Type GetArrangeOnAnyType()
         {{
             {GetArrangeOnAnyType()}
+        }}
+        public override global::System.Type GetArrangeOnType()
+        {{
+            {GetArrangeOnType()}
         }}
     }}
 
@@ -250,6 +272,13 @@ namespace {@namespace}
             return typeSymbol.IsGenericType
                 ? $"return MakeGenericType(typeof(global::{@namespace}.{Prefix.ArrangeOnAnyImplementation}{interfaceName}<{commaArguments}>));"
                 : $"return typeof(global::{@namespace}.{Prefix.ArrangeOnAnyImplementation}{interfaceName});";
+        }
+
+        string GetArrangeOnType()
+        {
+            return typeSymbol.IsGenericType
+                ? $"return MakeGenericType(typeof(global::{@namespace}.{Prefix.ArrangeOnImplementation}{interfaceName}<{commaArguments}>));"
+                : $"return typeof(global::{@namespace}.{Prefix.ArrangeOnImplementation}{interfaceName});";
         }
     }
 }

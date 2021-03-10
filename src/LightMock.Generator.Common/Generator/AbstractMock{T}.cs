@@ -72,6 +72,7 @@ namespace LightMock.Generator
         static Type? assertType;
         static Type? assertIsAnyType;
         static Type? arrangeOnAnyType;
+        static Type? arrangeOnType;
 
         object[] GetMockInstanceArgs()
         {
@@ -137,6 +138,14 @@ namespace LightMock.Generator
             return (T)result;
         }
 
+        T CreateArrangeOnInstance(ILambdaRequest request)
+        {
+            var result = Activator.CreateInstance(LazyInitializer.EnsureInitialized(ref arrangeOnType,
+                typeResolver.GetArrangeOnType), request)
+                ?? throw new InvalidOperationException("can't create arrange for: " + typeof(T).FullName);
+            return (T)result;
+        }
+
         IMockContextInternal CreatePropertiesContext()
         {
             return (IMockContextInternal)Activator.CreateInstance(LazyInitializer.EnsureInitialized(ref propertiesType,
@@ -186,10 +195,18 @@ namespace LightMock.Generator
             return propertiesContext.ArrangeAction(ExchangeForExpression(uidPart2 + uidPart1));
         }
 
+        const string KAssignmentIsRequired = "A property assignment is required.";
+
         public IArrangement ArrangeSetter_OnAny(Action<T> expression)
+            => ArrangeSetter_NoAot(expression, CreateArrangeOnAnyInstance);
+
+        public IArrangement ArrangeSetter_On(Action<T> expression) 
+            => ArrangeSetter_NoAot(expression, CreateArrangeOnInstance);
+
+        IArrangement ArrangeSetter_NoAot(Action<T> expression, Func<ILambdaRequest, T> instanceFactory)
         {
             var request = new LambdaRequest();
-            expression(CreateArrangeOnAnyInstance(request));
+            expression(instanceFactory(request));
             var result = request.Result ?? throw new InvalidOperationException("A property assignment is required.");
             return propertiesContext.ArrangeAction(result);
         }

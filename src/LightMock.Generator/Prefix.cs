@@ -35,5 +35,6 @@ namespace LightMock.Generator
         public const string AssertIsAnyImplementation = "Assert_IsAny_";
         public const string TypeByType = "TypeByType_";
         public const string ArrangeOnAnyImplementation = "Arrange_OnAny_";
+        public const string ArrangeOnImplementation = "Arrange_On_";
     }
 }

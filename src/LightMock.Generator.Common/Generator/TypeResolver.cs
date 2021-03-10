@@ -47,6 +47,11 @@ namespace LightMock.Generator
             throw new NotSupportedException();
         }
 
+        public virtual Type GetArrangeOnType()
+        {
+            throw new NotSupportedException();
+        }
+
         public virtual object GetDelegate(object mockContext)
         {
             throw new global::System.NotSupportedException();
@@ -67,5 +72,6 @@ namespace LightMock.Generator
 
         protected Type MakeGenericMockContextType(Type genericType)
             => Defaults.MockContextType.MakeGenericType(genericType.MakeGenericType(ContextType.GetGenericArguments()));
+
     }
 }
