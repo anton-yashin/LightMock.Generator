@@ -53,6 +53,7 @@ namespace LightMock.Generator
         private readonly SyntaxNode containingGeneric;
         private readonly IReadOnlyList<INamedTypeSymbol> dontOverrideList;
         private readonly SymbolVisitor<string> arrangeOnAnyImplementationVisitor;
+        private readonly SymbolVisitor<string> arrangeOnImplementationVisitor;
 
         public AbstractClassProcessor(
             SyntaxNode containingGeneric,
@@ -104,6 +105,9 @@ namespace LightMock.Generator
             this.containingGeneric = containingGeneric;
             this.dontOverrideList = dontOverrideList;
             this.arrangeOnAnyImplementationVisitor = new ArrangeOnAnyImplementationVisitor(
+                SymbolDisplayFormats.AbstractClass,
+                Prefix.PropertyToFuncInterface + className + typeArgumentsWithBrackets);
+            this.arrangeOnImplementationVisitor = new ArrangeOnImplementationVisitor(
                 SymbolDisplayFormats.AbstractClass,
                 Prefix.PropertyToFuncInterface + className + typeArgumentsWithBrackets);
         }
@@ -274,6 +278,16 @@ namespace {@namespace}
         {string.Join("\r\n        ", members.Select(i => i.OriginalDefinition.Accept(arrangeOnAnyImplementationVisitor)))}
     }}
 
+    sealed class {Prefix.ArrangeOnImplementation}{className}{typeArgumentsWithBrackets} : {baseNameWithTypeArguments}
+        {whereClause}
+    {{
+        private readonly global::LightMock.Generator.{nameof(ILambdaRequest)} {VariableNames.Request};
+
+{string.Join("\r\n", GenerateArrangeConstructors(Prefix.ArrangeOnImplementation))}
+
+        {string.Join("\r\n        ", members.Select(i => i.OriginalDefinition.Accept(arrangeOnImplementationVisitor)))}
+    }}
+
     public interface {Prefix.ProtectedToPublicInterface}{className}{typeArgumentsWithBrackets}
         {whereClause}
     {{
@@ -309,6 +323,10 @@ namespace {@namespace}
         public override global::System.Type {nameof(TypeResolver.GetArrangeOnAnyType)}()
         {{
             {GetArrangeOnAnyType()}
+        }}
+        public override global::System.Type {nameof(TypeResolver.GetArrangeOnType)}()
+        {{
+            {GetArrangeOnType()}
         }}
     }}
 
@@ -399,6 +417,13 @@ namespace LightMock.Generator
             return typeSymbol.IsGenericType
                 ? $"return MakeGenericType(typeof(global::{@namespace}.{Prefix.ArrangeOnAnyImplementation}{className}<{commaArguments}>));"
                 : $"return typeof(global::{@namespace}.{Prefix.ArrangeOnAnyImplementation}{className});";
+        }
+
+        string GetArrangeOnType()
+        {
+            return typeSymbol.IsGenericType
+                ? $"return MakeGenericType(typeof(global::{@namespace}.{Prefix.ArrangeOnImplementation}{className}<{commaArguments}>));"
+                : $"return typeof(global::{@namespace}.{Prefix.ArrangeOnImplementation}{className});";
         }
 
         static IEnumerable<INamedTypeSymbol> GetAllBaseTypes(INamedTypeSymbol type)
