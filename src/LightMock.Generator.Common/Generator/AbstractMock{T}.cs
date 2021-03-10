@@ -71,6 +71,8 @@ namespace LightMock.Generator
         static Type? propertiesType;
         static Type? assertType;
         static Type? assertIsAnyType;
+        static Type? arrangeOnAnyType;
+        static Type? arrangeOnType;
 
         object[] GetMockInstanceArgs()
         {
@@ -128,6 +130,22 @@ namespace LightMock.Generator
             return (T)result;
         }
 
+        T CreateArrangeOnAnyInstance(ILambdaRequest request)
+        {
+            var result = Activator.CreateInstance(LazyInitializer.EnsureInitialized(ref arrangeOnAnyType,
+                typeResolver.GetArrangeOnAnyType), request)
+                ?? throw new InvalidOperationException("can't create arrange for: " + typeof(T).FullName);
+            return (T)result;
+        }
+
+        T CreateArrangeOnInstance(ILambdaRequest request)
+        {
+            var result = Activator.CreateInstance(LazyInitializer.EnsureInitialized(ref arrangeOnType,
+                typeResolver.GetArrangeOnType), request)
+                ?? throw new InvalidOperationException("can't create arrange for: " + typeof(T).FullName);
+            return (T)result;
+        }
+
         IMockContextInternal CreatePropertiesContext()
         {
             return (IMockContextInternal)Activator.CreateInstance(LazyInitializer.EnsureInitialized(ref propertiesType,
@@ -175,6 +193,22 @@ namespace LightMock.Generator
             if (string.IsNullOrWhiteSpace(uidPart1))
                 throw new ArgumentException(KUidExceptionMessage, nameof(uidPart1));
             return propertiesContext.ArrangeAction(ExchangeForExpression(uidPart2 + uidPart1));
+        }
+
+        const string KAssignmentIsRequired = "A property assignment is required.";
+
+        public IArrangement ArrangeSetter_OnAny(Action<T> expression)
+            => ArrangeSetter_NoAot(expression, CreateArrangeOnAnyInstance);
+
+        public IArrangement ArrangeSetter_On(Action<T> expression) 
+            => ArrangeSetter_NoAot(expression, CreateArrangeOnInstance);
+
+        IArrangement ArrangeSetter_NoAot(Action<T> expression, Func<ILambdaRequest, T> instanceFactory)
+        {
+            var request = new LambdaRequest();
+            expression(instanceFactory(request));
+            var result = request.Result ?? throw new InvalidOperationException("A property assignment is required.");
+            return propertiesContext.ArrangeAction(result);
         }
 
         public void AssertSet(Action<T> expression, [CallerFilePath] string uidPart1 = "", [CallerLineNumber] int uidPart2 = 0)

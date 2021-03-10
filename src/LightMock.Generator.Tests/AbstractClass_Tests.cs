@@ -592,6 +592,40 @@ namespace LightMock.Generator.Tests
             Assert.Equal(KExpected, testScript.DoRun());
         }
 
+        [Fact]
+        public void ArrangeSetter_OnAny()
+        {
+            var expected = Guid.NewGuid().ToString();
+            var testScript = LoadAssembly<AArrangeSetter_OnAny>();
+            var context = testScript.Context;
+            var mock = testScript.MockObject;
+            string actual = "";
+
+            context.ArrangeSetter_OnAny(f => f.SetOnly = "").Callback<string>(s => actual = s);
+
+            mock.SetOnly = expected;
+
+            Assert.Equal(expected, actual);
+        }
+
+        [Fact]
+        public void ArrangeSetter_On()
+        {
+            int on1234 = 0;
+            int on5678 = 0;
+            var testScript = LoadAssembly<AArrangeSetter_On>();
+            var context = testScript.Context;
+            var mock = testScript.MockObject;
+
+            context.ArrangeSetter_On(f => f.SetOnly = "1234").Callback<string>(s => on1234++);
+            context.ArrangeSetter_On(f => f.SetOnly = "5678").Callback<string>(s => on5678++);
+
+            mock.SetOnly = "1234";
+
+            Assert.Equal(1, on1234);
+            Assert.Equal(0, on5678);
+        }
+
         protected override string GetFullResourceName(string resourceName)
             => "AbstractClass." + resourceName + ".test.cs";
     }
