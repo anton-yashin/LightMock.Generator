@@ -52,6 +52,7 @@ namespace LightMock.Generator
         private readonly List<string> constructorsCall;
         private readonly SyntaxNode containingGeneric;
         private readonly IReadOnlyList<INamedTypeSymbol> dontOverrideList;
+        private readonly SymbolVisitor<string> arrangeOnAnyImplementationVisitor;
 
         public AbstractClassProcessor(
             SyntaxNode containingGeneric,
@@ -102,6 +103,9 @@ namespace LightMock.Generator
                     .Replace(typeSymbol.Name, "").Trim('(', ')')));
             this.containingGeneric = containingGeneric;
             this.dontOverrideList = dontOverrideList;
+            this.arrangeOnAnyImplementationVisitor = new ArrangeOnAnyImplementationVisitor(
+                SymbolDisplayFormats.AbstractClass,
+                Prefix.PropertyToFuncInterface + className + typeArgumentsWithBrackets);
         }
 
         string GenerateConstructor(string declaration, string call)
@@ -182,6 +186,40 @@ namespace LightMock.Generator
             }
         }
 
+        string GenerateArrangeConstructor(string prefix, string declaration, string call)
+        {
+            return $@"
+        public {prefix}{className}(
+            global::LightMock.Generator.{nameof(ILambdaRequest)} {VariableNames.Request},
+            {declaration})
+            : base({call})
+        {{
+            this.{VariableNames.Request} = {VariableNames.Request};
+        }}
+";
+        }
+
+        string GenerateArrangeDefaultConstructor(string prefix)
+        {
+            return $@"
+        public {prefix}{className}(
+            global::LightMock.Generator.{nameof(ILambdaRequest)} {VariableNames.Request})
+        {{
+            this.{VariableNames.Request} = {VariableNames.Request};
+        }}
+";
+        }
+
+        IEnumerable<string> GenerateArrangeConstructors(string prefix)
+        {
+            for (int i = 0; i < constructors.Count; i++)
+            {
+                yield return constructors[i].Length == 0
+                    ? GenerateArrangeDefaultConstructor(prefix)
+                    : GenerateArrangeConstructor(prefix, constructors[i], constructorsCall[i]);
+            }
+        }
+
 
         public override SourceText DoGenerate()
         {
@@ -226,6 +264,16 @@ namespace {@namespace}
         {string.Join("\r\n        ", members.Select(i => i.OriginalDefinition.Accept(assertIsAnyImplementationVisitor)))}
     }}
 
+    sealed class {Prefix.ArrangeOnAnyImplementation}{className}{typeArgumentsWithBrackets} : {baseNameWithTypeArguments}
+        {whereClause}
+    {{
+        private readonly global::LightMock.Generator.{nameof(ILambdaRequest)} {VariableNames.Request};
+
+{string.Join("\r\n", GenerateArrangeConstructors(Prefix.ArrangeOnAnyImplementation))}
+
+        {string.Join("\r\n        ", members.Select(i => i.OriginalDefinition.Accept(arrangeOnAnyImplementationVisitor)))}
+    }}
+
     public interface {Prefix.ProtectedToPublicInterface}{className}{typeArgumentsWithBrackets}
         {whereClause}
     {{
@@ -257,6 +305,10 @@ namespace {@namespace}
         public override global::System.Type {nameof(TypeResolver.GetAssertIsAnyType)}()
         {{
             {GetAssertIsAnyType()};
+        }}
+        public override global::System.Type {nameof(TypeResolver.GetArrangeOnAnyType)}()
+        {{
+            {GetArrangeOnAnyType()}
         }}
     }}
 
@@ -340,6 +392,13 @@ namespace LightMock.Generator
             return typeSymbol.IsGenericType
                 ? $"return MakeGenericType(typeof(global::{@namespace}.{Prefix.AssertIsAnyImplementation}{className}<{commaArguments}>));"
                 : $"return typeof(global::{@namespace}.{Prefix.AssertIsAnyImplementation}{className});";
+        }
+
+        string GetArrangeOnAnyType()
+        {
+            return typeSymbol.IsGenericType
+                ? $"return MakeGenericType(typeof(global::{@namespace}.{Prefix.ArrangeOnAnyImplementation}{className}<{commaArguments}>));"
+                : $"return typeof(global::{@namespace}.{Prefix.ArrangeOnAnyImplementation}{className});";
         }
 
         static IEnumerable<INamedTypeSymbol> GetAllBaseTypes(INamedTypeSymbol type)
