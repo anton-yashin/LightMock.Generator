@@ -201,7 +201,7 @@ namespace LightMock.Generator
             }
             if (symbol.SetMethod != null)
             {
-                @this.Append("set { request.SetResult(ExpressionUtils.Get<")
+                @this.Append("set { request.SetResult(global::LightMock.Generator.ExpressionUtils.Get<")
                     .Append(propertyToFuncInterfaceName)
                     .Append(">(f => f.")
                     .AppendP2FSetter(symbol, typePart)
@@ -230,7 +230,7 @@ namespace LightMock.Generator
             }
             if (symbol.SetMethod != null)
             {
-                @this.Append("set { request.SetResult(ExpressionUtils.Get<")
+                @this.Append("set { request.SetResult(global::LightMock.Generator.ExpressionUtils.Get<")
                     .Append(propertyToFuncInterfaceName)
                     .Append(">(f => f.")
                     .AppendP2FSetter(symbol, typePart)
