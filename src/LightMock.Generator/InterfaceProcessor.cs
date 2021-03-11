@@ -112,13 +112,13 @@ namespace {@namespace}
         {string.Join("\r\n        ", members.Select(i => i.OriginalDefinition.Accept(propertyDefinitionVisitor)))}
     }}
 
-    sealed class {Prefix.AssertImplementation}{interfaceName}{typeArgumentsWithBrackets} : {baseNameWithTypeArguments}
+    sealed class {Prefix.AssertWhenImplementation}{interfaceName}{typeArgumentsWithBrackets} : {baseNameWithTypeArguments}
         {whereClause}
     {{
         private readonly IMockContext<{Prefix.PropertyToFuncInterface}{interfaceName}{typeArgumentsWithBrackets}> {VariableNames.Context};
         private readonly Invoked {VariableNames.Invoked};
 
-        public {Prefix.AssertImplementation}{interfaceName}(
+        public {Prefix.AssertWhenImplementation}{interfaceName}(
             IMockContext<{Prefix.PropertyToFuncInterface}{interfaceName}{typeArgumentsWithBrackets}> {VariableNames.Context},
             Invoked {VariableNames.Invoked})
         {{
@@ -129,13 +129,13 @@ namespace {@namespace}
         {string.Join("\r\n        ", members.Select(i => i.OriginalDefinition.Accept(assertImplementationVisitor)))}
     }}
 
-    sealed class {Prefix.AssertIsAnyImplementation}{interfaceName}{typeArgumentsWithBrackets} : {baseNameWithTypeArguments}
+    sealed class {Prefix.AssertWhenAnyImplementation}{interfaceName}{typeArgumentsWithBrackets} : {baseNameWithTypeArguments}
         {whereClause}
     {{
         private readonly IMockContext<{Prefix.PropertyToFuncInterface}{interfaceName}{typeArgumentsWithBrackets}> {VariableNames.Context};
         private readonly Invoked {VariableNames.Invoked};
 
-        public {Prefix.AssertIsAnyImplementation}{interfaceName}(
+        public {Prefix.AssertWhenAnyImplementation}{interfaceName}(
             IMockContext<{Prefix.PropertyToFuncInterface}{interfaceName}{typeArgumentsWithBrackets}> {VariableNames.Context},
             Invoked {VariableNames.Invoked})
         {{
@@ -146,12 +146,12 @@ namespace {@namespace}
         {string.Join("\r\n        ", members.Select(i => i.OriginalDefinition.Accept(assertIsAnyImplementationVisitor)))}
     }}
 
-    sealed class {Prefix.ArrangeOnAnyImplementation}{interfaceName}{typeArgumentsWithBrackets} : {baseNameWithTypeArguments}
+    sealed class {Prefix.ArrangeWhenAnyImplementation}{interfaceName}{typeArgumentsWithBrackets} : {baseNameWithTypeArguments}
         {whereClause}
     {{
         private readonly global::LightMock.Generator.ILambdaRequest {VariableNames.Request};
 
-        public {Prefix.ArrangeOnAnyImplementation}{interfaceName}(
+        public {Prefix.ArrangeWhenAnyImplementation}{interfaceName}(
             global::LightMock.Generator.ILambdaRequest {VariableNames.Request})
         {{
             this.{VariableNames.Request} = {VariableNames.Request};
@@ -160,12 +160,12 @@ namespace {@namespace}
         {string.Join("\r\n        ", members.Select(i => i.OriginalDefinition.Accept(arrangeOnAnyImplementationVisitor)))}
     }}
 
-    sealed class {Prefix.ArrangeOnImplementation}{interfaceName}{typeArgumentsWithBrackets} : {baseNameWithTypeArguments}
+    sealed class {Prefix.ArrangeWhenImplementation}{interfaceName}{typeArgumentsWithBrackets} : {baseNameWithTypeArguments}
         {whereClause}
     {{
         private readonly global::LightMock.Generator.ILambdaRequest {VariableNames.Request};
 
-        public {Prefix.ArrangeOnImplementation}{interfaceName}(
+        public {Prefix.ArrangeWhenImplementation}{interfaceName}(
             global::LightMock.Generator.ILambdaRequest {VariableNames.Request})
         {{
             this.{VariableNames.Request} = {VariableNames.Request};
@@ -188,21 +188,21 @@ namespace {@namespace}
         {{
             {GetPropertiesContextType()};
         }}
-        public override global::System.Type {nameof(TypeResolver.GetAssertType)}()
+        public override global::System.Type {nameof(TypeResolver.GetAssertWhenType)}()
         {{
-            {GetAssertType()};
+            {GetAssertWhenType()};
         }}
-        public override global::System.Type {nameof(TypeResolver.GetAssertIsAnyType)}()
+        public override global::System.Type {nameof(TypeResolver.GetAssertWhenAnyType)}()
         {{
-            {GetAssertIsAnyType()};
+            {GetAssertWhenAnyType()};
         }}
-        public override global::System.Type {nameof(TypeResolver.GetArrangeOnAnyType)}()
+        public override global::System.Type {nameof(TypeResolver.GetArrangeWhenAnyType)}()
         {{
-            {GetArrangeOnAnyType()}
+            {GetArrangeWhenAnyType()}
         }}
-        public override global::System.Type {nameof(TypeResolver.GetArrangeOnType)}()
+        public override global::System.Type {nameof(TypeResolver.GetArrangeWhenType)}()
         {{
-            {GetArrangeOnType()}
+            {GetArrangeWhenType()}
         }}
     }}
 
@@ -253,32 +253,32 @@ namespace {@namespace}
                 : $"return MakeMockContextType(typeof(global::{@namespace}.{Prefix.PropertyToFuncInterface}{interfaceName}));";
         }
 
-        string GetAssertType()
+        string GetAssertWhenType()
         {
             return typeSymbol.IsGenericType
-                ? $"return MakeGenericType(typeof(global::{@namespace}.{Prefix.AssertImplementation}{interfaceName}<{commaArguments}>));"
-                : $"return typeof(global::{@namespace}.{Prefix.AssertImplementation}{interfaceName});";
+                ? $"return MakeGenericType(typeof(global::{@namespace}.{Prefix.AssertWhenImplementation}{interfaceName}<{commaArguments}>));"
+                : $"return typeof(global::{@namespace}.{Prefix.AssertWhenImplementation}{interfaceName});";
         }
 
-        string GetAssertIsAnyType()
+        string GetAssertWhenAnyType()
         {
             return typeSymbol.IsGenericType
-                ? $"return MakeGenericType(typeof(global::{@namespace}.{Prefix.AssertIsAnyImplementation}{interfaceName}<{commaArguments}>));"
-                : $"return typeof(global::{@namespace}.{Prefix.AssertIsAnyImplementation}{interfaceName});";
+                ? $"return MakeGenericType(typeof(global::{@namespace}.{Prefix.AssertWhenAnyImplementation}{interfaceName}<{commaArguments}>));"
+                : $"return typeof(global::{@namespace}.{Prefix.AssertWhenAnyImplementation}{interfaceName});";
         }
 
-        string GetArrangeOnAnyType()
+        string GetArrangeWhenAnyType()
         {
             return typeSymbol.IsGenericType
-                ? $"return MakeGenericType(typeof(global::{@namespace}.{Prefix.ArrangeOnAnyImplementation}{interfaceName}<{commaArguments}>));"
-                : $"return typeof(global::{@namespace}.{Prefix.ArrangeOnAnyImplementation}{interfaceName});";
+                ? $"return MakeGenericType(typeof(global::{@namespace}.{Prefix.ArrangeWhenAnyImplementation}{interfaceName}<{commaArguments}>));"
+                : $"return typeof(global::{@namespace}.{Prefix.ArrangeWhenAnyImplementation}{interfaceName});";
         }
 
-        string GetArrangeOnType()
+        string GetArrangeWhenType()
         {
             return typeSymbol.IsGenericType
-                ? $"return MakeGenericType(typeof(global::{@namespace}.{Prefix.ArrangeOnImplementation}{interfaceName}<{commaArguments}>));"
-                : $"return typeof(global::{@namespace}.{Prefix.ArrangeOnImplementation}{interfaceName});";
+                ? $"return MakeGenericType(typeof(global::{@namespace}.{Prefix.ArrangeWhenImplementation}{interfaceName}<{commaArguments}>));"
+                : $"return typeof(global::{@namespace}.{Prefix.ArrangeWhenImplementation}{interfaceName});";
         }
     }
 }

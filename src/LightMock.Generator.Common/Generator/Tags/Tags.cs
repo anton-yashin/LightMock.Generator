@@ -30,8 +30,8 @@ namespace LightMock.Generator.Tags
     sealed class MockInstanceTag { }
     sealed class ProtectedContextTag { }
     sealed class PropertiesContextTag { }
-    sealed class AssertTag { }
-    sealed class AssertAnyTag { }
-    sealed class ArrangeTag { }
-    sealed class ArrangeAnyTag { }
+    sealed class AssertWhenTag { }
+    sealed class AssertWhenAnyTag { }
+    sealed class ArrangeWhenTag { }
+    sealed class ArrangeWhenAnyTag { }
 }

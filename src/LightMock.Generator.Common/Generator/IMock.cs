@@ -57,7 +57,7 @@ namespace LightMock.Generator
         /// <remarks>
         /// No AOT transformations, thus pattern matching using <see cref="The{TValue}"/> type is not working.
         /// </remarks>
-        void AssertSet_NoAot(Action<T> expression);
+        void AssertSet_When(Action<T> expression);
         /// <summary>
         /// Verifies that a property was set on the mock.
         /// </summary>
@@ -66,7 +66,7 @@ namespace LightMock.Generator
         /// <remarks>
         /// No AOT transformations, thus pattern matching using <see cref="The{TValue}"/> type is not working.
         /// </remarks>
-        void AssertSet_NoAot(Action<T> expression, Invoked times);
+        void AssertSet_When(Action<T> expression, Invoked times);
         /// <summary>
         /// Verifies that a property was set on the mock.
         /// </summary>
@@ -97,7 +97,7 @@ namespace LightMock.Generator
         /// <remarks>
         /// This function don't use AOT transformations.
         /// </remarks>
-        void AssertSet_IsAny(Action<T> propertySelector);
+        void AssertSet_WhenAny(Action<T> propertySelector);
         /// <summary>
         /// Verifies that a property was set with any value on the mock.
         /// </summary>
@@ -106,7 +106,7 @@ namespace LightMock.Generator
         /// <remarks>
         /// This function don't use AOT transformations.
         /// </remarks>
-        void AssertSet_IsAny(Action<T> propertySelector, Invoked times);
+        void AssertSet_WhenAny(Action<T> propertySelector, Invoked times);
         /// <summary>
         /// Verifies that an event was added to the mock.
         /// </summary>
@@ -142,11 +142,11 @@ namespace LightMock.Generator
         /// Usage restrictions:<br/>
         /// * All arguments MUST be available on compile time and be plain and simple;<br/>
         /// * Only one call per source code line allowed;<br/>
-        /// * Do not place on same line <see cref="AssertSet_NoAot(Action{T})"/>.
+        /// * Do not place on same line <see cref="AssertSet_When(Action{T})"/>.
         /// * Works when code generation is enabled <see cref="DisableCodeGenerationAttribute"/>
         /// </remarks>
         IArrangement ArrangeSetter(Action<T> expression, [CallerFilePath] string uidPart1 = "", [CallerLineNumber] int uidPart2 = 0);
-        IArrangement ArrangeSetter_OnAny(Action<T> expression);
-        IArrangement ArrangeSetter_On(Action<T> expression);
+        IArrangement ArrangeSetter_WhenAny(Action<T> expression);
+        IArrangement ArrangeSetter_When(Action<T> expression);
     }
 }

@@ -104,17 +104,17 @@ namespace LightMock.Generator
             return typeResolver.ActivateInstance<T>(GetMockInstanceArgs());
         }
 
-        T CreateAssertInstance(Invoked invoked)
-            => typeResolver.ActivateAssertInstance<T>(GetAssertArgs(invoked));
+        T CreateAssertWhenInstance(Invoked invoked)
+            => typeResolver.ActivateAssertWhenInstance<T>(GetAssertArgs(invoked));
 
-        T CreateAssertIsAnyInstance(Invoked invoked)
-            => typeResolver.ActivateAssertIsAnyInstance<T>(GetAssertArgs(invoked));
+        T CreateAssertWhenAnyInstance(Invoked invoked)
+            => typeResolver.ActivateAssertWhenAnyInstance<T>(GetAssertArgs(invoked));
 
-        T CreateArrangeOnAnyInstance(ILambdaRequest request)
-            => typeResolver.ActivateArrangeOnAnyInstance<T>(GetArrangeArgs(request));
+        T CreateArrangeWhenAnyInstance(ILambdaRequest request)
+            => typeResolver.ActivateArrangeWhenAnyInstance<T>(GetArrangeArgs(request));
 
-        T CreateArrangeOnInstance(ILambdaRequest request)
-            => typeResolver.ActivateArrangeOnInstance<T>(GetArrangeArgs(request));
+        T CreateArrangeWhenInstance(ILambdaRequest request)
+            => typeResolver.ActivateArrangeWhenInstance<T>(GetArrangeArgs(request));
 
         LambdaExpression ExchangeForExpression(string token)
             => ExchangeForExpression(token, ContextResolverDefaults.Instance);
@@ -126,12 +126,12 @@ namespace LightMock.Generator
             => AssertGet(expression, Invoked.AtLeast(1));
 
         public void AssertGet<TProperty>(Func<T, TProperty> expression, Invoked times)
-            => expression(CreateAssertInstance(times));
+            => expression(CreateAssertWhenInstance(times));
 
-        public void AssertSet_NoAot(Action<T> expression)
+        public void AssertSet_When(Action<T> expression)
             => AssertUsingAssertInstance(expression, Invoked.AtLeast(1));
 
-        public void AssertSet_NoAot(Action<T> expression, Invoked times)
+        public void AssertSet_When(Action<T> expression, Invoked times)
             => AssertUsingAssertInstance(expression, times);
 
         public void AssertAdd(Action<T> expression)
@@ -147,7 +147,7 @@ namespace LightMock.Generator
             => AssertUsingAssertInstance(expression, times);
 
         void AssertUsingAssertInstance(Action<T> expression, Invoked times)
-            => expression(CreateAssertInstance(times));
+            => expression(CreateAssertWhenInstance(times));
 
         const string KUidExceptionMessage = "you must provide part of unique identifier";
 
@@ -158,11 +158,11 @@ namespace LightMock.Generator
             return propertiesContext.ArrangeAction(ExchangeForExpression(uidPart2 + uidPart1));
         }
 
-        public IArrangement ArrangeSetter_OnAny(Action<T> expression)
-            => ArrangeSetter_NoAot(expression, CreateArrangeOnAnyInstance);
+        public IArrangement ArrangeSetter_WhenAny(Action<T> expression)
+            => ArrangeSetter_NoAot(expression, CreateArrangeWhenAnyInstance);
 
-        public IArrangement ArrangeSetter_On(Action<T> expression) 
-            => ArrangeSetter_NoAot(expression, CreateArrangeOnInstance);
+        public IArrangement ArrangeSetter_When(Action<T> expression) 
+            => ArrangeSetter_NoAot(expression, CreateArrangeWhenInstance);
 
         IArrangement ArrangeSetter_NoAot(Action<T> expression, Func<ILambdaRequest, T> instanceFactory)
         {
@@ -182,11 +182,11 @@ namespace LightMock.Generator
             propertiesContext.AssertInternal(ExchangeForExpression(uidPart2 + uidPart1), times);
         }
 
-        public void AssertSet_IsAny(Action<T> expression)
-            => AssertSet_IsAny(expression, Invoked.AtLeast(1));
+        public void AssertSet_WhenAny(Action<T> expression)
+            => AssertSet_WhenAny(expression, Invoked.AtLeast(1));
 
-        public void AssertSet_IsAny(Action<T> expression, Invoked times)
-            => expression(CreateAssertIsAnyInstance(times));
+        public void AssertSet_WhenAny(Action<T> expression, Invoked times)
+            => expression(CreateAssertWhenAnyInstance(times));
 
         #region IMockContext<T> implementation
 

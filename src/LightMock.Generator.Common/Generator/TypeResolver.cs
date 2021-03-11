@@ -51,16 +51,16 @@ namespace LightMock.Generator
                 ? Defaults.MulticastDelegateContextType
                 : throw new NotSupportedException();
 
-        public virtual Type GetAssertType()
+        public virtual Type GetAssertWhenType()
             => throw new NotSupportedException();
 
-        public virtual Type GetAssertIsAnyType()
+        public virtual Type GetAssertWhenAnyType()
             => throw new NotSupportedException();
 
-        public virtual Type GetArrangeOnAnyType()
+        public virtual Type GetArrangeWhenAnyType()
             => throw new NotSupportedException();
 
-        public virtual Type GetArrangeOnType()
+        public virtual Type GetArrangeWhenType()
             => throw new NotSupportedException();
 
         public virtual object GetDelegate(object mockContext)
@@ -91,16 +91,16 @@ namespace LightMock.Generator
         internal IMockContextInternal ActivatePropertiesContext<TMock>()
             => (IMockContextInternal)new TypeCacher<(TMock, PropertiesContextTag)>().Activate(GetPropertiesContextType);
 
-        internal TMock ActivateAssertInstance<TMock>(object[] args)
-            => (TMock)new TypeCacher<(TMock, AssertTag)>().Activate(GetAssertType, args);
+        internal TMock ActivateAssertWhenInstance<TMock>(object[] args)
+            => (TMock)new TypeCacher<(TMock, AssertWhenTag)>().Activate(GetAssertWhenType, args);
 
-        internal TMock ActivateAssertIsAnyInstance<TMock>(object[] args)
-            => (TMock)new TypeCacher<(TMock, AssertAnyTag)>().Activate(GetAssertIsAnyType, args);
+        internal TMock ActivateAssertWhenAnyInstance<TMock>(object[] args)
+            => (TMock)new TypeCacher<(TMock, AssertWhenAnyTag)>().Activate(GetAssertWhenAnyType, args);
 
-        internal TMock ActivateArrangeOnAnyInstance<TMock>(object[] args)
-            => (TMock)new TypeCacher<(TMock, ArrangeAnyTag)>().Activate(GetArrangeOnAnyType, args);
+        internal TMock ActivateArrangeWhenAnyInstance<TMock>(object[] args)
+            => (TMock)new TypeCacher<(TMock, ArrangeWhenAnyTag)>().Activate(GetArrangeWhenAnyType, args);
 
-        internal TMock ActivateArrangeOnInstance<TMock>(object[] args)
-            => (TMock)new TypeCacher<(TMock, ArrangeTag)>().Activate(GetArrangeOnType, args);
+        internal TMock ActivateArrangeWhenInstance<TMock>(object[] args)
+            => (TMock)new TypeCacher<(TMock, ArrangeWhenTag)>().Activate(GetArrangeWhenType, args);
     }
 }

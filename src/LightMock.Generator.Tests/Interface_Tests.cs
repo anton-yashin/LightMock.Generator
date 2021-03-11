@@ -40,7 +40,7 @@ namespace LightMock.Generator.Tests
             var mock = testScript.MockObject;
 
             Assert.Throws<MockException>(() => context.AssertGet(f => f.OnlyGet));
-            Assert.Throws<MockException>(() => context.AssertSet_NoAot(f => f.GetAndSet = 5678));
+            Assert.Throws<MockException>(() => context.AssertSet_When(f => f.GetAndSet = 5678));
             Assert.Throws<MockException>(() => context.AssertGet(f => f.GetAndSet));
 
             context.Arrange(f => f.OnlyGet).Returns(1234);
@@ -50,17 +50,17 @@ namespace LightMock.Generator.Tests
             context.ArrangeProperty(f => f.GetAndSet);
             mock.GetAndSet = 5678;
             Assert.Equal(5678, mock.GetAndSet);
-            context.AssertSet_NoAot(f => f.GetAndSet = 5678);
+            context.AssertSet_When(f => f.GetAndSet = 5678);
             context.AssertGet(f => f.GetAndSet);
 
-            Assert.Throws<MockException>(() => context.AssertSet_NoAot(f => f.GetAndSet = 1234));
+            Assert.Throws<MockException>(() => context.AssertSet_When(f => f.GetAndSet = 1234));
 
             Assert.Throws<MockException>(() => context.AssertGet(f => f.OnlyGet, Invoked.Never));
-            Assert.Throws<MockException>(() => context.AssertSet_NoAot(f => f.GetAndSet = 5678, Invoked.Never));
+            Assert.Throws<MockException>(() => context.AssertSet_When(f => f.GetAndSet = 5678, Invoked.Never));
             Assert.Throws<MockException>(() => context.AssertGet(f => f.GetAndSet, Invoked.Never));
 
             Assert.Throws<MockException>(() => context.AssertGet(f => f.OnlyGet, Invoked.Exactly(2)));
-            Assert.Throws<MockException>(() => context.AssertSet_NoAot(f => f.GetAndSet = 5678, Invoked.Exactly(2)));
+            Assert.Throws<MockException>(() => context.AssertSet_When(f => f.GetAndSet = 5678, Invoked.Exactly(2)));
             Assert.Throws<MockException>(() => context.AssertGet(f => f.GetAndSet, Invoked.Exactly(2)));
         }
 
@@ -113,17 +113,17 @@ namespace LightMock.Generator.Tests
             Assert.Throws<MockException>(() => context.AssertGet(f => f.OnlyGet, Invoked.Exactly(2)));
 
             Assert.Throws<MockException>(() => context.AssertGet(f => f.GetAndSet));
-            Assert.Throws<MockException>(() => context.AssertSet_NoAot(f => f.GetAndSet = 3456));
+            Assert.Throws<MockException>(() => context.AssertSet_When(f => f.GetAndSet = 3456));
             context.ArrangeProperty(f => f.GetAndSet);
             mock.GetAndSet = 3456;
             Assert.Equal(3456, mock.GetAndSet);
             context.AssertGet(f => f.GetAndSet);
-            context.AssertSet_NoAot(f => f.GetAndSet = 3456);
-            Assert.Throws<MockException>(() => context.AssertSet_NoAot(f => f.GetAndSet = 1234));
+            context.AssertSet_When(f => f.GetAndSet = 3456);
+            Assert.Throws<MockException>(() => context.AssertSet_When(f => f.GetAndSet = 1234));
             Assert.Throws<MockException>(() => context.AssertGet(f => f.GetAndSet, Invoked.Never));
-            Assert.Throws<MockException>(() => context.AssertSet_NoAot(f => f.GetAndSet = 3456, Invoked.Never));
+            Assert.Throws<MockException>(() => context.AssertSet_When(f => f.GetAndSet = 3456, Invoked.Never));
             Assert.Throws<MockException>(() => context.AssertGet(f => f.GetAndSet, Invoked.Exactly(2)));
-            Assert.Throws<MockException>(() => context.AssertSet_NoAot(f => f.GetAndSet = 3456, Invoked.Exactly(2)));
+            Assert.Throws<MockException>(() => context.AssertSet_When(f => f.GetAndSet = 3456, Invoked.Exactly(2)));
         }
 
         [Fact]
@@ -149,17 +149,17 @@ namespace LightMock.Generator.Tests
             Assert.Throws<MockException>(() => context.AssertGet(f => f.OnlyGet, Invoked.Exactly(2)));
 
             Assert.Throws<MockException>(() => context.AssertGet(f => f.GetAndSet));
-            Assert.Throws<MockException>(() => context.AssertSet_NoAot(f => f.GetAndSet = 3456));
+            Assert.Throws<MockException>(() => context.AssertSet_When(f => f.GetAndSet = 3456));
             context.ArrangeProperty(f => f.GetAndSet);
             mock.GetAndSet = 3456;
             Assert.Equal(3456, mock.GetAndSet);
             context.AssertGet(f => f.GetAndSet);
-            context.AssertSet_NoAot(f => f.GetAndSet = 3456);
-            Assert.Throws<MockException>(() => context.AssertSet_NoAot(f => f.GetAndSet = 1234));
+            context.AssertSet_When(f => f.GetAndSet = 3456);
+            Assert.Throws<MockException>(() => context.AssertSet_When(f => f.GetAndSet = 1234));
             Assert.Throws<MockException>(() => context.AssertGet(f => f.GetAndSet, Invoked.Never));
-            Assert.Throws<MockException>(() => context.AssertSet_NoAot(f => f.GetAndSet = 3456, Invoked.Never));
+            Assert.Throws<MockException>(() => context.AssertSet_When(f => f.GetAndSet = 3456, Invoked.Never));
             Assert.Throws<MockException>(() => context.AssertGet(f => f.GetAndSet, Invoked.Exactly(2)));
-            Assert.Throws<MockException>(() => context.AssertSet_NoAot(f => f.GetAndSet = 3456, Invoked.Exactly(2)));
+            Assert.Throws<MockException>(() => context.AssertSet_When(f => f.GetAndSet = 3456, Invoked.Exactly(2)));
 
             Assert.Equal(KExpected, testScript.DoRun());
         }
@@ -181,16 +181,16 @@ namespace LightMock.Generator.Tests
 
             var arg3 = new MultipleNamespacesArgument();
             Assert.Throws<MockException>(() => context.AssertGet(f => f.SomeProperty));
-            Assert.Throws<MockException>(() => context.AssertSet_NoAot(f => f.SomeProperty = arg3));
+            Assert.Throws<MockException>(() => context.AssertSet_When(f => f.SomeProperty = arg3));
             context.ArrangeProperty(f => f.SomeProperty);
             mock.SomeProperty = arg3;
             Assert.Same(expected: arg3, mock.SomeProperty);
             context.AssertGet(f => f.SomeProperty);
-            context.AssertSet_NoAot(f => f.SomeProperty = arg3);
+            context.AssertSet_When(f => f.SomeProperty = arg3);
             Assert.Throws<MockException>(() => context.AssertGet(f => f.SomeProperty, Invoked.Never));
-            Assert.Throws<MockException>(() => context.AssertSet_NoAot(f => f.SomeProperty = arg3, Invoked.Never));
+            Assert.Throws<MockException>(() => context.AssertSet_When(f => f.SomeProperty = arg3, Invoked.Never));
             Assert.Throws<MockException>(() => context.AssertGet(f => f.SomeProperty, Invoked.Exactly(2)));
-            Assert.Throws<MockException>(() => context.AssertSet_NoAot(f => f.SomeProperty = arg3, Invoked.Exactly(2)));
+            Assert.Throws<MockException>(() => context.AssertSet_When(f => f.SomeProperty = arg3, Invoked.Exactly(2)));
         }
 
         [Fact]
@@ -480,10 +480,10 @@ namespace LightMock.Generator.Tests
             mock.GetAndSet = Guid.NewGuid().ToString();
             mock.SetOnly = Guid.NewGuid().ToString();
 
-            context.AssertSet_IsAny(f => f.GetAndSet = "");
-            context.AssertSet_IsAny(f => f.GetAndSet = "", Invoked.Once);
-            context.AssertSet_IsAny(f => f.SetOnly = "");
-            context.AssertSet_IsAny(f => f.SetOnly = "", Invoked.Once);
+            context.AssertSet_WhenAny(f => f.GetAndSet = "");
+            context.AssertSet_WhenAny(f => f.GetAndSet = "", Invoked.Once);
+            context.AssertSet_WhenAny(f => f.SetOnly = "");
+            context.AssertSet_WhenAny(f => f.SetOnly = "", Invoked.Once);
 
             Assert.Equal(KExpected, testScript.DoRun());
         }
@@ -497,7 +497,7 @@ namespace LightMock.Generator.Tests
             var mock = testScript.MockObject;
             string actual = "";
 
-            context.ArrangeSetter_OnAny(f => f.SetOnly = "").Callback<string>(s => actual = s);
+            context.ArrangeSetter_WhenAny(f => f.SetOnly = "").Callback<string>(s => actual = s);
 
             mock.SetOnly = expected;
 
@@ -513,8 +513,8 @@ namespace LightMock.Generator.Tests
             var context = testScript.Context;
             var mock = testScript.MockObject;
 
-            context.ArrangeSetter_On(f => f.SetOnly = "1234").Callback<string>(s => on1234++);
-            context.ArrangeSetter_On(f => f.SetOnly = "5678").Callback<string>(s => on5678++);
+            context.ArrangeSetter_When(f => f.SetOnly = "1234").Callback<string>(s => on1234++);
+            context.ArrangeSetter_When(f => f.SetOnly = "5678").Callback<string>(s => on5678++);
 
             mock.SetOnly = "1234";
 
