@@ -74,8 +74,7 @@ namespace LightMock.Generator
             args[0] = publicContext;
             args[1] = propertiesContext;
             args[2] = protectedContext;
-            for (int i = 0; i < prms.Length; i++)
-                args[i + offset] = prms[i];
+            Array.Copy(prms, 0, args, offset, prms.Length);
             return args;
         }
 
@@ -85,8 +84,16 @@ namespace LightMock.Generator
             var args = new object[prms.Length + offset];
             args[0] = propertiesContext;
             args[1] = invoked;
-            for (int i = 0; i < prms.Length; i++)
-                args[i + offset] = prms[i];
+            Array.Copy(prms, 0, args, offset, prms.Length);
+            return args;
+        }
+
+        object[] GetArrangeArgs(ILambdaRequest request)
+        {
+            const int offset = 1;
+            var args = new object[prms.Length + offset];
+            args[0] = request;
+            Array.Copy(prms, 0, args, offset, prms.Length);
             return args;
         }
 
@@ -104,10 +111,10 @@ namespace LightMock.Generator
             => typeResolver.ActivateAssertIsAnyInstance<T>(GetAssertArgs(invoked));
 
         T CreateArrangeOnAnyInstance(ILambdaRequest request)
-            => typeResolver.ActivateArrangeOnAnyInstance<T>(new object[] { request });
+            => typeResolver.ActivateArrangeOnAnyInstance<T>(GetArrangeArgs(request));
 
         T CreateArrangeOnInstance(ILambdaRequest request)
-            => typeResolver.ActivateArrangeOnInstance<T>(new object[] { request });
+            => typeResolver.ActivateArrangeOnInstance<T>(GetArrangeArgs(request));
 
         LambdaExpression ExchangeForExpression(string token)
             => ExchangeForExpression(token, ContextResolverDefaults.Instance);

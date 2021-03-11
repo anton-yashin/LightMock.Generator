@@ -1,5 +1,6 @@
 ﻿using LightMock.Generator.Tests.TestAbstractions;
 using System;
+using System.Collections.Generic;
 
 namespace LightMock.Generator.Tests.AbstractClass
 {
@@ -7,7 +8,7 @@ namespace LightMock.Generator.Tests.AbstractClass
     {
         private readonly Mock<AArrangeSetter_OnAny> mock;
 
-        public ArrangeSetter_OnAny() => mock = new Mock<AArrangeSetter_OnAny>();
+        public ArrangeSetter_OnAny() => mock = new Mock<AArrangeSetter_OnAny>(new object(), 1234, (IEnumerable<object>)null!);
 
         public IMock<AArrangeSetter_OnAny> Context => mock;
 
