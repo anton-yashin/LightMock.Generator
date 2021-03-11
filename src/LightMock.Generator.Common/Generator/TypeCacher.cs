@@ -24,13 +24,39 @@
 *******************************************************************************
     https://github.com/anton-yashin/
 *******************************************************************************/
+
 using System;
-using System.Linq.Expressions;
+using System.Threading;
 
 namespace LightMock.Generator
 {
-    public interface ILambdaRequest
+    /// <summary>
+    /// Caches result of type resolution in static variable
+    /// </summary>
+    /// <typeparam name="TTag">unique tag</typeparam>
+    struct TypeCacher<TTag>
     {
-        void SetResult(LambdaExpression result);
+        static Type? cache;
+
+        /// <summary>
+        /// Resolves type by <paramref name="typeResolver"/> if not yet resoved
+        /// and activates it.
+        /// </summary>
+        /// <param name="typeResolver">Method to resolve type</param>
+        /// <param name="args">Arguments to be passed in to constructor</param>
+        /// <returns></returns>
+        public object Activate(Func<Type> typeResolver, object[] args)
+            => Activator.CreateInstance(LazyInitializer.EnsureInitialized(ref cache,
+                typeResolver), args: args);
+
+        /// <summary>
+        /// Resolves type by <paramref name="typeResolver"/> if not yet resoved
+        /// and activates it.
+        /// </summary>
+        /// <param name="typeResolver">Method to resolve type</param>
+        /// <returns></returns>
+        public object Activate(Func<Type> typeResolver)
+            => Activator.CreateInstance(LazyInitializer.EnsureInitialized(ref cache,
+                typeResolver));
     }
 }

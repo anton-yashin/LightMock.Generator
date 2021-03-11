@@ -31,10 +31,10 @@ namespace LightMock.Generator
         public const string ProtectedToPublicInterface = "IP2P_";
         public const string MockClass = "Mock_";
         public const string PropertyToFuncInterface = "Property_";
-        public const string AssertImplementation = "Assert_";
-        public const string AssertIsAnyImplementation = "Assert_IsAny_";
+        public const string AssertWhenImplementation = "Assert_When_";
+        public const string AssertWhenAnyImplementation = "Assert_WhenAny_";
         public const string TypeByType = "TypeByType_";
-        public const string ArrangeOnAnyImplementation = "Arrange_OnAny_";
-        public const string ArrangeOnImplementation = "Arrange_On_";
+        public const string ArrangeWhenAnyImplementation = "Arrange_WhenAny_";
+        public const string ArrangeWhenImplementation = "Arrange_When_";
     }
 }

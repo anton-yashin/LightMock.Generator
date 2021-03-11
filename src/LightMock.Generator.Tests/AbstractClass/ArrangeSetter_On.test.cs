@@ -7,7 +7,7 @@ namespace LightMock.Generator.Tests.AbstractClass
     {
         private readonly Mock<AArrangeSetter_On> mock;
 
-        public ArrangeSetter_On() => mock = new Mock<AArrangeSetter_On>();
+        public ArrangeSetter_On() => mock = new Mock<AArrangeSetter_On>(new object(), 1234);
 
         public IMock<AArrangeSetter_On> Context => mock;
 

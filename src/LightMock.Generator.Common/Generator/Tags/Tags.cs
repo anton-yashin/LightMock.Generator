@@ -24,13 +24,14 @@
 *******************************************************************************
     https://github.com/anton-yashin/
 *******************************************************************************/
-using System;
-using System.Linq.Expressions;
 
-namespace LightMock.Generator
+namespace LightMock.Generator.Tags
 {
-    public interface ILambdaRequest
-    {
-        void SetResult(LambdaExpression result);
-    }
+    sealed class MockInstanceTag { }
+    sealed class ProtectedContextTag { }
+    sealed class PropertiesContextTag { }
+    sealed class AssertWhenTag { }
+    sealed class AssertWhenAnyTag { }
+    sealed class ArrangeWhenTag { }
+    sealed class ArrangeWhenAnyTag { }
 }
