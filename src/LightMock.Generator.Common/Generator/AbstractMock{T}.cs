@@ -158,8 +158,6 @@ namespace LightMock.Generator
             return propertiesContext.ArrangeAction(ExchangeForExpression(uidPart2 + uidPart1));
         }
 
-        const string KAssignmentIsRequired = "A property assignment is required.";
-
         public IArrangement ArrangeSetter_OnAny(Action<T> expression)
             => ArrangeSetter_NoAot(expression, CreateArrangeOnAnyInstance);
 
