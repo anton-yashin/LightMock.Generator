@@ -1,4 +1,5 @@
-﻿using System;
+﻿using LightMock.Generator.Tags;
+using System;
 using System.ComponentModel;
 
 namespace LightMock.Generator
@@ -10,52 +11,33 @@ namespace LightMock.Generator
         protected IContextResolverDefaults Defaults => ContextResolverDefaults.Instance;
 
         protected TypeResolver(Type contextType)
-        {
-            this.ContextType = contextType;
-        }
+            => this.ContextType = contextType;
 
         public virtual Type GetInstanceType()
-        {
-            throw new global::System.NotSupportedException();
-        }
+            => throw new NotSupportedException();
 
         public virtual Type GetProtectedContextType()
-        {
-            return Defaults.DefaultProtectedContextType;
-        }
+            => Defaults.DefaultProtectedContextType;
 
         public virtual Type GetPropertiesContextType()
-        {
-            if (ContextType.IsSubclassOf(Defaults.MulticastDelegateType))
-                return Defaults.MulticastDelegateContextType;
-
-            throw new global::System.NotSupportedException();
-        }
+            => ContextType.IsSubclassOf(Defaults.MulticastDelegateType)
+                ? Defaults.MulticastDelegateContextType
+                : throw new NotSupportedException();
 
         public virtual Type GetAssertType()
-        {
-            throw new global::System.NotSupportedException();
-        }
+            => throw new NotSupportedException();
 
         public virtual Type GetAssertIsAnyType()
-        {
-            throw new global::System.NotSupportedException();
-        }
+            => throw new NotSupportedException();
 
         public virtual Type GetArrangeOnAnyType()
-        {
-            throw new NotSupportedException();
-        }
+            => throw new NotSupportedException();
 
         public virtual Type GetArrangeOnType()
-        {
-            throw new NotSupportedException();
-        }
+            => throw new NotSupportedException();
 
         public virtual object GetDelegate(object mockContext)
-        {
-            throw new global::System.NotSupportedException();
-        }
+            => throw new NotSupportedException();
 
         protected object CreateGenericDelegate(Type delegateType, object mockContext, string fullName)
         {
@@ -73,5 +55,25 @@ namespace LightMock.Generator
         protected Type MakeGenericMockContextType(Type genericType)
             => Defaults.MockContextType.MakeGenericType(genericType.MakeGenericType(ContextType.GetGenericArguments()));
 
+        internal TMock ActivateInstance<TMock>(object[] args)
+            => (TMock)new TypeCacher<(TMock, MockInstanceTag)>().Activate(GetInstanceType, args);
+
+        internal object ActivateProtectedContext<TMock>()
+            => new TypeCacher<(TMock, ProtectedContextTag)>().Activate(GetProtectedContextType);
+
+        internal IMockContextInternal ActivatePropertiesContext<TMock>()
+            => (IMockContextInternal)new TypeCacher<(TMock, PropertiesContextTag)>().Activate(GetPropertiesContextType);
+
+        internal TMock ActivateAssertInstance<TMock>(object[] args)
+            => (TMock)new TypeCacher<(TMock, AssertTag)>().Activate(GetAssertType, args);
+
+        internal TMock ActivateAssertIsAnyInstance<TMock>(object[] args)
+            => (TMock)new TypeCacher<(TMock, AssertAnyTag)>().Activate(GetAssertIsAnyType, args);
+
+        internal TMock ActivateArrangeOnAnyInstance<TMock>(object[] args)
+            => (TMock)new TypeCacher<(TMock, ArrangeAnyTag)>().Activate(GetArrangeOnAnyType, args);
+
+        internal TMock ActivateArrangeOnInstance<TMock>(object[] args)
+            => (TMock)new TypeCacher<(TMock, ArrangeTag)>().Activate(GetArrangeOnType, args);
     }
 }

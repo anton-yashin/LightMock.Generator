@@ -26,7 +26,6 @@
 *******************************************************************************/
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -51,8 +50,8 @@ namespace LightMock.Generator
             prms = Array.Empty<object>();
             typeResolver = (TypeResolver)Activator.CreateInstance(t, contextType);
             publicContext = new MockContext<T>();
-            protectedContext = CreateProtectedContext();
-            propertiesContext = CreatePropertiesContext();
+            protectedContext = typeResolver.ActivateProtectedContext<T>();
+            propertiesContext = typeResolver.ActivatePropertiesContext<T>();
         }
 
         public AbstractMock(params object[] prms) : this()
@@ -64,15 +63,9 @@ namespace LightMock.Generator
 
         object IProtectedContext<T>.ProtectedContext => protectedContext;
 
-        static Type contextType = typeof(T);
-        static Type resolverType = contextType.IsGenericType ? contextType.GetGenericTypeDefinition() : contextType;
-        static Type? mockInstanceType;
-        static Type? protectedContextType;
-        static Type? propertiesType;
-        static Type? assertType;
-        static Type? assertIsAnyType;
-        static Type? arrangeOnAnyType;
-        static Type? arrangeOnType;
+        static readonly Type contextType = typeof(T);
+        static readonly Type resolverType = contextType.IsGenericType ? contextType.GetGenericTypeDefinition() : contextType;
+        static readonly bool isDelegate = contextType.IsDelegate();
 
         object[] GetMockInstanceArgs()
         {
@@ -99,59 +92,22 @@ namespace LightMock.Generator
 
         T CreateMockInstance()
         {
-            var type = LazyInitializer.EnsureInitialized(ref mockInstanceType!, typeResolver.GetInstanceType);
-            if (type.IsDelegate())
+            if (isDelegate)
                 return (T)typeResolver.GetDelegate(publicContext);
-            var result = Activator.CreateInstance(type, args: GetMockInstanceArgs())
-                ?? throw new InvalidOperationException("can't create context for: " + typeof(T).FullName);
-            return (T)result;
-        }
-
-        object CreateProtectedContext()
-        {
-            return Activator.CreateInstance(LazyInitializer.EnsureInitialized(ref protectedContextType,
-                typeResolver.GetProtectedContextType))
-                ?? throw new InvalidOperationException("can't create protected context for: " + typeof(T).FullName);
+            return typeResolver.ActivateInstance<T>(GetMockInstanceArgs());
         }
 
         T CreateAssertInstance(Invoked invoked)
-        {
-            var result = Activator.CreateInstance(LazyInitializer.EnsureInitialized(ref assertType,
-                typeResolver.GetAssertType), args: GetAssertArgs(invoked))
-                ?? throw new InvalidOperationException("can't create assert for: " + typeof(T).FullName);
-            return (T)result;
-        }
+            => typeResolver.ActivateAssertInstance<T>(GetAssertArgs(invoked));
 
         T CreateAssertIsAnyInstance(Invoked invoked)
-        {
-            var result = Activator.CreateInstance(LazyInitializer.EnsureInitialized(ref assertIsAnyType,
-                typeResolver.GetAssertIsAnyType), args: GetAssertArgs(invoked))
-                ?? throw new InvalidOperationException("can't create assert for: " + typeof(T).FullName);
-            return (T)result;
-        }
+            => typeResolver.ActivateAssertIsAnyInstance<T>(GetAssertArgs(invoked));
 
         T CreateArrangeOnAnyInstance(ILambdaRequest request)
-        {
-            var result = Activator.CreateInstance(LazyInitializer.EnsureInitialized(ref arrangeOnAnyType,
-                typeResolver.GetArrangeOnAnyType), request)
-                ?? throw new InvalidOperationException("can't create arrange for: " + typeof(T).FullName);
-            return (T)result;
-        }
+            => typeResolver.ActivateArrangeOnAnyInstance<T>(new object[] { request });
 
         T CreateArrangeOnInstance(ILambdaRequest request)
-        {
-            var result = Activator.CreateInstance(LazyInitializer.EnsureInitialized(ref arrangeOnType,
-                typeResolver.GetArrangeOnType), request)
-                ?? throw new InvalidOperationException("can't create arrange for: " + typeof(T).FullName);
-            return (T)result;
-        }
-
-        IMockContextInternal CreatePropertiesContext()
-        {
-            return (IMockContextInternal)Activator.CreateInstance(LazyInitializer.EnsureInitialized(ref propertiesType,
-                typeResolver.GetPropertiesContextType))
-                ?? throw new InvalidOperationException("can't create property context for: " + typeof(T).FullName);
-        }
+            => typeResolver.ActivateArrangeOnInstance<T>(new object[] { request });
 
         LambdaExpression ExchangeForExpression(string token)
             => ExchangeForExpression(token, ContextResolverDefaults.Instance);
@@ -245,5 +201,6 @@ namespace LightMock.Generator
             => publicContext.Assert(matchExpression, invoked);
 
         #endregion
+
     }
 }
