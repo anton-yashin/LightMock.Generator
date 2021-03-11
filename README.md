@@ -20,6 +20,7 @@ namespace Playground
     {
         void Foo(int baz);
         int Bar();
+        string Baz { get; set; }
     }
 
     public class SomeTests
@@ -31,12 +32,19 @@ namespace Playground
             var o = mock.Object; // use Mock<T>.Object property to get mock object
 
             o.Foo(123);
-            mock.Assert(f => f.Foo(123)); // Mock<T> inherit MockContext<T>. Use it to assert or arrange context.
+            mock.Assert(f => f.Foo(123)); // Mock<T> uses MockContext<T> internally. Use it to assert or arrange context.
 
-            const int expected = 123;
-            mock.Arrange(f => f.Bar()).Returns(expected); // Mock<T> inherit MockContext<T>. Use it to assert or arrange context.
+            o.Baz = "456"; 
+            mock.AssertSet(f => f.Baz = The<string>.Is(s => s == "456")); // There methods available to work with properties. See IMock<T> to complete list
 
-            Assert.Equal(expected, o.Bar());
+            const int expectedBar = 123;
+            mock.Arrange(f => f.Bar()).Returns(expectedBar); // Mock<T> uses MockContext<T> internally. Use it to assert or arrange context.
+            Assert.Equal(expectedBar, o.Bar());
+
+            int bazInvokedTimes = 0; // ArrangeSetter without suffix uses AOT transformation. Methods with suffix can be used
+            mock.ArrangeSetter_WhenAny(f => f.Baz = "").Callback<string>(s => bazInvokedTimes++); //  without AOT transformations.
+            o.Baz = "some random value";
+            Assert.Equal(1, bazInvokedTimes);
         }
     }
 }
@@ -125,7 +133,8 @@ namespace Playground
 
 ### DisableCodeGenerationAttribute
 Place the attribute to your assembly to disable the source code generator.
-It can be useful if you moving mocks to separate assembly.
+It can be useful if you moving mocks to separate assembly. Be aware you can't use methods
+ArrangeSetter and AssertSet of Mock<T>, because they use AOT transformations.
 
 ### DontOverrideAttribute
 Use the attribute with class type whose virtual members should not be overridden

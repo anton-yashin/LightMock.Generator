@@ -74,8 +74,12 @@ namespace LightMock.Generator
         /// <param name="uidPart1">First part of uid that identifies <paramref name="expression"/></param>
         /// <param name="uidPart2">Second part of uid that identifies <paramref name="expression"/></param>
         /// <remarks>
-        /// This method uses AOT transformations, thus you can use pattern matching with <seealso cref="The{TValue}"/>
-        /// If code generation is disabled <see cref="DisableCodeGenerationAttribute"/>, then this method will not work.
+        /// Usage restrictions:<br/>
+        /// * All arguments MUST be available on compile time and be plain and simple;<br/>
+        /// * Pattern matching using <see cref="The{TValue}"/> type is available;<br/>
+        /// * Only one call per source code line allowed;<br/>
+        /// * Do not place on same line <see cref="ArrangeSetter(Action{T}, string, int)"/>.
+        /// * Works when code generation is enabled <see cref="DisableCodeGenerationAttribute"/>
         /// </remarks>
         void AssertSet(Action<T> expression, [CallerFilePath] string uidPart1 = "", [CallerLineNumber] int uidPart2 = 0);
         /// <summary>
@@ -86,8 +90,12 @@ namespace LightMock.Generator
         /// <param name="uidPart1">First part of uid that identifies <paramref name="expression"/></param>
         /// <param name="uidPart2">Second part of uid that identifies <paramref name="expression"/></param>
         /// <remarks>
-        /// This method uses AOT transformations, thus you can use pattern matching with <seealso cref="The{TValue}"/>
-        /// If code generation is disabled <see cref="DisableCodeGenerationAttribute"/>, then this method will not work.
+        /// Usage restrictions:<br/>
+        /// * All arguments MUST be available on compile time and be plain and simple;<br/>
+        /// * Pattern matching using <see cref="The{TValue}"/> type is available;<br/>
+        /// * Only one call per source code line allowed;<br/>
+        /// * Do not place on same line <see cref="ArrangeSetter(Action{T}, string, int)"/>.
+        /// * Works when code generation is enabled <see cref="DisableCodeGenerationAttribute"/>
         /// </remarks>
         void AssertSet(Action<T> expression, Invoked times, [CallerFilePath] string uidPart1 = "", [CallerLineNumber] int uidPart2 = 0);
         /// <summary>
@@ -95,7 +103,7 @@ namespace LightMock.Generator
         /// </summary>
         /// <param name="propertySelector">Set a property that you want to check with any value</param>
         /// <remarks>
-        /// This function don't use AOT transformations.
+        /// No AOT transformations, thus pattern matching using <see cref="The{TValue}"/> type is not working.
         /// </remarks>
         void AssertSet_WhenAny(Action<T> propertySelector);
         /// <summary>
@@ -104,7 +112,7 @@ namespace LightMock.Generator
         /// <param name="propertySelector">Set a property that you want to check with any value</param>
         /// <param name="times">The number of times a method is expected to be called.</param>
         /// <remarks>
-        /// This function don't use AOT transformations.
+        /// No AOT transformations, thus pattern matching using <see cref="The{TValue}"/> type is not working.
         /// </remarks>
         void AssertSet_WhenAny(Action<T> propertySelector, Invoked times);
         /// <summary>
@@ -137,16 +145,33 @@ namespace LightMock.Generator
         /// <param name="expression">The match expression that describes where this <see cref="IArrangement"/> will be applied.</param>
         /// <param name="uidPart1">First part of uid that identifies <paramref name="expression"/></param>
         /// <param name="uidPart2">Second part of uid that identifies <paramref name="expression"/></param>
-        /// <returns>A new <see cref="IArrangement"/> used to apply method behavior.</returns>
+        /// <returns>A new <see cref="IArrangement"/> used to apply property behavior.</returns>
         /// <remarks>
         /// Usage restrictions:<br/>
         /// * All arguments MUST be available on compile time and be plain and simple;<br/>
+        /// * Pattern matching using <see cref="The{TValue}"/> type is available;<br/>
         /// * Only one call per source code line allowed;<br/>
-        /// * Do not place on same line <see cref="AssertSet_When(Action{T})"/>.
+        /// * Do not place on same line <see cref="AssertSet(Action{T}, string, int)"/>.
         /// * Works when code generation is enabled <see cref="DisableCodeGenerationAttribute"/>
         /// </remarks>
         IArrangement ArrangeSetter(Action<T> expression, [CallerFilePath] string uidPart1 = "", [CallerLineNumber] int uidPart2 = 0);
+        /// <summary>
+        /// Arranges a property setter when any value is set to it.
+        /// </summary>
+        /// <param name="expression">Expression used to select a property that will be arranged when any value is set</param>
+        /// <returns>A new <see cref="IArrangement"/> used to apply property behavior.</returns>
+        /// <remarks>
+        /// No AOT transformations, thus pattern matching using <see cref="The{TValue}"/> type is not working.
+        /// </remarks>
         IArrangement ArrangeSetter_WhenAny(Action<T> expression);
+        /// <summary>
+        /// Arranges a property setter when specified value is set to it.
+        /// </summary>
+        /// <param name="expression">Expression used to select a property that will be arranged when specified value is set</param>
+        /// <returns>A new <see cref="IArrangement"/> used to apply property behavior.</returns>
+        /// <remarks>
+        /// No AOT transformations, thus pattern matching using <see cref="The{TValue}"/> type is not working.
+        /// </remarks>
         IArrangement ArrangeSetter_When(Action<T> expression);
     }
 }

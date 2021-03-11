@@ -31,6 +31,11 @@ namespace LightMock.Generator
     /// <summary>
     /// Apply this attribute to your assembly to turn off this source code generator.
     /// </summary>
+    /// <remarks>
+    /// Be aware you can't use <see cref="IMock{T}.ArrangeSetter(Action{T}, string, int)"/>,
+    /// <see cref="IMock{T}.AssertSet(Action{T}, string, int)"/> and <see cref="IMock{T}.AssertSet(Action{T}, Invoked, string, int)"/>
+    /// because they use AOT transformations. This attribute useful when you want to create a separate library of mocks.
+    /// </remarks>
     [AttributeUsage(validOn: AttributeTargets.Assembly, AllowMultiple = false, Inherited = false)]
     public sealed class DisableCodeGenerationAttribute : Attribute
     {
