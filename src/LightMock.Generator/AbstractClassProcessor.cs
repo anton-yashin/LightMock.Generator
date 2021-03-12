@@ -243,7 +243,7 @@ namespace {@namespace}
 {{
     public interface {Prefix.PropertyToFuncInterface}{className}{typeArgumentsWithBrackets}
     {{
-        {string.Join("\r\n        ", members.Select(i => i.OriginalDefinition.Accept(propertyDefinitionVisitor)))}
+        {string.Join("\r\n        ", members.Select(i => i.Accept(propertyDefinitionVisitor)))}
     }}
 
     sealed class {Prefix.AssertWhenImplementation}{className}{typeArgumentsWithBrackets} : {baseNameWithTypeArguments}
@@ -254,7 +254,7 @@ namespace {@namespace}
 
 {string.Join("\r\n", GenerateAssertConstructors(Prefix.AssertWhenImplementation))}
 
-        {string.Join("\r\n        ", members.Select(i => i.OriginalDefinition.Accept(assertImplementationVisitor)))}
+        {string.Join("\r\n        ", members.Select(i => i.Accept(assertImplementationVisitor)))}
     }}
 
     sealed class {Prefix.AssertWhenAnyImplementation}{className}{typeArgumentsWithBrackets} : {baseNameWithTypeArguments}
@@ -265,7 +265,7 @@ namespace {@namespace}
 
 {string.Join("\r\n", GenerateAssertConstructors(Prefix.AssertWhenAnyImplementation))}
 
-        {string.Join("\r\n        ", members.Select(i => i.OriginalDefinition.Accept(assertIsAnyImplementationVisitor)))}
+        {string.Join("\r\n        ", members.Select(i => i.Accept(assertIsAnyImplementationVisitor)))}
     }}
 
     sealed class {Prefix.ArrangeWhenAnyImplementation}{className}{typeArgumentsWithBrackets} : {baseNameWithTypeArguments}
@@ -275,7 +275,7 @@ namespace {@namespace}
 
 {string.Join("\r\n", GenerateArrangeConstructors(Prefix.ArrangeWhenAnyImplementation))}
 
-        {string.Join("\r\n        ", members.Select(i => i.OriginalDefinition.Accept(arrangeOnAnyImplementationVisitor)))}
+        {string.Join("\r\n        ", members.Select(i => i.Accept(arrangeOnAnyImplementationVisitor)))}
     }}
 
     sealed class {Prefix.ArrangeWhenImplementation}{className}{typeArgumentsWithBrackets} : {baseNameWithTypeArguments}
@@ -285,13 +285,13 @@ namespace {@namespace}
 
 {string.Join("\r\n", GenerateArrangeConstructors(Prefix.ArrangeWhenImplementation))}
 
-        {string.Join("\r\n        ", members.Select(i => i.OriginalDefinition.Accept(arrangeOnImplementationVisitor)))}
+        {string.Join("\r\n        ", members.Select(i => i.Accept(arrangeOnImplementationVisitor)))}
     }}
 
     public interface {Prefix.ProtectedToPublicInterface}{className}{typeArgumentsWithBrackets}
         {whereClause}
     {{
-        {string.Join("\r\n        ", members.Select(i => i.OriginalDefinition.Accept(protectedVisitor)).SkipWhile(i => string.IsNullOrWhiteSpace(i)))}
+        {string.Join("\r\n        ", members.Select(i => i.Accept(protectedVisitor)).SkipWhile(i => string.IsNullOrWhiteSpace(i)))}
     }}
 
     sealed class {Prefix.TypeByType}{className}{typeArgumentsWithUnderlines} : global::LightMock.Generator.{nameof(TypeResolver)}
@@ -339,7 +339,7 @@ namespace {@namespace}
 
 {string.Join("\r\n", GenerateConstructors())}
 
-        {string.Join("\r\n        ", members.Select(i => i.OriginalDefinition.Accept(symbolVisitor)).SkipWhile(i => string.IsNullOrWhiteSpace(i)))}
+        {string.Join("\r\n        ", members.Select(i => i.Accept(symbolVisitor)).SkipWhile(i => string.IsNullOrWhiteSpace(i)))}
     }}
 }}
 

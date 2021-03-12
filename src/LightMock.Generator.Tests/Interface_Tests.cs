@@ -522,6 +522,20 @@ namespace LightMock.Generator.Tests
             Assert.Equal(0, on5678);
         }
 
+        [Fact]
+        public void InheritSpecialized()
+        {
+            var expected = new SpecializationTag();
+            var testScript = LoadAssembly<IInheritSpecialized>();
+            var context = testScript.Context;
+            var mock = testScript.MockObject;
+
+            context.Arrange(f => f.Function()).Returns(expected);
+            Assert.Same(expected, mock.Function());
+
+            mock.Action(expected);
+            context.Assert(f => f.Action(expected));
+        }
 
         protected override string GetFullResourceName(string resourceName)
             => "Interface." + resourceName + ".test.cs";
