@@ -109,7 +109,7 @@ namespace {@namespace}
     public interface {Prefix.PropertyToFuncInterface}{interfaceName}{typeArgumentsWithBrackets}
         {whereClause}
     {{
-        {string.Join("\r\n        ", members.Select(i => i.OriginalDefinition.Accept(propertyDefinitionVisitor)))}
+        {string.Join("\r\n        ", members.Select(i => i.Accept(propertyDefinitionVisitor)))}
     }}
 
     sealed class {Prefix.AssertWhenImplementation}{interfaceName}{typeArgumentsWithBrackets} : {baseNameWithTypeArguments}
@@ -126,7 +126,7 @@ namespace {@namespace}
             this.{VariableNames.Invoked} = {VariableNames.Invoked};
         }}
 
-        {string.Join("\r\n        ", members.Select(i => i.OriginalDefinition.Accept(assertImplementationVisitor)))}
+        {string.Join("\r\n        ", members.Select(i => i.Accept(assertImplementationVisitor)))}
     }}
 
     sealed class {Prefix.AssertWhenAnyImplementation}{interfaceName}{typeArgumentsWithBrackets} : {baseNameWithTypeArguments}
@@ -143,7 +143,7 @@ namespace {@namespace}
             this.{VariableNames.Invoked} = {VariableNames.Invoked};
         }}
 
-        {string.Join("\r\n        ", members.Select(i => i.OriginalDefinition.Accept(assertIsAnyImplementationVisitor)))}
+        {string.Join("\r\n        ", members.Select(i => i.Accept(assertIsAnyImplementationVisitor)))}
     }}
 
     sealed class {Prefix.ArrangeWhenAnyImplementation}{interfaceName}{typeArgumentsWithBrackets} : {baseNameWithTypeArguments}
@@ -157,7 +157,7 @@ namespace {@namespace}
             this.{VariableNames.Request} = {VariableNames.Request};
         }}
 
-        {string.Join("\r\n        ", members.Select(i => i.OriginalDefinition.Accept(arrangeOnAnyImplementationVisitor)))}
+        {string.Join("\r\n        ", members.Select(i => i.Accept(arrangeOnAnyImplementationVisitor)))}
     }}
 
     sealed class {Prefix.ArrangeWhenImplementation}{interfaceName}{typeArgumentsWithBrackets} : {baseNameWithTypeArguments}
@@ -171,7 +171,7 @@ namespace {@namespace}
             this.{VariableNames.Request} = {VariableNames.Request};
         }}
 
-        {string.Join("\r\n        ", members.Select(i => i.OriginalDefinition.Accept(arrangeOnImplementationVisitor)))}
+        {string.Join("\r\n        ", members.Select(i => i.Accept(arrangeOnImplementationVisitor)))}
     }}
 
     sealed class {Prefix.TypeByType}{interfaceName}{typeArgumentsWithUnderlines} : global::LightMock.Generator.{nameof(TypeResolver)}
@@ -226,7 +226,7 @@ namespace {@namespace}
             object unused)
             : this({VariableNames.Context}, {VariableNames.PropertiesContext}) {{ }}
 
-        {string.Join("\r\n        ", members.Select(i => i.OriginalDefinition.Accept(symbolVisitor)))}
+        {string.Join("\r\n        ", members.Select(i => i.Accept(symbolVisitor)))}
     }}
 }}
 ";
