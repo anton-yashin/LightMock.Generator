@@ -63,7 +63,7 @@ namespace LightMock.Generator
             string contextName,
             IPropertySymbol symbol)
         {
-            return @this.AppendMockGetterAndSetter(contextName, symbol, sb => sb.Append(".Invoke(f => f."));
+            return @this.AppendMockGetterAndSetter(contextName, symbol, sb => sb.Append(".Invoke(f => f"));
         }
 
         public static StringBuilder AppendMockGetterAndSetter(
@@ -73,7 +73,7 @@ namespace LightMock.Generator
             string invocationType)
         {
             return @this.AppendMockGetterAndSetter(contextName, symbol,
-                sb => sb.Append(".Invoke(f => ((").Append(invocationType).Append(")f)."));
+                sb => sb.Append(".Invoke(f => ((").Append(invocationType).Append(")f)"));
         }
 
         static StringBuilder AppendMockGetterAndSetter(
@@ -90,11 +90,23 @@ namespace LightMock.Generator
                     .Append(VariableNames.PropertiesContext)
                     .Append(".Invoke(f => f.")
                     .AppendP2FGetter(symbol, typePart)
-                    .Append("()); return global::LightMock.Generator.Default.Get(() =>")
+                    .Append("(")
+                    .AppendIndexerParametersInvocation(symbol, addCommaAtEnd: false)
+                    .Append(")); return global::LightMock.Generator.Default.Get(() =>")
                     .Append(contextName);
-                appendGetInvocation(@this)
-                    .Append(symbol.Name)
-                    .Append(")); } ");
+                appendGetInvocation(@this);
+                if (symbol.IsIndexer)
+                {
+                    @this.Append('[')
+                        .AppendIndexerParametersInvocation(symbol, addCommaAtEnd: false)
+                        .Append("])); } ");
+                }
+                else
+                { 
+                    @this.Append('.')
+                        .Append(symbol.Name)
+                        .Append(")); } ");
+                }
             }
             if (symbol.SetMethod != null)
             {
@@ -102,13 +114,25 @@ namespace LightMock.Generator
                     .Append(VariableNames.PropertiesContext)
                     .Append(".Invoke(f => f.")
                     .AppendP2FSetter(symbol, typePart)
-                    .Append("(value)); ");
+                    .Append("(")
+                    .AppendIndexerParametersInvocation(symbol, addCommaAtEnd: true)
+                    .Append("value)); ");
                 if (symbol.GetMethod != null)
                 {
                     @this.Append(contextName)
-                        .Append(".InvokeSetter(f => f.")
-                        .Append(symbol.Name)
-                        .Append(", value); ");
+                        .Append(".InvokeSetter(f => f");
+                    if (symbol.IsIndexer)
+                    {
+                        @this.Append('[')
+                            .AppendIndexerParametersInvocation(symbol, addCommaAtEnd: false)
+                            .Append("], value); ");
+                    }
+                    else
+                    {
+                        @this.Append('.')
+                            .Append(symbol.Name)
+                            .Append(", value); ");
+                    }
                 }
                 @this.Append("} ");
             }
@@ -128,7 +152,9 @@ namespace LightMock.Generator
                     .Append(VariableNames.Context)
                     .Append(".Assert(f => f.")
                     .AppendP2FGetter(symbol, typePart)
-                    .Append("(), ")
+                    .Append("(")
+                    .AppendIndexerParametersInvocation(symbol, addCommaAtEnd: false)
+                    .Append("), ")
                     .Append(VariableNames.Invoked)
                     .Append("); return default(")
                     .Append(symbol.Type.ToDisplayString(SymbolDisplayFormats.WithTypeParams))
@@ -140,7 +166,9 @@ namespace LightMock.Generator
                     .Append(VariableNames.Context)
                     .Append(".Assert(f => f.")
                     .AppendP2FSetter(symbol, typePart)
-                    .Append("(value), ")
+                    .Append("(")
+                    .AppendIndexerParametersInvocation(symbol, addCommaAtEnd: true)
+                    .Append("value), ")
                     .Append(VariableNames.Invoked)
                     .Append("); }");
             }
@@ -162,7 +190,9 @@ namespace LightMock.Generator
                     .Append(VariableNames.Context)
                     .Append(".Assert(f => f.")
                     .AppendP2FGetter(symbol, typePart)
-                    .Append("(), ")
+                    .Append("(")
+                    .AppendIndexerParametersIsAnyInvocation(symbol, addCommaAtEnd: false)
+                    .Append("), ")
                     .Append(VariableNames.Invoked)
                     .Append("); return default(")
                     .Append(symbol.Type.ToDisplayString(SymbolDisplayFormats.WithTypeParams))
@@ -174,7 +204,9 @@ namespace LightMock.Generator
                     .Append(VariableNames.Context)
                     .Append(".Assert(f => f.")
                     .AppendP2FSetter(symbol, typePart)
-                    .Append("(The<")
+                    .Append("(")
+                    .AppendIndexerParametersIsAnyInvocation(symbol, addCommaAtEnd: true)
+                    .Append("The<")
                     .Append(symbol.Type.ToDisplayString(SymbolDisplayFormats.WithTypeParams))
                     .Append(">.IsAnyValue), ")
                     .Append(VariableNames.Invoked)
@@ -205,7 +237,9 @@ namespace LightMock.Generator
                     .Append(propertyToFuncInterfaceName)
                     .Append(">(f => f.")
                     .AppendP2FSetter(symbol, typePart)
-                    .Append("(The<")
+                    .Append("(")
+                    .AppendIndexerParametersIsAnyInvocation(symbol, addCommaAtEnd: true)
+                    .Append("The<")
                     .Append(symbol.Type.ToDisplayString(SymbolDisplayFormats.WithTypeParams))
                     .Append(">.IsAnyValue))); }");
             }
@@ -234,7 +268,9 @@ namespace LightMock.Generator
                     .Append(propertyToFuncInterfaceName)
                     .Append(">(f => f.")
                     .AppendP2FSetter(symbol, typePart)
-                    .Append("(value))); }");
+                    .Append("(")
+                    .AppendIndexerParametersInvocation(symbol, addCommaAtEnd: true)
+                    .Append("value))); }");
             }
 
             @this.Append("}");
@@ -251,7 +287,9 @@ namespace LightMock.Generator
                     .Append(symbol.Type.ToDisplayString(SymbolDisplayFormats.Interface))
                     .Append(' ')
                     .AppendP2FGetter(symbol, typePart)
-                    .Append("();");
+                    .Append("(")
+                    .AppendIndexerParametersDefinition(symbol, addCommaAtEnd: false)
+                    .Append(");");
             }
             if (symbol.SetMethod != null)
             {
@@ -259,8 +297,59 @@ namespace LightMock.Generator
                     .Append("void ")
                     .AppendP2FSetter(symbol, typePart)
                     .Append("(")
+                    .AppendIndexerParametersDefinition(symbol, addCommaAtEnd: true)
                     .Append(symbol.Type.ToDisplayString(SymbolDisplayFormats.Interface))
                     .Append(" prm);");
+            }
+            return @this;
+        }
+
+        public static StringBuilder AppendIndexerParametersDefinition(this StringBuilder @this, IPropertySymbol symbol, bool addCommaAtEnd)
+        {
+            if (symbol.Parameters.Length > 0)
+            {
+                @this.Append(symbol.Parameters[0].Type.ToDisplayString(SymbolDisplayFormats.Interface))
+                    .Append(" p0");
+                for (int i = 1; i < symbol.Parameters.Length; i++)
+                {
+                    @this.Append(", ")
+                        .Append(symbol.Parameters[i].Type.ToDisplayString(SymbolDisplayFormats.Interface))
+                        .Append(" p").Append(i);
+                }
+                if (addCommaAtEnd)
+                    @this.Append(", ");
+            }
+            return @this;
+        }
+
+        public static StringBuilder AppendIndexerParametersInvocation(this StringBuilder @this, IPropertySymbol symbol, bool addCommaAtEnd)
+        {
+            if (symbol.Parameters.Length > 0)
+            {
+                @this.Append(symbol.Parameters[0].Name);
+                for (int i = 1; i < symbol.Parameters.Length; i++)
+                    @this.Append(", ").Append(symbol.Parameters[i].Name);
+                if (addCommaAtEnd)
+                    @this.Append(", ");
+            }
+            return @this;
+        }
+
+        public static StringBuilder AppendIndexerParametersIsAnyInvocation(this StringBuilder @this, IPropertySymbol symbol, bool addCommaAtEnd)
+        {
+            if (symbol.Parameters.Length > 0)
+            {
+                @this.Append("The<")
+                    .Append(symbol.Parameters[0].Type.ToDisplayString(SymbolDisplayFormats.Interface))
+                    .Append(">.IsAnyValue");
+                for (int i = 1; i < symbol.Parameters.Length; i++)
+                {
+                    @this.Append(", The<")
+                        .Append(symbol.Parameters[i].Type.ToDisplayString(SymbolDisplayFormats.Interface))
+                        .Append(">.IsAnyValue");
+                }
+                if (addCommaAtEnd)
+                    @this.Append(", ");
             }
             return @this;
         }
@@ -283,10 +372,14 @@ namespace LightMock.Generator
             string typePart,
             string suffix)
         {
-            return @this.Append(symbol.Name)
-                               .Append('_')
-                               .Append(typePart)
-                               .Append(suffix);
+            return symbol.IsIndexer
+                ? @this.Append(typePart)
+                    .Append(Suffix.Indexer)
+                    .Append(suffix)
+                : @this.Append(symbol.Name)
+                    .Append('_')
+                    .Append(typePart)
+                    .Append(suffix);
         }
 
         static string GetPropertyTypePart(IPropertySymbol symbol)

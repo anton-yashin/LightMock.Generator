@@ -537,6 +537,25 @@ namespace LightMock.Generator.Tests
             context.Assert(f => f.Action(expected));
         }
 
+        [Fact]
+        public void Indexer()
+        {
+            string expectedValue = Guid.NewGuid().ToString();
+            int expectedIndex = new Random().Next();
+            var testScript = LoadAssembly<IIndexer<string>>();
+            var context = testScript.Context;
+            var mock = testScript.MockObject;
+
+            context.Arrange(f => f[The<int>.IsAnyValue]).Returns(expectedValue);
+            Assert.Equal(expectedValue, mock[expectedIndex]);
+
+            (int index, string value) invokedWith = default;
+            context.ArrangeSetter_WhenAny(f => f[0] = "").Callback<int, string>((i, s) => invokedWith = (i, s));
+            mock[expectedIndex] = expectedValue;
+            Assert.Equal(expectedValue, invokedWith.value);
+            Assert.Equal(expectedIndex, invokedWith.index);
+        }
+
         protected override string GetFullResourceName(string resourceName)
             => "Interface." + resourceName + ".test.cs";
     }
