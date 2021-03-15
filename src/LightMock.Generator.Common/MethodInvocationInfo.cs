@@ -41,8 +41,8 @@ namespace LightMock
 
         public object[] Arguments { get; }
 
-        public void Invoke(Action<object[]?> action) => action(Arguments);
+        public void Invoke(Callback callback) => callback.Invoke(Arguments);
 
-        public TResult Invoke<TResult>(Func<object[]?, TResult> func) => func(Arguments);
+        public TResult Invoke<TResult>(Callback callback, TResult defaultValue) => callback.Invoke(Arguments, defaultValue);
     }
 }

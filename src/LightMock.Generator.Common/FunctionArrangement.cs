@@ -37,9 +37,9 @@ namespace LightMock
     /// <typeparam name="TResult">The type of the return value of the mocked method.</typeparam>
     sealed class FunctionArrangement<TResult> : Arrangement, IArrangement<TResult>, IArrangementInvocation<TResult>
     {
-        private TResult result;
+        private TResult result = default!;
 
-        private Func<object[]?, TResult>? getResult;
+        private Callback callback = new Callback();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FunctionArrangement{TResult}"/> class.
@@ -48,9 +48,7 @@ namespace LightMock
         /// where to apply this <see cref="Arrangement"/>.</param>
         public FunctionArrangement(LambdaExpression expression)
             : base(expression)
-        {
-            result = default!;
-        }
+        { }
 
         /// <summary>
         /// Arranges for the mocked method to return a value of type <typeparamref name="TResult"/>.
@@ -67,9 +65,7 @@ namespace LightMock
         /// </summary>
         /// <param name="getResultFunc">The <see cref="Func{TResult}"/> is executed and returns value when the mocked method is invoked.</param>
         public void Returns(Func<TResult> getResultFunc)
-        {
-            getResult = args => (TResult)getResultFunc.DynamicInvoke(args);
-        }
+            => callback.Method = getResultFunc;
 
         /// <summary>
         /// Arranges for the mocked method to return a value of type <typeparamref name="TResult"/>. 
@@ -78,9 +74,7 @@ namespace LightMock
         /// <typeparam name="T">The type of the first parameter.</typeparam>
         /// <param name="getResultFunc">The <see cref="Func{T, TResult}"/> is executed and returns value when the mocked method is invoked.</param>
         public void Returns<T>(Func<T, TResult> getResultFunc)
-        {
-            getResult = args => (TResult)getResultFunc.DynamicInvoke(args);
-        }
+            => callback.Method = getResultFunc;
 
         /// <summary>
         /// Arranges for the mocked method to return a value of type <typeparamref name="TResult"/>. 
@@ -90,9 +84,7 @@ namespace LightMock
         /// <typeparam name="T2">The type of the second parameter.</typeparam>
         /// <param name="getResultFunc">The <see cref="Func{T1, T2, TResult}"/> is executed and returns value when the mocked method is invoked.</param>
         public void Returns<T1, T2>(Func<T1, T2, TResult> getResultFunc)
-        {
-            getResult = args => (TResult)getResultFunc.DynamicInvoke(args);
-        }
+            => callback.Method = getResultFunc;
 
         /// <summary>
         /// Arranges for the mocked method to return a value of type <typeparamref name="TResult"/>. 
@@ -103,9 +95,7 @@ namespace LightMock
         /// <typeparam name="T3">The type of the third parameter.</typeparam>
         /// <param name="getResultFunc">The <see cref="Func{T1, T2, T3, TResult}"/> is executed and returns value when the mocked method is invoked.</param>
         public void Returns<T1, T2, T3>(Func<T1, T2, T3, TResult> getResultFunc)
-        {
-            getResult = args => (TResult)getResultFunc.DynamicInvoke(args);
-        }
+            => callback.Method = getResultFunc;
 
         /// <summary>
         /// Arranges for the mocked method to return a value of type <typeparamref name="TResult"/>. 
@@ -117,15 +107,11 @@ namespace LightMock
         /// <typeparam name="T4">The type of the fourth parameter.</typeparam>
         /// <param name="getResultFunc">The <see cref="Func{T1, T2, T3, T4, TResult}"/> is executed and returns value when the mocked method is invoked.</param>
         public void Returns<T1, T2, T3, T4>(Func<T1, T2, T3, T4, TResult> getResultFunc)
-        {
-            getResult = args => (TResult)getResultFunc.DynamicInvoke(args);
-        }
+            => callback.Method = getResultFunc;
 
         TResult IArrangementInvocation<TResult>.Invoke(IInvocationInfo invocation)
         {
-            var getResult = this.getResult;
-            if (getResult != null)
-                result = invocation.Invoke(getResult);
+            result = invocation.Invoke(callback, result);
             InvokeCallback(invocation);
             InvokeThrowAction();
             return result;

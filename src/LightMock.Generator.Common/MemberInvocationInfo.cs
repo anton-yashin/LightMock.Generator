@@ -38,8 +38,8 @@ namespace LightMock
 
         public MemberInfo MemberInfo { get; }
 
-        public void Invoke(Action<object[]?> action) => action(null);
+        public void Invoke(Callback callback) => callback.Invoke(null);
 
-        public TResult Invoke<TResult>(Func<object[]?, TResult> func) => func(null);
+        public TResult Invoke<TResult>(Callback callback, TResult defaultValue) => callback.Invoke(null, defaultValue);
     }
 }
