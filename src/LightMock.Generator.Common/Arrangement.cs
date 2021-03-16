@@ -48,52 +48,13 @@ namespace LightMock
             this.expression = expression;
         }
 
-        Arrangement Throws<TException>() where TException : Exception, new()
-            => Throws(() => new TException());
-
-        Arrangement Throws<TException>(Func<TException> factory) where TException : Exception
+        Arrangement SetExceptionFactory(Delegate exceptionFactory)
         {
-            exceptionFactory.Method = factory;
+            this.exceptionFactory.Method = exceptionFactory;
             return this;
         }
 
-        Arrangement Callback(Action callback)
-        {
-            this.callback.Method = callback;
-            return this;
-        }
-
-        Arrangement Callback<T>(Action<T> callback)
-        {
-            this.callback.Method = callback;
-            return this;
-        }
-
-        Arrangement Callback<T1, T2>(Action<T1, T2> callback)
-        {
-            this.callback.Method = callback;
-            return this;
-        }
-
-        Arrangement Callback<T1, T2, T3>(Action<T1, T2, T3> callback)
-        {
-            this.callback.Method = callback;
-            return this;
-        }
-
-        Arrangement Callback<T1, T2, T3, T4>(Action<T1, T2, T3, T4> callback)
-        {
-            this.callback.Method = callback;
-            return this;
-        }
-
-        Arrangement Callback<T1, T2, T3, T4, T5>(Action<T1, T2, T3, T4, T5> callback)
-        {
-            this.callback.Method = callback;
-            return this;
-        }
-
-        Arrangement Callback<T1, T2, T3, T4, T5, T6>(Action<T1, T2, T3, T4, T5, T6> callback)
+        Arrangement SetCallback(Delegate callback)
         {
             this.callback.Method = callback;
             return this;
@@ -119,37 +80,36 @@ namespace LightMock
             return expression.ToMatchInfo().Equals(matchInfo);
         }
 
-
         protected Exception? GetException() => exceptionFactory.Invoke<Exception>(null);
 
         protected void InvokeCallback(IInvocationInfo invocationInfo)
             => invocationInfo.Invoke(callback);
 
         ICallbackResult ICallback.Callback(Action callback)
-            => Callback(callback);
+            => SetCallback(callback);
 
         ICallbackResult ICallback.Callback<T>(Action<T> callback)
-            => Callback(callback);
+            => SetCallback(callback);
 
         ICallbackResult ICallback.Callback<T1, T2>(Action<T1, T2> callback)
-            => Callback(callback);
+            => SetCallback(callback);
 
         ICallbackResult ICallback.Callback<T1, T2, T3>(Action<T1, T2, T3> callback)
-            => Callback(callback);
+            => SetCallback(callback);
 
         ICallbackResult ICallback.Callback<T1, T2, T3, T4>(Action<T1, T2, T3, T4> callback)
-            => Callback(callback);
+            => SetCallback(callback);
 
         ICallbackResult ICallback.Callback<T1, T2, T3, T4, T5>(Action<T1, T2, T3, T4, T5> callback)
-            => Callback(callback);
+            => SetCallback(callback);
 
         ICallbackResult ICallback.Callback<T1, T2, T3, T4, T5, T6>(Action<T1, T2, T3, T4, T5, T6> callback)
-            => Callback(callback);
+            => SetCallback(callback);
 
         void IThrows.Throws<TException>()
-            => Throws<TException>();
+            => SetExceptionFactory(new Func<TException>(() => new TException()));
 
         void IThrows.Throws<TException>(Func<TException> factory)
-            => Throws(factory);
+            => SetExceptionFactory(factory);
     }
 }

@@ -49,36 +49,9 @@ namespace LightMock
             : base(expression)
         { }
 
-        FunctionArrangement<TResult> Returns(TResult value)
-            => Returns(() => value);
-
-        FunctionArrangement<TResult> Returns(Func<TResult> getResultFunc)
+        FunctionArrangement<TResult> SetCallback(Delegate callback)
         {
-            callback.Method = getResultFunc;
-            return this;
-        }
-
-        FunctionArrangement<TResult> Returns<T>(Func<T, TResult> getResultFunc)
-        {
-            callback.Method = getResultFunc;
-            return this;
-        }
-
-        FunctionArrangement<TResult> Returns<T1, T2>(Func<T1, T2, TResult> getResultFunc)
-        {
-            callback.Method = getResultFunc;
-            return this;
-        }
-
-        FunctionArrangement<TResult> Returns<T1, T2, T3>(Func<T1, T2, T3, TResult> getResultFunc)
-        {
-            callback.Method = getResultFunc;
-            return this;
-        }
-
-        FunctionArrangement<TResult> Returns<T1, T2, T3, T4>(Func<T1, T2, T3, T4, TResult> getResultFunc)
-        {
-            callback.Method = getResultFunc;
+            this.callback.Method = callback;
             return this;
         }
 
@@ -94,21 +67,21 @@ namespace LightMock
         }
 
         IReturnsResult<TResult> IReturns<TResult>.Returns(TResult value)
-            => Returns(value);
+            => SetCallback(new Func<TResult>(() => value));
 
         IReturnsResult<TResult> IReturns<TResult>.Returns(Func<TResult> getResultFunc)
-            => Returns(getResultFunc);
+            => SetCallback(getResultFunc);
 
         IReturnsResult<TResult> IReturns<TResult>.Returns<T>(Func<T, TResult> getResultFunc)
-            => Returns(getResultFunc);
+            => SetCallback(getResultFunc);
 
         IReturnsResult<TResult> IReturns<TResult>.Returns<T1, T2>(Func<T1, T2, TResult> getResultFunc)
-            => Returns(getResultFunc);
+            => SetCallback(getResultFunc);
 
         IReturnsResult<TResult> IReturns<TResult>.Returns<T1, T2, T3>(Func<T1, T2, T3, TResult> getResultFunc)
-            => Returns(getResultFunc);
+            => SetCallback(getResultFunc);
 
         IReturnsResult<TResult> IReturns<TResult>.Returns<T1, T2, T3, T4>(Func<T1, T2, T3, T4, TResult> getResultFunc)
-            => Returns(getResultFunc);
+            => SetCallback(getResultFunc);
     }
 }
