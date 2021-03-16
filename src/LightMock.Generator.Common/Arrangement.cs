@@ -35,8 +35,8 @@ namespace LightMock
     abstract class Arrangement : IArrangement
     {
         private readonly LambdaExpression expression;                
-        private readonly Callback exceptionFactory;
-        private readonly Callback callback;
+        private readonly CallbackInvocation exceptionFactory = new();
+        private readonly CallbackInvocation callback = new();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Arrangement"/> class.
@@ -46,8 +46,6 @@ namespace LightMock
         protected Arrangement(LambdaExpression expression)
         {
             this.expression = expression;
-            exceptionFactory = new Callback();
-            callback = new Callback();
         }
 
         /// <summary>

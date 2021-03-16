@@ -29,12 +29,12 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace LightMock
 {
-    sealed class Callback
+    sealed class CallbackInvocation
     {
         private Delegate? __method;
         private readonly object __methodLock = new object();
 
-        public Callback() { }
+        public CallbackInvocation() { }
 
         public Delegate? Method
         { 

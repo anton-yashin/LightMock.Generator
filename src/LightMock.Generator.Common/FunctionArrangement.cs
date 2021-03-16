@@ -41,7 +41,7 @@ namespace LightMock
         [AllowNull]
         private TResult result = default!;
 
-        private Callback callback = new Callback();
+        private CallbackInvocation callback = new();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FunctionArrangement{TResult}"/> class.
