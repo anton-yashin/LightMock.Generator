@@ -30,7 +30,7 @@ using System.Text;
 
 namespace LightMock
 {
-    public interface ICallback
+    public interface ICallback : IFluentInterface
     {
         ICallbackResult Callback(Action callback);
         ICallbackResult Callback<T>(Action<T> callback);
@@ -41,16 +41,16 @@ namespace LightMock
         ICallbackResult Callback<T1, T2, T3, T4, T5, T6>(Action<T1, T2, T3, T4, T5, T6> callback);
     }
 
-    public interface ICallbackResult : IThrows { }
+    public interface ICallbackResult : IThrows, IFluentInterface { }
 
 
-    public interface IThrows
+    public interface IThrows : IFluentInterface
     {
         void Throws<TException>() where TException : Exception, new();
         void Throws<TException>(Func<TException> factory) where TException : Exception;
     }
 
-    public interface IReturns<TResult>
+    public interface IReturns<TResult> : IFluentInterface
     {
         IReturnsResult<TResult> Returns(TResult value);
         IReturnsResult<TResult> Returns(Func<TResult> getResultFunc);
@@ -60,11 +60,11 @@ namespace LightMock
         IReturnsResult<TResult> Returns<T1, T2, T3, T4>(Func<T1, T2, T3, T4, TResult> getResultFunc);
     }
 
-    public interface IReturnsResult<TResult> : ICallback, IThrows { }
+    public interface IReturnsResult<TResult> : ICallback, IThrows, IFluentInterface { }
 
 
-    public interface IArrangement : ICallback, IThrows, ICallbackResult { }
+    public interface IArrangement : ICallback, IThrows, ICallbackResult, IFluentInterface { }
 
-    public interface IArrangement<TResult> : IReturns<TResult>, IReturnsResult<TResult>, ICallback, IThrows { }
+    public interface IArrangement<TResult> : IReturns<TResult>, IReturnsResult<TResult>, ICallback, IThrows, IFluentInterface { }
 
 }
