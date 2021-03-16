@@ -35,8 +35,8 @@ namespace LightMock
     abstract class Arrangement : IArrangement
     {
         private readonly LambdaExpression expression;                
-        private readonly Callback exceptionFactory;
-        private readonly Callback callback;
+        private readonly CallbackInvocation exceptionFactory = new();
+        private readonly CallbackInvocation callback = new();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Arrangement"/> class.
@@ -46,15 +46,13 @@ namespace LightMock
         protected Arrangement(LambdaExpression expression)
         {
             this.expression = expression;
-            exceptionFactory = new Callback();
-            callback = new Callback();
         }
 
         /// <summary>
         /// Arranges for an <see cref="Exception"/> of type <typeparamref name="TException"/> to be thrown.
         /// </summary>
         /// <typeparam name="TException">The type of <see cref="Exception"/> to be thrown.</typeparam>
-        public void Throws<TException>() where TException : Exception, new()
+        Arrangement Throws<TException>() where TException : Exception, new()
             => Throws(() => new TException());
 
         /// <summary>
@@ -62,23 +60,32 @@ namespace LightMock
         /// </summary>
         /// <typeparam name="TException">The type of <see cref="Exception"/> to be thrown.</typeparam>
         /// <param name="factory">A factory delegate used to create the <typeparamref name="TException"/> instance.</param>
-        public void Throws<TException>(Func<TException> factory) where TException : Exception
-            => exceptionFactory.Method = factory;
+        Arrangement Throws<TException>(Func<TException> factory) where TException : Exception
+        {
+            exceptionFactory.Method = factory;
+            return this;
+        }
 
         /// <summary>
         /// Arranges for the <paramref name="callback"/> to be called when the mocked method is invoked.
         /// </summary>
         /// <param name="callback">The <see cref="Action"/> to be called when the mocked method is invoked.</param>
-        public void Callback(Action callback)
-            => this.callback.Method = callback;
+        Arrangement Callback(Action callback)
+        {
+            this.callback.Method = callback;
+            return this;
+        }
 
         /// <summary>
         /// Arranges for the <paramref name="callback"/> to be called when the mocked method is invoked.
         /// </summary>
         /// <typeparam name="T">The type of the first parameter.</typeparam>
         /// <param name="callback">The <see cref="Action{T}"/> to be called when the mocked method is invoked.</param>
-        public void Callback<T>(Action<T> callback)
-            => this.callback.Method = callback;
+        Arrangement Callback<T>(Action<T> callback)
+        {
+            this.callback.Method = callback;
+            return this;
+        }
 
         /// <summary>
         /// Arranges for the <paramref name="callback"/> to be called when the mocked method is invoked.
@@ -86,8 +93,11 @@ namespace LightMock
         /// <typeparam name="T1">The type of the first parameter.</typeparam>
         /// <typeparam name="T2">The type of the second parameter.</typeparam>
         /// <param name="callback">The <see cref="Action{T1,T2}"/> to be called when the mocked method is invoked.</param>
-        public void Callback<T1, T2>(Action<T1, T2> callback)
-            => this.callback.Method = callback;
+        Arrangement Callback<T1, T2>(Action<T1, T2> callback)
+        {
+            this.callback.Method = callback;
+            return this;
+        }
 
         /// <summary>
         /// Arranges for the <paramref name="callback"/> to be called when the mocked method is invoked.
@@ -96,8 +106,11 @@ namespace LightMock
         /// <typeparam name="T2">The type of the second parameter.</typeparam>
         /// <typeparam name="T3">The type of the third parameter.</typeparam>
         /// <param name="callback">The <see cref="Action{T1,T2}"/> to be called when the mocked method is invoked.</param>
-        public void Callback<T1, T2, T3>(Action<T1, T2, T3> callback)
-            => this.callback.Method = callback;
+        Arrangement Callback<T1, T2, T3>(Action<T1, T2, T3> callback)
+        {
+            this.callback.Method = callback;
+            return this;
+        }
 
         /// <summary>
         /// Arranges for the <paramref name="callback"/> to be called when the mocked method is invoked.
@@ -107,8 +120,11 @@ namespace LightMock
         /// <typeparam name="T3">The type of the third parameter.</typeparam>
         /// <typeparam name="T4">The type of the fourth parameter.</typeparam>
         /// <param name="callback">The <see cref="Action{T1,T2}"/> to be called when the mocked method is invoked.</param>
-        public void Callback<T1, T2, T3, T4>(Action<T1, T2, T3, T4> callback)
-            => this.callback.Method = callback;
+        Arrangement Callback<T1, T2, T3, T4>(Action<T1, T2, T3, T4> callback)
+        {
+            this.callback.Method = callback;
+            return this;
+        }
 
         /// <summary>
         /// Arranges for the <paramref name="callback"/> to be called when the mocked method is invoked.
@@ -119,8 +135,11 @@ namespace LightMock
         /// <typeparam name="T4">The type of the fourth parameter.</typeparam>
         /// <typeparam name="T5">The type of the fifth parameter.</typeparam>
         /// <param name="callback">The <see cref="Action{T1,T2}"/> to be called when the mocked method is invoked.</param>
-        public void Callback<T1, T2, T3, T4, T5>(Action<T1, T2, T3, T4, T5> callback)
-            => this.callback.Method = callback;
+        Arrangement Callback<T1, T2, T3, T4, T5>(Action<T1, T2, T3, T4, T5> callback)
+        {
+            this.callback.Method = callback;
+            return this;
+        }
 
         /// <summary>
         /// Arranges for the <paramref name="callback"/> to be called when the mocked method is invoked.
@@ -132,8 +151,11 @@ namespace LightMock
         /// <typeparam name="T5">The type of the fifth parameter.</typeparam>
         /// <typeparam name="T6">The type of the sixth parameter.</typeparam>
         /// <param name="callback">The <see cref="Action{T1,T2}"/> to be called when the mocked method is invoked.</param>
-        public void Callback<T1, T2, T3, T4, T5, T6>(Action<T1, T2, T3, T4, T5, T6> callback)
-            => this.callback.Method = callback;
+        Arrangement Callback<T1, T2, T3, T4, T5, T6>(Action<T1, T2, T3, T4, T5, T6> callback)
+        {
+            this.callback.Method = callback;
+            return this;
+        }
 
         /// <summary>
         /// Determines if the <paramref name="invocationInfo"/> matches this <see cref="Arrangement"/>.
@@ -160,5 +182,32 @@ namespace LightMock
 
         protected void InvokeCallback(IInvocationInfo invocationInfo)
             => invocationInfo.Invoke(callback);
+
+        ICallbackResult ICallback.Callback(Action callback)
+            => Callback(callback);
+
+        ICallbackResult ICallback.Callback<T>(Action<T> callback)
+            => Callback(callback);
+
+        ICallbackResult ICallback.Callback<T1, T2>(Action<T1, T2> callback)
+            => Callback(callback);
+
+        ICallbackResult ICallback.Callback<T1, T2, T3>(Action<T1, T2, T3> callback)
+            => Callback(callback);
+
+        ICallbackResult ICallback.Callback<T1, T2, T3, T4>(Action<T1, T2, T3, T4> callback)
+            => Callback(callback);
+
+        ICallbackResult ICallback.Callback<T1, T2, T3, T4, T5>(Action<T1, T2, T3, T4, T5> callback)
+            => Callback(callback);
+
+        ICallbackResult ICallback.Callback<T1, T2, T3, T4, T5, T6>(Action<T1, T2, T3, T4, T5, T6> callback)
+            => Callback(callback);
+
+        void IThrows.Throws<TException>()
+            => Throws<TException>();
+
+        void IThrows.Throws<TException>(Func<TException> factory)
+            => Throws(factory);
     }
 }

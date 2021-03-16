@@ -3,12 +3,12 @@ using Xunit;
 
 namespace LightMock.Generator.Tests.BaseTests
 {
-    public class Callback_Tests
+    public class CallbackInvocation_Tests
     {
         [Theory, MemberData(nameof(NoMethodProvided_Data))]
         public void NoMethodProvided_Successful(object[]? prms)
         {
-            var cb = new Callback();
+            var cb = new CallbackInvocation();
             cb.Invoke(prms);
         }
 
@@ -16,7 +16,7 @@ namespace LightMock.Generator.Tests.BaseTests
         public void NoMethodProvided_ReturnsDefault(object[]? prms)
         {
             var expected = Guid.NewGuid();
-            var cb = new Callback();
+            var cb = new CallbackInvocation();
 
             var actual = cb.Invoke(prms, expected);
             Assert.Equal(expected, actual);
@@ -27,7 +27,7 @@ namespace LightMock.Generator.Tests.BaseTests
         {
             int invoked = 0;
             void SomeMethod() => invoked++;
-            var cb = new Callback();
+            var cb = new CallbackInvocation();
 
             cb.Method = new Action(SomeMethod);
             cb.Invoke(prms);
@@ -41,7 +41,7 @@ namespace LightMock.Generator.Tests.BaseTests
             var expected = Guid.NewGuid();
             int invoked = 0;
             Guid SomeMethod() { invoked++; return expected; }
-            var cb = new Callback();
+            var cb = new CallbackInvocation();
 
             cb.Method = new Func<Guid>(SomeMethod);
             var actual = cb.Invoke(prms, expected);
@@ -62,7 +62,7 @@ namespace LightMock.Generator.Tests.BaseTests
         public void ActionParametersCountMismatch_Throws(Type exceptionType, object[]? prms)
         {
             void SomeMethod(object a, object b) { }
-            var cb = new Callback();
+            var cb = new CallbackInvocation();
             cb.Method = new Action<object, object>(SomeMethod);
 
             Assert.Throws(exceptionType, () => cb.Invoke(prms));
@@ -72,7 +72,7 @@ namespace LightMock.Generator.Tests.BaseTests
         public void FunctionParametersCountMismatch_Throws(Type exceptionType, object[]? prms)
         {
             string SomeMethod(object a, object b) => "zzz";
-            var cb = new Callback();
+            var cb = new CallbackInvocation();
             cb.Method = new Func<object, object, string>(SomeMethod);
 
             Assert.Throws(exceptionType, () => cb.Invoke(prms));
@@ -90,10 +90,10 @@ namespace LightMock.Generator.Tests.BaseTests
         [Fact]
         public void ReturnTypeMismatch_Throws()
         {
-            Callback SomeMethod() => null!;
+            CallbackInvocation SomeMethod() => null!;
 
-            var cb = new Callback();
-            cb.Method = new Func<Callback>(SomeMethod);
+            var cb = new CallbackInvocation();
+            cb.Method = new Func<CallbackInvocation>(SomeMethod);
 
             Assert.Throws<ArgumentException>(() => cb.Invoke(null, "abc"));
         }

@@ -42,10 +42,10 @@ namespace LightMock
 
         public object[] Arguments { get; }
 
-        public void Invoke(Callback callback) => callback.Invoke(Arguments);
+        public void Invoke(CallbackInvocation callback) => callback.Invoke(Arguments);
 
         [return: MaybeNull]
-        public TResult Invoke<TResult>(Callback callback, [AllowNull] TResult defaultValue)
+        public TResult Invoke<TResult>(CallbackInvocation callback, [AllowNull] TResult defaultValue)
             => callback.Invoke(Arguments, defaultValue);
     }
 }

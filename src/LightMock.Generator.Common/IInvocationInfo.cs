@@ -33,10 +33,10 @@ namespace LightMock
 {
     internal interface IInvocationInfo
     {
-        void Invoke(Callback callback);
+        void Invoke(CallbackInvocation callback);
         
         [return: MaybeNull]
-        TResult Invoke<TResult>(Callback callback, [AllowNull] TResult defaultValue);
+        TResult Invoke<TResult>(CallbackInvocation callback, [AllowNull] TResult defaultValue);
 
     }
 }

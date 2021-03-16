@@ -26,31 +26,51 @@
 *******************************************************************************/
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 
 namespace LightMock
 {
-    public interface IArrangement
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public interface ICallback : IFluentInterface
     {
-        void Callback(Action callBack);
-        void Callback<T>(Action<T> callBack);
-        void Callback<T1, T2>(Action<T1, T2> callBack);
-        void Callback<T1, T2, T3>(Action<T1, T2, T3> callBack);
-        void Callback<T1, T2, T3, T4>(Action<T1, T2, T3, T4> callBack);
-        void Callback<T1, T2, T3, T4, T5>(Action<T1, T2, T3, T4, T5> callBack);
-        void Callback<T1, T2, T3, T4, T5, T6>(Action<T1, T2, T3, T4, T5, T6> callBack);
+        ICallbackResult Callback(Action callback);
+        ICallbackResult Callback<T>(Action<T> callback);
+        ICallbackResult Callback<T1, T2>(Action<T1, T2> callback);
+        ICallbackResult Callback<T1, T2, T3>(Action<T1, T2, T3> callback);
+        ICallbackResult Callback<T1, T2, T3, T4>(Action<T1, T2, T3, T4> callback);
+        ICallbackResult Callback<T1, T2, T3, T4, T5>(Action<T1, T2, T3, T4, T5> callback);
+        ICallbackResult Callback<T1, T2, T3, T4, T5, T6>(Action<T1, T2, T3, T4, T5, T6> callback);
+    }
+
+    [EditorBrowsable(EditorBrowsableState.Never)] 
+    public interface ICallbackResult : IThrows, IFluentInterface { }
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public interface IThrows : IFluentInterface
+    {
         void Throws<TException>() where TException : Exception, new();
         void Throws<TException>(Func<TException> factory) where TException : Exception;
     }
 
-    public interface IArrangement<TResult> : IArrangement
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public interface IReturns<TResult> : IFluentInterface
     {
-        void Returns(TResult value);
-        void Returns(Func<TResult> getResultFunc);
-        void Returns<T>(Func<T, TResult> getResultFunc);
-        void Returns<T1, T2>(Func<T1, T2, TResult> getResultFunc);
-        void Returns<T1, T2, T3>(Func<T1, T2, T3, TResult> getResultFunc);
-        void Returns<T1, T2, T3, T4>(Func<T1, T2, T3, T4, TResult> getResultFunc);
+        IReturnsResult<TResult> Returns(TResult value);
+        IReturnsResult<TResult> Returns(Func<TResult> getResultFunc);
+        IReturnsResult<TResult> Returns<T>(Func<T, TResult> getResultFunc);
+        IReturnsResult<TResult> Returns<T1, T2>(Func<T1, T2, TResult> getResultFunc);
+        IReturnsResult<TResult> Returns<T1, T2, T3>(Func<T1, T2, T3, TResult> getResultFunc);
+        IReturnsResult<TResult> Returns<T1, T2, T3, T4>(Func<T1, T2, T3, T4, TResult> getResultFunc);
     }
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public interface IReturnsResult<TResult> : ICallback, IThrows, IFluentInterface { }
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public interface IArrangement : ICallback, IThrows, ICallbackResult, IFluentInterface { }
+
+    [EditorBrowsable(EditorBrowsableState.Never)]
+    public interface IArrangement<TResult> : IReturns<TResult>, IReturnsResult<TResult>, ICallback, IThrows, IFluentInterface { }
 
 }
