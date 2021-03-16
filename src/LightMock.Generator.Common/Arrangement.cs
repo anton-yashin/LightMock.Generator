@@ -120,7 +120,7 @@ namespace LightMock
         }
 
 
-        protected Exception? GetException() => exceptionFactory.Invoke<Exception>(null, null);
+        protected Exception? GetException() => exceptionFactory.Invoke<Exception>(null);
 
         protected void InvokeCallback(IInvocationInfo invocationInfo)
             => invocationInfo.Invoke(callback);

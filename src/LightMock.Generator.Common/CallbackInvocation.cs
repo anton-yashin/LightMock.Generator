@@ -61,7 +61,7 @@ namespace LightMock
         }
 
         [return: MaybeNull]
-        public TResult Invoke<TResult>(object[]? parameters, [AllowNull] TResult defaultValue)
+        public TResult Invoke<TResult>(object[]? parameters)
         {
             var method = Method;
             if (method != null)
@@ -70,7 +70,7 @@ namespace LightMock
                 parameters = ValidateMethodParameters(method, parameters);
                 return (TResult)method.DynamicInvoke(parameters);
             }
-            return defaultValue;
+            return default;
         }
 
         static object[] ValidateMethodParameters(Delegate method, object[]? parameters)

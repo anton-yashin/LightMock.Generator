@@ -36,7 +36,7 @@ namespace LightMock
         void Invoke(CallbackInvocation callback);
         
         [return: MaybeNull]
-        TResult Invoke<TResult>(CallbackInvocation callback, [AllowNull] TResult defaultValue);
+        TResult Invoke<TResult>(CallbackInvocation callback);
 
     }
 }
