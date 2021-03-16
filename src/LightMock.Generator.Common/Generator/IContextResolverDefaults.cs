@@ -25,15 +25,40 @@
     https://github.com/anton-yashin/
 *******************************************************************************/
 using System;
+using System.ComponentModel;
 
 namespace LightMock.Generator
 {
+    /// <summary>
+    /// For internal usage
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public interface IContextResolverDefaults
     {
+        /// <summary>
+        /// For internal usage
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
         Type DefaultProtectedContextType { get; }
+        /// <summary>
+        /// For internal usage
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
         Type MockContextType { get; }
+        /// <summary>
+        /// For internal usage
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
         Type DefaultPropertiesContextType { get; }
+        /// <summary>
+        /// For internal usage
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
         Type MulticastDelegateType { get; }
+        /// <summary>
+        /// For internal usage
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
         Type MulticastDelegateContextType { get; }
     }
 }

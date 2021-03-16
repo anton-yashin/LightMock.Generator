@@ -26,12 +26,18 @@
 *******************************************************************************/
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using System.Threading;
 
 namespace LightMock.Generator
 {
+    /// <summary>
+    /// Base class for generated Mock&lt;T&gt; class.
+    /// </summary>
+    /// <typeparam name="T">The type for which mock is generated.</typeparam> 
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public abstract class AbstractMock<T> : IProtectedContext<T>, IMock<T>, IMockContext<T>
         where T : class
     {
@@ -42,7 +48,11 @@ namespace LightMock.Generator
         readonly object protectedContext;
         readonly IMockContextInternal propertiesContext;
 
-        public AbstractMock()
+        /// <summary>
+        /// Initializes a contexts which you can use to arrange a behaviour.
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        protected AbstractMock()
         {
             if (ContextResolverTable.TryGetValue(resolverType, out var t) == false)
                 throw new MockNotGeneratedException(contextType);
@@ -54,11 +64,19 @@ namespace LightMock.Generator
             propertiesContext = typeResolver.ActivatePropertiesContext<T>();
         }
 
-        public AbstractMock(params object[] prms) : this()
+        /// <summary>
+        /// Initializes a contexts which you can use to arrange a behaviour.
+        /// </summary>
+        /// <param name="prms">Paramters that must be used to initalize base class.</param>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        protected AbstractMock(params object[] prms) : this()
         {
             this.prms = prms;
         }
 
+        /// <summary>
+        /// Instance of generated mock object.
+        /// </summary>
         public T Object => LazyInitializer.EnsureInitialized(ref instance!, CreateMockInstance);
 
         object IProtectedContext<T>.ProtectedContext => protectedContext;
@@ -116,30 +134,46 @@ namespace LightMock.Generator
         T CreateArrangeWhenInstance(ILambdaRequest request)
             => typeResolver.ActivateArrangeWhenInstance<T>(GetArrangeArgs(request));
 
+        /// <summary>
+        /// For internal usage
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
         protected abstract LambdaExpression ExchangeForExpression(string token);
+        /// <summary>
+        /// For internal usage
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
         protected abstract IReadOnlyDictionary<Type, Type> ContextResolverTable { get; }
 
+        ///<inheritdoc/>
         public void AssertGet<TProperty>(Func<T, TProperty> expression)
             => AssertGet(expression, Invoked.AtLeast(1));
 
+        ///<inheritdoc/>
         public void AssertGet<TProperty>(Func<T, TProperty> expression, Invoked times)
             => expression(CreateAssertWhenInstance(times));
 
+        ///<inheritdoc/>
         public void AssertSet_When(Action<T> expression)
             => AssertUsingAssertInstance(expression, Invoked.AtLeast(1));
 
+        ///<inheritdoc/>
         public void AssertSet_When(Action<T> expression, Invoked times)
             => AssertUsingAssertInstance(expression, times);
 
+        ///<inheritdoc/>
         public void AssertAdd(Action<T> expression)
             => AssertUsingAssertInstance(expression, Invoked.AtLeast(1));
 
+        ///<inheritdoc/>
         public void AssertAdd(Action<T> expression, Invoked times)
             => AssertUsingAssertInstance(expression, times);
 
+        ///<inheritdoc/>
         public void AssertRemove(Action<T> expression)
             => AssertUsingAssertInstance(expression, Invoked.AtLeast(1));
 
+        ///<inheritdoc/>
         public void AssertRemove(Action<T> expression, Invoked times)
             => AssertUsingAssertInstance(expression, times);
 
@@ -148,6 +182,7 @@ namespace LightMock.Generator
 
         const string KUidExceptionMessage = "you must provide part of unique identifier";
 
+        ///<inheritdoc/>
         public IArrangement ArrangeSetter(Action<T> expression, [CallerFilePath] string uidPart1 = "", [CallerLineNumber] int uidPart2 = 0)
         {
             if (string.IsNullOrWhiteSpace(uidPart1))
@@ -155,9 +190,11 @@ namespace LightMock.Generator
             return propertiesContext.ArrangeAction(ExchangeForExpression(uidPart2 + uidPart1));
         }
 
+        ///<inheritdoc/>
         public IArrangement ArrangeSetter_WhenAny(Action<T> expression)
             => ArrangeSetter_NoAot(expression, CreateArrangeWhenAnyInstance);
 
+        ///<inheritdoc/>
         public IArrangement ArrangeSetter_When(Action<T> expression) 
             => ArrangeSetter_NoAot(expression, CreateArrangeWhenInstance);
 
@@ -169,9 +206,11 @@ namespace LightMock.Generator
             return propertiesContext.ArrangeAction(result);
         }
 
+        ///<inheritdoc/>
         public void AssertSet(Action<T> expression, [CallerFilePath] string uidPart1 = "", [CallerLineNumber] int uidPart2 = 0)
             => AssertSet(expression, Invoked.AtLeast(1), uidPart1, uidPart2);
 
+        ///<inheritdoc/>
         public void AssertSet(Action<T> expression, Invoked times, [CallerFilePath] string uidPart1 = "", [CallerLineNumber] int uidPart2 = 0)
         {
             if (string.IsNullOrWhiteSpace(uidPart1))
@@ -179,26 +218,33 @@ namespace LightMock.Generator
             propertiesContext.AssertInternal(ExchangeForExpression(uidPart2 + uidPart1), times);
         }
 
+        ///<inheritdoc/>
         public void AssertSet_WhenAny(Action<T> expression)
             => AssertSet_WhenAny(expression, Invoked.AtLeast(1));
 
+        ///<inheritdoc/>
         public void AssertSet_WhenAny(Action<T> expression, Invoked times)
             => expression(CreateAssertWhenAnyInstance(times));
 
         #region IMockContext<T> implementation
 
+        ///<inheritdoc/>
         public IArrangement Arrange(Expression<Action<T>> matchExpression)
             => publicContext.Arrange(matchExpression);
 
+        ///<inheritdoc/>
         public IArrangement<TResult> Arrange<TResult>(Expression<Func<T, TResult>> matchExpression)
             => publicContext.Arrange(matchExpression);
 
+        ///<inheritdoc/>
         public IArrangement ArrangeProperty<TResult>(Expression<Func<T, TResult>> matchExpression)
             => publicContext.ArrangeProperty(matchExpression);
 
+        ///<inheritdoc/>
         public void Assert(Expression<Action<T>> matchExpression)
             => publicContext.Assert(matchExpression);
 
+        ///<inheritdoc/>
         public void Assert(Expression<Action<T>> matchExpression, Invoked invoked)
             => publicContext.Assert(matchExpression, invoked);
 

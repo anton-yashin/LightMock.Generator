@@ -30,9 +30,12 @@ using System.Text;
 
 namespace LightMock.Generator
 {
+    /// <summary>
+    /// Exception thrown by Mock&lt;T&gt; class when no boilerplate code is generated.
+    /// </summary>
     public sealed class MockNotGeneratedException : Exception
     {
-        public MockNotGeneratedException(Type type)
+        internal MockNotGeneratedException(Type type)
             : base(CreateMessage(type))
         {
         }

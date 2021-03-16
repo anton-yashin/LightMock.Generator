@@ -31,41 +31,80 @@ using System.ComponentModel;
 
 namespace LightMock.Generator
 {
+    /// <summary>
+    /// For internal usage.
+    /// </summary>
     [EditorBrowsable(EditorBrowsableState.Never)]
     public abstract class TypeResolver
     {
+        /// <summary>
+        /// For internal usage.
+        /// </summary>
         protected Type ContextType { get; }
+        /// <summary>
+        /// For internal usage.
+        /// </summary>
         protected IContextResolverDefaults Defaults => ContextResolverDefaults.Instance;
 
+        /// <summary>
+        /// For internal usage.
+        /// </summary>
         protected TypeResolver(Type contextType)
             => this.ContextType = contextType;
 
+        /// <summary>
+        /// For internal usage.
+        /// </summary>
         public virtual Type GetInstanceType()
             => throw new NotSupportedException();
 
+        /// <summary>
+        /// For internal usage.
+        /// </summary>
         public virtual Type GetProtectedContextType()
             => Defaults.DefaultProtectedContextType;
 
+        /// <summary>
+        /// For internal usage.
+        /// </summary>
         public virtual Type GetPropertiesContextType()
             => ContextType.IsSubclassOf(Defaults.MulticastDelegateType)
                 ? Defaults.MulticastDelegateContextType
                 : throw new NotSupportedException();
 
+        /// <summary>
+        /// For internal usage.
+        /// </summary>
         public virtual Type GetAssertWhenType()
             => throw new NotSupportedException();
 
+        /// <summary>
+        /// For internal usage.
+        /// </summary>
         public virtual Type GetAssertWhenAnyType()
             => throw new NotSupportedException();
 
+        /// <summary>
+        /// For internal usage.
+        /// </summary>
         public virtual Type GetArrangeWhenAnyType()
             => throw new NotSupportedException();
 
+        /// <summary>
+        /// For internal usage.
+        /// </summary>
         public virtual Type GetArrangeWhenType()
             => throw new NotSupportedException();
 
+        /// <summary>
+        /// For internal usage.
+        /// </summary>
         public virtual object GetDelegate(object mockContext)
             => throw new NotSupportedException();
 
+        /// <summary>
+        /// For internal usage.
+        /// </summary>
         protected object CreateGenericDelegate(Type delegateType, object mockContext, string fullName)
         {
             var dp = Activator.CreateInstance(delegateType.MakeGenericType(ContextType.GetGenericArguments()), new object[] { mockContext } )
@@ -73,12 +112,21 @@ namespace LightMock.Generator
             return ((IDelegateProvider)dp).GetDelegate();
         }
 
+        /// <summary>
+        /// For internal usage.
+        /// </summary>
         protected Type MakeGenericType(Type genericType) 
             => genericType.MakeGenericType(ContextType.GetGenericArguments());
 
+        /// <summary>
+        /// For internal usage.
+        /// </summary>
         protected Type MakeMockContextType(Type type)
             => Defaults.MockContextType.MakeGenericType(type);
 
+        /// <summary>
+        /// For internal usage.
+        /// </summary>
         protected Type MakeGenericMockContextType(Type genericType)
             => Defaults.MockContextType.MakeGenericType(genericType.MakeGenericType(ContextType.GetGenericArguments()));
 

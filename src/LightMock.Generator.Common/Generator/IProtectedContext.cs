@@ -34,6 +34,9 @@ namespace LightMock.Generator
     [EditorBrowsable(EditorBrowsableState.Never)]
     public interface IProtectedContext<T> where T : class
     {
+        /// <summary>
+        /// For internal usage
+        /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
         object ProtectedContext { get; }
     }
