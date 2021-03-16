@@ -56,9 +56,10 @@ namespace LightMock
         /// Arranges for the mocked method to return a value of type <typeparamref name="TResult"/>.
         /// </summary>
         /// <param name="value">The value to be returned from the mocked method.</param>
-        public void Returns(TResult value)
+        FunctionArrangement<TResult> Returns(TResult value)
         {
             result = value;
+            return this;
         }
 
         /// <summary>
@@ -66,8 +67,11 @@ namespace LightMock
         /// Return value is set by the <paramref name="getResultFunc"/> when the mocked method is invoked.
         /// </summary>
         /// <param name="getResultFunc">The <see cref="Func{TResult}"/> is executed and returns value when the mocked method is invoked.</param>
-        public void Returns(Func<TResult> getResultFunc)
-            => callback.Method = getResultFunc;
+        FunctionArrangement<TResult> Returns(Func<TResult> getResultFunc)
+        {
+            callback.Method = getResultFunc;
+            return this;
+        }
 
         /// <summary>
         /// Arranges for the mocked method to return a value of type <typeparamref name="TResult"/>. 
@@ -75,8 +79,11 @@ namespace LightMock
         /// </summary>
         /// <typeparam name="T">The type of the first parameter.</typeparam>
         /// <param name="getResultFunc">The <see cref="Func{T, TResult}"/> is executed and returns value when the mocked method is invoked.</param>
-        public void Returns<T>(Func<T, TResult> getResultFunc)
-            => callback.Method = getResultFunc;
+        FunctionArrangement<TResult> Returns<T>(Func<T, TResult> getResultFunc)
+        {
+            callback.Method = getResultFunc;
+            return this;
+        }
 
         /// <summary>
         /// Arranges for the mocked method to return a value of type <typeparamref name="TResult"/>. 
@@ -85,8 +92,11 @@ namespace LightMock
         /// <typeparam name="T1">The type of the first parameter.</typeparam>
         /// <typeparam name="T2">The type of the second parameter.</typeparam>
         /// <param name="getResultFunc">The <see cref="Func{T1, T2, TResult}"/> is executed and returns value when the mocked method is invoked.</param>
-        public void Returns<T1, T2>(Func<T1, T2, TResult> getResultFunc)
-            => callback.Method = getResultFunc;
+        FunctionArrangement<TResult> Returns<T1, T2>(Func<T1, T2, TResult> getResultFunc)
+        {
+            callback.Method = getResultFunc;
+            return this;
+        }
 
         /// <summary>
         /// Arranges for the mocked method to return a value of type <typeparamref name="TResult"/>. 
@@ -96,8 +106,11 @@ namespace LightMock
         /// <typeparam name="T2">The type of the second parameter.</typeparam>
         /// <typeparam name="T3">The type of the third parameter.</typeparam>
         /// <param name="getResultFunc">The <see cref="Func{T1, T2, T3, TResult}"/> is executed and returns value when the mocked method is invoked.</param>
-        public void Returns<T1, T2, T3>(Func<T1, T2, T3, TResult> getResultFunc)
-            => callback.Method = getResultFunc;
+        FunctionArrangement<TResult> Returns<T1, T2, T3>(Func<T1, T2, T3, TResult> getResultFunc)
+        {
+            callback.Method = getResultFunc;
+            return this;
+        }
 
         /// <summary>
         /// Arranges for the mocked method to return a value of type <typeparamref name="TResult"/>. 
@@ -108,8 +121,11 @@ namespace LightMock
         /// <typeparam name="T3">The type of the third parameter.</typeparam>
         /// <typeparam name="T4">The type of the fourth parameter.</typeparam>
         /// <param name="getResultFunc">The <see cref="Func{T1, T2, T3, T4, TResult}"/> is executed and returns value when the mocked method is invoked.</param>
-        public void Returns<T1, T2, T3, T4>(Func<T1, T2, T3, T4, TResult> getResultFunc)
-            => callback.Method = getResultFunc;
+        FunctionArrangement<TResult> Returns<T1, T2, T3, T4>(Func<T1, T2, T3, T4, TResult> getResultFunc)
+        {
+            callback.Method = getResultFunc;
+            return this;
+        }
 
         [return: MaybeNull]
         TResult IArrangementInvocation<TResult>.Invoke(IInvocationInfo invocation)
@@ -121,5 +137,23 @@ namespace LightMock
                 throw exception;
             return result;
         }
+
+        IReturnsResult<TResult> IReturns<TResult>.Returns(TResult value)
+            => Returns(value);
+
+        IReturnsResult<TResult> IReturns<TResult>.Returns(Func<TResult> getResultFunc)
+            => Returns(getResultFunc);
+
+        IReturnsResult<TResult> IReturns<TResult>.Returns<T>(Func<T, TResult> getResultFunc)
+            => Returns(getResultFunc);
+
+        IReturnsResult<TResult> IReturns<TResult>.Returns<T1, T2>(Func<T1, T2, TResult> getResultFunc)
+            => Returns(getResultFunc);
+
+        IReturnsResult<TResult> IReturns<TResult>.Returns<T1, T2, T3>(Func<T1, T2, T3, TResult> getResultFunc)
+            => Returns(getResultFunc);
+
+        IReturnsResult<TResult> IReturns<TResult>.Returns<T1, T2, T3, T4>(Func<T1, T2, T3, T4, TResult> getResultFunc)
+            => Returns(getResultFunc);
     }
 }
