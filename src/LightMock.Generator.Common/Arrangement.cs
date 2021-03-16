@@ -35,7 +35,7 @@ namespace LightMock
     abstract class Arrangement : IArrangement
     {
         private readonly LambdaExpression expression;                
-        private Action throwAction;
+        private readonly Callback exceptionFactory;
         private readonly Callback callback;
 
         /// <summary>
@@ -46,7 +46,7 @@ namespace LightMock
         protected Arrangement(LambdaExpression expression)
         {
             this.expression = expression;
-            throwAction = () => { };
+            exceptionFactory = new Callback();
             callback = new Callback();
         }
 
@@ -55,9 +55,7 @@ namespace LightMock
         /// </summary>
         /// <typeparam name="TException">The type of <see cref="Exception"/> to be thrown.</typeparam>
         public void Throws<TException>() where TException : Exception, new()
-        {
-            throwAction = () => { throw new TException(); };
-        }
+            => Throws(() => new TException());
 
         /// <summary>
         /// Arranges for an <see cref="Exception"/> of type <typeparamref name="TException"/> to be thrown.
@@ -65,9 +63,7 @@ namespace LightMock
         /// <typeparam name="TException">The type of <see cref="Exception"/> to be thrown.</typeparam>
         /// <param name="factory">A factory delegate used to create the <typeparamref name="TException"/> instance.</param>
         public void Throws<TException>(Func<TException> factory) where TException : Exception
-        {
-            throwAction = () => { throw factory(); };
-        }
+            => exceptionFactory.Method = factory;
 
         /// <summary>
         /// Arranges for the <paramref name="callback"/> to be called when the mocked method is invoked.
@@ -159,7 +155,8 @@ namespace LightMock
             return expression.ToMatchInfo().Equals(matchInfo);
         }
 
-        protected void InvokeThrowAction() => throwAction();
+
+        protected Exception? GetException() => exceptionFactory.Invoke<Exception>(null, null);
 
         protected void InvokeCallback(IInvocationInfo invocationInfo)
             => invocationInfo.Invoke(callback);

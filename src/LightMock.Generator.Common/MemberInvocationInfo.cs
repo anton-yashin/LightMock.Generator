@@ -25,6 +25,7 @@
     https://github.com/anton-yashin/
 *******************************************************************************/
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 namespace LightMock
@@ -40,6 +41,8 @@ namespace LightMock
 
         public void Invoke(Callback callback) => callback.Invoke(null);
 
-        public TResult Invoke<TResult>(Callback callback, TResult defaultValue) => callback.Invoke(null, defaultValue);
+        [return: MaybeNull]
+        public TResult Invoke<TResult>(Callback callback, [AllowNull] TResult defaultValue)
+            => callback.Invoke(null, defaultValue);
     }
 }

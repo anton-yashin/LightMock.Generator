@@ -37,8 +37,10 @@ namespace LightMock
 
         public void Invoke(IInvocationInfo invocationInfo)
         {
+            var exception = GetException();
             InvokeCallback(invocationInfo);
-            InvokeThrowAction();
+            if (exception != null)
+                throw exception;
         }
     }
 }

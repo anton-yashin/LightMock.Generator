@@ -26,6 +26,7 @@
 *******************************************************************************/
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 
 namespace LightMock
@@ -33,7 +34,9 @@ namespace LightMock
     internal interface IInvocationInfo
     {
         void Invoke(Callback callback);
-        TResult Invoke<TResult>(Callback callback, TResult defaultValue);
+        
+        [return: MaybeNull]
+        TResult Invoke<TResult>(Callback callback, [AllowNull] TResult defaultValue);
 
     }
 }

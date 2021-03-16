@@ -25,6 +25,7 @@
     https://github.com/anton-yashin/
 *******************************************************************************/
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace LightMock
 {
@@ -59,7 +60,8 @@ namespace LightMock
             }
         }
 
-        public TResult Invoke<TResult>(object[]? parameters, TResult defaultValue)
+        [return: MaybeNull]
+        public TResult Invoke<TResult>(object[]? parameters, [AllowNull] TResult defaultValue)
         {
             var method = Method;
             if (method != null)
