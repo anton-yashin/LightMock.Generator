@@ -32,8 +32,8 @@ namespace LightMock
 {
     internal interface IInvocationInfo
     {
-        void Invoke(Action<object[]?> action);
-        TResult Invoke<TResult>(Func<object[]?, TResult> func);
+        void Invoke(Callback callback);
+        TResult Invoke<TResult>(Callback callback, TResult defaultValue);
 
     }
 }
