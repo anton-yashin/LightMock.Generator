@@ -26,10 +26,12 @@
 *******************************************************************************/
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Text;
 
 namespace LightMock
 {
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public interface ICallback : IFluentInterface
     {
         ICallbackResult Callback(Action callback);
@@ -41,15 +43,17 @@ namespace LightMock
         ICallbackResult Callback<T1, T2, T3, T4, T5, T6>(Action<T1, T2, T3, T4, T5, T6> callback);
     }
 
+    [EditorBrowsable(EditorBrowsableState.Never)] 
     public interface ICallbackResult : IThrows, IFluentInterface { }
 
-
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public interface IThrows : IFluentInterface
     {
         void Throws<TException>() where TException : Exception, new();
         void Throws<TException>(Func<TException> factory) where TException : Exception;
     }
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public interface IReturns<TResult> : IFluentInterface
     {
         IReturnsResult<TResult> Returns(TResult value);
@@ -60,11 +64,13 @@ namespace LightMock
         IReturnsResult<TResult> Returns<T1, T2, T3, T4>(Func<T1, T2, T3, T4, TResult> getResultFunc);
     }
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public interface IReturnsResult<TResult> : ICallback, IThrows, IFluentInterface { }
 
-
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public interface IArrangement : ICallback, IThrows, ICallbackResult, IFluentInterface { }
 
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public interface IArrangement<TResult> : IReturns<TResult>, IReturnsResult<TResult>, ICallback, IThrows, IFluentInterface { }
 
 }
