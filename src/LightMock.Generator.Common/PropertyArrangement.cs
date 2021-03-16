@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 
 namespace LightMock
@@ -12,6 +13,7 @@ namespace LightMock
         IPropertyArrangementInvocation<TResult>,
         IArrangementInvocation<TResult>
     {
+        [AllowNull]
         private TResult result;
 
         /// <summary>
@@ -22,9 +24,10 @@ namespace LightMock
         public PropertyArrangement(LambdaExpression expression)
             : base(expression)
         {
-            result = default!;
+            result = default;
         }
 
+        [return: MaybeNull]
         TResult IArrangementInvocation<TResult>.Invoke(IInvocationInfo invocation) => result;
 
         void IPropertyArrangementInvocation<TResult>.Invoke(TResult value) => result = value;

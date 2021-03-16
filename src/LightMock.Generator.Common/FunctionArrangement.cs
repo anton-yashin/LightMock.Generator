@@ -26,6 +26,7 @@
 ******************************************************************************/
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 
 namespace LightMock
@@ -37,6 +38,7 @@ namespace LightMock
     /// <typeparam name="TResult">The type of the return value of the mocked method.</typeparam>
     sealed class FunctionArrangement<TResult> : Arrangement, IArrangement<TResult>, IArrangementInvocation<TResult>
     {
+        [AllowNull]
         private TResult result = default!;
 
         private Callback callback = new Callback();
@@ -109,11 +111,14 @@ namespace LightMock
         public void Returns<T1, T2, T3, T4>(Func<T1, T2, T3, T4, TResult> getResultFunc)
             => callback.Method = getResultFunc;
 
+        [return: MaybeNull]
         TResult IArrangementInvocation<TResult>.Invoke(IInvocationInfo invocation)
         {
+            var exception = GetException();
             result = invocation.Invoke(callback, result);
             InvokeCallback(invocation);
-            InvokeThrowAction();
+            if (exception != null)
+                throw exception;
             return result;
         }
     }
