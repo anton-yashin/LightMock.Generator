@@ -116,10 +116,7 @@ namespace LightMock.Generator
         T CreateArrangeWhenInstance(ILambdaRequest request)
             => typeResolver.ActivateArrangeWhenInstance<T>(GetArrangeArgs(request));
 
-        LambdaExpression ExchangeForExpression(string token)
-            => ExchangeForExpression(token, ContextResolverDefaults.Instance);
-
-        protected abstract LambdaExpression ExchangeForExpression(string token, IContextResolverDefaults defaults);
+        protected abstract LambdaExpression ExchangeForExpression(string token);
         protected abstract IReadOnlyDictionary<Type, Type> ContextResolverTable { get; }
 
         public void AssertGet<TProperty>(Func<T, TProperty> expression)

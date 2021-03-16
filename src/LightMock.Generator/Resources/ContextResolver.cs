@@ -12,7 +12,7 @@ namespace LightMock.Generator
             /*typeByTypeBuilder*/
         };
 
-        public static LambdaExpression ExchangeForExpression(string token, IContextResolverDefaults defaults)
+        public static LambdaExpression ExchangeForExpression(string token)
         {
             switch (token)
             {

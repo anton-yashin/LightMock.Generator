@@ -38,7 +38,7 @@ namespace LightMock.Generator
         protected override IReadOnlyDictionary<Type, Type> ContextResolverTable
             => throw new NotImplementedException();
 
-        protected override LambdaExpression ExchangeForExpression(string token, IContextResolverDefaults defaults)
+        protected override LambdaExpression ExchangeForExpression(string token)
             => throw new NotImplementedException();
     }
 }
