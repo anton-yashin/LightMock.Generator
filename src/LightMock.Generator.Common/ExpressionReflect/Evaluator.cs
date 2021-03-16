@@ -39,7 +39,7 @@ namespace ExpressionReflect
 	static class Evaluator
 	{
 		/// <summary>
-		/// Performs evaluation & replacement of independent sub-trees
+		/// Performs evaluation &amp; replacement of independent sub-trees
 		/// </summary>
 		/// <param name="expression">The root of the expression tree.</param>
 		/// <returns>A new tree with sub-trees evaluated and replaced.</returns>
@@ -49,7 +49,7 @@ namespace ExpressionReflect
 		}
 
 		/// <summary>
-		/// Performs evaluation & replacement of independent sub-trees
+		/// Performs evaluation &amp; replacement of independent sub-trees
 		/// </summary>
 		/// <param name="expression">The root of the expression tree.</param>
 		/// <param name="fnCanBeEvaluated">A function that decides whether a given expression node can be part of the local function.</param>
@@ -65,7 +65,7 @@ namespace ExpressionReflect
 		}
 
 		/// <summary>
-		/// Evaluates & replaces sub-trees when first candidate is reached (top-down)
+		/// Evaluates &amp; replaces sub-trees when first candidate is reached (top-down)
 		/// </summary>
 		private class SubtreeEvaluator : ExpressionVisitor
 		{

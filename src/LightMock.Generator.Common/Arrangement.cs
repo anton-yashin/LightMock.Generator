@@ -48,109 +48,51 @@ namespace LightMock
             this.expression = expression;
         }
 
-        /// <summary>
-        /// Arranges for an <see cref="Exception"/> of type <typeparamref name="TException"/> to be thrown.
-        /// </summary>
-        /// <typeparam name="TException">The type of <see cref="Exception"/> to be thrown.</typeparam>
         Arrangement Throws<TException>() where TException : Exception, new()
             => Throws(() => new TException());
 
-        /// <summary>
-        /// Arranges for an <see cref="Exception"/> of type <typeparamref name="TException"/> to be thrown.
-        /// </summary>
-        /// <typeparam name="TException">The type of <see cref="Exception"/> to be thrown.</typeparam>
-        /// <param name="factory">A factory delegate used to create the <typeparamref name="TException"/> instance.</param>
         Arrangement Throws<TException>(Func<TException> factory) where TException : Exception
         {
             exceptionFactory.Method = factory;
             return this;
         }
 
-        /// <summary>
-        /// Arranges for the <paramref name="callback"/> to be called when the mocked method is invoked.
-        /// </summary>
-        /// <param name="callback">The <see cref="Action"/> to be called when the mocked method is invoked.</param>
         Arrangement Callback(Action callback)
         {
             this.callback.Method = callback;
             return this;
         }
 
-        /// <summary>
-        /// Arranges for the <paramref name="callback"/> to be called when the mocked method is invoked.
-        /// </summary>
-        /// <typeparam name="T">The type of the first parameter.</typeparam>
-        /// <param name="callback">The <see cref="Action{T}"/> to be called when the mocked method is invoked.</param>
         Arrangement Callback<T>(Action<T> callback)
         {
             this.callback.Method = callback;
             return this;
         }
 
-        /// <summary>
-        /// Arranges for the <paramref name="callback"/> to be called when the mocked method is invoked.
-        /// </summary>
-        /// <typeparam name="T1">The type of the first parameter.</typeparam>
-        /// <typeparam name="T2">The type of the second parameter.</typeparam>
-        /// <param name="callback">The <see cref="Action{T1,T2}"/> to be called when the mocked method is invoked.</param>
         Arrangement Callback<T1, T2>(Action<T1, T2> callback)
         {
             this.callback.Method = callback;
             return this;
         }
 
-        /// <summary>
-        /// Arranges for the <paramref name="callback"/> to be called when the mocked method is invoked.
-        /// </summary>
-        /// <typeparam name="T1">The type of the first parameter.</typeparam>
-        /// <typeparam name="T2">The type of the second parameter.</typeparam>
-        /// <typeparam name="T3">The type of the third parameter.</typeparam>
-        /// <param name="callback">The <see cref="Action{T1,T2}"/> to be called when the mocked method is invoked.</param>
         Arrangement Callback<T1, T2, T3>(Action<T1, T2, T3> callback)
         {
             this.callback.Method = callback;
             return this;
         }
 
-        /// <summary>
-        /// Arranges for the <paramref name="callback"/> to be called when the mocked method is invoked.
-        /// </summary>
-        /// <typeparam name="T1">The type of the first parameter.</typeparam>
-        /// <typeparam name="T2">The type of the second parameter.</typeparam>
-        /// <typeparam name="T3">The type of the third parameter.</typeparam>
-        /// <typeparam name="T4">The type of the fourth parameter.</typeparam>
-        /// <param name="callback">The <see cref="Action{T1,T2}"/> to be called when the mocked method is invoked.</param>
         Arrangement Callback<T1, T2, T3, T4>(Action<T1, T2, T3, T4> callback)
         {
             this.callback.Method = callback;
             return this;
         }
 
-        /// <summary>
-        /// Arranges for the <paramref name="callback"/> to be called when the mocked method is invoked.
-        /// </summary>
-        /// <typeparam name="T1">The type of the first parameter.</typeparam>
-        /// <typeparam name="T2">The type of the second parameter.</typeparam>
-        /// <typeparam name="T3">The type of the third parameter.</typeparam>
-        /// <typeparam name="T4">The type of the fourth parameter.</typeparam>
-        /// <typeparam name="T5">The type of the fifth parameter.</typeparam>
-        /// <param name="callback">The <see cref="Action{T1,T2}"/> to be called when the mocked method is invoked.</param>
         Arrangement Callback<T1, T2, T3, T4, T5>(Action<T1, T2, T3, T4, T5> callback)
         {
             this.callback.Method = callback;
             return this;
         }
 
-        /// <summary>
-        /// Arranges for the <paramref name="callback"/> to be called when the mocked method is invoked.
-        /// </summary>
-        /// <typeparam name="T1">The type of the first parameter.</typeparam>
-        /// <typeparam name="T2">The type of the second parameter.</typeparam>
-        /// <typeparam name="T3">The type of the third parameter.</typeparam>
-        /// <typeparam name="T4">The type of the fourth parameter.</typeparam>
-        /// <typeparam name="T5">The type of the fifth parameter.</typeparam>
-        /// <typeparam name="T6">The type of the sixth parameter.</typeparam>
-        /// <param name="callback">The <see cref="Action{T1,T2}"/> to be called when the mocked method is invoked.</param>
         Arrangement Callback<T1, T2, T3, T4, T5, T6>(Action<T1, T2, T3, T4, T5, T6> callback)
         {
             this.callback.Method = callback;

@@ -25,12 +25,22 @@
     https://github.com/anton-yashin/
 *******************************************************************************/
 using System;
+using System.ComponentModel;
 using System.Linq.Expressions;
 
 namespace LightMock.Generator
 {
+    /// <summary>
+    /// For internal usage
+    /// </summary>
+    [EditorBrowsable(EditorBrowsableState.Never)]
+
     public interface ILambdaRequest
     {
+        /// <summary>
+        /// For internal usage
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
         void SetResult(LambdaExpression result);
     }
 }

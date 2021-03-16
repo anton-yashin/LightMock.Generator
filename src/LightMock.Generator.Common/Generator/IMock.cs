@@ -29,6 +29,10 @@ using System.Runtime.CompilerServices;
 
 namespace LightMock.Generator
 {
+    /// <summary>
+    /// Interface for Mock&lt;T&gt;
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public interface IMock<T> : IMockContext<T>
         where T : class
     {
@@ -136,7 +140,6 @@ namespace LightMock.Generator
         /// Verifies that an event was removed from the mock.
         /// </summary>
         /// <param name="expression">Expression to verify.</param>
-        /// <param name="times">The number of times a method is expected to be called.</param>
         void AssertRemove(Action<T> expression);
 
         /// <summary>

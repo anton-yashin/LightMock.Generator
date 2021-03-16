@@ -39,6 +39,9 @@ namespace LightMock.Generator
     [AttributeUsage(validOn: AttributeTargets.Assembly, AllowMultiple = false, Inherited = false)]
     public sealed class DisableCodeGenerationAttribute : Attribute
     {
+        /// <summary>
+        /// Initialize a new instance of the <see cref="DisableCodeGenerationAttribute"/> class.
+        /// </summary>
         public DisableCodeGenerationAttribute() { }
     }
 }

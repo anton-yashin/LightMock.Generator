@@ -31,6 +31,9 @@ using System.Text;
 
 namespace LightMock
 {
+    /// <summary>
+    /// <see cref="MockException"/> thrown when an assert is failed.
+    /// </summary>
     public class MockException : Exception
     {
         internal MockException()
