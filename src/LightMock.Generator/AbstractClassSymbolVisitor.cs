@@ -42,16 +42,13 @@ namespace LightMock.Generator
             this.interfaceName = interfaceName;
         }
 
-        static bool IsInterfaceRequired(ISymbol symbol)
-            => symbol.IsCanBeOverriden() && symbol.DeclaredAccessibility == Accessibility.Protected;
-
         public override string? VisitMethod(IMethodSymbol symbol)
         {
             if (symbol.MethodKind != MethodKind.Ordinary || symbol.IsCanBeOverriden() == false)
                 return null;
 
             var result = new StringBuilder();
-            bool isInterfaceRequired = IsInterfaceRequired(symbol);
+            bool isInterfaceRequired = symbol.IsInterfaceRequired();
 
             if (isInterfaceRequired)
                 AddInterfaceImplementation(symbol, result);
@@ -83,7 +80,7 @@ namespace LightMock.Generator
             if (symbol.IsCanBeOverriden() == false)
                 return null;
 
-            bool isInterfaceRequired = IsInterfaceRequired(symbol);
+            bool isInterfaceRequired = symbol.IsInterfaceRequired();
 
             var result = new StringBuilder();
             if (isInterfaceRequired)

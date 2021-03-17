@@ -44,6 +44,9 @@ namespace LightMock.Generator
         public static bool IsCanBeOverriden(this ISymbol @this)
             => @this.IsAbstract || @this.IsVirtual;
 
+        public static bool IsInterfaceRequired(this ISymbol @this)
+            => @this.IsCanBeOverriden() && @this.DeclaredAccessibility == Accessibility.Protected;
+
         public static (string whereClause, IEnumerable<ITypeSymbol> typeArguments)
             GetWhereClauseAndTypeArguments(this INamedTypeSymbol @this)
         {
