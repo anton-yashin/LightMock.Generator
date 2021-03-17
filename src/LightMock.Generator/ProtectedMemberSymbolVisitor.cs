@@ -34,8 +34,7 @@ namespace LightMock.Generator
         public ProtectedMemberSymbolVisitor() { }
 
         bool IsInterfaceRequired(ISymbol symbol)
-            => (symbol.IsAbstract || symbol.IsVirtual)
-                && symbol.DeclaredAccessibility == Accessibility.Protected;
+            => symbol.IsCanBeOverriden() && symbol.DeclaredAccessibility == Accessibility.Protected;
 
         public override string? VisitMethod(IMethodSymbol symbol)
         {

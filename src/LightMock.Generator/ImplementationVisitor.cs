@@ -41,17 +41,13 @@ namespace LightMock.Generator
         }
 
 
-        protected static bool IsCanBeOverriden(ISymbol symbol)
-            => symbol.IsAbstract || symbol.IsVirtual;
-
         protected static string GetObsoleteAndOrOverrideChunkFor(ISymbol symbol)
             => (symbol.ContainingType.Name == nameof(Object) || symbol.ContainingType.BaseType != null)
-            ? (symbol.IsObsolete() ? "[Obsolete] override " : "override ")
-            : "";
+            ? symbol.GetObsoleteOrOverrideChunk() : "";
 
         public override string? VisitMethod(IMethodSymbol symbol)
         {
-            if (symbol.MethodKind != MethodKind.Ordinary || IsCanBeOverriden(symbol) == false)
+            if (symbol.MethodKind != MethodKind.Ordinary || symbol.IsCanBeOverriden() == false)
                 return null;
             var result = new StringBuilder()
                 .Append(GetObsoleteAndOrOverrideChunkFor(symbol))
@@ -69,7 +65,7 @@ namespace LightMock.Generator
 
         protected string? VisitProperty(IPropertySymbol symbol, Func<StringBuilder, IPropertySymbol, StringBuilder> appedGetterAndSetter)
         {
-            if (IsCanBeOverriden(symbol) == false)
+            if (symbol.IsCanBeOverriden() == false)
                 return null;
 
             var result = new StringBuilder(GetObsoleteAndOrOverrideChunkFor(symbol))
@@ -93,7 +89,7 @@ namespace LightMock.Generator
                 appendEventAddRemove(result, symbol);
                 return result.ToString();
             }
-            if (IsCanBeOverriden(symbol))
+            if (symbol.IsCanBeOverriden())
             {
                 result.Append("override ")
                     .Append(symbol.ToDisplayString(SymbolDisplayFormats.AbstractClass));
