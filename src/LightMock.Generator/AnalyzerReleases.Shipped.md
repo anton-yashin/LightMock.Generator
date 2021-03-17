@@ -21,3 +21,11 @@ SPG001 | Usage | Error | DiagnosticsDescriptors
 SPG002 | Usage | Error | DiagnosticsDescriptors
 SPG003 | Usage | Error | DiagnosticsDescriptors
 SPG004 | Usage | Warning | DiagnosticsDescriptors
+
+
+## Release 1.0.0-preview.2
+### New Rules
+Rule ID | Category | Severity | Notes
+--------|----------|----------|-------
+SPG006 | Usage | Error | DiagnosticsDescriptors
+SPG007 | Usage | Error | DiagnosticsDescriptors
