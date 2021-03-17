@@ -23,7 +23,7 @@ SPG003 | Usage | Error | DiagnosticsDescriptors
 SPG004 | Usage | Warning | DiagnosticsDescriptors
 
 
-## Release 1.0.0-preview.2
+## Release 0.906
 ### New Rules
 Rule ID | Category | Severity | Notes
 --------|----------|----------|-------
