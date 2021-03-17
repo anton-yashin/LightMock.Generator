@@ -26,82 +26,23 @@
 *******************************************************************************/
 using Microsoft.CodeAnalysis;
 using System;
-using System.Text;
 
 namespace LightMock.Generator
 {
-    sealed class ArrangeOnAnyImplementationVisitor : SymbolVisitor<string>
+    sealed class ArrangeOnAnyImplementationVisitor : ImplementationVisitor
     {
-        private readonly SymbolDisplayFormat definitionFormat;
         private readonly string propertyToFuncInterfaceName;
 
         public ArrangeOnAnyImplementationVisitor(SymbolDisplayFormat definitionFormat, string propertyToFuncInterfaceName)
+            : base(definitionFormat)
         {
-            this.definitionFormat = definitionFormat;
             this.propertyToFuncInterfaceName = propertyToFuncInterfaceName;
         }
 
-        static bool IsCanBeOverriden(ISymbol symbol)
-            => symbol.IsAbstract || symbol.IsVirtual;
-
-        static string GetObsoleteAndOrOverrideChunkFor(ISymbol symbol)
-            => (symbol.ContainingType.Name == nameof(Object) || symbol.ContainingType.BaseType != null) 
-            ? (symbol.IsObsolete() ? "[Obsolete] override " : "override ")
-            : "";
-
-        public override string? VisitMethod(IMethodSymbol symbol)
-        {
-            if (symbol.MethodKind != MethodKind.Ordinary || IsCanBeOverriden(symbol) == false)
-                return null;
-            var result = new StringBuilder()
-                .Append(GetObsoleteAndOrOverrideChunkFor(symbol))
-                .AppendMethodDeclaration(symbol.ToDisplayString(definitionFormat), symbol);
-            result.Append("{");
-            if (symbol.ReturnsVoid == false)
-            {
-                result.Append("return default(")
-                    .Append(symbol.ReturnType.ToDisplayString(SymbolDisplayFormats.WithTypeParams))
-                    .Append(");");
-            }
-            result.Append("}");
-            return result.ToString();
-        }
-
         public override string? VisitProperty(IPropertySymbol symbol)
-        {
-            if (IsCanBeOverriden(symbol) == false)
-                return null;
-
-            var result = new StringBuilder(GetObsoleteAndOrOverrideChunkFor(symbol))
-                .Append(symbol.ToDisplayString(definitionFormat))
-                .AppendArrangeOnAnyGetterAndSetter(symbol, propertyToFuncInterfaceName);
-
-            return result.ToString();
-        }
+            => VisitProperty(symbol, (sb, sym) => sb.AppendArrangeOnAnyGetterAndSetter(symbol, propertyToFuncInterfaceName));
 
         public override string? VisitEvent(IEventSymbol symbol)
-        {
-            var ct = symbol.ContainingType;
-            var result = new StringBuilder();
-            if (ct.Name != nameof(Object) && ct.BaseType == null)
-            {
-                result.Append(symbol.ToDisplayString(SymbolDisplayFormats.Interface))
-                    .AppendDummyEventAddRemove(symbol);
-                return result.ToString();
-            }
-            if (IsCanBeOverriden(symbol))
-            {
-                result.Append("override ")
-                    .Append(symbol.ToDisplayString(SymbolDisplayFormats.AbstractClass))
-                    .AppendDummyEventAddRemove(symbol);
-                return result.ToString();
-            }
-            return null;
-        }
-
-        public override string? VisitNamedType(INamedTypeSymbol symbol)
-        {
-            return symbol.ToDisplayString(SymbolDisplayFormats.Interface);
-        }
+            => VisitEvent(symbol, BuilderPrimitives.AppendDummyEventAddRemove);
     }
 }
