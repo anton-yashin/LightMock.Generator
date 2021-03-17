@@ -61,10 +61,5 @@ namespace LightMock.Generator
 
             return result.ToString();
         }
-
-        public override string? VisitEvent(IEventSymbol symbol)
-        {
-            return null;
-        }
     }
 }
