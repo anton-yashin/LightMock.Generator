@@ -42,27 +42,18 @@ namespace LightMock.Generator
             this.interfaceName = interfaceName;
         }
 
-        static bool IsInterfaceRequired(ISymbol symbol)
-            => IsCanBeOverriden(symbol) && symbol.DeclaredAccessibility == Accessibility.Protected;
-
-        static bool IsCanBeOverriden(ISymbol symbol)
-            => symbol.IsAbstract || symbol.IsVirtual;
-
         public override string? VisitMethod(IMethodSymbol symbol)
         {
-            if (symbol.MethodKind != MethodKind.Ordinary || IsCanBeOverriden(symbol) == false)
+            if (symbol.MethodKind != MethodKind.Ordinary || symbol.IsCanBeOverriden() == false)
                 return null;
 
             var result = new StringBuilder();
-            bool isInterfaceRequired = IsInterfaceRequired(symbol);
+            bool isInterfaceRequired = symbol.IsInterfaceRequired();
 
             if (isInterfaceRequired)
                 AddInterfaceImplementation(symbol, result);
 
-            if (symbol.IsObsolete())
-                result.Append("[Obsolete] ");
-
-            result.Append("override ")
+            result.Append(symbol.GetObsoleteOrOverrideChunk())
                 .AppendMethodDeclaration(symbol.ToDisplayString(SymbolDisplayFormats.AbstractClass), symbol)
                 .AppendMethodBody(isInterfaceRequired ? VariableNames.ProtectedContext : VariableNames.Context, symbol);
             return result.ToString();
@@ -86,19 +77,16 @@ namespace LightMock.Generator
 
         public override string? VisitProperty(IPropertySymbol symbol)
         {
-            if (IsCanBeOverriden(symbol) == false)
+            if (symbol.IsCanBeOverriden() == false)
                 return null;
 
-            bool isInterfaceRequired = IsInterfaceRequired(symbol);
+            bool isInterfaceRequired = symbol.IsInterfaceRequired();
 
             var result = new StringBuilder();
             if (isInterfaceRequired)
                 AddInterfaceImplementation(symbol, result);
 
-            if (symbol.IsObsolete())
-                result.Append("[Obsolete] ");
-
-            result.Append("override ")
+            result.Append(symbol.GetObsoleteOrOverrideChunk())
                 .Append(symbol.ToDisplayString(SymbolDisplayFormats.AbstractClass))
                 .AppendMockGetterAndSetter(isInterfaceRequired ? VariableNames.ProtectedContext : VariableNames.Context, symbol);
             return result.ToString();
@@ -112,7 +100,7 @@ namespace LightMock.Generator
 
         public override string? VisitEvent(IEventSymbol symbol)
         {
-            if (IsCanBeOverriden(symbol))
+            if (symbol.IsCanBeOverriden())
             {
                 var result = new StringBuilder("override ")
                     .Append(symbol.ToDisplayString(SymbolDisplayFormats.AbstractClass))

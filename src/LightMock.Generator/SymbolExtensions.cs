@@ -38,6 +38,15 @@ namespace LightMock.Generator
                 where i.AttributeClass?.ToDisplayString(SymbolDisplayFormats.Namespace) == "System." + nameof(ObsoleteAttribute)
                 select i).Any();
 
+        public static string GetObsoleteOrOverrideChunk(this ISymbol @this)
+            => @this.IsObsolete() ? "[Obsolete] override " : "override ";
+
+        public static bool IsCanBeOverriden(this ISymbol @this)
+            => @this.IsAbstract || @this.IsVirtual;
+
+        public static bool IsInterfaceRequired(this ISymbol @this)
+            => @this.IsCanBeOverriden() && @this.DeclaredAccessibility == Accessibility.Protected;
+
         public static (string whereClause, IEnumerable<ITypeSymbol> typeArguments)
             GetWhereClauseAndTypeArguments(this INamedTypeSymbol @this)
         {

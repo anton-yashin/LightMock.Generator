@@ -234,8 +234,7 @@ namespace LightMock.Generator
 
         public void Initialize(GeneratorInitializationContext context)
         {
-            context.CancellationToken.ThrowIfCancellationRequested();
-            context.RegisterForSyntaxNotifications(() => new LightMockSyntaxReceiver(context.CancellationToken));
+            context.RegisterForSyntaxNotifications(() => new LightMockSyntaxReceiver());
         }
     }
 }

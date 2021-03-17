@@ -35,12 +35,7 @@ namespace LightMock.Generator
 {
     sealed class LightMockSyntaxReceiver : CSharpSyntaxVisitor, ISyntaxReceiver
     {
-        private CancellationToken cancellationToken;
-
-        public LightMockSyntaxReceiver(CancellationToken cancellationToken)
-        {
-            this.cancellationToken = cancellationToken;
-        }
+        public LightMockSyntaxReceiver() { }
 
         public List<GenericNameSyntax> CandidateMocks { get; } = new List<GenericNameSyntax>();
         public List<AttributeSyntax> DisableCodeGenerationAttributes { get; } = new List<AttributeSyntax>();
@@ -49,7 +44,6 @@ namespace LightMock.Generator
 
         public void OnVisitSyntaxNode(SyntaxNode syntaxNode)
         {
-            cancellationToken.ThrowIfCancellationRequested();
             if (syntaxNode is CSharpSyntaxNode cssn)
                 cssn.Accept(this);
         }

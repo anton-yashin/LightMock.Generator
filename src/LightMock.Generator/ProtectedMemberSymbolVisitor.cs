@@ -33,13 +33,9 @@ namespace LightMock.Generator
     {
         public ProtectedMemberSymbolVisitor() { }
 
-        bool IsInterfaceRequired(ISymbol symbol)
-            => (symbol.IsAbstract || symbol.IsVirtual)
-                && symbol.DeclaredAccessibility == Accessibility.Protected;
-
         public override string? VisitMethod(IMethodSymbol symbol)
         {
-            if (symbol.MethodKind != MethodKind.Ordinary || IsInterfaceRequired(symbol) == false)
+            if (symbol.MethodKind != MethodKind.Ordinary || symbol.IsInterfaceRequired() == false)
                 return null;
 
             var result = symbol.ToDisplayString(SymbolDisplayFormats.KP2PInterfaceDeclaration) + ";";
@@ -49,7 +45,7 @@ namespace LightMock.Generator
 
         public override string? VisitProperty(IPropertySymbol symbol)
         {
-            if (IsInterfaceRequired(symbol) == false)
+            if (symbol.IsInterfaceRequired() == false)
                 return null;
             var result = new StringBuilder(symbol.ToDisplayString(SymbolDisplayFormats.KP2PInterfaceDeclaration))
                 .Append("{");
@@ -61,11 +57,6 @@ namespace LightMock.Generator
             result.Append("}");
 
             return result.ToString();
-        }
-
-        public override string? VisitEvent(IEventSymbol symbol)
-        {
-            return null;
         }
     }
 }
