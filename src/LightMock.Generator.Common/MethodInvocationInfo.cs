@@ -45,7 +45,7 @@ namespace LightMock
         public void Invoke(CallbackInvocation callback) => callback.Invoke(Arguments);
 
         [return: MaybeNull]
-        public TResult Invoke<TResult>(CallbackInvocation callback)
-            => callback.Invoke<TResult>(Arguments);
+        public TResult Invoke<TResult>(CallbackInvocation callback, [AllowNull] TResult defaultValue)
+            => callback.Invoke(Arguments, defaultValue);
     }
 }

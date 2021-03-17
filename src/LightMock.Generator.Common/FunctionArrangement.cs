@@ -38,6 +38,9 @@ namespace LightMock
     /// <typeparam name="TResult">The type of the return value of the mocked method.</typeparam>
     sealed class FunctionArrangement<TResult> : Arrangement, IArrangement<TResult>, IArrangementInvocation<TResult>
     {
+        [AllowNull]
+        private TResult result;
+
         private CallbackInvocation callback = new();
 
         /// <summary>
@@ -59,7 +62,7 @@ namespace LightMock
         TResult IArrangementInvocation<TResult>.Invoke(IInvocationInfo invocation)
         {
             var exception = GetException();
-            var result = invocation.Invoke<TResult>(callback);
+            var result = invocation.Invoke(callback, this.result);
             InvokeCallback(invocation);
             if (exception != null)
                 throw exception;
@@ -67,7 +70,11 @@ namespace LightMock
         }
 
         IReturnsResult<TResult> IReturns<TResult>.Returns(TResult value)
-            => SetCallback(new Func<TResult>(() => value));
+        {
+            result = value;
+            this.callback.Method = null;
+            return this;
+        }
 
         IReturnsResult<TResult> IReturns<TResult>.Returns(Func<TResult> getResultFunc)
             => SetCallback(getResultFunc);

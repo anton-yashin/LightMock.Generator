@@ -15,10 +15,11 @@ namespace LightMock.Generator.Tests.BaseTests
         [Theory, MemberData(nameof(NoMethodProvided_Data))]
         public void NoMethodProvided_ReturnsDefault(object[]? prms)
         {
+            var expected = Guid.NewGuid();
             var cb = new CallbackInvocation();
 
-            var actual = cb.Invoke<Guid>(prms);
-            Assert.Equal(default(Guid), actual);
+            var actual = cb.Invoke(prms, expected);
+            Assert.Equal(expected, actual);
         }
 
         [Theory, MemberData(nameof(NoMethodProvided_Data))]
@@ -43,7 +44,7 @@ namespace LightMock.Generator.Tests.BaseTests
             var cb = new CallbackInvocation();
 
             cb.Method = new Func<Guid>(SomeMethod);
-            var actual = cb.Invoke<Guid>(prms);
+            var actual = cb.Invoke<Guid>(prms, default);
 
             Assert.Equal(1, invoked);
             Assert.Equal(expected, actual);
@@ -94,7 +95,7 @@ namespace LightMock.Generator.Tests.BaseTests
             var cb = new CallbackInvocation();
             cb.Method = new Func<CallbackInvocation>(SomeMethod);
 
-            Assert.Throws<ArgumentException>(() => cb.Invoke<string>(null));
+            Assert.Throws<ArgumentException>(() => cb.Invoke(null, "abc"));
         }
     }
 }

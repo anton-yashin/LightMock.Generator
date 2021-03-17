@@ -80,7 +80,8 @@ namespace LightMock
             return expression.ToMatchInfo().Equals(matchInfo);
         }
 
-        protected Exception? GetException() => exceptionFactory.Invoke<Exception>(null);
+
+        protected Exception? GetException() => exceptionFactory.Invoke<Exception>(null, null);
 
         protected void InvokeCallback(IInvocationInfo invocationInfo)
             => invocationInfo.Invoke(callback);
