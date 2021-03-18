@@ -48,7 +48,7 @@ namespace LightMock
             this.expression = expression;
         }
 
-        Arrangement SetExceptionFactory(Delegate exceptionFactory)
+        Arrangement SetExceptionFactory(Delegate? exceptionFactory)
         {
             this.exceptionFactory.Method = exceptionFactory;
             return this;
@@ -112,5 +112,8 @@ namespace LightMock
 
         void IThrows.Throws<TException>(Func<TException> factory)
             => SetExceptionFactory(factory);
+
+        void IThrows.ThrowsNothing()
+            => SetExceptionFactory(null);
     }
 }
