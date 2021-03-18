@@ -176,5 +176,9 @@ namespace LightMock.Generator
         /// No AOT transformations, thus pattern matching using <see cref="The{TValue}"/> type is not working.
         /// </remarks>
         IArrangement ArrangeSetter_When(Action<T> expression);
+        /// <summary>
+        /// Verifies that there no calls other than those already verified.
+        /// </summary>
+        void AssertNoOtherCalls();
     }
 }

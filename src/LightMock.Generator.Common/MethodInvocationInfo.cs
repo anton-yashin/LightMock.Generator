@@ -26,7 +26,9 @@
 *******************************************************************************/
 using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Reflection;
+using System.Text;
 
 namespace LightMock
 {
@@ -42,10 +44,61 @@ namespace LightMock
 
         public object[] Arguments { get; }
 
+        public string AsString()
+        {
+            var result = new StringBuilder();
+            result.Append(Method.ReturnType)
+                .Append(' ')
+                .Append(Method.DeclaringType)
+                .Append('.')
+                .Append(Method.Name)
+                .Append('(');
+
+            var parameters = Method.GetParameters();
+            var last = Math.Min(Arguments.Length, parameters.Length);
+            for (int i = 0; i < last; i++)
+            {
+                var p = parameters[i];
+                var a = Arguments[i];
+                if (i > 0)
+                    result.Append(',');
+                result.Append(p.ParameterType)
+                    .Append(' ')
+                    .Append(p.Name)
+                    .Append(" = ")
+                    .Append(ArgumentValueToString(a));
+            }
+            result.Append(')');
+            return result.ToString();
+        }
+
+        static string ArgumentValueToString(object value)
+        {
+            if (value == null)
+                return "null";
+            switch (value)
+            {
+                case float f:
+                    return f.ToString("G9");
+                case double d:
+                    return d.ToString("G17");
+                case Enum e:
+                    return e.GetType().ToString() + '.' + e.ToString("F");
+                case string s:
+                    return '"' + s + '"';
+            }
+            return value.ToString();
+        }
+
         public void Invoke(CallbackInvocation callback) => callback.Invoke(Arguments);
 
         [return: MaybeNull]
         public TResult Invoke<TResult>(CallbackInvocation callback, [AllowNull] TResult defaultValue)
             => callback.Invoke(Arguments, defaultValue);
+
+        public bool IsMethod
+            => Method.IsSpecialName == false
+            || Method.Name.StartsWith("get_") == false
+            && Method.Name.StartsWith("set_") == false;
     }
 }

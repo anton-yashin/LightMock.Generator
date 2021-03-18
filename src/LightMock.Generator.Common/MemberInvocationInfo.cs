@@ -27,6 +27,7 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using System.Text;
 
 namespace LightMock
 {
@@ -39,10 +40,24 @@ namespace LightMock
 
         public MemberInfo MemberInfo { get; }
 
+        public string AsString()
+        {
+            var result = new StringBuilder();
+            result.Append(MemberInfo.MemberType)
+                .Append(' ')
+                .Append(MemberInfo.DeclaringType)
+                .Append('.')
+                .Append(MemberInfo.Name);
+
+            return result.ToString();
+        }
+
         public void Invoke(CallbackInvocation callback) => callback.Invoke(null);
 
         [return: MaybeNull]
         public TResult Invoke<TResult>(CallbackInvocation callback, [AllowNull] TResult defaultValue)
             => callback.Invoke(null, defaultValue);
+
+        public bool IsMethod => false;
     }
 }

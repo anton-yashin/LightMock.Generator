@@ -256,9 +256,13 @@ namespace LightMock
             var unverified = new List<IInvocationInfo>();
             foreach (var i in invocations)
             {
+                if (i.IsMethod == false)
+                    continue;
                 bool found = false;
                 foreach (var j in verifiedInvocations)
                 {
+                    if (j.IsMethod == false)
+                        continue;
                     if (ReferenceEquals(i, j))
                     {
                         found = true;

@@ -556,6 +556,59 @@ namespace LightMock.Generator.Tests
             Assert.Equal(expectedIndex, invokedWith.index);
         }
 
+        [Fact]
+        public void AssertNoOtherCalls()
+        {
+            var testScript = LoadAssembly<IAssertNoOtherCalls>();
+            var context = testScript.Context;
+            var mock = testScript.MockObject;
+
+            mock.GetAndSet = nameof(mock.GetAndSet);
+            mock.SetOnly = nameof(mock.SetOnly);
+            mock["123"] = "indexer_set";
+
+            _ = mock.GetAndSet;
+            _ = mock.GetOnly;
+            _ = mock["456"];
+
+            _ = mock.Function(nameof(mock.Function));
+            mock.Method(nameof(mock.Method));
+
+            context.AssertSet_When(f => f.GetAndSet = nameof(mock.GetAndSet));
+            context.AssertSet_When(f => f.SetOnly = nameof(mock.SetOnly));
+            context.AssertSet_When(f => f["123"] = "indexer_set");
+
+            context.AssertGet(f => f.GetAndSet);
+            context.AssertGet(f => f.GetOnly);
+            context.AssertGet(f => f["456"]);
+
+            context.Assert(f => f.Function(nameof(mock.Function)));
+            context.Assert(f => f.Method(nameof(mock.Method)));
+
+            context.AssertNoOtherCalls();
+        }
+
+        [Fact]
+        public void AssertNoOtherCalls_Throws()
+        {
+            var testScript = LoadAssembly<IAssertNoOtherCalls>(nameof(AssertNoOtherCalls));
+            var context = testScript.Context;
+            var mock = testScript.MockObject;
+
+            mock.GetAndSet = nameof(mock.GetAndSet);
+            mock.SetOnly = nameof(mock.SetOnly);
+            mock["123"] = "indexer_set";
+
+            _ = mock.GetAndSet;
+            _ = mock.GetOnly;
+            _ = mock["456"];
+
+            _ = mock.Function(nameof(mock.Function));
+            mock.Method(nameof(mock.Method));
+
+            Assert.Throws<MockException>(() => context.AssertNoOtherCalls());
+        }
+
         protected override string GetFullResourceName(string resourceName)
             => "Interface." + resourceName + ".test.cs";
     }

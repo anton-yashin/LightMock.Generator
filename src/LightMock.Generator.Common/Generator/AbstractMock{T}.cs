@@ -27,6 +27,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using System.Threading;
@@ -44,7 +45,7 @@ namespace LightMock.Generator
         T? instance;
         readonly object[] prms;
         readonly TypeResolver typeResolver;
-        readonly IMockContext<T> publicContext;
+        readonly MockContext<T> publicContext;
         readonly object protectedContext;
         readonly IMockContextInternal propertiesContext;
 
@@ -144,6 +145,19 @@ namespace LightMock.Generator
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
         protected abstract IReadOnlyDictionary<Type, Type> ContextResolverTable { get; }
+
+        ///<inheritdoc/>
+        public void AssertNoOtherCalls()
+        {
+            var publicInvocations = publicContext.GetUnverifiedCalls();
+            var propertyInvocations = propertiesContext.GetUnverifiedCalls();
+            var protectedInvocations = protectedContext is IMockContextInternal mci
+                ? mci.GetUnverifiedCalls() : Array.Empty<IInvocationInfo>();
+            if (publicInvocations.Any() || propertyInvocations.Any() || protectedInvocations.Any())
+            {
+                throw new MockException("there unverified invocations");
+            }
+        }
 
         ///<inheritdoc/>
         public void AssertGet<TProperty>(Func<T, TProperty> expression)
