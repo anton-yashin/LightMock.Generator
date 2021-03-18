@@ -125,6 +125,13 @@ namespace LightMock
         /// <typeparam name="TException"></typeparam>
         /// <param name="factory"></param>
         void Throws<TException>(Func<TException> factory) where TException : Exception;
+
+#pragma warning disable CS0419 // Ambiguous reference in cref attribute
+        /// <summary>
+        /// Cancels previous <see cref="Throws{TException}"/> or <see cref="Throws{TException}(Func{TException})"/> arrangement.
+        /// </summary>
+        void ThrowsNothing();
+#pragma warning restore CS0419 // Ambiguous reference in cref attribute
     }
 
     /// <summary>

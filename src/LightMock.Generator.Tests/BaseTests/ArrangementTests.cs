@@ -1,4 +1,5 @@
-﻿using Xunit;
+﻿using System;
+using Xunit;
 
 namespace LightMock.Generator.Tests.BaseTests
 {
@@ -281,6 +282,24 @@ namespace LightMock.Generator.Tests.BaseTests
 
             Assert.Equal("hi", result);
             Assert.Equal("hello", firstResult);
+        }
+
+        [Fact]
+        public void Arrange_ThrowsNothing_CancelsThrows()
+        {
+            var expected = Guid.NewGuid().ToString();
+            var mockContext = new MockContext<IFoo>();
+            var fooMock = new FooMock(mockContext);
+
+            mockContext.Arrange(f => f.Execute(The<string>.IsAnyValue))
+                .Returns(expected)
+                .Throws<InvalidOperationException>();
+            Assert.Throws<InvalidOperationException>(() => fooMock.Execute("abc"));
+            
+            mockContext.Arrange(f => f.Execute(The<string>.IsAnyValue)).ThrowsNothing();
+            var actual = fooMock.Execute("abc");
+
+            Assert.Equal(expected, actual);
         }
     }
 }
