@@ -37,5 +37,7 @@ namespace LightMock
         IArrangement<TResult> ArrangeFunction<TResult>(LambdaExpression matchExpression);
         IArrangement ArrangeProperty<TProperty>(LambdaExpression matchExpression);
         void AssertInternal(LambdaExpression matchExpression, Invoked invoked);
+
+        ICollection<IInvocationInfo> GetUnverifiedCalls();
     }
 }

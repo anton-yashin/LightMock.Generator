@@ -314,5 +314,32 @@ namespace LightMock.Generator.Tests.BaseTests
             propertyValue = propMock.TwoWayProperty;
             Assert.Equal("customValue", propertyValue);
         }
+
+        [Fact]
+        public void GetUnverifiedCalls_Empty()
+        {
+            var mockContext = new MockContext<IFoo>();
+            var mockFoo = new FooMock(mockContext);
+
+            mockFoo.Execute("abc");
+
+            mockContext.Assert(f => f.Execute("abc"));
+            var unverified = mockContext.GetUnverifiedCalls();
+            Assert.Empty(unverified);
+        }
+
+        [Fact]
+        public void GetUnverifiedCalls_NotEmpty()
+        {
+            var mockContext = new MockContext<IFoo>();
+            var mockFoo = new FooMock(mockContext);
+
+            mockFoo.Execute("abc");
+            mockFoo.Execute("def");
+
+            mockContext.Assert(f => f.Execute("abc"));
+            var unverified = mockContext.GetUnverifiedCalls();
+            Assert.Equal(1, unverified.Count);
+        }
     }
 }

@@ -28,9 +28,11 @@
 ******************************************************************************/
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Text;
 
 namespace LightMock
 {
@@ -42,6 +44,7 @@ namespace LightMock
     {
         private readonly ILockedCollection<IInvocationInfo> invocations = new LockedCollection<IInvocationInfo>();
         private readonly ILockedCollection<Arrangement> arrangements = new LockedCollection<Arrangement>();
+        private readonly ILockedCollection<IInvocationInfo> verifiedInvocations = new LockedCollection<IInvocationInfo>();
 
         /// <summary>
         /// Arranges a mocked method. 
@@ -146,11 +149,19 @@ namespace LightMock
         public void AssertInternal(LambdaExpression matchExpression, Invoked invoked)
         {
             var matchInfo = matchExpression.ToMatchInfo();
-            var callCount = invocations.InvokeLocked(c => c.Count(matchInfo.Matches));
+            var invocations = this.invocations.InvokeLocked(c => (from i in c where matchInfo.Matches(i) select i).ToImmutableArray());
 
-            if (!invoked.Verify(callCount))
+            if (invoked.Verify(invocations.Length))
             {
-                throw new MockException(string.Format("The method {0} was called {1} times", matchExpression.Simplify(), callCount));
+                verifiedInvocations.InvokeLocked(c =>
+                {
+                    foreach (var i in invocations)
+                        c.Add(i);
+                });
+            }
+            else
+            {
+                throw new MockException(string.Format("The method {0} was called {1} times", matchExpression.Simplify(), invocations.Length));
             }
         }
 
@@ -237,6 +248,28 @@ namespace LightMock
             => ArrangeFunction<TResult>(matchExpression);
         IArrangement IMockContextInternal.ArrangeProperty<TProperty>(LambdaExpression matchExpression)
             => ArrangePropertyInternal<TProperty>(matchExpression);
+
+        public ICollection<IInvocationInfo> GetUnverifiedCalls()
+        {
+            var invocations = this.invocations.ToArray();
+            var verifiedInvocations = this.verifiedInvocations.ToArray();
+            var unverified = new List<IInvocationInfo>();
+            foreach (var i in invocations)
+            {
+                bool found = false;
+                foreach (var j in verifiedInvocations)
+                {
+                    if (ReferenceEquals(i, j))
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+                if (found == false)
+                    unverified.Add(i);
+            }
+            return unverified;
+        }
 
         #endregion
     }
