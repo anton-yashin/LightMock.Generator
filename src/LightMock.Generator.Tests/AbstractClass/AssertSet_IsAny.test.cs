@@ -13,6 +13,14 @@ namespace LightMock.Generator.Tests.AbstractClass
 
         public AAssertSet_IsAny MockObject => mock.Object;
 
-        public int DoRun() => 42;
+        public int DoRun()
+        {
+            mock.Protected().AssertSet_WhenAny(f => f.ProtectedGetAndSet = "");
+            mock.Protected().AssertSet_WhenAny(f => f.ProtectedGetAndSet = "", Invoked.Once);
+            mock.Protected().AssertSet_WhenAny(f => f.ProtectedSetOnly = "");
+            mock.Protected().AssertSet_WhenAny(f => f.ProtectedSetOnly = "", Invoked.Once);
+
+            return 42;
+        }
     }
 }
