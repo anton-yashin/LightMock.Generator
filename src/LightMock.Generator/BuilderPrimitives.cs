@@ -280,10 +280,18 @@ namespace LightMock.Generator
         public static StringBuilder AppendPropertyDefinition(this StringBuilder @this, IPropertySymbol symbol)
         {
             var typePart = GetPropertyTypePart(symbol);
+            var spl = symbol.Parameters.Length;
+            var sn = symbol.IsIndexer ? "" : "." + symbol.Name;
 
             if (symbol.GetMethod != null)
             {
                 @this
+                    .Append("[global::LightMock.Generator.OriginalNameAttribute(")
+                    .Append(spl)
+                    .Append(", \"")
+                    .Append(sn)
+                    .AppendIndexerParametersFormat(symbol)
+                    .Append("\")]")
                     .Append(symbol.Type.ToDisplayString(SymbolDisplayFormats.Interface))
                     .Append(' ')
                     .AppendP2FGetter(symbol, typePart)
@@ -294,12 +302,39 @@ namespace LightMock.Generator
             if (symbol.SetMethod != null)
             {
                 @this
+                    .Append("[global::LightMock.Generator.OriginalNameAttribute(")
+                    .Append(spl + 1)
+                    .Append(", \"")
+                    .Append(sn)
+                    .AppendIndexerParametersFormat(symbol)
+                    .Append(" = {")
+                    .Append(spl)
+                    .Append("}\")]")
                     .Append("void ")
                     .AppendP2FSetter(symbol, typePart)
                     .Append("(")
                     .AppendIndexerParametersDefinition(symbol, addCommaAtEnd: true)
                     .Append(symbol.Type.ToDisplayString(SymbolDisplayFormats.Interface))
                     .Append(" prm);");
+            }
+            return @this;
+        }
+
+        public static StringBuilder AppendIndexerParametersFormat(this StringBuilder @this, IPropertySymbol symbol)
+        {
+            if (symbol.Parameters.Length > 0)
+            {
+                @this
+                    .Append('[')
+                    .Append(symbol.Parameters[0].Type.ToDisplayString(SymbolDisplayFormats.Interface))
+                    .Append(" {0}");
+                for (int i = 1; i < symbol.Parameters.Length; i++)
+                {
+                    @this.Append(", ")
+                        .Append(symbol.Parameters[i].Type.ToDisplayString(SymbolDisplayFormats.Interface))
+                        .Append(" {").Append(i).Append('}');
+                }
+                @this.Append(']');
             }
             return @this;
         }

@@ -30,6 +30,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Threading;
 
 namespace LightMock.Generator
@@ -155,7 +156,18 @@ namespace LightMock.Generator
                 ? mci.GetUnverifiedCalls() : Array.Empty<IInvocationInfo>();
             if (publicInvocations.Any() || propertyInvocations.Any() || protectedInvocations.Any())
             {
-                throw new MockException("there unverified invocations");
+                var message = new StringBuilder("Detected unverified invocations: ");
+                message.AppendLine();
+                foreach (var i in publicInvocations)
+                    message.Append(i.AsString()).AppendLine();
+
+                foreach (var i in propertyInvocations)
+                    message.Append(i.AsString()).AppendLine();
+
+                foreach (var i in protectedInvocations)
+                    message.Append(i.AsString()).AppendLine();
+
+                throw new MockException(message.ToString());
             }
         }
 

@@ -24,6 +24,7 @@
 *******************************************************************************
     https://github.com/anton-yashin/
 *******************************************************************************/
+using LightMock.Generator;
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
@@ -48,12 +49,28 @@ namespace LightMock
         {
             var result = new StringBuilder();
             result.Append(Method.ReturnType)
-                .Append(' ')
-                .Append(Method.DeclaringType)
-                .Append('.')
+                .Append(' ');
+            AppendDeclaringType(result);
+            AppendParameters(result);
+            return result.ToString();
+        }
+
+        void AppendParameters(StringBuilder here)
+        {
+            var ona = Method.GetCustomAttribute<OriginalNameAttribute>();
+            if (ona != null)
+                here.AppendFormat(ona.OriginalName, Arguments.Select(i => ArgumentValueToString(i))
+                    .Concat(Enumerable.Repeat<object?>(null, ona.ParametersCount))
+                    .Take(ona.ParametersCount).ToArray());
+            else
+                DefaultAppendParameters(here);
+        }
+
+        void DefaultAppendParameters(StringBuilder here)
+        {
+            here.Append('.')
                 .Append(Method.Name)
                 .Append('(');
-
             var parameters = Method.GetParameters();
             var last = Math.Min(Arguments.Length, parameters.Length);
             for (int i = 0; i < last; i++)
@@ -61,15 +78,29 @@ namespace LightMock
                 var p = parameters[i];
                 var a = Arguments[i];
                 if (i > 0)
-                    result.Append(',');
-                result.Append(p.ParameterType)
+                    here.Append(',');
+                here.Append(p.ParameterType)
                     .Append(' ')
                     .Append(p.Name)
                     .Append(" = ")
                     .Append(ArgumentValueToString(a));
             }
-            result.Append(')');
-            return result.ToString();
+            here.Append(')');
+        }
+
+        void AppendDeclaringType(StringBuilder stringBuilder)
+        {
+            var mdt = Method.DeclaringType;
+            var ona = mdt.GetCustomAttribute<OriginalNameAttribute>();
+            if (ona != null)
+            {
+                var ta = mdt.IsGenericType ? mdt.GetGenericArguments() : Array.Empty<Type>();
+                stringBuilder.AppendFormat(ona.OriginalName, ta);
+            }
+            else
+            {
+                stringBuilder.Append(mdt);
+            }
         }
 
         static string ArgumentValueToString(object value)
@@ -96,9 +127,6 @@ namespace LightMock
         public TResult Invoke<TResult>(CallbackInvocation callback, [AllowNull] TResult defaultValue)
             => callback.Invoke(Arguments, defaultValue);
 
-        public bool IsMethod
-            => Method.IsSpecialName == false
-            || Method.Name.StartsWith("get_") == false
-            && Method.Name.StartsWith("set_") == false;
+        public bool IsMethod => Method.IsSpecialName == false;
     }
 }

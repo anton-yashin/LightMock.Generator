@@ -4,6 +4,7 @@ using LightMock.Generator.Tests.Interface.Namespace1;
 using LightMock.Generator.Tests.Interface.Namespace2;
 using LightMock.Generator.Tests.TestAbstractions;
 using System;
+using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
@@ -563,16 +564,7 @@ namespace LightMock.Generator.Tests
             var context = testScript.Context;
             var mock = testScript.MockObject;
 
-            mock.GetAndSet = nameof(mock.GetAndSet);
-            mock.SetOnly = nameof(mock.SetOnly);
-            mock["123"] = "indexer_set";
-
-            _ = mock.GetAndSet;
-            _ = mock.GetOnly;
-            _ = mock["456"];
-
-            _ = mock.Function(nameof(mock.Function));
-            mock.Method(nameof(mock.Method));
+            DoInvocations_AssertNoOtherCalls(mock);
 
             context.AssertSet_When(f => f.GetAndSet = nameof(mock.GetAndSet));
             context.AssertSet_When(f => f.SetOnly = nameof(mock.SetOnly));
@@ -591,10 +583,30 @@ namespace LightMock.Generator.Tests
         [Fact]
         public void AssertNoOtherCalls_Throws()
         {
+            var expectedMessage = new StringBuilder()
+                .AppendLine("Detected unverified invocations: ")
+                .AppendLine("System.String LightMock.Generator.Tests.Interface.IAssertNoOtherCalls.Function(System.String a = \"Function\")")
+                .AppendLine("System.Void LightMock.Generator.Tests.Interface.IAssertNoOtherCalls.Method(System.String a = \"Method\")")
+                .AppendLine("System.Void LightMock.Generator.Tests.Interface.IAssertNoOtherCalls.GetAndSet = \"GetAndSet\"")
+                .AppendLine("System.Void LightMock.Generator.Tests.Interface.IAssertNoOtherCalls.SetOnly = \"SetOnly\"")
+                .AppendLine("System.Void LightMock.Generator.Tests.Interface.IAssertNoOtherCalls[string \"123\"] = \"indexer_set\"")
+                .AppendLine("System.String LightMock.Generator.Tests.Interface.IAssertNoOtherCalls.GetAndSet")
+                .AppendLine("System.String LightMock.Generator.Tests.Interface.IAssertNoOtherCalls.GetOnly")
+                .AppendLine("System.String LightMock.Generator.Tests.Interface.IAssertNoOtherCalls[string \"456\"]")
+                .ToString();
+
             var testScript = LoadAssembly<IAssertNoOtherCalls>(nameof(AssertNoOtherCalls));
             var context = testScript.Context;
             var mock = testScript.MockObject;
 
+            DoInvocations_AssertNoOtherCalls(mock);
+
+            var ex = Assert.Throws<MockException>(() => context.AssertNoOtherCalls());
+            Assert.Equal(expectedMessage, ex.Message);
+        }
+
+        static void DoInvocations_AssertNoOtherCalls(IAssertNoOtherCalls mock)
+        {
             mock.GetAndSet = nameof(mock.GetAndSet);
             mock.SetOnly = nameof(mock.SetOnly);
             mock["123"] = "indexer_set";
@@ -605,8 +617,6 @@ namespace LightMock.Generator.Tests
 
             _ = mock.Function(nameof(mock.Function));
             mock.Method(nameof(mock.Method));
-
-            Assert.Throws<MockException>(() => context.AssertNoOtherCalls());
         }
 
         protected override string GetFullResourceName(string resourceName)
