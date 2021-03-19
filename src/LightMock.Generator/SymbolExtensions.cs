@@ -47,6 +47,9 @@ namespace LightMock.Generator
         public static bool IsInterfaceRequired(this ISymbol @this)
             => @this.IsCanBeOverriden() && @this.DeclaredAccessibility == Accessibility.Protected;
 
+        public static bool IsInterfaceRequired(this IPropertySymbol @this)
+            => IsInterfaceRequired((ISymbol)@this) && @this.GetMethod != null;
+
         public static (string whereClause, IEnumerable<ITypeSymbol> typeArguments)
             GetWhereClauseAndTypeArguments(this INamedTypeSymbol @this)
         {
