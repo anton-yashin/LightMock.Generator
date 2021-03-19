@@ -3,15 +3,15 @@ using System;
 
 namespace LightMock.Generator.Tests.AbstractClass
 {
-    public class AssertSet_IsAny : ITestScript<AAssertSet_IsAny>
+    public class AssertSet_WhenAny : ITestScript<AAssertSet_WhenAny>
     {
-        private readonly Mock<AAssertSet_IsAny> mock;
+        private readonly Mock<AAssertSet_WhenAny> mock;
 
-        public AssertSet_IsAny() => mock = new Mock<AAssertSet_IsAny>();
+        public AssertSet_WhenAny() => mock = new Mock<AAssertSet_WhenAny>();
 
-        public IMock<AAssertSet_IsAny> Context => mock;
+        public IMock<AAssertSet_WhenAny> Context => mock;
 
-        public AAssertSet_IsAny MockObject => mock.Object;
+        public AAssertSet_WhenAny MockObject => mock.Object;
 
         public int DoRun()
         {

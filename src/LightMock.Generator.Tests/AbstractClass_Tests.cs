@@ -575,9 +575,9 @@ namespace LightMock.Generator.Tests
         }
 
         [Fact]
-        public void AssertSet_IsAny()
+        public void AssertSet_WhenAny()
         {
-            var testScript = LoadAssembly<AAssertSet_IsAny>();
+            var testScript = LoadAssembly<AAssertSet_WhenAny>();
             var context = testScript.Context;
             var mock = testScript.MockObject;
 
@@ -593,10 +593,10 @@ namespace LightMock.Generator.Tests
         }
 
         [Fact]
-        public void ArrangeSetter_OnAny()
+        public void ArrangeSetter_WhenAny()
         {
             var expected = Guid.NewGuid().ToString();
-            var testScript = LoadAssembly<AArrangeSetter_OnAny>();
+            var testScript = LoadAssembly<AArrangeSetter_WhenAny>();
             var context = testScript.Context;
             var mock = testScript.MockObject;
             string actual = "";
@@ -609,11 +609,11 @@ namespace LightMock.Generator.Tests
         }
 
         [Fact]
-        public void ArrangeSetter_On()
+        public void ArrangeSetter_When()
         {
             int on1234 = 0;
             int on5678 = 0;
-            var testScript = LoadAssembly<AArrangeSetter_On>();
+            var testScript = LoadAssembly<AArrangeSetter_When>();
             var context = testScript.Context;
             var mock = testScript.MockObject;
 
