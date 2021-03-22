@@ -26,7 +26,8 @@
 *******************************************************************************/
 using Microsoft.CodeAnalysis;
 using System;
-using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 using System.Text;
 
 namespace LightMock.Generator
@@ -34,12 +35,13 @@ namespace LightMock.Generator
     abstract class ImplementationVisitor : SymbolVisitor<string>
     {
         protected readonly SymbolDisplayFormat definitionFormat;
+        private readonly string? p2pInterfaceName;
 
-        public ImplementationVisitor(SymbolDisplayFormat definitionFormat)
+        public ImplementationVisitor(SymbolDisplayFormat definitionFormat, string? p2pInterfaceName)
         {
             this.definitionFormat = definitionFormat;
+            this.p2pInterfaceName = p2pInterfaceName;
         }
-
 
         protected static string GetObsoleteAndOrOverrideChunkFor(ISymbol symbol)
             => (symbol.ContainingType.Name == nameof(Object) || symbol.ContainingType.BaseType != null)
@@ -60,6 +62,21 @@ namespace LightMock.Generator
                     .Append(");");
             }
             result.Append("}");
+            if (p2pInterfaceName != null && symbol.IsInterfaceRequired())
+            {
+                var parts = symbol.ToDisplayParts(SymbolDisplayFormats.Interface).Select(p
+                    => p.Kind == SymbolDisplayPartKind.ClassName && p.ToString().Contains(symbol.ContainingType.Name)
+                    ? new SymbolDisplayPart(SymbolDisplayPartKind.ClassName, symbol, p2pInterfaceName.Split('<').First())
+                    : p).ToImmutableArray();
+                result.AppendMethodDeclaration(parts.ToDisplayString(), symbol).Append('{');
+                if (symbol.ReturnsVoid == false)
+                {
+                    result.Append(" return default(")
+                        .Append(symbol.ReturnType.ToDisplayString(SymbolDisplayFormats.WithTypeParams))
+                        .Append("); ");
+                }
+                result.Append('}');
+            }
             return result.ToString();
         }
 
@@ -71,6 +88,13 @@ namespace LightMock.Generator
             var result = new StringBuilder(GetObsoleteAndOrOverrideChunkFor(symbol))
                 .Append(symbol.ToDisplayString(definitionFormat));
             appedGetterAndSetter(result, symbol);
+
+            if (p2pInterfaceName != null && symbol.IsInterfaceRequired())
+            {
+                result.Append(symbol.Type.ToDisplayString(SymbolDisplayFormats.Namespace))
+                    .Append(' ').Append(p2pInterfaceName).Append('.').Append(symbol.Name);
+                appedGetterAndSetter(result, symbol);
+            }
 
             return result.ToString();
 

@@ -35,10 +35,6 @@ namespace LightMock.Generator
 {
     sealed class AbstractClassProcessor : ClassProcessor
     {
-        private readonly SymbolVisitor<string> protectedVisitor;
-        private readonly SymbolVisitor<string> propertyDefinitionVisitor;
-        private readonly SymbolVisitor<string> assertImplementationVisitor;
-        private readonly SymbolVisitor<string> assertIsAnyImplementationVisitor;
         private readonly string @namespace;
         private readonly SymbolVisitor<string> symbolVisitor;
         private readonly string className;
@@ -52,6 +48,10 @@ namespace LightMock.Generator
         private readonly List<string> constructorsCall;
         private readonly SyntaxNode containingGeneric;
         private readonly IReadOnlyList<INamedTypeSymbol> dontOverrideList;
+        private readonly SymbolVisitor<string> protectedVisitor;
+        private readonly SymbolVisitor<string> propertyDefinitionVisitor;
+        private readonly SymbolVisitor<string> assertImplementationVisitor;
+        private readonly SymbolVisitor<string> assertIsAnyImplementationVisitor;
         private readonly SymbolVisitor<string> arrangeOnAnyImplementationVisitor;
         private readonly SymbolVisitor<string> arrangeOnImplementationVisitor;
 
@@ -62,10 +62,6 @@ namespace LightMock.Generator
         {
             typeSymbol = typeSymbol.OriginalDefinition;
 
-            protectedVisitor = new ProtectedMemberSymbolVisitor();
-            propertyDefinitionVisitor = new PropertyDefinitionVisitor();
-            assertImplementationVisitor = new AssertImplementationVisitor(SymbolDisplayFormats.AbstractClass);
-            assertIsAnyImplementationVisitor = new AssertIsAnyImplementationVisitor(SymbolDisplayFormats.AbstractClass);
             @namespace = typeSymbol.ContainingNamespace.ToDisplayString(SymbolDisplayFormats.Namespace);
 
             var (whereClause, typeArguments) = typeSymbol.GetWhereClauseAndTypeArguments();
@@ -104,12 +100,18 @@ namespace LightMock.Generator
                     .Replace(typeSymbol.Name, "").Trim('(', ')')));
             this.containingGeneric = containingGeneric;
             this.dontOverrideList = dontOverrideList;
+
+            var p2fInterfaceName = Prefix.PropertyToFuncInterface + className + typeArgumentsWithBrackets;
+            var p2pInterfaceName = Prefix.ProtectedToPublicInterface + className + typeArgumentsWithBrackets;
+
+            protectedVisitor = new ProtectedMemberSymbolVisitor();
+            propertyDefinitionVisitor = new PropertyDefinitionVisitor();
+            assertImplementationVisitor = new AssertImplementationVisitor(SymbolDisplayFormats.AbstractClass, p2pInterfaceName);
+            assertIsAnyImplementationVisitor = new AssertIsAnyImplementationVisitor(SymbolDisplayFormats.AbstractClass, p2pInterfaceName);
             this.arrangeOnAnyImplementationVisitor = new ArrangeOnAnyImplementationVisitor(
-                SymbolDisplayFormats.AbstractClass,
-                Prefix.PropertyToFuncInterface + className + typeArgumentsWithBrackets);
+                SymbolDisplayFormats.AbstractClass, p2fInterfaceName, p2pInterfaceName);
             this.arrangeOnImplementationVisitor = new ArrangeOnImplementationVisitor(
-                SymbolDisplayFormats.AbstractClass,
-                Prefix.PropertyToFuncInterface + className + typeArgumentsWithBrackets);
+                SymbolDisplayFormats.AbstractClass, p2fInterfaceName, p2pInterfaceName);
         }
 
         string GenerateConstructor(string declaration, string call)
@@ -246,7 +248,13 @@ namespace {@namespace}
         {string.Join("\r\n        ", members.Select(i => i.Accept(propertyDefinitionVisitor)))}
     }}
 
-    sealed class {Prefix.AssertWhenImplementation}{className}{typeArgumentsWithBrackets} : {baseNameWithTypeArguments}
+    public interface {Prefix.ProtectedToPublicInterface}{className}{typeArgumentsWithBrackets}
+        {whereClause}
+    {{
+        {string.Join("\r\n        ", members.Select(i => i.Accept(protectedVisitor)).SkipWhile(i => string.IsNullOrWhiteSpace(i)))}
+    }}
+
+    sealed class {Prefix.AssertWhenImplementation}{className}{typeArgumentsWithBrackets} : {baseNameWithTypeArguments}, {Prefix.ProtectedToPublicInterface}{className}{typeArgumentsWithBrackets}
         {whereClause}
     {{
         private readonly IMockContext<{Prefix.PropertyToFuncInterface}{className}{typeArgumentsWithBrackets}> {VariableNames.Context};
@@ -257,7 +265,7 @@ namespace {@namespace}
         {string.Join("\r\n        ", members.Select(i => i.Accept(assertImplementationVisitor)))}
     }}
 
-    sealed class {Prefix.AssertWhenAnyImplementation}{className}{typeArgumentsWithBrackets} : {baseNameWithTypeArguments}
+    sealed class {Prefix.AssertWhenAnyImplementation}{className}{typeArgumentsWithBrackets} : {baseNameWithTypeArguments}, {Prefix.ProtectedToPublicInterface}{className}{typeArgumentsWithBrackets}
         {whereClause}
     {{
         private readonly IMockContext<{Prefix.PropertyToFuncInterface}{className}{typeArgumentsWithBrackets}> {VariableNames.Context};
@@ -268,7 +276,7 @@ namespace {@namespace}
         {string.Join("\r\n        ", members.Select(i => i.Accept(assertIsAnyImplementationVisitor)))}
     }}
 
-    sealed class {Prefix.ArrangeWhenAnyImplementation}{className}{typeArgumentsWithBrackets} : {baseNameWithTypeArguments}
+    sealed class {Prefix.ArrangeWhenAnyImplementation}{className}{typeArgumentsWithBrackets} : {baseNameWithTypeArguments}, {Prefix.ProtectedToPublicInterface}{className}{typeArgumentsWithBrackets}
         {whereClause}
     {{
         private readonly global::LightMock.Generator.{nameof(ILambdaRequest)} {VariableNames.Request};
@@ -278,7 +286,7 @@ namespace {@namespace}
         {string.Join("\r\n        ", members.Select(i => i.Accept(arrangeOnAnyImplementationVisitor)))}
     }}
 
-    sealed class {Prefix.ArrangeWhenImplementation}{className}{typeArgumentsWithBrackets} : {baseNameWithTypeArguments}
+    sealed class {Prefix.ArrangeWhenImplementation}{className}{typeArgumentsWithBrackets} : {baseNameWithTypeArguments}, {Prefix.ProtectedToPublicInterface}{className}{typeArgumentsWithBrackets}
         {whereClause}
     {{
         private readonly global::LightMock.Generator.{nameof(ILambdaRequest)} {VariableNames.Request};
@@ -286,12 +294,6 @@ namespace {@namespace}
 {string.Join("\r\n", GenerateArrangeConstructors(Prefix.ArrangeWhenImplementation))}
 
         {string.Join("\r\n        ", members.Select(i => i.Accept(arrangeOnImplementationVisitor)))}
-    }}
-
-    public interface {Prefix.ProtectedToPublicInterface}{className}{typeArgumentsWithBrackets}
-        {whereClause}
-    {{
-        {string.Join("\r\n        ", members.Select(i => i.Accept(protectedVisitor)).SkipWhile(i => string.IsNullOrWhiteSpace(i)))}
     }}
 
     sealed class {Prefix.TypeByType}{className}{typeArgumentsWithUnderlines} : global::LightMock.Generator.{nameof(TypeResolver)}
@@ -350,9 +352,9 @@ namespace LightMock.Generator
     public static partial class MockExtensions
     {{
         [DebuggerStepThrough]
-        public static IMockContext<global::{@namespace}.{Prefix.ProtectedToPublicInterface}{className}{typeArgumentsWithBrackets}> Protected{typeArgumentsWithBrackets}(this IProtectedContext<{baseNameWithTypeArguments}> @this)
+        public static IAdvancedMockContext<global::{@namespace}.{Prefix.ProtectedToPublicInterface}{className}{typeArgumentsWithBrackets}> Protected{typeArgumentsWithBrackets}(this IProtectedContext<{baseNameWithTypeArguments}> @this)
             {whereClause}
-            => (IMockContext<global::{@namespace}.{Prefix.ProtectedToPublicInterface}{className}{typeArgumentsWithBrackets}>)@this.{nameof(IProtectedContext<object>.ProtectedContext)};
+            => (IAdvancedMockContext<global::{@namespace}.{Prefix.ProtectedToPublicInterface}{className}{typeArgumentsWithBrackets}>)@this.{nameof(IProtectedContext<object>.ProtectedContext)};
     }}
 }}
 ";
@@ -387,8 +389,8 @@ namespace LightMock.Generator
         string GetProtectedContextType()
         {
             return typeSymbol.IsGenericType
-                ? $"return MakeGenericMockContextType(typeof(global::{@namespace}.{Prefix.ProtectedToPublicInterface}{className}<{commaArguments}>));"
-                : $"return MakeMockContextType(typeof(global::{@namespace}.{Prefix.ProtectedToPublicInterface}{className}));";
+                ? $"return MakeGenericAdvancedMockContextType(typeof(global::{@namespace}.{Prefix.ProtectedToPublicInterface}{className}<{commaArguments}>));"
+                : $"return MakeAdvancedMockContextType(typeof(global::{@namespace}.{Prefix.ProtectedToPublicInterface}{className}));";
         }
 
         string GetPropertiesContextType()

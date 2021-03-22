@@ -9,7 +9,9 @@ namespace LightMock.Generator
         where T : class
     {
 
-        public Mock() { }
+        public Mock()
+            : base(Array.Empty<object>())
+        { }
 
         public Mock(params object[] prms)
             : base(prms)

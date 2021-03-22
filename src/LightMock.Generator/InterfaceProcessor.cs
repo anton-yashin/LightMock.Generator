@@ -58,8 +58,8 @@ namespace LightMock.Generator
 
             this.symbolVisitor = new InterfaceSymbolVisitor();
             this.propertyDefinitionVisitor = new PropertyDefinitionVisitor();
-            this.assertImplementationVisitor = new AssertImplementationVisitor(SymbolDisplayFormats.Interface);
-            this.assertIsAnyImplementationVisitor = new AssertIsAnyImplementationVisitor(SymbolDisplayFormats.Interface);
+            this.assertImplementationVisitor = new AssertImplementationVisitor(SymbolDisplayFormats.Interface, null);
+            this.assertIsAnyImplementationVisitor = new AssertIsAnyImplementationVisitor(SymbolDisplayFormats.Interface, null);
 
             var (whereClause, typeArguments) = typeSymbol.GetWhereClauseAndTypeArguments();
 
@@ -84,12 +84,11 @@ namespace LightMock.Generator
             commaArguments = string.Join(",", typeArguments.Select(i => " "));
             this.whereClause = whereClause;
             @namespace = typeSymbol.ContainingNamespace.ToDisplayString(SymbolDisplayFormats.Namespace);
+            var p2fInterfaceName = Prefix.PropertyToFuncInterface + interfaceName + typeArgumentsWithBrackets;
             this.arrangeOnAnyImplementationVisitor = new ArrangeOnAnyImplementationVisitor(
-                SymbolDisplayFormats.Interface, 
-                Prefix.PropertyToFuncInterface + interfaceName + typeArgumentsWithBrackets);
+                SymbolDisplayFormats.Interface, p2fInterfaceName, null);
             this.arrangeOnImplementationVisitor = new ArrangeOnImplementationVisitor(
-                SymbolDisplayFormats.Interface,
-                Prefix.PropertyToFuncInterface + interfaceName + typeArgumentsWithBrackets);
+                SymbolDisplayFormats.Interface, p2fInterfaceName, null);
         }
 
         public override IEnumerable<Diagnostic> GetErrors()

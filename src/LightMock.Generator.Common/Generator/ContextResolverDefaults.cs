@@ -37,10 +37,11 @@ namespace LightMock.Generator
 
         private ContextResolverDefaults() { }
 
-        public Type DefaultProtectedContextType { get; } = typeof(object);
+        public Type DefaultProtectedContextType { get; } = typeof(AdvancedMockContext<object>);
         public Type MockContextType { get; } = typeof(MockContext<>);
         public Type DefaultPropertiesContextType { get; } = typeof(MockContext<object>);
         public Type MulticastDelegateType { get; } = typeof(MulticastDelegate);
         public Type MulticastDelegateContextType { get; } = typeof(MockContext<object>);
+        public Type AdvancedMockContextType { get; } = typeof(AdvancedMockContext<>);
     }
 }

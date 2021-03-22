@@ -125,7 +125,7 @@ namespace LightMock.Generator
                 // process symbols under ArrangeSetter
                 
                 var expressionUids = new HashSet<string>();
-                var mockInterfaceMatcher = new TypeMatcher(typeof(IMock<>));
+                var mockInterfaceMatcher = new TypeMatcher(typeof(IAdvancedMockContext<>));
                 foreach (var candidateInvocation in receiver.ArrangeInvocations)
                 {
                     context.CancellationToken.ThrowIfCancellationRequested();

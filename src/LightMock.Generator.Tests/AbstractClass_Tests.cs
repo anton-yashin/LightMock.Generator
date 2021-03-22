@@ -583,6 +583,8 @@ namespace LightMock.Generator.Tests
 
             mock.GetAndSet = Guid.NewGuid().ToString();
             mock.SetOnly = Guid.NewGuid().ToString();
+            mock.InvokeProtectedGetAndSet = Guid.NewGuid().ToString();
+            mock.InvokeProtectedSetOnly = Guid.NewGuid().ToString();
 
             context.AssertSet_WhenAny(f => f.GetAndSet = "");
             context.AssertSet_WhenAny(f => f.GetAndSet = "", Invoked.Once);

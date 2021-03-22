@@ -60,5 +60,10 @@ namespace LightMock.Generator
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
         Type MulticastDelegateContextType { get; }
+        /// <summary>
+        /// For internal usage
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        Type AdvancedMockContextType { get; }
     }
 }
