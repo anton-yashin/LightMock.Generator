@@ -554,9 +554,13 @@ namespace LightMock.Generator.Tests
 
             Assert.Equal(KExpected, testScript.DoRun());
             mock.GetAndSet = "4567";
-            mock.Set = "1234";
-            Assert.Throws<ValidProgramException>(() => mock.GetAndSet = "1234");
-            Assert.Throws<ValidProgramException>(() => mock.Set = "4567");
+            mock.SetOnly = "1234";
+            mock.InvokeProtectedGetAndSet = "2345";
+            mock.InvokeProtectedSetOnly = "8901";
+            Assert.Equal(nameof(mock.GetAndSet), Assert.Throws<ValidProgramException>(() => mock.GetAndSet = "1234").Message);
+            Assert.Equal(nameof(mock.SetOnly), Assert.Throws<ValidProgramException>(() => mock.SetOnly = "4567").Message);
+            Assert.Equal("ProtectedGetAndSet", Assert.Throws<ValidProgramException>(() => mock.InvokeProtectedGetAndSet = "8901").Message);
+            Assert.Equal("ProtectedSetOnly", Assert.Throws<ValidProgramException>(() => mock.InvokeProtectedSetOnly = "2345").Message);
         }
 
         [Fact]
