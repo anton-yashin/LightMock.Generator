@@ -120,7 +120,7 @@ namespace LightMock.Generator
                             .Append(".")
                             .Append(Prefix.PropertyToFuncInterface)
                             .AppendContainingTypes<string>(typeSymbol, (sb, ts) => sb.AppendTypeArguments(ts, i => i.Name, "_", "_"), "_")
-                            .Append(typeSymbol.Name)
+                            .Append(typeSymbol.Name.Replace(Prefix.ProtectedToPublicInterface, ""))
                             .Append(">(")
                             .Append(parameterText)
                             .Append("=>")

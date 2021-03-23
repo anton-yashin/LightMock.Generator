@@ -570,6 +570,8 @@ namespace LightMock.Generator.Tests
 
             mock.GetAndSet = "jskldjalsdjljl";
             mock.SetOnly = "hello world";
+            mock.InvokeProtectedGetAndSet = "jskldjalsdjljl";
+            mock.InvokeProtectedSetOnly = "hello world";
 
             Assert.Equal(KExpected, testScript.DoRun());
         }

@@ -46,6 +46,8 @@ namespace LightMock.Generator
         public abstract IEnumerable<Diagnostic> GetWarnings();
         public abstract SourceText DoGenerate();
 
+        public virtual bool IsUpdateCompilationRequired => false;
+
         public virtual void DoGeneratePart_TypeByType(StringBuilder here) { }
 
         public string FileName

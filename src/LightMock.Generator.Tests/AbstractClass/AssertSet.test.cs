@@ -15,6 +15,8 @@ namespace LightMock.Generator.Tests.AbstractClass
 
         public int DoRun()
         {
+            mock.Protected().AssertSet(f => f.ProtectedGetAndSet = The<string>.Is(s => s.Length > 5), Invoked.Once);
+            mock.Protected().AssertSet(f => f.ProtectedSetOnly = The<string>.Is(s => s.StartsWith("hello")));
             mock.AssertSet(f => f.GetAndSet = The<string>.Is(s => s.Length > 5), Invoked.Once);
             mock.AssertSet(f => f.SetOnly = The<string>.Is(s => s.StartsWith("hello")));
             return 42;
