@@ -34,27 +34,29 @@ namespace LightMock.Generator
 {
     static class BuilderPrimitives
     {
-        public static StringBuilder AppendGetter(this StringBuilder @this, string contextName, ISymbol symbol)
-            => @this.Append(" get { return ")
-            .Append(contextName)
-            .Append(".Invoke(f => f.")
-            .Append(symbol.Name)
-            .Append("); } ");
-
-        public static StringBuilder AppendSetter(this StringBuilder @this, string contextName, ISymbol symbol)
-            => @this.Append("set { ")
-            .Append(contextName)
-            .Append(".InvokeSetter(f => f.")
-            .Append(symbol.Name)
-            .Append(", value); } ");
-
         public static StringBuilder AppendGetterAndSetter(this StringBuilder @this, string contextName, IPropertySymbol symbol)
         {
             @this.Append(" {");
             if (symbol.GetMethod != null)
-                @this.AppendGetter(contextName, symbol);
+            {
+                @this.Append(" get { return ")
+                    .Append(contextName)
+                    .Append(".Invoke(f => f.")
+                    .Append(symbol.Name)
+                    .Append("); } ");
+            }
             if (symbol.SetMethod != null)
-                @this.AppendSetter(contextName, symbol);
+            {
+                @this.Append("set { ");
+                if (symbol.GetMethod != null)
+                {
+                    @this.Append(contextName)
+                        .Append(".InvokeSetter(f => f.")
+                        .Append(symbol.Name)
+                        .Append(", value);");
+                }
+                @this.Append(" } ");
+            }
             return @this.Append("}");
         }
 
@@ -360,12 +362,6 @@ namespace LightMock.Generator
         public static StringBuilder AppendP2FSetter(this StringBuilder @this, IPropertySymbol symbol, string typePart)
             => @this.AppendP2FName(symbol, typePart, Suffix.Setter);
 
-        public static StringBuilder AppendP2FGetter(this StringBuilder @this, IPropertySymbol symbol)
-            => @this.AppendP2FName(symbol, GetPropertyTypePart(symbol), Suffix.Getter);
-
-        public static StringBuilder AppendP2FSetter(this StringBuilder @this, IPropertySymbol symbol)
-            => @this.AppendP2FName(symbol, GetPropertyTypePart(symbol), Suffix.Setter);
-
         static StringBuilder AppendP2FName(
             this StringBuilder @this,
             IPropertySymbol symbol,
@@ -380,6 +376,34 @@ namespace LightMock.Generator
                     .Append('_')
                     .Append(typePart)
                     .Append(suffix);
+        }
+
+        public static StringBuilder AppendP2FSetter(this StringBuilder @this, IPropertySymbol symbol)
+        {
+            SymbolDisplayPart Mutator(SymbolDisplayPart part)
+            {
+                switch (part.Kind)
+                {
+                    case SymbolDisplayPartKind.Punctuation when part.ToString() == ".":
+                        return new SymbolDisplayPart(part.Kind, part.Symbol, "_");
+                    case SymbolDisplayPartKind.InterfaceName when part.ToString().StartsWith(Prefix.ProtectedToPublicInterface):
+                        return new SymbolDisplayPart(part.Kind, part.Symbol,
+                            part.ToString().Replace(Prefix.ProtectedToPublicInterface, ""));
+                }
+
+                return part;
+            }
+
+            return symbol.IsIndexer
+                ? @this
+                    .AppendDisplayFormat(symbol.ContainingType, SymbolDisplayFormats.Namespace, Mutator)
+                    .Append(Suffix.Indexer)
+                    .Append(Suffix.Setter)
+                : @this
+                    .Append(symbol.Name)
+                    .Append('_')
+                    .AppendDisplayFormat(symbol.ContainingType, SymbolDisplayFormats.Namespace, Mutator)
+                    .Append(Suffix.Setter);
         }
 
         static string GetPropertyTypePart(IPropertySymbol symbol)
@@ -558,5 +582,18 @@ namespace LightMock.Generator
             }
             return @this;
         }
+
+        public static StringBuilder AppendDisplayFormat(this StringBuilder @this, ISymbol symbol, SymbolDisplayFormat format, Func<SymbolDisplayPart, SymbolDisplayPart> mutator)
+        {
+            return symbol.ToDisplayParts(format)
+                .Aggregate<SymbolDisplayPart, StringBuilder>(@this, (sb, p) => sb.Append(mutator(p)));
+        }
+
+        public static StringBuilder AppendDisplayFormat(this StringBuilder @this, IPropertySymbol symbol, SymbolDisplayFormat format)
+        {
+            return symbol.ToDisplayParts(format)
+                .Aggregate<SymbolDisplayPart, StringBuilder>(@this, (sb, p) => sb.Append(p));
+        }
+
     }
 }

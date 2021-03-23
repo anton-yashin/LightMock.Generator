@@ -35,6 +35,10 @@ namespace LightMock.Generator
     /// </summary>
     internal sealed class AbstractMockNameofProvider : AbstractMock<IDelegateProvider>
     {
+        public AbstractMockNameofProvider(object[] prms) : base(prms)
+        {
+        }
+
         protected override IReadOnlyDictionary<Type, Type> ContextResolverTable
             => throw new NotImplementedException();
 

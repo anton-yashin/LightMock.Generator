@@ -114,7 +114,13 @@ namespace LightMock.Generator
                             continue;
                         context.CancellationToken.ThrowIfCancellationRequested();
                         EmitDiagnostics(context, processor.GetWarnings());
-                        context.AddSource(processor.FileName, processor.DoGenerate());
+                        var text = processor.DoGenerate();
+                        context.AddSource(processor.FileName, text);
+                        if (processor.IsUpdateCompilationRequired)
+                        {
+                            compilation = compilation.AddSyntaxTrees(CSharpSyntaxTree.ParseText(
+                                text, options, cancellationToken: context.CancellationToken));
+                        }
                         context.CancellationToken.ThrowIfCancellationRequested();
                         processor.DoGeneratePart_TypeByType(typeByTypeBuilder);
                         context.CancellationToken.ThrowIfCancellationRequested();
@@ -125,12 +131,12 @@ namespace LightMock.Generator
                 // process symbols under ArrangeSetter
                 
                 var expressionUids = new HashSet<string>();
-                var mockInterfaceMatcher = new TypeMatcher(typeof(IMock<>));
+                var mockInterfaceMatcher = new TypeMatcher(typeof(IAdvancedMockContext<>));
                 foreach (var candidateInvocation in receiver.ArrangeInvocations)
                 {
                     context.CancellationToken.ThrowIfCancellationRequested();
-                    var methodSymbol = compilation.GetSemanticModel(candidateInvocation.SyntaxTree)
-                        .GetSymbolInfo(candidateInvocation, context.CancellationToken).Symbol as IMethodSymbol;
+                    var st = compilation.GetSemanticModel(candidateInvocation.SyntaxTree);
+                    var methodSymbol = st.GetSymbolInfo(candidateInvocation, context.CancellationToken).Symbol as IMethodSymbol;
                     context.CancellationToken.ThrowIfCancellationRequested();
 
                     if (methodSymbol != null 

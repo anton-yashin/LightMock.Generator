@@ -18,8 +18,12 @@ namespace LightMock.Generator.Tests.AbstractClass
         {
             mock.ArrangeSetter(f => f.GetAndSet = The<string>.Is(s => s == "1234"))
                 .Throws(() => new ValidProgramException(nameof(AArrangeSetter.GetAndSet)));
-            mock.ArrangeSetter(uidPart2: 271289, uidPart1: "c:\\some\\path\\to\\file", expression: f => f.Set = The<string>.Is(s => s == "4567"))
-                .Throws(() => new ValidProgramException(nameof(AArrangeSetter.Set)));
+            mock.ArrangeSetter(uidPart2: 271289, uidPart1: "c:\\some\\path\\to\\file", expression: f => f.SetOnly = The<string>.Is(s => s == "4567"))
+                .Throws(() => new ValidProgramException(nameof(AArrangeSetter.SetOnly)));
+            mock.Protected().ArrangeSetter(f => f.ProtectedGetAndSet = The<string>.Is(s => s == "8901"))
+                .Throws(() => new ValidProgramException("ProtectedGetAndSet"));
+            mock.Protected().ArrangeSetter(uidPart1: "c:\\some\\path\\to\\file", uidPart2: 819273, expression: f => f.ProtectedSetOnly = The<string>.Is(s => s == "2345"))
+                .Throws(() => new ValidProgramException("ProtectedSetOnly"));
             return 42;
         }
     }

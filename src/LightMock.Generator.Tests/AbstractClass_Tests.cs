@@ -554,9 +554,13 @@ namespace LightMock.Generator.Tests
 
             Assert.Equal(KExpected, testScript.DoRun());
             mock.GetAndSet = "4567";
-            mock.Set = "1234";
-            Assert.Throws<ValidProgramException>(() => mock.GetAndSet = "1234");
-            Assert.Throws<ValidProgramException>(() => mock.Set = "4567");
+            mock.SetOnly = "1234";
+            mock.InvokeProtectedGetAndSet = "2345";
+            mock.InvokeProtectedSetOnly = "8901";
+            Assert.Equal(nameof(mock.GetAndSet), Assert.Throws<ValidProgramException>(() => mock.GetAndSet = "1234").Message);
+            Assert.Equal(nameof(mock.SetOnly), Assert.Throws<ValidProgramException>(() => mock.SetOnly = "4567").Message);
+            Assert.Equal("ProtectedGetAndSet", Assert.Throws<ValidProgramException>(() => mock.InvokeProtectedGetAndSet = "8901").Message);
+            Assert.Equal("ProtectedSetOnly", Assert.Throws<ValidProgramException>(() => mock.InvokeProtectedSetOnly = "2345").Message);
         }
 
         [Fact]
@@ -570,19 +574,23 @@ namespace LightMock.Generator.Tests
 
             mock.GetAndSet = "jskldjalsdjljl";
             mock.SetOnly = "hello world";
+            mock.InvokeProtectedGetAndSet = "jskldjalsdjljl";
+            mock.InvokeProtectedSetOnly = "hello world";
 
             Assert.Equal(KExpected, testScript.DoRun());
         }
 
         [Fact]
-        public void AssertSet_IsAny()
+        public void AssertSet_WhenAny()
         {
-            var testScript = LoadAssembly<AAssertSet_IsAny>();
+            var testScript = LoadAssembly<AAssertSet_WhenAny>();
             var context = testScript.Context;
             var mock = testScript.MockObject;
 
             mock.GetAndSet = Guid.NewGuid().ToString();
             mock.SetOnly = Guid.NewGuid().ToString();
+            mock.InvokeProtectedGetAndSet = Guid.NewGuid().ToString();
+            mock.InvokeProtectedSetOnly = Guid.NewGuid().ToString();
 
             context.AssertSet_WhenAny(f => f.GetAndSet = "");
             context.AssertSet_WhenAny(f => f.GetAndSet = "", Invoked.Once);
@@ -593,10 +601,10 @@ namespace LightMock.Generator.Tests
         }
 
         [Fact]
-        public void ArrangeSetter_OnAny()
+        public void ArrangeSetter_WhenAny()
         {
             var expected = Guid.NewGuid().ToString();
-            var testScript = LoadAssembly<AArrangeSetter_OnAny>();
+            var testScript = LoadAssembly<AArrangeSetter_WhenAny>();
             var context = testScript.Context;
             var mock = testScript.MockObject;
             string actual = "";
@@ -609,11 +617,11 @@ namespace LightMock.Generator.Tests
         }
 
         [Fact]
-        public void ArrangeSetter_On()
+        public void ArrangeSetter_When()
         {
             int on1234 = 0;
             int on5678 = 0;
-            var testScript = LoadAssembly<AArrangeSetter_On>();
+            var testScript = LoadAssembly<AArrangeSetter_When>();
             var context = testScript.Context;
             var mock = testScript.MockObject;
 

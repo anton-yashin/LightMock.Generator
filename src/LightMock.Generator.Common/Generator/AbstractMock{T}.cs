@@ -44,34 +44,25 @@ namespace LightMock.Generator
         T? instance;
         readonly object[] prms;
         readonly TypeResolver typeResolver;
-        readonly IMockContext<T> publicContext;
         readonly object protectedContext;
         readonly IMockContextInternal propertiesContext;
-
-        /// <summary>
-        /// Initializes a contexts which you can use to arrange a behaviour.
-        /// </summary>
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        protected AbstractMock()
-        {
-            if (ContextResolverTable.TryGetValue(resolverType, out var t) == false)
-                throw new MockNotGeneratedException(contextType);
-
-            prms = Array.Empty<object>();
-            typeResolver = (TypeResolver)Activator.CreateInstance(t, contextType);
-            publicContext = new MockContext<T>();
-            protectedContext = typeResolver.ActivateProtectedContext<T>();
-            propertiesContext = typeResolver.ActivatePropertiesContext<T>();
-        }
+        readonly AdvancedMockContext<T> publicContext;
 
         /// <summary>
         /// Initializes a contexts which you can use to arrange a behaviour.
         /// </summary>
         /// <param name="prms">Paramters that must be used to initalize base class.</param>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        protected AbstractMock(params object[] prms) : this()
+        protected AbstractMock(object[] prms)
         {
+            if (ContextResolverTable.TryGetValue(resolverType, out var t) == false)
+                throw new MockNotGeneratedException(contextType);
+
             this.prms = prms;
+            typeResolver = (TypeResolver)Activator.CreateInstance(t, contextType);
+            publicContext = new AdvancedMockContext<T>(prms, typeResolver, ExchangeForExpression);
+            protectedContext = typeResolver.ActivateProtectedContext<T>(GetProtectedContextArgs());
+            propertiesContext = typeResolver.GetPropertiesContext<T>();
         }
 
         /// <summary>
@@ -96,22 +87,12 @@ namespace LightMock.Generator
             return args;
         }
 
-        object[] GetAssertArgs(Invoked invoked)
+        object[] GetProtectedContextArgs()
         {
-            const int offset = 2;
-            var args = new object[prms.Length + offset];
-            args[0] = propertiesContext;
-            args[1] = invoked;
-            Array.Copy(prms, 0, args, offset, prms.Length);
-            return args;
-        }
-
-        object[] GetArrangeArgs(ILambdaRequest request)
-        {
-            const int offset = 1;
-            var args = new object[prms.Length + offset];
-            args[0] = request;
-            Array.Copy(prms, 0, args, offset, prms.Length);
+            var args = new object[3];
+            args[0] = prms;
+            args[1] = typeResolver;
+            args[2] = new Func<string, LambdaExpression>(ExchangeForExpression);
             return args;
         }
 
@@ -121,18 +102,6 @@ namespace LightMock.Generator
                 return (T)typeResolver.GetDelegate(publicContext);
             return typeResolver.ActivateInstance<T>(GetMockInstanceArgs());
         }
-
-        T CreateAssertWhenInstance(Invoked invoked)
-            => typeResolver.ActivateAssertWhenInstance<T>(GetAssertArgs(invoked));
-
-        T CreateAssertWhenAnyInstance(Invoked invoked)
-            => typeResolver.ActivateAssertWhenAnyInstance<T>(GetAssertArgs(invoked));
-
-        T CreateArrangeWhenAnyInstance(ILambdaRequest request)
-            => typeResolver.ActivateArrangeWhenAnyInstance<T>(GetArrangeArgs(request));
-
-        T CreateArrangeWhenInstance(ILambdaRequest request)
-            => typeResolver.ActivateArrangeWhenInstance<T>(GetArrangeArgs(request));
 
         /// <summary>
         /// For internal usage
@@ -145,86 +114,69 @@ namespace LightMock.Generator
         [EditorBrowsable(EditorBrowsableState.Never)]
         protected abstract IReadOnlyDictionary<Type, Type> ContextResolverTable { get; }
 
+        #region IAdvancedMockContext<T> implementation
+
         ///<inheritdoc/>
         public void AssertGet<TProperty>(Func<T, TProperty> expression)
-            => AssertGet(expression, Invoked.AtLeast(1));
+            => publicContext.AssertGet(expression);
 
         ///<inheritdoc/>
         public void AssertGet<TProperty>(Func<T, TProperty> expression, Invoked times)
-            => expression(CreateAssertWhenInstance(times));
+            => publicContext.AssertGet(expression, times);
 
         ///<inheritdoc/>
         public void AssertSet_When(Action<T> expression)
-            => AssertUsingAssertInstance(expression, Invoked.AtLeast(1));
+            => publicContext.AssertSet_When(expression);
 
         ///<inheritdoc/>
         public void AssertSet_When(Action<T> expression, Invoked times)
-            => AssertUsingAssertInstance(expression, times);
+            => publicContext.AssertSet_When(expression, times);
 
         ///<inheritdoc/>
         public void AssertAdd(Action<T> expression)
-            => AssertUsingAssertInstance(expression, Invoked.AtLeast(1));
+            => publicContext.AssertAdd(expression);
 
         ///<inheritdoc/>
         public void AssertAdd(Action<T> expression, Invoked times)
-            => AssertUsingAssertInstance(expression, times);
+            => publicContext.AssertAdd(expression, times);
 
         ///<inheritdoc/>
         public void AssertRemove(Action<T> expression)
-            => AssertUsingAssertInstance(expression, Invoked.AtLeast(1));
+            => publicContext.AssertRemove(expression);
 
         ///<inheritdoc/>
         public void AssertRemove(Action<T> expression, Invoked times)
-            => AssertUsingAssertInstance(expression, times);
-
-        void AssertUsingAssertInstance(Action<T> expression, Invoked times)
-            => expression(CreateAssertWhenInstance(times));
-
-        const string KUidExceptionMessage = "you must provide part of unique identifier";
+            => publicContext.AssertRemove(expression, times);
 
         ///<inheritdoc/>
         public IArrangement ArrangeSetter(Action<T> expression, [CallerFilePath] string uidPart1 = "", [CallerLineNumber] int uidPart2 = 0)
-        {
-            if (string.IsNullOrWhiteSpace(uidPart1))
-                throw new ArgumentException(KUidExceptionMessage, nameof(uidPart1));
-            return propertiesContext.ArrangeAction(ExchangeForExpression(uidPart2 + uidPart1));
-        }
+            => publicContext.ArrangeSetter(expression, uidPart1, uidPart2);
 
         ///<inheritdoc/>
         public IArrangement ArrangeSetter_WhenAny(Action<T> expression)
-            => ArrangeSetter_NoAot(expression, CreateArrangeWhenAnyInstance);
+                => publicContext.ArrangeSetter_WhenAny(expression);
 
         ///<inheritdoc/>
-        public IArrangement ArrangeSetter_When(Action<T> expression) 
-            => ArrangeSetter_NoAot(expression, CreateArrangeWhenInstance);
-
-        IArrangement ArrangeSetter_NoAot(Action<T> expression, Func<ILambdaRequest, T> instanceFactory)
-        {
-            var request = new LambdaRequest();
-            expression(instanceFactory(request));
-            var result = request.Result ?? throw new InvalidOperationException("A property assignment is required.");
-            return propertiesContext.ArrangeAction(result);
-        }
+        public IArrangement ArrangeSetter_When(Action<T> expression)
+            => publicContext.ArrangeSetter_When(expression);
 
         ///<inheritdoc/>
         public void AssertSet(Action<T> expression, [CallerFilePath] string uidPart1 = "", [CallerLineNumber] int uidPart2 = 0)
-            => AssertSet(expression, Invoked.AtLeast(1), uidPart1, uidPart2);
+            => publicContext.AssertSet(expression, uidPart1, uidPart2);
 
         ///<inheritdoc/>
         public void AssertSet(Action<T> expression, Invoked times, [CallerFilePath] string uidPart1 = "", [CallerLineNumber] int uidPart2 = 0)
-        {
-            if (string.IsNullOrWhiteSpace(uidPart1))
-                throw new ArgumentException(KUidExceptionMessage, nameof(uidPart1));
-            propertiesContext.AssertInternal(ExchangeForExpression(uidPart2 + uidPart1), times);
-        }
+            => publicContext.AssertSet(expression, times, uidPart1, uidPart2);
 
         ///<inheritdoc/>
         public void AssertSet_WhenAny(Action<T> expression)
-            => AssertSet_WhenAny(expression, Invoked.AtLeast(1));
+            => publicContext.AssertSet_WhenAny(expression);
 
         ///<inheritdoc/>
         public void AssertSet_WhenAny(Action<T> expression, Invoked times)
-            => expression(CreateAssertWhenAnyInstance(times));
+            => publicContext.AssertSet_WhenAny(expression, times);
+
+        #endregion
 
         #region IMockContext<T> implementation
 

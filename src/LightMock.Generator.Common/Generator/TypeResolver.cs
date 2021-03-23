@@ -28,6 +28,7 @@
 using LightMock.Generator.Tags;
 using System;
 using System.ComponentModel;
+using System.Threading;
 
 namespace LightMock.Generator
 {
@@ -130,14 +131,30 @@ namespace LightMock.Generator
         protected Type MakeGenericMockContextType(Type genericType)
             => Defaults.MockContextType.MakeGenericType(genericType.MakeGenericType(ContextType.GetGenericArguments()));
 
+        /// <summary>
+        /// For internal usage
+        /// </summary>
+        protected Type MakeAdvancedMockContextType(Type type)
+            => Defaults.AdvancedMockContextType.MakeGenericType(type);
+
+        /// <summary>
+        /// For internal usage.
+        /// </summary>
+        protected Type MakeGenericAdvancedMockContextType(Type genericType)
+            => Defaults.AdvancedMockContextType.MakeGenericType(genericType.MakeGenericType(ContextType.GetGenericArguments()));
+
         internal TMock ActivateInstance<TMock>(object[] args)
             => (TMock)new TypeCacher<(TMock, MockInstanceTag)>().Activate(GetInstanceType, args);
 
-        internal object ActivateProtectedContext<TMock>()
-            => new TypeCacher<(TMock, ProtectedContextTag)>().Activate(GetProtectedContextType);
+        internal object ActivateProtectedContext<TMock>(object[] args)
+            => new TypeCacher<(TMock, ProtectedContextTag)>().Activate(GetProtectedContextType, args);
 
         internal IMockContextInternal ActivatePropertiesContext<TMock>()
             => (IMockContextInternal)new TypeCacher<(TMock, PropertiesContextTag)>().Activate(GetPropertiesContextType);
+
+        IMockContextInternal? propertiesContext;
+        internal IMockContextInternal GetPropertiesContext<TMock>()
+            => propertiesContext ?? (propertiesContext = ActivatePropertiesContext<TMock>());
 
         internal TMock ActivateAssertWhenInstance<TMock>(object[] args)
             => (TMock)new TypeCacher<(TMock, AssertWhenTag)>().Activate(GetAssertWhenType, args);
