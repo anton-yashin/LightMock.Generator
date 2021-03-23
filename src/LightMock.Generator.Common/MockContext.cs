@@ -28,6 +28,7 @@
 ******************************************************************************/
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
@@ -42,6 +43,7 @@ namespace LightMock
     {
         private readonly ILockedCollection<IInvocationInfo> invocations = new LockedCollection<IInvocationInfo>();
         private readonly ILockedCollection<Arrangement> arrangements = new LockedCollection<Arrangement>();
+        private readonly ILockedCollection<IInvocationInfo> verifiedInvocations = new LockedCollection<IInvocationInfo>();
 
         /// <summary>
         /// Arranges a mocked method. 
@@ -146,12 +148,12 @@ namespace LightMock
         public void AssertInternal(LambdaExpression matchExpression, Invoked invoked)
         {
             var matchInfo = matchExpression.ToMatchInfo();
-            var callCount = invocations.InvokeLocked(c => c.Count(matchInfo.Matches));
+            var invocations = this.invocations.InvokeLocked(c => c.Where(matchInfo.Matches).ToImmutableList());
 
-            if (!invoked.Verify(callCount))
-            {
-                throw new MockException(string.Format("The method {0} was called {1} times", matchExpression.Simplify(), callCount));
-            }
+            if (invoked.Verify(invocations.Count))
+                verifiedInvocations.AddRange(invocations);
+            else
+                throw new MockException(string.Format("The method {0} was called {1} times", matchExpression.Simplify(), invocations.Count));
         }
 
         /// <summary>
@@ -237,6 +239,26 @@ namespace LightMock
             => ArrangeFunction<TResult>(matchExpression);
         IArrangement IMockContextInternal.ArrangeProperty<TProperty>(LambdaExpression matchExpression)
             => ArrangePropertyInternal<TProperty>(matchExpression);
+
+        public IEnumerable<IInvocationInfo> GetUnverifiedInvocations()
+        {
+            var verified = verifiedInvocations.ToArray();
+            var invocations = this.invocations.ToArray();
+            foreach (var i in invocations)
+            {
+                bool found = false;
+                foreach (var j in verified)
+                {
+                    if (ReferenceEquals(i, j))
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+                if (found == false)
+                    yield return i;
+            }
+        }
 
         #endregion
     }

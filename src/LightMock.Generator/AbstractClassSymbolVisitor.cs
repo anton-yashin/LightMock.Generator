@@ -95,7 +95,7 @@ namespace LightMock.Generator
         void AddInterfaceImplementation(IPropertySymbol symbol, StringBuilder result)
         {
             result.Append(CombineWithInterface(symbol))
-                .AppendGetterAndSetter(VariableNames.ProtectedContext, symbol);
+                .AppendProtectedInterfaceGetterAndSetter(VariableNames.ProtectedContext, symbol);
         }
 
         public override string? VisitEvent(IEventSymbol symbol)
