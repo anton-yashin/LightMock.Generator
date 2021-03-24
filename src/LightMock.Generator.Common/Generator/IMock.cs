@@ -39,5 +39,10 @@ namespace LightMock.Generator
         /// Exposes the mocked object instance.
         /// </summary>
         T Object { get; }
+
+        /// <summary>
+        /// Verifies that there were no invocations other than already verified.
+        /// </summary>
+        void AssertNoOtherCalls();
     }
 }

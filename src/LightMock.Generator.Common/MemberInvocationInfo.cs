@@ -27,6 +27,7 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
+using System.Text;
 
 namespace LightMock
 {
@@ -44,5 +45,12 @@ namespace LightMock
         [return: MaybeNull]
         public TResult Invoke<TResult>(CallbackInvocation callback, [AllowNull] TResult defaultValue)
             => callback.Invoke(null, defaultValue);
+
+        public void AppendInvocationInfo(StringBuilder here) 
+        {
+            here.Append(MemberInfo);
+        }
+
+        public bool IsMethod => false;
     }
 }

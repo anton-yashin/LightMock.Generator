@@ -229,6 +229,21 @@ namespace LightMock.Generator
 
         public override SourceText DoGenerate()
         {
+            var originalNameFormat = new StringBuilder(typeSymbol.ContainingNamespace.ToDisplayString(SymbolDisplayFormats.Namespace))
+              .Append('.')
+              .Append(typeSymbol.Name);
+            if (typeSymbol.IsGenericType)
+            {
+                originalNameFormat.Append('<');
+                for (int i = 0; i < typeSymbol.TypeArguments.Length; i++)
+                {
+                    if (i > 0)
+                        originalNameFormat.Append(", ");
+                    originalNameFormat.Append('{').Append(i).Append('}');
+                }
+                originalNameFormat.Append('>');
+            }
+
             var members = GetAllBaseTypes(typeSymbol)
                 .SelectMany(i => i.GetMembers())
                 .Concat(typeSymbol.GetMembers())
@@ -243,11 +258,13 @@ using System.Linq.Expressions;
 
 namespace {@namespace}
 {{
+    [global::LightMock.Generator.OriginalNameAttribute({typeSymbol.TypeArguments.Length}, ""{originalNameFormat}"")]
     public interface {Prefix.PropertyToFuncInterface}{className}{typeArgumentsWithBrackets}
     {{
         {string.Join("\r\n        ", members.Select(i => i.Accept(propertyDefinitionVisitor)))}
     }}
 
+    [global::LightMock.Generator.OriginalNameAttribute({typeSymbol.TypeArguments.Length}, ""{originalNameFormat}"")]
     public interface {Prefix.ProtectedToPublicInterface}{className}{typeArgumentsWithBrackets}
         {whereClause}
     {{

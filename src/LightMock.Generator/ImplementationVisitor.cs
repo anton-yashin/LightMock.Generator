@@ -86,17 +86,32 @@ namespace LightMock.Generator
                 return null;
 
             var result = new StringBuilder(GetObsoleteAndOrOverrideChunkFor(symbol))
-                .Append(symbol.ToDisplayString(definitionFormat));
+                .AppendDisplayFormat(symbol, definitionFormat);
             appedGetterAndSetter(result, symbol);
 
             if (p2pInterfaceName != null && symbol.IsInterfaceRequired())
             {
-                result.Append(symbol.Type.ToDisplayString(SymbolDisplayFormats.Namespace))
-                    .Append(' ').Append(p2pInterfaceName).Append('.').Append(symbol.Name);
+                var name = p2pInterfaceName.Split('<').First();
+                if (p2pInterfaceName == "IP2P_AAbstractClassWithMultipleNamespaces")
+                { }
+                result.AppendDisplayFormat(symbol, SymbolDisplayFormats.Interface, Mutator);
                 appedGetterAndSetter(result, symbol);
+
+                SymbolDisplayPart Mutator(SymbolDisplayPart part)
+                {
+                    var s = part.ToString();
+                    var xs = symbol;
+                    switch (part.Kind)
+                    {
+                        case SymbolDisplayPartKind.ClassName when name.Contains(s):
+                            return new SymbolDisplayPart(part.Kind, part.Symbol, name);
+                    }
+                    return part;
+                }
             }
 
             return result.ToString();
+
 
         }
 

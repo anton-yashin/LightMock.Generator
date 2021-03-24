@@ -75,5 +75,11 @@ namespace LightMock
             lock (collection)
                 return func(collection);
         }
+
+        public void AddRange(IEnumerable<T> range)
+        {
+            lock (collection)
+                collection.AddRange(range);
+        }
     }
 }

@@ -25,13 +25,14 @@
     https://github.com/anton-yashin/
 *******************************************************************************/
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 
 namespace LightMock.Generator
 {
-    sealed class AdvancedMockContext<T> : IAdvancedMockContext<T>, IInvocationContext<T>
+    sealed class AdvancedMockContext<T> : IAdvancedMockContext<T>, IInvocationContext<T>, IAdvancedMockContext
     {
         private readonly object[] @params;
         private readonly TypeResolver typeResolver;
@@ -147,6 +148,9 @@ namespace LightMock.Generator
 
         public void AssertSet_WhenAny(Action<T> propertySelector, Invoked times)
             => propertySelector(CreateAssertWhenAnyInstance(times));
+
+        public IEnumerable<IInvocationInfo> GetUnverifiedInvocations()
+            => mockContext.GetUnverifiedInvocations();
 
         #region IMockContext<T> implementation
 

@@ -146,8 +146,8 @@ namespace LightMock.Generator
         internal TMock ActivateInstance<TMock>(object[] args)
             => (TMock)new TypeCacher<(TMock, MockInstanceTag)>().Activate(GetInstanceType, args);
 
-        internal object ActivateProtectedContext<TMock>(object[] args)
-            => new TypeCacher<(TMock, ProtectedContextTag)>().Activate(GetProtectedContextType, args);
+        internal IAdvancedMockContext ActivateProtectedContext<TMock>(object[] args)
+            => (IAdvancedMockContext)new TypeCacher<(TMock, ProtectedContextTag)>().Activate(GetProtectedContextType, args);
 
         internal IMockContextInternal ActivatePropertiesContext<TMock>()
             => (IMockContextInternal)new TypeCacher<(TMock, PropertiesContextTag)>().Activate(GetPropertiesContextType);

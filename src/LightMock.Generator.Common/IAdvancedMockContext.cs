@@ -26,6 +26,7 @@
 *******************************************************************************/
 using LightMock.Generator;
 using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 
 namespace LightMock
@@ -171,6 +172,11 @@ namespace LightMock
         /// No AOT transformations, thus pattern matching using <see cref="The{TValue}"/> type is not working.
         /// </remarks>
         IArrangement ArrangeSetter_When(Action<T> expression);
-
     }
+
+    internal interface IAdvancedMockContext
+    {
+        IEnumerable<IInvocationInfo> GetUnverifiedInvocations();
+    }
+
 }

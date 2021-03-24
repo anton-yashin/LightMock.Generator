@@ -26,7 +26,10 @@
 *******************************************************************************/
 using System;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Reflection;
+using System.Text;
+using LightMock.Generator;
 
 namespace LightMock
 {
@@ -47,5 +50,82 @@ namespace LightMock
         [return: MaybeNull]
         public TResult Invoke<TResult>(CallbackInvocation callback, [AllowNull] TResult defaultValue)
             => callback.Invoke(Arguments, defaultValue);
-    }
+
+        public void AppendInvocationInfo(StringBuilder here)
+        {
+			here.Append(Method.ReturnType).Append(' ');
+			AppendDeclaringType(here);
+			AppendParameters(here);
+		}
+
+		public bool IsMethod => Method.IsSpecialName == false;
+
+		private void AppendParameters(StringBuilder here)
+		{
+			var customAttribute = Method.GetCustomAttribute<OriginalNameAttribute>();
+			if (customAttribute != null)
+			{
+				here.AppendFormat(customAttribute.OriginalNameFormat,
+					args: Arguments.Select(i => ArgumentValueToString(i))
+					.Concat(Enumerable.Repeat<object?>(null, customAttribute.ParametersCount))
+					.Take(customAttribute.ParametersCount)
+					.ToArray());
+			}
+			else
+			{
+				DefaultAppendParameters(here);
+			}
+		}
+
+		private void DefaultAppendParameters(StringBuilder here)
+		{
+			here.Append('.').Append(Method.Name).Append('(');
+            var parameters = Method.GetParameters();
+			int num = Math.Min(Arguments.Length, parameters.Length);
+			for (int i = 0; i < num; i++)
+			{
+				var parameterInfo = parameters[i];
+				var value = Arguments[i];
+				if (i > 0)
+					here.Append(',');
+				here.Append(parameterInfo.ParameterType).Append(' ').Append(parameterInfo.Name)
+					.Append(" = ")
+					.Append(ArgumentValueToString(value));
+			}
+			here.Append(')');
+		}
+
+		private void AppendDeclaringType(StringBuilder stringBuilder)
+		{
+			var declaringType = Method.DeclaringType;
+			var customAttribute = declaringType.GetCustomAttribute<OriginalNameAttribute>();
+			if (customAttribute != null)
+			{
+				stringBuilder.AppendFormat(customAttribute.OriginalNameFormat,
+					args: declaringType.IsGenericType ? declaringType.GetGenericArguments() : Array.Empty<Type>());
+			}
+			else
+			{
+				stringBuilder.Append(declaringType);
+			}
+		}
+
+		private static string ArgumentValueToString(object value)
+		{
+			if (value == null)
+				return "null";
+			switch (value)
+            {
+				case string s:
+					return "\"" + s + "\"";
+				case float f:
+					return f.ToString("G9");
+				case double d:
+					return d.ToString("G17");
+				case Enum @enum:
+					return @enum.GetType().ToString() + "." + @enum.ToString("F");
+            }
+			return value.ToString();
+		}
+	}
 }

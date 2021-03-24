@@ -34,5 +34,6 @@ namespace LightMock
         void InvokeLocked(Action<ICollection<T>> action);
         TResult InvokeLocked<TResult>(Func<ICollection<T>, TResult> func);
         T[] ToArray();
+        void AddRange(IEnumerable<T> range);
     }
 }

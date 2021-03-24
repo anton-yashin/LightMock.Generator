@@ -38,5 +38,8 @@ namespace LightMock
         [return: MaybeNull]
         TResult Invoke<TResult>(CallbackInvocation callback, [AllowNull] TResult defaultValue);
 
+        void AppendInvocationInfo(StringBuilder here);
+
+        bool IsMethod { get; }
     }
 }

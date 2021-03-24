@@ -27,8 +27,10 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Threading;
 
 namespace LightMock.Generator
@@ -44,7 +46,7 @@ namespace LightMock.Generator
         T? instance;
         readonly object[] prms;
         readonly TypeResolver typeResolver;
-        readonly object protectedContext;
+        readonly IAdvancedMockContext protectedContext;
         readonly IMockContextInternal propertiesContext;
         readonly AdvancedMockContext<T> publicContext;
 
@@ -175,6 +177,25 @@ namespace LightMock.Generator
         ///<inheritdoc/>
         public void AssertSet_WhenAny(Action<T> expression, Invoked times)
             => publicContext.AssertSet_WhenAny(expression, times);
+
+        ///<inheritdoc/>
+        public void AssertNoOtherCalls()
+        {
+            var unverifiedInvocations = publicContext.GetUnverifiedInvocations()
+                .Concat(protectedContext.GetUnverifiedInvocations())
+                .Concat(propertiesContext.GetUnverifiedInvocations())
+                .Where(i => i.IsMethod).ToArray();
+            if (unverifiedInvocations.Length > 0)
+            {
+                var messageBuilder = new StringBuilder().AppendLine("Detected unverified invocations: ");
+                foreach (var i in unverifiedInvocations)
+                {
+                    i.AppendInvocationInfo(messageBuilder);
+                    messageBuilder.AppendLine();
+                }
+                throw new MockException(messageBuilder.ToString());
+            }
+        }
 
         #endregion
 
