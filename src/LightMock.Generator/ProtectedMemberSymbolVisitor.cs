@@ -47,7 +47,8 @@ namespace LightMock.Generator
         {
             if (symbol.IsInterfaceRequired() == false)
                 return null;
-            var result = new StringBuilder(symbol.ToDisplayString(SymbolDisplayFormats.KP2PInterfaceDeclaration))
+            var result = new StringBuilder()
+                .Append(symbol, SymbolDisplayFormats.KP2PInterfaceDeclaration)
                 .Append("{");
 
             if (symbol.GetMethod != null)

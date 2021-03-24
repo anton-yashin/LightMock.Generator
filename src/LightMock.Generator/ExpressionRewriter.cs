@@ -116,7 +116,7 @@ namespace LightMock.Generator
                             .Append(uid.Replace(@"\", @"\\"))
                             .AppendLine("\":")
                             .Append("return ExpressionUtils.Get<global::")
-                            .Append(typeSymbol.ContainingNamespace.ToDisplayString(SymbolDisplayFormats.Namespace))
+                            .Append(typeSymbol.ContainingNamespace, SymbolDisplayFormats.Namespace)
                             .Append(".")
                             .Append(Prefix.PropertyToFuncInterface)
                             .AppendContainingTypes<string>(typeSymbol, (sb, ts) => sb.AppendTypeArguments(ts, i => i.Name, "_", "_"), "_")

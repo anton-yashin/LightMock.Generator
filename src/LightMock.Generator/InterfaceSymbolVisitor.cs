@@ -49,7 +49,8 @@ namespace LightMock.Generator
 
         public override string? VisitProperty(IPropertySymbol symbol)
         {
-            var result = new StringBuilder(symbol.ToDisplayString(SymbolDisplayFormats.Interface))
+            var result = new StringBuilder()
+                .Append(symbol, SymbolDisplayFormats.Interface)
                 .AppendMockGetterAndSetter(VariableNames.Context,
                 symbol, symbol.ContainingType.ToDisplayString(SymbolDisplayFormats.WithTypeParams));
             return result.ToString();
@@ -57,7 +58,8 @@ namespace LightMock.Generator
 
         public override string? VisitEvent(IEventSymbol symbol)
         {
-            var result = new StringBuilder(symbol.ToDisplayString(SymbolDisplayFormats.Interface))
+            var result = new StringBuilder()
+                .Append(symbol, SymbolDisplayFormats.Interface)
                 .AppendEventAddRemove(VariableNames.PropertiesContext, symbol, methodName: "Invoke");
             return result.ToString();
         }

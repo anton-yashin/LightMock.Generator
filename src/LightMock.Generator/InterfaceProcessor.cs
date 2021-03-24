@@ -99,7 +99,8 @@ namespace LightMock.Generator
 
         public override SourceText DoGenerate()
         {
-            var originalNameFormat = new StringBuilder(typeSymbol.ContainingNamespace.ToDisplayString(SymbolDisplayFormats.Namespace))
+            var originalNameFormat = new StringBuilder()
+                .Append(typeSymbol.ContainingNamespace, SymbolDisplayFormats.Namespace)
                 .Append('.')
                 .Append(typeSymbol.Name);
             if (typeSymbol.IsGenericType)

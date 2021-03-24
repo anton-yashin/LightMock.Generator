@@ -87,7 +87,7 @@ namespace LightMock.Generator
                 AddInterfaceImplementation(symbol, result);
 
             result.Append(symbol.GetObsoleteOrOverrideChunk())
-                .Append(symbol.ToDisplayString(SymbolDisplayFormats.AbstractClass))
+                .Append(symbol, SymbolDisplayFormats.AbstractClass)
                 .AppendMockGetterAndSetter(isInterfaceRequired ? VariableNames.ProtectedContext : VariableNames.Context, symbol);
             return result.ToString();
         }
@@ -103,7 +103,7 @@ namespace LightMock.Generator
             if (symbol.IsCanBeOverriden())
             {
                 var result = new StringBuilder("override ")
-                    .Append(symbol.ToDisplayString(SymbolDisplayFormats.AbstractClass))
+                    .Append(symbol, SymbolDisplayFormats.AbstractClass)
                     .AppendEventAddRemove(VariableNames.PropertiesContext, symbol, methodName: "Invoke");
                 return result.ToString();
             }

@@ -46,7 +46,7 @@ namespace LightMock.Generator
                     .Append(symbol.Name)
                     .Append(Suffix.Add)
                     .Append("(")
-                    .Append(symbol.Type.ToDisplayString(SymbolDisplayFormats.Interface))
+                    .Append(symbol.Type, SymbolDisplayFormats.Interface)
                     .Append(" prm);");
             }
             if (symbol.RemoveMethod != null)
@@ -57,7 +57,7 @@ namespace LightMock.Generator
                     .Append(symbol.Name)
                     .Append(Suffix.Remove)
                     .Append("(")
-                    .Append(symbol.Type.ToDisplayString(SymbolDisplayFormats.Interface))
+                    .Append(symbol.Type, SymbolDisplayFormats.Interface)
                     .Append(" prm);");
             }
 

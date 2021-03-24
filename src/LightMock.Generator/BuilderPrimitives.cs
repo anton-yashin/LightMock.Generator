@@ -179,7 +179,7 @@ namespace LightMock.Generator
                     .Append("), ")
                     .Append(VariableNames.Invoked)
                     .Append("); return default(")
-                    .Append(symbol.Type.ToDisplayString(SymbolDisplayFormats.WithTypeParams))
+                    .Append(symbol.Type, SymbolDisplayFormats.WithTypeParams)
                     .Append(");}");
             }
             if (symbol.SetMethod != null)
@@ -217,7 +217,7 @@ namespace LightMock.Generator
                     .Append("), ")
                     .Append(VariableNames.Invoked)
                     .Append("); return default(")
-                    .Append(symbol.Type.ToDisplayString(SymbolDisplayFormats.WithTypeParams))
+                    .Append(symbol.Type, SymbolDisplayFormats.WithTypeParams)
                     .Append(");}");
             }
             if (symbol.SetMethod != null)
@@ -229,7 +229,7 @@ namespace LightMock.Generator
                     .Append("(")
                     .AppendIndexerParametersIsAnyInvocation(symbol, addCommaAtEnd: true)
                     .Append("The<")
-                    .Append(symbol.Type.ToDisplayString(SymbolDisplayFormats.WithTypeParams))
+                    .Append(symbol.Type, SymbolDisplayFormats.WithTypeParams)
                     .Append(">.IsAnyValue), ")
                     .Append(VariableNames.Invoked)
                     .Append("); }");
@@ -250,7 +250,7 @@ namespace LightMock.Generator
             if (symbol.GetMethod != null)
             {
                 @this.Append("get { return default(")
-                    .Append(symbol.Type.ToDisplayString(SymbolDisplayFormats.WithTypeParams))
+                    .Append(symbol.Type, SymbolDisplayFormats.WithTypeParams)
                     .Append("); }");
             }
             if (symbol.SetMethod != null)
@@ -262,7 +262,7 @@ namespace LightMock.Generator
                     .Append("(")
                     .AppendIndexerParametersIsAnyInvocation(symbol, addCommaAtEnd: true)
                     .Append("The<")
-                    .Append(symbol.Type.ToDisplayString(SymbolDisplayFormats.WithTypeParams))
+                    .Append(symbol.Type, SymbolDisplayFormats.WithTypeParams)
                     .Append(">.IsAnyValue))); }");
             }
 
@@ -281,7 +281,7 @@ namespace LightMock.Generator
             if (symbol.GetMethod != null)
             {
                 @this.Append("get { return default(")
-                    .Append(symbol.Type.ToDisplayString(SymbolDisplayFormats.WithTypeParams))
+                    .Append(symbol.Type, SymbolDisplayFormats.WithTypeParams)
                     .Append("); }");
             }
             if (symbol.SetMethod != null)
@@ -345,12 +345,12 @@ namespace LightMock.Generator
         {
             if (symbol.Parameters.Length > 0)
             {
-                @this.Append(symbol.Parameters[0].Type.ToDisplayString(SymbolDisplayFormats.Interface))
+                @this.Append(symbol.Parameters[0].Type, SymbolDisplayFormats.Interface)
                     .Append(" p0");
                 for (int i = 1; i < symbol.Parameters.Length; i++)
                 {
                     @this.Append(", ")
-                        .Append(symbol.Parameters[i].Type.ToDisplayString(SymbolDisplayFormats.Interface))
+                        .Append(symbol.Parameters[i].Type, SymbolDisplayFormats.Interface)
                         .Append(" p").Append(i);
                 }
                 if (addCommaAtEnd)
@@ -392,12 +392,12 @@ namespace LightMock.Generator
             if (symbol.Parameters.Length > 0)
             {
                 @this.Append("The<")
-                    .Append(symbol.Parameters[0].Type.ToDisplayString(SymbolDisplayFormats.Interface))
+                    .Append(symbol.Parameters[0].Type, SymbolDisplayFormats.Interface)
                     .Append(">.IsAnyValue");
                 for (int i = 1; i < symbol.Parameters.Length; i++)
                 {
                     @this.Append(", The<")
-                        .Append(symbol.Parameters[i].Type.ToDisplayString(SymbolDisplayFormats.Interface))
+                        .Append(symbol.Parameters[i].Type, SymbolDisplayFormats.Interface)
                         .Append(">.IsAnyValue");
                 }
                 if (addCommaAtEnd)

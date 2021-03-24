@@ -58,7 +58,7 @@ namespace LightMock.Generator
             if (symbol.ReturnsVoid == false)
             {
                 result.Append("return default(")
-                    .Append(symbol.ReturnType.ToDisplayString(SymbolDisplayFormats.WithTypeParams))
+                    .Append(symbol.ReturnType, SymbolDisplayFormats.WithTypeParams)
                     .Append(");");
             }
             result.Append("}");
@@ -72,7 +72,7 @@ namespace LightMock.Generator
                 if (symbol.ReturnsVoid == false)
                 {
                     result.Append(" return default(")
-                        .Append(symbol.ReturnType.ToDisplayString(SymbolDisplayFormats.WithTypeParams))
+                        .Append(symbol.ReturnType, SymbolDisplayFormats.WithTypeParams)
                         .Append("); ");
                 }
                 result.Append('}');
@@ -124,14 +124,14 @@ namespace LightMock.Generator
             var result = new StringBuilder();
             if (ct.Name != nameof(Object) && ct.BaseType == null)
             {
-                result.Append(symbol.ToDisplayString(SymbolDisplayFormats.Interface));
+                result.Append(symbol, SymbolDisplayFormats.Interface);
                 appendEventAddRemove(result, symbol);
                 return result.ToString();
             }
             if (symbol.IsCanBeOverriden())
             {
                 result.Append("override ")
-                    .Append(symbol.ToDisplayString(SymbolDisplayFormats.AbstractClass));
+                    .Append(symbol, SymbolDisplayFormats.AbstractClass);
                 appendEventAddRemove(result, symbol);
                 return result.ToString();
             }
