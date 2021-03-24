@@ -313,7 +313,7 @@ namespace LightMock.Generator
                     .Append(value)
                     .AppendIndexerParametersFormat(symbol)
                     .Append("\")] ")
-                    .AppendDisplayFormat(symbol.Type, SymbolDisplayFormats.Interface)
+                    .Append(symbol.Type, SymbolDisplayFormats.Interface)
                     .Append(' ')
                     .AppendP2FGetter(symbol, propertyTypePart)
                     .Append("(")
@@ -335,7 +335,7 @@ namespace LightMock.Generator
                     .AppendP2FSetter(symbol, propertyTypePart)
                     .Append("(")
                     .AppendIndexerParametersDefinition(symbol, addCommaAtEnd: true)
-                    .AppendDisplayFormat(symbol.Type, SymbolDisplayFormats.Interface)
+                    .Append(symbol.Type, SymbolDisplayFormats.Interface)
                     .Append(" prm);");
             }
             return @this;
@@ -363,10 +363,10 @@ namespace LightMock.Generator
         {
             if (symbol.Parameters.Length > 0)
             {
-                @this.Append('[').AppendDisplayFormat(symbol.Parameters[0].Type, SymbolDisplayFormats.Interface).Append(" {0}");
+                @this.Append('[').Append(symbol.Parameters[0].Type, SymbolDisplayFormats.Interface).Append(" {0}");
                 for (int i = 1; i < symbol.Parameters.Length; i++)
                 {
-                    @this.Append(", ").AppendDisplayFormat(symbol.Parameters[i].Type, SymbolDisplayFormats.Interface)
+                    @this.Append(", ").Append(symbol.Parameters[i].Type, SymbolDisplayFormats.Interface)
                         .Append(" {").Append(i).Append('}');
                 }
                 @this.Append(']');
@@ -446,13 +446,13 @@ namespace LightMock.Generator
 
             return symbol.IsIndexer
                 ? @this
-                    .AppendDisplayFormat(symbol.ContainingType, SymbolDisplayFormats.Namespace, Mutator)
+                    .Append(symbol.ContainingType, SymbolDisplayFormats.Namespace, Mutator)
                     .Append(Suffix.Indexer)
                     .Append(Suffix.Setter)
                 : @this
                     .Append(symbol.Name)
                     .Append('_')
-                    .AppendDisplayFormat(symbol.ContainingType, SymbolDisplayFormats.Namespace, Mutator)
+                    .Append(symbol.ContainingType, SymbolDisplayFormats.Namespace, Mutator)
                     .Append(Suffix.Setter);
         }
 
@@ -633,13 +633,13 @@ namespace LightMock.Generator
             return @this;
         }
 
-        public static StringBuilder AppendDisplayFormat(this StringBuilder @this, ISymbol symbol, SymbolDisplayFormat format, Func<SymbolDisplayPart, SymbolDisplayPart> mutator)
+        public static StringBuilder Append(this StringBuilder @this, ISymbol symbol, SymbolDisplayFormat format, Func<SymbolDisplayPart, SymbolDisplayPart> mutator)
         {
             return symbol.ToDisplayParts(format)
                 .Aggregate<SymbolDisplayPart, StringBuilder>(@this, (sb, p) => sb.Append(mutator(p)));
         }
 
-        public static StringBuilder AppendDisplayFormat(
+        public static StringBuilder Append(
             this StringBuilder @this,
             ISymbol symbol,
             SymbolDisplayFormat format,
@@ -648,7 +648,7 @@ namespace LightMock.Generator
             return symbol.ToDisplayParts(format).Select(mutator).Aggregate(@this, (sb, p) => sb.Append(p));
         }
 
-        public static StringBuilder AppendDisplayFormat(this StringBuilder @this, ISymbol symbol, SymbolDisplayFormat format)
+        public static StringBuilder Append(this StringBuilder @this, ISymbol symbol, SymbolDisplayFormat format)
         {
             return symbol.ToDisplayParts(format)
                 .Aggregate<SymbolDisplayPart, StringBuilder>(@this, (sb, p) => sb.Append(p));

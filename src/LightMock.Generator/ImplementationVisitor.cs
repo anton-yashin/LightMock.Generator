@@ -86,7 +86,7 @@ namespace LightMock.Generator
                 return null;
 
             var result = new StringBuilder(GetObsoleteAndOrOverrideChunkFor(symbol))
-                .AppendDisplayFormat(symbol, definitionFormat);
+                .Append(symbol, definitionFormat);
             appedGetterAndSetter(result, symbol);
 
             if (p2pInterfaceName != null && symbol.IsInterfaceRequired())
@@ -94,7 +94,7 @@ namespace LightMock.Generator
                 var name = p2pInterfaceName.Split('<').First();
                 if (p2pInterfaceName == "IP2P_AAbstractClassWithMultipleNamespaces")
                 { }
-                result.AppendDisplayFormat(symbol, SymbolDisplayFormats.Interface, Mutator);
+                result.Append(symbol, SymbolDisplayFormats.Interface, Mutator);
                 appedGetterAndSetter(result, symbol);
 
                 SymbolDisplayPart Mutator(SymbolDisplayPart part)
