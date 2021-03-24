@@ -676,7 +676,25 @@ namespace LightMock.Generator.Tests
             var context = testScript.Context;
             var mock = testScript.MockObject;
 
-            DoInvocations_AssertNoOtherCalls(mock);
+            mock.GetAndSet = nameof(mock.GetAndSet);
+            mock.SetOnly = nameof(mock.SetOnly);
+
+            _ = mock.GetAndSet;
+            _ = mock.GetOnly;
+
+            _ = mock.Function(nameof(mock.Function));
+            mock.Method(nameof(mock.Method));
+
+            mock.InvokeProtectedGetAndSet = nameof(mock.GetAndSet);
+            mock.InvokeProtectedSetOnly = nameof(mock.SetOnly);
+            mock.InvokeIndexerSet("123", "indexer_set");
+
+            _ = mock.InvokeProtectedGetAndSet;
+            _ = mock.InvokeProtectedGetOnly;
+            _ = mock.InvokeIndexerGet("456");
+
+            _ = mock.InvokeProtectedFunction(nameof(mock.Function));
+            mock.InvokeProtectedMethod(nameof(mock.Method));
 
             context.AssertSet_When(f => f.GetAndSet = nameof(mock.GetAndSet));
             context.AssertSet_When(f => f.SetOnly = nameof(mock.SetOnly));
@@ -697,34 +715,26 @@ namespace LightMock.Generator.Tests
         {
             var expectedMessage = new StringBuilder()
                 .AppendLine("Detected unverified invocations: ")
-                .AppendLine("System.String LightMock.Generator.Tests.AbstractClass.AAssertNoOtherCalls.Function(System.String a = \"Function\")")
-                .AppendLine("System.Void LightMock.Generator.Tests.AbstractClass.AAssertNoOtherCalls.Method(System.String a = \"Method\")")
-                .AppendLine("System.String LightMock.Generator.Tests.AbstractClass.AAssertNoOtherCalls.ProtectedFunction(System.String a = \"Function\")")
-                .AppendLine("System.Void LightMock.Generator.Tests.AbstractClass.AAssertNoOtherCalls.ProtectedMethod(System.String a = \"Method\")")
-                .AppendLine("System.Void LightMock.Generator.Tests.AbstractClass.AAssertNoOtherCalls.GetAndSet = \"GetAndSet\"")
-                .AppendLine("System.Void LightMock.Generator.Tests.AbstractClass.AAssertNoOtherCalls.SetOnly = \"SetOnly\"")
-                .AppendLine("System.String LightMock.Generator.Tests.AbstractClass.AAssertNoOtherCalls.GetAndSet")
-                .AppendLine("System.String LightMock.Generator.Tests.AbstractClass.AAssertNoOtherCalls.GetOnly")
-                .AppendLine("System.Void LightMock.Generator.Tests.AbstractClass.AAssertNoOtherCalls.ProtectedGetAndSet = \"GetAndSet\"")
-                .AppendLine("System.Void LightMock.Generator.Tests.AbstractClass.AAssertNoOtherCalls.ProtectedSetOnly = \"SetOnly\"")
-                .AppendLine("System.Void LightMock.Generator.Tests.AbstractClass.AAssertNoOtherCalls[string \"123\"] = \"indexer_set\"")
-                .AppendLine("System.String LightMock.Generator.Tests.AbstractClass.AAssertNoOtherCalls.ProtectedGetAndSet")
-                .AppendLine("System.String LightMock.Generator.Tests.AbstractClass.AAssertNoOtherCalls.ProtectedGetOnly")
-                .AppendLine("System.String LightMock.Generator.Tests.AbstractClass.AAssertNoOtherCalls[string \"456\"]")
+                .AppendLine("System.String LightMock.Generator.Tests.AbstractClass.AAssertNoOtherCalls_Throws.Function(System.String a = \"Function\")")
+                .AppendLine("System.Void LightMock.Generator.Tests.AbstractClass.AAssertNoOtherCalls_Throws.Method(System.String a = \"Method\")")
+                .AppendLine("System.String LightMock.Generator.Tests.AbstractClass.AAssertNoOtherCalls_Throws.ProtectedFunction(System.String a = \"Function\")")
+                .AppendLine("System.Void LightMock.Generator.Tests.AbstractClass.AAssertNoOtherCalls_Throws.ProtectedMethod(System.String a = \"Method\")")
+                .AppendLine("System.Void LightMock.Generator.Tests.AbstractClass.AAssertNoOtherCalls_Throws.GetAndSet = \"GetAndSet\"")
+                .AppendLine("System.Void LightMock.Generator.Tests.AbstractClass.AAssertNoOtherCalls_Throws.SetOnly = \"SetOnly\"")
+                .AppendLine("System.String LightMock.Generator.Tests.AbstractClass.AAssertNoOtherCalls_Throws.GetAndSet")
+                .AppendLine("System.String LightMock.Generator.Tests.AbstractClass.AAssertNoOtherCalls_Throws.GetOnly")
+                .AppendLine("System.Void LightMock.Generator.Tests.AbstractClass.AAssertNoOtherCalls_Throws.ProtectedGetAndSet = \"GetAndSet\"")
+                .AppendLine("System.Void LightMock.Generator.Tests.AbstractClass.AAssertNoOtherCalls_Throws.ProtectedSetOnly = \"SetOnly\"")
+                .AppendLine("System.Void LightMock.Generator.Tests.AbstractClass.AAssertNoOtherCalls_Throws[string \"123\"] = \"indexer_set\"")
+                .AppendLine("System.String LightMock.Generator.Tests.AbstractClass.AAssertNoOtherCalls_Throws.ProtectedGetAndSet")
+                .AppendLine("System.String LightMock.Generator.Tests.AbstractClass.AAssertNoOtherCalls_Throws.ProtectedGetOnly")
+                .AppendLine("System.String LightMock.Generator.Tests.AbstractClass.AAssertNoOtherCalls_Throws[string \"456\"]")
                 .ToString();
 
-            var testScript = LoadAssembly<AAssertNoOtherCalls>(nameof(AssertNoOtherCalls));
+            var testScript = LoadAssembly<AAssertNoOtherCalls_Throws>();
             var context = testScript.Context;
             var mock = testScript.MockObject;
 
-            DoInvocations_AssertNoOtherCalls(mock);
-
-            var ex = Assert.Throws<MockException>(() => context.AssertNoOtherCalls());
-            Assert.Equal(expectedMessage, ex.Message);
-        }
-
-        static void DoInvocations_AssertNoOtherCalls(AAssertNoOtherCalls mock)
-        {
             mock.GetAndSet = nameof(mock.GetAndSet);
             mock.SetOnly = nameof(mock.SetOnly);
 
@@ -744,6 +754,9 @@ namespace LightMock.Generator.Tests
 
             _ = mock.InvokeProtectedFunction(nameof(mock.Function));
             mock.InvokeProtectedMethod(nameof(mock.Method));
+
+            var ex = Assert.Throws<MockException>(() => context.AssertNoOtherCalls());
+            Assert.Equal(expectedMessage, ex.Message);
         }
 
         protected override string GetFullResourceName(string resourceName)
