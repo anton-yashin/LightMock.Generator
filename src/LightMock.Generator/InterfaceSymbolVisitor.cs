@@ -52,7 +52,7 @@ namespace LightMock.Generator
             var result = new StringBuilder()
                 .Append(symbol, SymbolDisplayFormats.Interface)
                 .AppendMockGetterAndSetter(VariableNames.Context,
-                symbol, symbol.ContainingType.ToDisplayString(SymbolDisplayFormats.WithTypeParams));
+                symbol, sb => sb.Append("(").Append(symbol.ContainingType, SymbolDisplayFormats.WithTypeParams).Append(")"));
             return result.ToString();
         }
 

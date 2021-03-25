@@ -86,20 +86,10 @@ namespace LightMock.Generator
             string contextName,
             IPropertySymbol symbol)
         {
-            return @this.AppendMockGetterAndSetter(contextName, symbol, sb => sb.Append(".Invoke(f => f"));
+            return @this.AppendMockGetterAndSetter(contextName, symbol, sb => sb);
         }
 
         public static StringBuilder AppendMockGetterAndSetter(
-            this StringBuilder @this,
-            string contextName,
-            IPropertySymbol symbol,
-            string invocationType)
-        {
-            return @this.AppendMockGetterAndSetter(contextName, symbol,
-                sb => sb.Append(".Invoke(f => ((").Append(invocationType).Append(")f)"));
-        }
-
-        static StringBuilder AppendMockGetterAndSetter(
             this StringBuilder @this,
             string contextName,
             IPropertySymbol symbol,
@@ -115,8 +105,9 @@ namespace LightMock.Generator
                     .Append("(")
                     .AppendIndexerParametersInvocation(symbol, addCommaAtEnd: false)
                     .Append(")); return global::LightMock.Generator.Default.Get(() =>")
-                    .Append(contextName);
-                appendGetInvocation(@this);
+                    .Append(contextName)
+                    .Append(".Invoke(f => (");
+                appendGetInvocation(@this).Append("f)");
                 if (symbol.IsIndexer)
                 {
                     @this.Append('[')
