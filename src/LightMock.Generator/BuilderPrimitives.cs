@@ -105,14 +105,13 @@ namespace LightMock.Generator
             IPropertySymbol symbol,
             Func<StringBuilder, StringBuilder> appendGetInvocation)
         {
-            var typePart = GetPropertyTypePart(symbol);
             @this.Append(" {");
             if (symbol.GetMethod != null)
             {
                 @this.Append(" get { ")
                     .Append(VariableNames.PropertiesContext)
                     .Append(".Invoke(f => f.")
-                    .AppendP2FGetter(symbol, typePart)
+                    .AppendP2FGetter(symbol)
                     .Append("(")
                     .AppendIndexerParametersInvocation(symbol, addCommaAtEnd: false)
                     .Append(")); return global::LightMock.Generator.Default.Get(() =>")
@@ -136,7 +135,7 @@ namespace LightMock.Generator
                 @this.Append("set { ")
                     .Append(VariableNames.PropertiesContext)
                     .Append(".Invoke(f => f.")
-                    .AppendP2FSetter(symbol, typePart)
+                    .AppendP2FSetter(symbol)
                     .Append("(")
                     .AppendIndexerParametersInvocation(symbol, addCommaAtEnd: true)
                     .Append("value)); ");
@@ -166,7 +165,6 @@ namespace LightMock.Generator
             this StringBuilder @this,
             IPropertySymbol symbol)
         {
-            var typePart = GetPropertyTypePart(symbol);
             @this.Append("{");
 
             if (symbol.GetMethod != null)
@@ -174,7 +172,7 @@ namespace LightMock.Generator
                 @this.Append("get { ")
                     .Append(VariableNames.Context)
                     .Append(".Assert(f => f.")
-                    .AppendP2FGetter(symbol, typePart)
+                    .AppendP2FGetter(symbol)
                     .Append("(")
                     .AppendIndexerParametersInvocation(symbol, addCommaAtEnd: false)
                     .Append("), ")
@@ -188,7 +186,7 @@ namespace LightMock.Generator
                 @this.Append("set {")
                     .Append(VariableNames.Context)
                     .Append(".Assert(f => f.")
-                    .AppendP2FSetter(symbol, typePart)
+                    .AppendP2FSetter(symbol)
                     .Append("(")
                     .AppendIndexerParametersInvocation(symbol, addCommaAtEnd: true)
                     .Append("value), ")
@@ -204,7 +202,6 @@ namespace LightMock.Generator
             this StringBuilder @this,
             IPropertySymbol symbol)
         {
-            var typePart = GetPropertyTypePart(symbol);
             @this.Append("{");
 
             if (symbol.GetMethod != null)
@@ -212,7 +209,7 @@ namespace LightMock.Generator
                 @this.Append("get { ")
                     .Append(VariableNames.Context)
                     .Append(".Assert(f => f.")
-                    .AppendP2FGetter(symbol, typePart)
+                    .AppendP2FGetter(symbol)
                     .Append("(")
                     .AppendIndexerParametersIsAnyInvocation(symbol, addCommaAtEnd: false)
                     .Append("), ")
@@ -226,7 +223,7 @@ namespace LightMock.Generator
                 @this.Append("set {")
                     .Append(VariableNames.Context)
                     .Append(".Assert(f => f.")
-                    .AppendP2FSetter(symbol, typePart)
+                    .AppendP2FSetter(symbol)
                     .Append("(")
                     .AppendIndexerParametersIsAnyInvocation(symbol, addCommaAtEnd: true)
                     .Append("The<")
@@ -245,7 +242,6 @@ namespace LightMock.Generator
             IPropertySymbol symbol,
             string propertyToFuncInterfaceName)
         {
-            var typePart = GetPropertyTypePart(symbol);
             @this.Append("{");
 
             if (symbol.GetMethod != null)
@@ -259,7 +255,7 @@ namespace LightMock.Generator
                 @this.Append("set { request.SetResult(global::LightMock.Generator.ExpressionUtils.Get<")
                     .Append(propertyToFuncInterfaceName)
                     .Append(">(f => f.")
-                    .AppendP2FSetter(symbol, typePart)
+                    .AppendP2FSetter(symbol)
                     .Append("(")
                     .AppendIndexerParametersIsAnyInvocation(symbol, addCommaAtEnd: true)
                     .Append("The<")
@@ -276,7 +272,6 @@ namespace LightMock.Generator
             IPropertySymbol symbol,
             string propertyToFuncInterfaceName)
         {
-            var typePart = GetPropertyTypePart(symbol);
             @this.Append("{");
 
             if (symbol.GetMethod != null)
@@ -290,7 +285,7 @@ namespace LightMock.Generator
                 @this.Append("set { request.SetResult(global::LightMock.Generator.ExpressionUtils.Get<")
                     .Append(propertyToFuncInterfaceName)
                     .Append(">(f => f.")
-                    .AppendP2FSetter(symbol, typePart)
+                    .AppendP2FSetter(symbol)
                     .Append("(")
                     .AppendIndexerParametersInvocation(symbol, addCommaAtEnd: true)
                     .Append("value))); }");
@@ -302,7 +297,6 @@ namespace LightMock.Generator
 
         public static StringBuilder AppendPropertyDefinition(this StringBuilder @this, IPropertySymbol symbol)
         {
-            var propertyTypePart = GetPropertyTypePart(symbol);
             var value = symbol.IsIndexer ? "" : ("." + symbol.Name);
 
             if (symbol.GetMethod != null)
@@ -316,7 +310,7 @@ namespace LightMock.Generator
                     .Append("\")] ")
                     .Append(symbol.Type, SymbolDisplayFormats.Interface)
                     .Append(' ')
-                    .AppendP2FGetter(symbol, propertyTypePart)
+                    .AppendP2FGetter(symbol)
                     .Append("(")
                     .AppendIndexerParametersDefinition(symbol, addCommaAtEnd: false)
                     .Append(");");
@@ -333,7 +327,7 @@ namespace LightMock.Generator
                     .Append(symbol.Parameters.Length)
                     .Append("}\")] ")
                     .Append("void ")
-                    .AppendP2FSetter(symbol, propertyTypePart)
+                    .AppendP2FSetter(symbol)
                     .Append("(")
                     .AppendIndexerParametersDefinition(symbol, addCommaAtEnd: true)
                     .Append(symbol.Type, SymbolDisplayFormats.Interface)
@@ -407,58 +401,32 @@ namespace LightMock.Generator
             return @this;
         }
 
-        public static StringBuilder AppendP2FGetter(this StringBuilder @this, IPropertySymbol symbol, string typePart)
-            => @this.AppendP2FName(symbol, typePart, Suffix.Getter);
+        public static StringBuilder AppendP2FGetter(this StringBuilder @this, IPropertySymbol symbol)
+            => @this.AppendP2FName(symbol, Suffix.Getter, ReplaceDotWithUnderline);
 
-        public static StringBuilder AppendP2FSetter(this StringBuilder @this, IPropertySymbol symbol, string typePart)
-            => @this.AppendP2FName(symbol, typePart, Suffix.Setter);
+        public static StringBuilder AppendP2FSetter(this StringBuilder @this, IPropertySymbol symbol)
+            => @this.AppendP2FName(symbol, Suffix.Setter, ReplaceDotWithUnderline);
 
-        static StringBuilder AppendP2FName(
+        public static StringBuilder AppendP2FName(
             this StringBuilder @this,
             IPropertySymbol symbol,
-            string typePart,
-            string suffix)
+            string suffix,
+            Func<SymbolDisplayPart, SymbolDisplayPart> mutator)
         {
             return symbol.IsIndexer
-                ? @this.Append(typePart)
+                ? @this.Append(symbol.ContainingType, SymbolDisplayFormats.Namespace, mutator)
                     .Append(Suffix.Indexer)
                     .Append(suffix)
                 : @this.Append(symbol.Name)
                     .Append('_')
-                    .Append(typePart)
+                    .Append(symbol.ContainingType, SymbolDisplayFormats.Namespace, mutator)
                     .Append(suffix);
         }
 
-        public static StringBuilder AppendP2FSetter(this StringBuilder @this, IPropertySymbol symbol)
-        {
-            SymbolDisplayPart Mutator(SymbolDisplayPart part)
-            {
-                switch (part.Kind)
-                {
-                    case SymbolDisplayPartKind.Punctuation when part.ToString() == ".":
-                        return new SymbolDisplayPart(part.Kind, part.Symbol, "_");
-                    case SymbolDisplayPartKind.InterfaceName when part.ToString().StartsWith(Prefix.ProtectedToPublicInterface):
-                        return new SymbolDisplayPart(part.Kind, part.Symbol,
-                            part.ToString().Replace(Prefix.ProtectedToPublicInterface, ""));
-                }
-
-                return part;
-            }
-
-            return symbol.IsIndexer
-                ? @this
-                    .Append(symbol.ContainingType, SymbolDisplayFormats.Namespace, Mutator)
-                    .Append(Suffix.Indexer)
-                    .Append(Suffix.Setter)
-                : @this
-                    .Append(symbol.Name)
-                    .Append('_')
-                    .Append(symbol.ContainingType, SymbolDisplayFormats.Namespace, Mutator)
-                    .Append(Suffix.Setter);
-        }
-
-        static string GetPropertyTypePart(IPropertySymbol symbol)
-            => symbol.ContainingType.ToDisplayString(SymbolDisplayFormats.Namespace).Replace(".", "_");
+        static SymbolDisplayPart ReplaceDotWithUnderline(SymbolDisplayPart p)
+            => p.Kind == SymbolDisplayPartKind.Punctuation && p.ToString() == "."
+            ? new SymbolDisplayPart(p.Kind, p.Symbol, "_")
+            : p;
 
         public static StringBuilder AppendMethodDeclaration(this StringBuilder @this,
             SymbolDisplayFormat format,

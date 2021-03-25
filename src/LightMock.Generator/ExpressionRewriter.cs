@@ -126,7 +126,7 @@ namespace LightMock.Generator
                             .Append("=>")
                             .Append(parameterText)
                             .Append(".")
-                            .AppendP2FSetter(leftPart)
+                            .AppendP2FName(leftPart, Suffix.Setter, Mutator)
                             .Append("(")
                             .Append(assignment.Right.ToString())
                             .AppendLine("));");
@@ -140,6 +140,21 @@ namespace LightMock.Generator
                 }
             }
         }
+
+        SymbolDisplayPart Mutator(SymbolDisplayPart part)
+        {
+            switch (part.Kind)
+            {
+                case SymbolDisplayPartKind.Punctuation when part.ToString() == ".":
+                    return new SymbolDisplayPart(part.Kind, part.Symbol, "_");
+                case SymbolDisplayPartKind.InterfaceName when part.ToString().StartsWith(Prefix.ProtectedToPublicInterface):
+                    return new SymbolDisplayPart(part.Kind, part.Symbol,
+                        part.ToString().Replace(Prefix.ProtectedToPublicInterface, ""));
+            }
+
+            return part;
+        }
+
 
         public IEnumerable<Diagnostic> GetErrors() => errors;
 
