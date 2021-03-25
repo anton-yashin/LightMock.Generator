@@ -33,8 +33,8 @@ namespace LightMock.Generator
     {
         private readonly string propertyToFuncInterfaceName;
 
-        public ArrangeOnAnyImplementationVisitor(SymbolDisplayFormat definitionFormat, string propertyToFuncInterfaceName, string? p2pInterfaceName)
-            : base(definitionFormat, p2pInterfaceName)
+        public ArrangeOnAnyImplementationVisitor(SymbolDisplayFormat definitionFormat, string propertyToFuncInterfaceName, string? className)
+            : base(definitionFormat, className)
         {
             this.propertyToFuncInterfaceName = propertyToFuncInterfaceName;
         }

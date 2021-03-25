@@ -35,12 +35,12 @@ namespace LightMock.Generator
     abstract class ImplementationVisitor : SymbolVisitor<string>
     {
         protected readonly SymbolDisplayFormat definitionFormat;
-        private readonly string? p2pInterfaceName;
+        private readonly string? implementationName;
 
-        public ImplementationVisitor(SymbolDisplayFormat definitionFormat, string? p2pInterfaceName)
+        public ImplementationVisitor(SymbolDisplayFormat definitionFormat, string? implementationName)
         {
             this.definitionFormat = definitionFormat;
-            this.p2pInterfaceName = p2pInterfaceName;
+            this.implementationName = implementationName;
         }
 
         protected static string GetObsoleteAndOrOverrideChunkFor(ISymbol symbol)
@@ -53,7 +53,7 @@ namespace LightMock.Generator
                 return null;
             var result = new StringBuilder()
                 .Append(GetObsoleteAndOrOverrideChunkFor(symbol))
-                .AppendMethodDeclaration(symbol.ToDisplayString(definitionFormat), symbol);
+                .AppendMethodDeclaration(definitionFormat, symbol);
             result.Append("{");
             if (symbol.ReturnsVoid == false)
             {
@@ -62,13 +62,12 @@ namespace LightMock.Generator
                     .Append(");");
             }
             result.Append("}");
-            if (p2pInterfaceName != null && symbol.IsInterfaceRequired())
+            if (implementationName != null && symbol.IsInterfaceRequired())
             {
-                var parts = symbol.ToDisplayParts(SymbolDisplayFormats.Interface).Select(p
-                    => p.Kind == SymbolDisplayPartKind.ClassName && p.ToString().Contains(symbol.ContainingType.Name)
-                    ? new SymbolDisplayPart(SymbolDisplayPartKind.ClassName, symbol, p2pInterfaceName.Split('<').First())
-                    : p).ToImmutableArray();
-                result.AppendMethodDeclaration(parts.ToDisplayString(), symbol).Append('{');
+                result.AppendMethodDeclaration(SymbolDisplayFormats.Interface, symbol, p
+                    => p.Kind == SymbolDisplayPartKind.ClassName && p.ToString() == symbol.ContainingType.Name
+                    ? new SymbolDisplayPart(SymbolDisplayPartKind.ClassName, symbol, Prefix.ProtectedToPublicInterface + implementationName)
+                    : p).Append('{');
                 if (symbol.ReturnsVoid == false)
                 {
                     result.Append(" return default(")
@@ -89,11 +88,8 @@ namespace LightMock.Generator
                 .Append(symbol, definitionFormat);
             appedGetterAndSetter(result, symbol);
 
-            if (p2pInterfaceName != null && symbol.IsInterfaceRequired())
+            if (implementationName != null && symbol.IsInterfaceRequired())
             {
-                var name = p2pInterfaceName.Split('<').First();
-                if (p2pInterfaceName == "IP2P_AAbstractClassWithMultipleNamespaces")
-                { }
                 result.Append(symbol, SymbolDisplayFormats.Interface, Mutator);
                 appedGetterAndSetter(result, symbol);
 
@@ -103,8 +99,8 @@ namespace LightMock.Generator
                     var xs = symbol;
                     switch (part.Kind)
                     {
-                        case SymbolDisplayPartKind.ClassName when name.Contains(s):
-                            return new SymbolDisplayPart(part.Kind, part.Symbol, name);
+                        case SymbolDisplayPartKind.ClassName when implementationName == s:
+                            return new SymbolDisplayPart(part.Kind, part.Symbol, Prefix.ProtectedToPublicInterface + implementationName);
                     }
                     return part;
                 }

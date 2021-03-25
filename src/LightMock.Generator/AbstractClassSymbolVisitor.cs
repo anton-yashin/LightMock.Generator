@@ -33,13 +33,11 @@ namespace LightMock.Generator
 {
     sealed class AbstractClassSymbolVisitor : SymbolVisitor<string>
     {
-        readonly string interfaceNamespace;
-        readonly string interfaceName;
+        readonly string className;
 
-        public AbstractClassSymbolVisitor(string interfaceNamespace, string interfaceName)
+        public AbstractClassSymbolVisitor(string className)
         {
-            this.interfaceNamespace = interfaceNamespace;
-            this.interfaceName = interfaceName;
+            this.className = className;
         }
 
         public override string? VisitMethod(IMethodSymbol symbol)
@@ -54,26 +52,23 @@ namespace LightMock.Generator
                 AddInterfaceImplementation(symbol, result);
 
             result.Append(symbol.GetObsoleteOrOverrideChunk())
-                .AppendMethodDeclaration(symbol.ToDisplayString(SymbolDisplayFormats.AbstractClass), symbol)
+                .AppendMethodDeclaration(SymbolDisplayFormats.AbstractClass, symbol)
                 .AppendMethodBody(isInterfaceRequired ? VariableNames.ProtectedContext : VariableNames.Context, symbol);
             return result.ToString();
         }
 
         void AddInterfaceImplementation(IMethodSymbol symbol, StringBuilder result)
         {
-            result.AppendMethodDeclaration(CombineWithInterface(symbol), symbol)
+            result.AppendMethodDeclaration(SymbolDisplayFormats.Interface, symbol, p => ToP2P(p, symbol))
                 .AppendMethodBody(VariableNames.ProtectedContext, symbol);
         }
 
-        private string CombineWithInterface(ISymbol symbol)
+        SymbolDisplayPart ToP2P(SymbolDisplayPart p, ISymbol symbol)
         {
-            var @namespace = symbol.ContainingNamespace.ToDisplayString(SymbolDisplayFormats.Namespace);
-            var ctn = symbol.ContainingType.Name;
-            return symbol
-                .ToDisplayString(SymbolDisplayFormats.Interface)
-                .Replace(@namespace + "." + ctn, interfaceNamespace + "." + interfaceName);
+            return p.Kind == SymbolDisplayPartKind.ClassName && p.ToString() == symbol.ContainingType.Name
+                ? new SymbolDisplayPart(p.Kind, p.Symbol, Prefix.ProtectedToPublicInterface + className)
+                : p;
         }
-
 
         public override string? VisitProperty(IPropertySymbol symbol)
         {
@@ -94,7 +89,7 @@ namespace LightMock.Generator
 
         void AddInterfaceImplementation(IPropertySymbol symbol, StringBuilder result)
         {
-            result.Append(CombineWithInterface(symbol))
+            result.Append(symbol, SymbolDisplayFormats.Interface, p => ToP2P(p, symbol))
                 .AppendProtectedInterfaceGetterAndSetter(VariableNames.ProtectedContext, symbol);
         }
 

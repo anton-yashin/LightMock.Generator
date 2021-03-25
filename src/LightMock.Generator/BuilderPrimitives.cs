@@ -27,6 +27,7 @@
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 
@@ -459,38 +460,43 @@ namespace LightMock.Generator
         static string GetPropertyTypePart(IPropertySymbol symbol)
             => symbol.ContainingType.ToDisplayString(SymbolDisplayFormats.Namespace).Replace(".", "_");
 
-        static readonly string[] whereSeparator = new string[] { "where" };
+        public static StringBuilder AppendMethodDeclaration(this StringBuilder @this,
+            SymbolDisplayFormat format,
+            IMethodSymbol symbol)
+        {
+            return @this.AppendMethodDeclaration(format, symbol, p => p);
+        }
 
-        public static StringBuilder AppendMethodDeclaration(this StringBuilder @this, string declaration, IMethodSymbol symbol)
+        public static StringBuilder AppendMethodDeclaration(this StringBuilder @this,
+            SymbolDisplayFormat format,
+            IMethodSymbol symbol,
+            Func<SymbolDisplayPart, SymbolDisplayPart> mutator)
         {
             var allowedTypeParameters = symbol.TypeParameters.Where(
                 i => i.HasReferenceTypeConstraint || i.HasValueTypeConstraint)
                 .ToList();
             int i = 0;
-            foreach (var part in declaration.Split(whereSeparator, StringSplitOptions.RemoveEmptyEntries))
+            var parts = symbol.ToDisplayParts(format);
+            foreach (var span in parts.Split(sdp => sdp.ToString() == "where"))
             {
                 if (i++ == 0)
                 {
-                    @this.Append(part);
+                    span.Aggregate(@this, (sb, p) => sb.Append(mutator(p).ToString()));
                 }
                 else
                 {
-                    foreach (var atp in allowedTypeParameters)
+                    var tpn = span.First(s => s.Kind == SymbolDisplayPartKind.TypeParameterName).ToString();
+                    var param = allowedTypeParameters.FirstOrDefault(p => p.Name == tpn);
+                    if (param != null)
                     {
-                        if (part.StartsWith(" " + atp.Name + " : "))
-                        {
-                            @this.Append("where ")
-                                .Append(atp.Name);
-                            if (atp.HasReferenceTypeConstraint)
-                                @this.Append(" : class ");
-                            if (atp.HasValueTypeConstraint)
-                                @this.Append(" : struct ");
-                            break;
-                        }
+                        @this.Append("where ").Append(param.Name);
+                        if (param.HasReferenceTypeConstraint)
+                            @this.Append(" : class ");
+                        if (param.HasValueTypeConstraint)
+                            @this.Append(" : struct ");
                     }
                 }
             }
-
             return @this;
         }
 
@@ -636,7 +642,7 @@ namespace LightMock.Generator
         public static StringBuilder Append(this StringBuilder @this, ISymbol symbol, SymbolDisplayFormat format, Func<SymbolDisplayPart, SymbolDisplayPart> mutator)
         {
             return symbol.ToDisplayParts(format)
-                .Aggregate<SymbolDisplayPart, StringBuilder>(@this, (sb, p) => sb.Append(mutator(p)));
+                .Aggregate<SymbolDisplayPart, StringBuilder>(@this, (sb, p) => sb.Append(mutator(p).ToString()));
         }
 
         public static StringBuilder Append(
@@ -645,14 +651,13 @@ namespace LightMock.Generator
             SymbolDisplayFormat format,
             Func<SymbolDisplayPart, int, SymbolDisplayPart> mutator)
         {
-            return symbol.ToDisplayParts(format).Select(mutator).Aggregate(@this, (sb, p) => sb.Append(p));
+            return symbol.ToDisplayParts(format).Select(mutator).Aggregate(@this, (sb, p) => sb.Append(p.ToString()));
         }
 
         public static StringBuilder Append(this StringBuilder @this, ISymbol symbol, SymbolDisplayFormat format)
         {
             return symbol.ToDisplayParts(format)
-                .Aggregate<SymbolDisplayPart, StringBuilder>(@this, (sb, p) => sb.Append(p));
+                .Aggregate<SymbolDisplayPart, StringBuilder>(@this, (sb, p) => sb.Append(p.ToString()));
         }
-
     }
 }

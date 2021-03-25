@@ -41,7 +41,7 @@ namespace LightMock.Generator
                 return null;
 
             var result = new StringBuilder()
-                .AppendMethodDeclaration(symbol.ToDisplayString(SymbolDisplayFormats.Interface), symbol)
+                .AppendMethodDeclaration(SymbolDisplayFormats.Interface, symbol)
                 .AppendMethodBody(VariableNames.Context, symbol,
                 symbol.ContainingType.ToDisplayString(SymbolDisplayFormats.WithTypeParams));
             return result.ToString();

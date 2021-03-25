@@ -31,8 +31,8 @@ namespace LightMock.Generator
 {
     sealed class AssertIsAnyImplementationVisitor : ImplementationVisitor
     {
-        public AssertIsAnyImplementationVisitor(SymbolDisplayFormat definitionFormat, string? p2pInterfaceName)
-            : base(definitionFormat, p2pInterfaceName)
+        public AssertIsAnyImplementationVisitor(SymbolDisplayFormat definitionFormat, string? className)
+            : base(definitionFormat, className)
         { }
 
         public override string? VisitProperty(IPropertySymbol symbol)
