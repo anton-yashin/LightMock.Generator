@@ -468,17 +468,14 @@ namespace LightMock.Generator
             return @this;
         }
 
-        public static StringBuilder AppendMethodBody(this StringBuilder @this, string contextName, IMethodSymbol symbol, string invocationType)
-            => AppendMethodBody(@this, contextName, symbol,
-                sb => sb.Append(".Invoke(f => ((")
-                .Append(invocationType)
-                .Append(")f).")
-                );
-
         public static StringBuilder AppendMethodBody(this StringBuilder @this, string contextName, IMethodSymbol symbol)
-            => AppendMethodBody(@this, contextName, symbol, sb => sb.Append(".Invoke(f => f."));
+            => AppendMethodBody(@this, contextName, symbol, sb => sb);
 
-        private static StringBuilder AppendMethodBody(StringBuilder @this, string contextName, IMethodSymbol symbol, Func<StringBuilder, StringBuilder> appendInvocation)
+        public static StringBuilder AppendMethodBody(
+            this StringBuilder @this,
+            string contextName,
+            IMethodSymbol symbol,
+            Func<StringBuilder, StringBuilder> appendTypeCast)
         {
             if (IsHaveRefStructParameters(symbol))
                 return @this.AppendRefStructException();
@@ -489,8 +486,9 @@ namespace LightMock.Generator
                 @this.Append("return ");
 
             @this.Append("global::LightMock.Generator.Default.Get(() =>")
-                .Append(contextName);
-            appendInvocation(@this).Append(symbol.Name);
+                .Append(contextName)
+                .Append(".Invoke(f => (");
+            appendTypeCast(@this).Append("f).").Append(symbol.Name);
             if (symbol.IsGenericMethod)
             {
                 @this.Append("<")
