@@ -95,20 +95,13 @@ namespace LightMock.Generator
 
                 SymbolDisplayPart Mutator(SymbolDisplayPart part)
                 {
-                    var s = part.ToString();
-                    var xs = symbol;
-                    switch (part.Kind)
-                    {
-                        case SymbolDisplayPartKind.ClassName when implementationName == s:
-                            return new SymbolDisplayPart(part.Kind, part.Symbol, Prefix.ProtectedToPublicInterface + implementationName);
-                    }
+                    if (part.Kind == SymbolDisplayPartKind.ClassName && implementationName == part.ToString())
+                        return new SymbolDisplayPart(part.Kind, part.Symbol, Prefix.ProtectedToPublicInterface + implementationName);
                     return part;
                 }
             }
 
             return result.ToString();
-
-
         }
 
         public override string? VisitNamedType(INamedTypeSymbol symbol)
