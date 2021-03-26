@@ -501,6 +501,29 @@ namespace LightMock.Generator
             => @this.Append("{ throw new global::System.InvalidProgramException(\""
                 + ExceptionMessages.OnRefStructMethod + "\");}");
 
+        public static StringBuilder AppendEventDefinition(this StringBuilder @this, IEventSymbol symbol)
+        {
+            if (symbol.AddMethod != null)
+            {
+                @this.Append("void ")
+                    .Append(symbol.Name)
+                    .Append(Suffix.Add)
+                    .Append("(")
+                    .Append(symbol.Type, SymbolDisplayFormats.Interface)
+                    .Append(" prm);");
+            }
+            if (symbol.RemoveMethod != null)
+            {
+                @this.Append("void ")
+                    .Append(symbol.Name)
+                    .Append(Suffix.Remove)
+                    .Append("(")
+                    .Append(symbol.Type, SymbolDisplayFormats.Interface)
+                    .Append(" prm);");
+            }
+            return @this;
+        }
+
         public static StringBuilder AppendEventAdd(this StringBuilder @this, string contextName, IEventSymbol symbol, string methodName)
             => @this.Append("add{")
             .Append(contextName)

@@ -37,31 +37,6 @@ namespace LightMock.Generator
             => new StringBuilder().AppendPropertyDefinition(symbol).ToString();
 
         public override string? VisitEvent(IEventSymbol symbol)
-        {
-            var result = new StringBuilder();
-            if (symbol.AddMethod != null)
-            {
-                result
-                    .Append("void ")
-                    .Append(symbol.Name)
-                    .Append(Suffix.Add)
-                    .Append("(")
-                    .Append(symbol.Type, SymbolDisplayFormats.Interface)
-                    .Append(" prm);");
-            }
-            if (symbol.RemoveMethod != null)
-            {
-
-                result
-                    .Append("void ")
-                    .Append(symbol.Name)
-                    .Append(Suffix.Remove)
-                    .Append("(")
-                    .Append(symbol.Type, SymbolDisplayFormats.Interface)
-                    .Append(" prm);");
-            }
-
-            return result.ToString();
-        }
+            => new StringBuilder().AppendEventDefinition(symbol).ToString();
     }
 }
