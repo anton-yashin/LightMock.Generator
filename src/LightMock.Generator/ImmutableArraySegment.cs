@@ -37,6 +37,20 @@ namespace LightMock.Generator
         private readonly int start;
         private readonly int length;
 
+        public static readonly ImmutableArraySegment<T> Empty = new ImmutableArraySegment<T>();
+
+        public ImmutableArraySegment()
+            : this(ImmutableArray<T>.Empty, 0, 0)
+        { }
+
+        public ImmutableArraySegment(ImmutableArray<T> underlying)
+            : this(underlying, 0, underlying.Length)
+        { }
+
+        public ImmutableArraySegment(ImmutableArray<T> underlying, int start)
+            : this(underlying, start, underlying.Length - start)
+        { }
+
         public ImmutableArraySegment(ImmutableArray<T> underlying, int start, int length)
         {
             if (start < 0 || underlying.Length < start)

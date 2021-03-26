@@ -24,9 +24,12 @@
 *******************************************************************************
     https://github.com/anton-yashin/
 *******************************************************************************/
+using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Linq;
+using System.Text;
 
 namespace LightMock.Generator
 {
@@ -44,6 +47,29 @@ namespace LightMock.Generator
                 }
             }
             yield return new ImmutableArraySegment<T>(@this, start: previous, length: @this.Length - previous);
+        }
+
+        public static int IndexOf<T>(this IReadOnlyList<T> @this, Func<T, bool> predicate)
+        {
+            for (int i = 0; i < @this.Count; i++)
+                if (predicate(@this[i]))
+                    return i;
+            return -1;
+        }
+
+        public static string ToDisplayString(this ImmutableArraySegment<SymbolDisplayPart> @this)
+        {
+            switch (@this.Count)
+            {
+                case 0:
+                    return "";
+                case 1:
+                    return @this[0].ToString();
+            }
+            var sb = new StringBuilder();
+            foreach (var i in @this)
+                sb.Append(i.ToString());
+            return sb.ToString();
         }
     }
 }
