@@ -26,19 +26,50 @@
 *******************************************************************************/
 using Microsoft.CodeAnalysis;
 using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
+using System.Text;
 
 namespace LightMock.Generator
 {
-    sealed class AssertIsAnyImplementationVisitor : ImplementationVisitor
+    static class ImmutableArrayExtensions
     {
-        public AssertIsAnyImplementationVisitor(SymbolDisplayFormat definitionFormat, string? className)
-            : base(definitionFormat, className)
-        { }
+        public static IEnumerable<ImmutableArraySegment<T>> Split<T>(this ImmutableArray<T> @this, Func<T, bool> predicate)
+        {
+            int previous = 0;
+            for (int i = 0; i < @this.Length; i++)
+            {
+                if (predicate(@this[i]))
+                {
+                    yield return new ImmutableArraySegment<T>(@this, start: previous, length: i - previous);
+                    previous = i;
+                }
+            }
+            yield return new ImmutableArraySegment<T>(@this, start: previous, length: @this.Length - previous);
+        }
 
-        public override string? VisitProperty(IPropertySymbol symbol)
-            => VisitProperty(symbol, (sb, sym) => sb.AppendAssertIsAnyGetterAndSetter(symbol));
+        public static int IndexOf<T>(this IReadOnlyList<T> @this, Func<T, bool> predicate)
+        {
+            for (int i = 0; i < @this.Count; i++)
+                if (predicate(@this[i]))
+                    return i;
+            return -1;
+        }
 
-        public override string? VisitEvent(IEventSymbol symbol)
-            => VisitEvent(symbol, (sb, sym) => sb.AppendEventAddRemove(VariableNames.Context, sym, "Assert"));
+        public static string ToDisplayString(this ImmutableArraySegment<SymbolDisplayPart> @this)
+        {
+            switch (@this.Count)
+            {
+                case 0:
+                    return "";
+                case 1:
+                    return @this[0].ToString();
+            }
+            var sb = new StringBuilder();
+            foreach (var i in @this)
+                sb.Append(i.ToString());
+            return sb.ToString();
+        }
     }
 }

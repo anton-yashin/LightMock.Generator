@@ -27,6 +27,7 @@
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 
@@ -85,38 +86,28 @@ namespace LightMock.Generator
             string contextName,
             IPropertySymbol symbol)
         {
-            return @this.AppendMockGetterAndSetter(contextName, symbol, sb => sb.Append(".Invoke(f => f"));
+            return @this.AppendMockGetterAndSetter(contextName, symbol, sb => sb);
         }
 
         public static StringBuilder AppendMockGetterAndSetter(
             this StringBuilder @this,
             string contextName,
             IPropertySymbol symbol,
-            string invocationType)
-        {
-            return @this.AppendMockGetterAndSetter(contextName, symbol,
-                sb => sb.Append(".Invoke(f => ((").Append(invocationType).Append(")f)"));
-        }
-
-        static StringBuilder AppendMockGetterAndSetter(
-            this StringBuilder @this,
-            string contextName,
-            IPropertySymbol symbol,
             Func<StringBuilder, StringBuilder> appendGetInvocation)
         {
-            var typePart = GetPropertyTypePart(symbol);
             @this.Append(" {");
             if (symbol.GetMethod != null)
             {
                 @this.Append(" get { ")
                     .Append(VariableNames.PropertiesContext)
                     .Append(".Invoke(f => f.")
-                    .AppendP2FGetter(symbol, typePart)
+                    .AppendP2FGetter(symbol)
                     .Append("(")
                     .AppendIndexerParametersInvocation(symbol, addCommaAtEnd: false)
                     .Append(")); return global::LightMock.Generator.Default.Get(() =>")
-                    .Append(contextName);
-                appendGetInvocation(@this);
+                    .Append(contextName)
+                    .Append(".Invoke(f => (");
+                appendGetInvocation(@this).Append("f)");
                 if (symbol.IsIndexer)
                 {
                     @this.Append('[')
@@ -135,7 +126,7 @@ namespace LightMock.Generator
                 @this.Append("set { ")
                     .Append(VariableNames.PropertiesContext)
                     .Append(".Invoke(f => f.")
-                    .AppendP2FSetter(symbol, typePart)
+                    .AppendP2FSetter(symbol)
                     .Append("(")
                     .AppendIndexerParametersInvocation(symbol, addCommaAtEnd: true)
                     .Append("value)); ");
@@ -165,7 +156,6 @@ namespace LightMock.Generator
             this StringBuilder @this,
             IPropertySymbol symbol)
         {
-            var typePart = GetPropertyTypePart(symbol);
             @this.Append("{");
 
             if (symbol.GetMethod != null)
@@ -173,13 +163,13 @@ namespace LightMock.Generator
                 @this.Append("get { ")
                     .Append(VariableNames.Context)
                     .Append(".Assert(f => f.")
-                    .AppendP2FGetter(symbol, typePart)
+                    .AppendP2FGetter(symbol)
                     .Append("(")
                     .AppendIndexerParametersInvocation(symbol, addCommaAtEnd: false)
                     .Append("), ")
                     .Append(VariableNames.Invoked)
                     .Append("); return default(")
-                    .Append(symbol.Type.ToDisplayString(SymbolDisplayFormats.WithTypeParams))
+                    .Append(symbol.Type, SymbolDisplayFormats.WithTypeParams)
                     .Append(");}");
             }
             if (symbol.SetMethod != null)
@@ -187,7 +177,7 @@ namespace LightMock.Generator
                 @this.Append("set {")
                     .Append(VariableNames.Context)
                     .Append(".Assert(f => f.")
-                    .AppendP2FSetter(symbol, typePart)
+                    .AppendP2FSetter(symbol)
                     .Append("(")
                     .AppendIndexerParametersInvocation(symbol, addCommaAtEnd: true)
                     .Append("value), ")
@@ -203,7 +193,6 @@ namespace LightMock.Generator
             this StringBuilder @this,
             IPropertySymbol symbol)
         {
-            var typePart = GetPropertyTypePart(symbol);
             @this.Append("{");
 
             if (symbol.GetMethod != null)
@@ -211,13 +200,13 @@ namespace LightMock.Generator
                 @this.Append("get { ")
                     .Append(VariableNames.Context)
                     .Append(".Assert(f => f.")
-                    .AppendP2FGetter(symbol, typePart)
+                    .AppendP2FGetter(symbol)
                     .Append("(")
                     .AppendIndexerParametersIsAnyInvocation(symbol, addCommaAtEnd: false)
                     .Append("), ")
                     .Append(VariableNames.Invoked)
                     .Append("); return default(")
-                    .Append(symbol.Type.ToDisplayString(SymbolDisplayFormats.WithTypeParams))
+                    .Append(symbol.Type, SymbolDisplayFormats.WithTypeParams)
                     .Append(");}");
             }
             if (symbol.SetMethod != null)
@@ -225,11 +214,11 @@ namespace LightMock.Generator
                 @this.Append("set {")
                     .Append(VariableNames.Context)
                     .Append(".Assert(f => f.")
-                    .AppendP2FSetter(symbol, typePart)
+                    .AppendP2FSetter(symbol)
                     .Append("(")
                     .AppendIndexerParametersIsAnyInvocation(symbol, addCommaAtEnd: true)
                     .Append("The<")
-                    .Append(symbol.Type.ToDisplayString(SymbolDisplayFormats.WithTypeParams))
+                    .Append(symbol.Type, SymbolDisplayFormats.WithTypeParams)
                     .Append(">.IsAnyValue), ")
                     .Append(VariableNames.Invoked)
                     .Append("); }");
@@ -244,13 +233,12 @@ namespace LightMock.Generator
             IPropertySymbol symbol,
             string propertyToFuncInterfaceName)
         {
-            var typePart = GetPropertyTypePart(symbol);
             @this.Append("{");
 
             if (symbol.GetMethod != null)
             {
                 @this.Append("get { return default(")
-                    .Append(symbol.Type.ToDisplayString(SymbolDisplayFormats.WithTypeParams))
+                    .Append(symbol.Type, SymbolDisplayFormats.WithTypeParams)
                     .Append("); }");
             }
             if (symbol.SetMethod != null)
@@ -258,11 +246,11 @@ namespace LightMock.Generator
                 @this.Append("set { request.SetResult(global::LightMock.Generator.ExpressionUtils.Get<")
                     .Append(propertyToFuncInterfaceName)
                     .Append(">(f => f.")
-                    .AppendP2FSetter(symbol, typePart)
+                    .AppendP2FSetter(symbol)
                     .Append("(")
                     .AppendIndexerParametersIsAnyInvocation(symbol, addCommaAtEnd: true)
                     .Append("The<")
-                    .Append(symbol.Type.ToDisplayString(SymbolDisplayFormats.WithTypeParams))
+                    .Append(symbol.Type, SymbolDisplayFormats.WithTypeParams)
                     .Append(">.IsAnyValue))); }");
             }
 
@@ -275,13 +263,12 @@ namespace LightMock.Generator
             IPropertySymbol symbol,
             string propertyToFuncInterfaceName)
         {
-            var typePart = GetPropertyTypePart(symbol);
             @this.Append("{");
 
             if (symbol.GetMethod != null)
             {
                 @this.Append("get { return default(")
-                    .Append(symbol.Type.ToDisplayString(SymbolDisplayFormats.WithTypeParams))
+                    .Append(symbol.Type, SymbolDisplayFormats.WithTypeParams)
                     .Append("); }");
             }
             if (symbol.SetMethod != null)
@@ -289,7 +276,7 @@ namespace LightMock.Generator
                 @this.Append("set { request.SetResult(global::LightMock.Generator.ExpressionUtils.Get<")
                     .Append(propertyToFuncInterfaceName)
                     .Append(">(f => f.")
-                    .AppendP2FSetter(symbol, typePart)
+                    .AppendP2FSetter(symbol)
                     .Append("(")
                     .AppendIndexerParametersInvocation(symbol, addCommaAtEnd: true)
                     .Append("value))); }");
@@ -301,7 +288,6 @@ namespace LightMock.Generator
 
         public static StringBuilder AppendPropertyDefinition(this StringBuilder @this, IPropertySymbol symbol)
         {
-            var propertyTypePart = GetPropertyTypePart(symbol);
             var value = symbol.IsIndexer ? "" : ("." + symbol.Name);
 
             if (symbol.GetMethod != null)
@@ -313,9 +299,9 @@ namespace LightMock.Generator
                     .Append(value)
                     .AppendIndexerParametersFormat(symbol)
                     .Append("\")] ")
-                    .AppendDisplayFormat(symbol.Type, SymbolDisplayFormats.Interface)
+                    .Append(symbol.Type, SymbolDisplayFormats.Interface)
                     .Append(' ')
-                    .AppendP2FGetter(symbol, propertyTypePart)
+                    .AppendP2FGetter(symbol)
                     .Append("(")
                     .AppendIndexerParametersDefinition(symbol, addCommaAtEnd: false)
                     .Append(");");
@@ -332,10 +318,10 @@ namespace LightMock.Generator
                     .Append(symbol.Parameters.Length)
                     .Append("}\")] ")
                     .Append("void ")
-                    .AppendP2FSetter(symbol, propertyTypePart)
+                    .AppendP2FSetter(symbol)
                     .Append("(")
                     .AppendIndexerParametersDefinition(symbol, addCommaAtEnd: true)
-                    .AppendDisplayFormat(symbol.Type, SymbolDisplayFormats.Interface)
+                    .Append(symbol.Type, SymbolDisplayFormats.Interface)
                     .Append(" prm);");
             }
             return @this;
@@ -345,12 +331,12 @@ namespace LightMock.Generator
         {
             if (symbol.Parameters.Length > 0)
             {
-                @this.Append(symbol.Parameters[0].Type.ToDisplayString(SymbolDisplayFormats.Interface))
+                @this.Append(symbol.Parameters[0].Type, SymbolDisplayFormats.Interface)
                     .Append(" p0");
                 for (int i = 1; i < symbol.Parameters.Length; i++)
                 {
                     @this.Append(", ")
-                        .Append(symbol.Parameters[i].Type.ToDisplayString(SymbolDisplayFormats.Interface))
+                        .Append(symbol.Parameters[i].Type, SymbolDisplayFormats.Interface)
                         .Append(" p").Append(i);
                 }
                 if (addCommaAtEnd)
@@ -363,10 +349,10 @@ namespace LightMock.Generator
         {
             if (symbol.Parameters.Length > 0)
             {
-                @this.Append('[').AppendDisplayFormat(symbol.Parameters[0].Type, SymbolDisplayFormats.Interface).Append(" {0}");
+                @this.Append('[').Append(symbol.Parameters[0].Type, SymbolDisplayFormats.Interface).Append(" {0}");
                 for (int i = 1; i < symbol.Parameters.Length; i++)
                 {
-                    @this.Append(", ").AppendDisplayFormat(symbol.Parameters[i].Type, SymbolDisplayFormats.Interface)
+                    @this.Append(", ").Append(symbol.Parameters[i].Type, SymbolDisplayFormats.Interface)
                         .Append(" {").Append(i).Append('}');
                 }
                 @this.Append(']');
@@ -392,12 +378,12 @@ namespace LightMock.Generator
             if (symbol.Parameters.Length > 0)
             {
                 @this.Append("The<")
-                    .Append(symbol.Parameters[0].Type.ToDisplayString(SymbolDisplayFormats.Interface))
+                    .Append(symbol.Parameters[0].Type, SymbolDisplayFormats.Interface)
                     .Append(">.IsAnyValue");
                 for (int i = 1; i < symbol.Parameters.Length; i++)
                 {
                     @this.Append(", The<")
-                        .Append(symbol.Parameters[i].Type.ToDisplayString(SymbolDisplayFormats.Interface))
+                        .Append(symbol.Parameters[i].Type, SymbolDisplayFormats.Interface)
                         .Append(">.IsAnyValue");
                 }
                 if (addCommaAtEnd)
@@ -406,105 +392,81 @@ namespace LightMock.Generator
             return @this;
         }
 
-        public static StringBuilder AppendP2FGetter(this StringBuilder @this, IPropertySymbol symbol, string typePart)
-            => @this.AppendP2FName(symbol, typePart, Suffix.Getter);
+        public static StringBuilder AppendP2FGetter(this StringBuilder @this, IPropertySymbol symbol)
+            => @this.AppendP2FName(symbol, Suffix.Getter, ReplaceDotWithUnderline);
 
-        public static StringBuilder AppendP2FSetter(this StringBuilder @this, IPropertySymbol symbol, string typePart)
-            => @this.AppendP2FName(symbol, typePart, Suffix.Setter);
+        public static StringBuilder AppendP2FSetter(this StringBuilder @this, IPropertySymbol symbol)
+            => @this.AppendP2FName(symbol, Suffix.Setter, ReplaceDotWithUnderline);
 
-        static StringBuilder AppendP2FName(
+        public static StringBuilder AppendP2FName(
             this StringBuilder @this,
             IPropertySymbol symbol,
-            string typePart,
-            string suffix)
+            string suffix,
+            Func<SymbolDisplayPart, SymbolDisplayPart> mutator)
         {
             return symbol.IsIndexer
-                ? @this.Append(typePart)
+                ? @this.Append(symbol.ContainingType, SymbolDisplayFormats.Namespace, mutator)
                     .Append(Suffix.Indexer)
                     .Append(suffix)
                 : @this.Append(symbol.Name)
                     .Append('_')
-                    .Append(typePart)
+                    .Append(symbol.ContainingType, SymbolDisplayFormats.Namespace, mutator)
                     .Append(suffix);
         }
 
-        public static StringBuilder AppendP2FSetter(this StringBuilder @this, IPropertySymbol symbol)
+        static SymbolDisplayPart ReplaceDotWithUnderline(SymbolDisplayPart p)
+            => p.Kind == SymbolDisplayPartKind.Punctuation && p.ToString() == "."
+            ? new SymbolDisplayPart(p.Kind, p.Symbol, "_")
+            : p;
+
+        public static StringBuilder AppendMethodDeclaration(this StringBuilder @this,
+            SymbolDisplayFormat format,
+            IMethodSymbol symbol)
         {
-            SymbolDisplayPart Mutator(SymbolDisplayPart part)
-            {
-                switch (part.Kind)
-                {
-                    case SymbolDisplayPartKind.Punctuation when part.ToString() == ".":
-                        return new SymbolDisplayPart(part.Kind, part.Symbol, "_");
-                    case SymbolDisplayPartKind.InterfaceName when part.ToString().StartsWith(Prefix.ProtectedToPublicInterface):
-                        return new SymbolDisplayPart(part.Kind, part.Symbol,
-                            part.ToString().Replace(Prefix.ProtectedToPublicInterface, ""));
-                }
-
-                return part;
-            }
-
-            return symbol.IsIndexer
-                ? @this
-                    .AppendDisplayFormat(symbol.ContainingType, SymbolDisplayFormats.Namespace, Mutator)
-                    .Append(Suffix.Indexer)
-                    .Append(Suffix.Setter)
-                : @this
-                    .Append(symbol.Name)
-                    .Append('_')
-                    .AppendDisplayFormat(symbol.ContainingType, SymbolDisplayFormats.Namespace, Mutator)
-                    .Append(Suffix.Setter);
+            return @this.AppendMethodDeclaration(format, symbol, p => p);
         }
 
-        static string GetPropertyTypePart(IPropertySymbol symbol)
-            => symbol.ContainingType.ToDisplayString(SymbolDisplayFormats.Namespace).Replace(".", "_");
-
-        static readonly string[] whereSeparator = new string[] { "where" };
-
-        public static StringBuilder AppendMethodDeclaration(this StringBuilder @this, string declaration, IMethodSymbol symbol)
+        public static StringBuilder AppendMethodDeclaration(this StringBuilder @this,
+            SymbolDisplayFormat format,
+            IMethodSymbol symbol,
+            Func<SymbolDisplayPart, SymbolDisplayPart> mutator)
         {
             var allowedTypeParameters = symbol.TypeParameters.Where(
                 i => i.HasReferenceTypeConstraint || i.HasValueTypeConstraint)
                 .ToList();
             int i = 0;
-            foreach (var part in declaration.Split(whereSeparator, StringSplitOptions.RemoveEmptyEntries))
+            var parts = symbol.ToDisplayParts(format);
+            foreach (var span in parts.Split(sdp => sdp.ToString() == "where"))
             {
                 if (i++ == 0)
                 {
-                    @this.Append(part);
+                    span.Aggregate(@this, (sb, p) => sb.Append(mutator(p).ToString()));
                 }
                 else
                 {
-                    foreach (var atp in allowedTypeParameters)
+                    var tpn = span.First(s => s.Kind == SymbolDisplayPartKind.TypeParameterName).ToString();
+                    var param = allowedTypeParameters.FirstOrDefault(p => p.Name == tpn);
+                    if (param != null)
                     {
-                        if (part.StartsWith(" " + atp.Name + " : "))
-                        {
-                            @this.Append("where ")
-                                .Append(atp.Name);
-                            if (atp.HasReferenceTypeConstraint)
-                                @this.Append(" : class ");
-                            if (atp.HasValueTypeConstraint)
-                                @this.Append(" : struct ");
-                            break;
-                        }
+                        @this.Append("where ").Append(param.Name);
+                        if (param.HasReferenceTypeConstraint)
+                            @this.Append(" : class ");
+                        if (param.HasValueTypeConstraint)
+                            @this.Append(" : struct ");
                     }
                 }
             }
-
             return @this;
         }
 
-        public static StringBuilder AppendMethodBody(this StringBuilder @this, string contextName, IMethodSymbol symbol, string invocationType)
-            => AppendMethodBody(@this, contextName, symbol,
-                sb => sb.Append(".Invoke(f => ((")
-                .Append(invocationType)
-                .Append(")f).")
-                );
-
         public static StringBuilder AppendMethodBody(this StringBuilder @this, string contextName, IMethodSymbol symbol)
-            => AppendMethodBody(@this, contextName, symbol, sb => sb.Append(".Invoke(f => f."));
+            => AppendMethodBody(@this, contextName, symbol, sb => sb);
 
-        private static StringBuilder AppendMethodBody(StringBuilder @this, string contextName, IMethodSymbol symbol, Func<StringBuilder, StringBuilder> appendInvocation)
+        public static StringBuilder AppendMethodBody(
+            this StringBuilder @this,
+            string contextName,
+            IMethodSymbol symbol,
+            Func<StringBuilder, StringBuilder> appendTypeCast)
         {
             if (IsHaveRefStructParameters(symbol))
                 return @this.AppendRefStructException();
@@ -515,8 +477,9 @@ namespace LightMock.Generator
                 @this.Append("return ");
 
             @this.Append("global::LightMock.Generator.Default.Get(() =>")
-                .Append(contextName);
-            appendInvocation(@this).Append(symbol.Name);
+                .Append(contextName)
+                .Append(".Invoke(f => (");
+            appendTypeCast(@this).Append("f).").Append(symbol.Name);
             if (symbol.IsGenericMethod)
             {
                 @this.Append("<")
@@ -538,33 +501,54 @@ namespace LightMock.Generator
             => @this.Append("{ throw new global::System.InvalidProgramException(\""
                 + ExceptionMessages.OnRefStructMethod + "\");}");
 
-        public static StringBuilder AppendEventAdd(this StringBuilder @this, string contextName, IEventSymbol symbol, string methodName)
-            => @this.Append("add{")
-            .Append(contextName)
-            .Append(".")
-            .Append(methodName)
-            .Append("(f => f.")
-            .Append(symbol.Name)
-            .Append(Suffix.Add)
-            .Append("(value));}");
-
-        public static StringBuilder AppendEventRemove(this StringBuilder @this, string contextName, IEventSymbol symbol, string methodName)
-            => @this.Append("remove{")
-            .Append(contextName)
-            .Append(".")
-            .Append(methodName)
-            .Append("(f => f.")
-            .Append(symbol.Name)
-            .Append(Suffix.Remove)
-            .Append("(value));}");
+        public static StringBuilder AppendEventDefinition(this StringBuilder @this, IEventSymbol symbol)
+        {
+            if (symbol.AddMethod != null)
+            {
+                @this.Append("void ")
+                    .Append(symbol.Name)
+                    .Append(Suffix.Add)
+                    .Append("(")
+                    .Append(symbol.Type, SymbolDisplayFormats.Interface)
+                    .Append(" prm);");
+            }
+            if (symbol.RemoveMethod != null)
+            {
+                @this.Append("void ")
+                    .Append(symbol.Name)
+                    .Append(Suffix.Remove)
+                    .Append("(")
+                    .Append(symbol.Type, SymbolDisplayFormats.Interface)
+                    .Append(" prm);");
+            }
+            return @this;
+        }
 
         public static StringBuilder AppendEventAddRemove(this StringBuilder @this, string contextName, IEventSymbol symbol, string methodName)
         {
             @this.Append("{");
             if (symbol.AddMethod != null)
-                @this.AppendEventAdd(contextName, symbol, methodName);
+            {
+                @this.Append("add{")
+                    .Append(contextName)
+                    .Append(".")
+                    .Append(methodName)
+                    .Append("(f => f.")
+                    .Append(symbol.Name)
+                    .Append(Suffix.Add)
+                    .Append("(value));}");
+            }
             if (symbol.RemoveMethod != null)
-                @this.AppendEventRemove(contextName, symbol, methodName);
+            {
+                @this.Append("remove{")
+                    .Append(contextName)
+                    .Append(".")
+                    .Append(methodName)
+                    .Append("(f => f.")
+                    .Append(symbol.Name)
+                    .Append(Suffix.Remove)
+                    .Append("(value));}");
+            }
             @this.Append("}");
             return @this;
         }
@@ -633,26 +617,49 @@ namespace LightMock.Generator
             return @this;
         }
 
-        public static StringBuilder AppendDisplayFormat(this StringBuilder @this, ISymbol symbol, SymbolDisplayFormat format, Func<SymbolDisplayPart, SymbolDisplayPart> mutator)
+        public static StringBuilder Append(
+            this StringBuilder @this,
+            ISymbol symbol,
+            SymbolDisplayFormat format,
+            Func<SymbolDisplayPart, SymbolDisplayPart> mutator)
         {
-            return symbol.ToDisplayParts(format)
-                .Aggregate<SymbolDisplayPart, StringBuilder>(@this, (sb, p) => sb.Append(mutator(p)));
+            return @this.AppendParts(symbol.ToDisplayParts(format), mutator);
         }
 
-        public static StringBuilder AppendDisplayFormat(
+        public static StringBuilder Append(
             this StringBuilder @this,
             ISymbol symbol,
             SymbolDisplayFormat format,
             Func<SymbolDisplayPart, int, SymbolDisplayPart> mutator)
         {
-            return symbol.ToDisplayParts(format).Select(mutator).Aggregate(@this, (sb, p) => sb.Append(p));
+            return @this.AppendParts(symbol.ToDisplayParts(format), mutator);
         }
 
-        public static StringBuilder AppendDisplayFormat(this StringBuilder @this, ISymbol symbol, SymbolDisplayFormat format)
+        public static StringBuilder Append(this StringBuilder @this, ISymbol symbol, SymbolDisplayFormat format) 
+            => @this.AppendParts(symbol.ToDisplayParts(format));
+
+        public static StringBuilder AppendParts<T>(this StringBuilder @this, T parts)
+            where T : IReadOnlyList<SymbolDisplayPart>
         {
-            return symbol.ToDisplayParts(format)
-                .Aggregate<SymbolDisplayPart, StringBuilder>(@this, (sb, p) => sb.Append(p));
+            foreach (var item in parts)
+                @this.Append(item.ToString());
+            return @this;
         }
 
+        public static StringBuilder AppendParts<T>(this StringBuilder @this, T parts, Func<SymbolDisplayPart, SymbolDisplayPart> mutator)
+            where T : IReadOnlyList<SymbolDisplayPart>
+        {
+            foreach (var item in parts)
+                @this.Append(mutator(item).ToString());
+            return @this;
+        }
+
+        public static StringBuilder AppendParts<T>(this StringBuilder @this, T parts, Func<SymbolDisplayPart, int, SymbolDisplayPart> mutator)
+            where T : IReadOnlyList<SymbolDisplayPart>
+        {
+            for (int i = 0; i < parts.Count; i++)
+                @this.Append(mutator(parts[i], i).ToString());
+            return @this;
+        }
     }
 }

@@ -116,7 +116,7 @@ namespace LightMock.Generator
                             .Append(uid.Replace(@"\", @"\\"))
                             .AppendLine("\":")
                             .Append("return ExpressionUtils.Get<global::")
-                            .Append(typeSymbol.ContainingNamespace.ToDisplayString(SymbolDisplayFormats.Namespace))
+                            .Append(typeSymbol.ContainingNamespace, SymbolDisplayFormats.Namespace)
                             .Append(".")
                             .Append(Prefix.PropertyToFuncInterface)
                             .AppendContainingTypes<string>(typeSymbol, (sb, ts) => sb.AppendTypeArguments(ts, i => i.Name, "_", "_"), "_")
@@ -126,7 +126,7 @@ namespace LightMock.Generator
                             .Append("=>")
                             .Append(parameterText)
                             .Append(".")
-                            .AppendP2FSetter(leftPart)
+                            .AppendP2FName(leftPart, Suffix.Setter, Mutator)
                             .Append("(")
                             .Append(assignment.Right.ToString())
                             .AppendLine("));");
@@ -140,6 +140,21 @@ namespace LightMock.Generator
                 }
             }
         }
+
+        SymbolDisplayPart Mutator(SymbolDisplayPart part)
+        {
+            switch (part.Kind)
+            {
+                case SymbolDisplayPartKind.Punctuation when part.ToString() == ".":
+                    return new SymbolDisplayPart(part.Kind, part.Symbol, "_");
+                case SymbolDisplayPartKind.InterfaceName when part.ToString().StartsWith(Prefix.ProtectedToPublicInterface):
+                    return new SymbolDisplayPart(part.Kind, part.Symbol,
+                        part.ToString().Replace(Prefix.ProtectedToPublicInterface, ""));
+            }
+
+            return part;
+        }
+
 
         public IEnumerable<Diagnostic> GetErrors() => errors;
 

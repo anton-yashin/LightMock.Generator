@@ -41,23 +41,25 @@ namespace LightMock.Generator
                 return null;
 
             var result = new StringBuilder()
-                .AppendMethodDeclaration(symbol.ToDisplayString(SymbolDisplayFormats.Interface), symbol)
+                .AppendMethodDeclaration(SymbolDisplayFormats.Interface, symbol)
                 .AppendMethodBody(VariableNames.Context, symbol,
-                symbol.ContainingType.ToDisplayString(SymbolDisplayFormats.WithTypeParams));
+                sb => sb.Append("(").Append(symbol.ContainingType, SymbolDisplayFormats.WithTypeParams).Append(")"));
             return result.ToString();
         }
 
         public override string? VisitProperty(IPropertySymbol symbol)
         {
-            var result = new StringBuilder(symbol.ToDisplayString(SymbolDisplayFormats.Interface))
+            var result = new StringBuilder()
+                .Append(symbol, SymbolDisplayFormats.Interface)
                 .AppendMockGetterAndSetter(VariableNames.Context,
-                symbol, symbol.ContainingType.ToDisplayString(SymbolDisplayFormats.WithTypeParams));
+                symbol, sb => sb.Append("(").Append(symbol.ContainingType, SymbolDisplayFormats.WithTypeParams).Append(")"));
             return result.ToString();
         }
 
         public override string? VisitEvent(IEventSymbol symbol)
         {
-            var result = new StringBuilder(symbol.ToDisplayString(SymbolDisplayFormats.Interface))
+            var result = new StringBuilder()
+                .Append(symbol, SymbolDisplayFormats.Interface)
                 .AppendEventAddRemove(VariableNames.PropertiesContext, symbol, methodName: "Invoke");
             return result.ToString();
         }

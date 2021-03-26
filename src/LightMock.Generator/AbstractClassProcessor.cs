@@ -64,7 +64,9 @@ namespace LightMock.Generator
 
             @namespace = typeSymbol.ContainingNamespace.ToDisplayString(SymbolDisplayFormats.Namespace);
 
-            var (whereClause, typeArguments) = typeSymbol.GetWhereClauseAndTypeArguments();
+            var typeHierarchy = typeSymbol.GetTypeHierarchy();
+            var typeArguments = typeHierarchy.GetTypeArguments();
+            var whereClause = typeHierarchy.GetWhereClause();
 
             bool haveTypeArguments = typeSymbol.TypeArguments.Any();
 
@@ -82,7 +84,7 @@ namespace LightMock.Generator
                 .Append(typeSymbol.Name)
                 .Append(haveTypeArguments ? "<" + string.Join(",", typeSymbol.TypeArguments.Select(i => " ")) + ">" : "")
                 .ToString();
-            symbolVisitor = new AbstractClassSymbolVisitor(@namespace, Prefix.ProtectedToPublicInterface + className);
+            symbolVisitor = new AbstractClassSymbolVisitor(className);
 
             typeArgumentsWithBrackets = string.Join(",", typeArguments.Select(i => i.Name)); ;
             if (typeArgumentsWithBrackets.Length > 0)
@@ -102,16 +104,15 @@ namespace LightMock.Generator
             this.dontOverrideList = dontOverrideList;
 
             var p2fInterfaceName = Prefix.PropertyToFuncInterface + className + typeArgumentsWithBrackets;
-            var p2pInterfaceName = Prefix.ProtectedToPublicInterface + className + typeArgumentsWithBrackets;
 
             protectedVisitor = new ProtectedMemberSymbolVisitor();
             propertyDefinitionVisitor = new PropertyDefinitionVisitor();
-            assertImplementationVisitor = new AssertImplementationVisitor(SymbolDisplayFormats.AbstractClass, p2pInterfaceName);
-            assertIsAnyImplementationVisitor = new AssertIsAnyImplementationVisitor(SymbolDisplayFormats.AbstractClass, p2pInterfaceName);
+            assertImplementationVisitor = new AssertImplementationVisitor(SymbolDisplayFormats.AbstractClass, className);
+            assertIsAnyImplementationVisitor = new AssertIsAnyImplementationVisitor(SymbolDisplayFormats.AbstractClass, className);
             this.arrangeOnAnyImplementationVisitor = new ArrangeOnAnyImplementationVisitor(
-                SymbolDisplayFormats.AbstractClass, p2fInterfaceName, p2pInterfaceName);
+                SymbolDisplayFormats.AbstractClass, p2fInterfaceName, className);
             this.arrangeOnImplementationVisitor = new ArrangeOnImplementationVisitor(
-                SymbolDisplayFormats.AbstractClass, p2fInterfaceName, p2pInterfaceName);
+                SymbolDisplayFormats.AbstractClass, p2fInterfaceName, className);
         }
 
         string GenerateConstructor(string declaration, string call)
@@ -229,9 +230,10 @@ namespace LightMock.Generator
 
         public override SourceText DoGenerate()
         {
-            var originalNameFormat = new StringBuilder(typeSymbol.ContainingNamespace.ToDisplayString(SymbolDisplayFormats.Namespace))
-              .Append('.')
-              .Append(typeSymbol.Name);
+            var originalNameFormat = new StringBuilder()
+                .Append(typeSymbol.ContainingNamespace, SymbolDisplayFormats.Namespace)
+                .Append('.')
+                .Append(typeSymbol.Name);
             if (typeSymbol.IsGenericType)
             {
                 originalNameFormat.Append('<');
