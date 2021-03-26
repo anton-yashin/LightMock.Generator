@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace LightMock.Generator.Tests.BaseTests
@@ -203,6 +204,61 @@ namespace LightMock.Generator.Tests.BaseTests
                 .Returns<string, string, string>((a, b, c) => "This" + a + b + c);
 
             var result = fooMock.Execute(" is", " really", " cool");
+            Assert.Equal("This is really cool", result);
+        }
+
+        [Fact]
+        public async Task Arrange_ReturnsValueAsyncWithNoArguments_InvokesGetResult()
+        {
+            var mockContext = new MockContext<IFoo>();
+            var fooMock = new FooMock(mockContext);
+
+            mockContext.Arrange(f => f.ExecuteAsync()).ReturnsAsync("This");
+            var result = await fooMock.ExecuteAsync();
+            Assert.Equal("This", result);
+        }
+
+        [Fact]
+        public async Task Arrange_ReturnsAsyncWithNoArguments_InvokesGetResult()
+        {
+            var mockContext = new MockContext<IFoo>();
+            var fooMock = new FooMock(mockContext);
+
+            mockContext.Arrange(f => f.ExecuteAsync()).ReturnsAsync(() => "This");
+            var result = await fooMock.ExecuteAsync();
+            Assert.Equal("This", result);
+        }
+
+        [Fact]
+        public async Task Arrange_ReturnsAsyncWithOneArgument_InvokesGetResult()
+        {
+            var mockContext = new MockContext<IFoo>();
+            var fooMock = new FooMock(mockContext);
+            mockContext.Arrange(f => f.ExecuteAsync(The<string>.IsAnyValue)).ReturnsAsync((string a) => "This" + a);
+            var result = await fooMock.ExecuteAsync(" is");
+            Assert.Equal("This is", result);
+        }
+
+        [Fact]
+        public async Task Arrange_ReturnsAsyncWithTwoArguments_InvokesGetResult()
+        {
+            var mockContext = new MockContext<IFoo>();
+            var fooMock = new FooMock(mockContext);
+            mockContext.Arrange(f => f.ExecuteAsync(The<string>.IsAnyValue, The<string>.IsAnyValue))
+                .ReturnsAsync((string a, string b) => "This" + a + b);
+            var result = await fooMock.ExecuteAsync(" is", " really");
+            Assert.Equal("This is really", result);
+        }
+
+        [Fact]
+        public async Task Arrange_ReturnsAsyncWithThreeArguments_InvokesGetResult()
+        {
+            var mockContext = new MockContext<IFoo>();
+            var fooMock = new FooMock(mockContext);
+            mockContext.Arrange(f => f.ExecuteAsync(The<string>.IsAnyValue, The<string>.IsAnyValue, The<string>.IsAnyValue))
+                .ReturnsAsync((string a, string b, string c) => "This" + a + b + c);
+
+            var result = await fooMock.ExecuteAsync(" is", " really", " cool");
             Assert.Equal("This is really cool", result);
         }
 

@@ -1,4 +1,6 @@
-﻿namespace LightMock.Generator.Tests.BaseTests
+﻿using System.Threading.Tasks;
+
+namespace LightMock.Generator.Tests.BaseTests
 {
     public class FooMock : IFoo
     {
@@ -48,6 +50,11 @@
             return context.Invoke(f => f.Execute());
         }
 
+        public Task<string> ExecuteAsync(string value)
+        {
+            return context.Invoke(f => f.ExecuteAsync(value))!;
+        }
+
         public string? Execute(string first, string second)
         {
             return context.Invoke(f => f.Execute(first, second));
@@ -61,6 +68,26 @@
         public string? Execute(string first, string second, string third, string fourth)
         {
             return context.Invoke(f => f.Execute(first, second, third, fourth));
+        }
+
+        public Task<string> ExecuteAsync()
+        {
+            return context.Invoke(f => f.ExecuteAsync())!;
+        }
+
+        public Task<string> ExecuteAsync(string first, string second)
+        {
+            return context.Invoke(f => f.ExecuteAsync(first, second))!;
+        }
+
+        public Task<string> ExecuteAsync(string first, string second, string third)
+        {
+            return context.Invoke(f => f.ExecuteAsync(first, second, third))!;
+        }
+
+        public Task<string> ExecuteAsync(string first, string second, string third, string fourth)
+        {
+            return context.Invoke(f => f.ExecuteAsync(first, second, third, fourth))!;
         }
 
         public byte[]? Execute(byte[] array)
