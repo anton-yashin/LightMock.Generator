@@ -524,33 +524,31 @@ namespace LightMock.Generator
             return @this;
         }
 
-        public static StringBuilder AppendEventAdd(this StringBuilder @this, string contextName, IEventSymbol symbol, string methodName)
-            => @this.Append("add{")
-            .Append(contextName)
-            .Append(".")
-            .Append(methodName)
-            .Append("(f => f.")
-            .Append(symbol.Name)
-            .Append(Suffix.Add)
-            .Append("(value));}");
-
-        public static StringBuilder AppendEventRemove(this StringBuilder @this, string contextName, IEventSymbol symbol, string methodName)
-            => @this.Append("remove{")
-            .Append(contextName)
-            .Append(".")
-            .Append(methodName)
-            .Append("(f => f.")
-            .Append(symbol.Name)
-            .Append(Suffix.Remove)
-            .Append("(value));}");
-
         public static StringBuilder AppendEventAddRemove(this StringBuilder @this, string contextName, IEventSymbol symbol, string methodName)
         {
             @this.Append("{");
             if (symbol.AddMethod != null)
-                @this.AppendEventAdd(contextName, symbol, methodName);
+            {
+                @this.Append("add{")
+                    .Append(contextName)
+                    .Append(".")
+                    .Append(methodName)
+                    .Append("(f => f.")
+                    .Append(symbol.Name)
+                    .Append(Suffix.Add)
+                    .Append("(value));}");
+            }
             if (symbol.RemoveMethod != null)
-                @this.AppendEventRemove(contextName, symbol, methodName);
+            {
+                @this.Append("remove{")
+                    .Append(contextName)
+                    .Append(".")
+                    .Append(methodName)
+                    .Append("(f => f.")
+                    .Append(symbol.Name)
+                    .Append(Suffix.Remove)
+                    .Append("(value));}");
+            }
             @this.Append("}");
             return @this;
         }
