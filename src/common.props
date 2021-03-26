@@ -21,4 +21,9 @@
     <None Include="..\..\LICENSE" PackagePath="" Pack="true" Visible="false"/>
     <None Include="..\..\README.md" PackagePath="" Pack="true" Visible="false"/>
   </ItemGroup>
+
+  <!-- Copy package to folder set by NuGetFolder environment variable if present -->
+  <Target Name="CopyPackage" AfterTargets="Pack" Condition=" '$(NuGetFolder)' != '' ">
+    <Copy SourceFiles="$(OutputPath)..\$(PackageId).$(PackageVersion).nupkg" DestinationFolder="$(NuGetFolder)" />
+  </Target>
 </Project>
