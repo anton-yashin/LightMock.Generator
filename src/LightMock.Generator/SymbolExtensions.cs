@@ -27,6 +27,7 @@
 using Microsoft.CodeAnalysis;
 using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
 
@@ -36,7 +37,8 @@ namespace LightMock.Generator
     {
         public static bool IsObsolete(this ISymbol @this)
             => (from i in @this.GetAttributes()
-                where i.AttributeClass?.ToDisplayString(SymbolDisplayFormats.Namespace) == "System." + nameof(ObsoleteAttribute)
+                let a = i.AttributeClass
+                where  a != null && a.Name == nameof(ObsoleteAttribute) && a.ContainingNamespace.Name == nameof(System)
                 select i).Any();
 
         public static string GetObsoleteOrOverrideChunk(this ISymbol @this)
@@ -48,27 +50,36 @@ namespace LightMock.Generator
         public static bool IsInterfaceRequired(this ISymbol @this)
             => @this.IsCanBeOverriden() && @this.DeclaredAccessibility == Accessibility.Protected;
 
-        public static (string whereClause, IEnumerable<ITypeSymbol> typeArguments)
-            GetWhereClauseAndTypeArguments(this INamedTypeSymbol @this)
-        {
-            IEnumerable<ITypeSymbol> typeArguments = @this.TypeArguments;
-            var whereClause = @this.GetWhereClause();
 
-            for (var tsct = @this.ContainingType; tsct != null; tsct = tsct.ContainingType)
+        public static ImmutableArray<INamedTypeSymbol> GetTypeHierarchy(this INamedTypeSymbol @this)
+        {
+            var builder = ImmutableArray.CreateBuilder<INamedTypeSymbol>();
+            for (var tsct = @this; tsct != null; tsct = tsct.ContainingType)
+                builder.Add(tsct);
+            return builder.ToImmutable();
+        }
+
+        public static ImmutableArray<ITypeSymbol> GetTypeArguments(this ImmutableArray<INamedTypeSymbol> @this)
+        {
+            var builder = ImmutableArray.CreateBuilder<ITypeSymbol>();
+            for (int i = @this.Length - 1; i >= 0; i--)
+                builder.AddRange(@this[i].TypeArguments);
+            return builder.ToImmutable();
+        }
+
+        public static string GetWhereClause(this ImmutableArray<INamedTypeSymbol> @this)
+        {
+            var sb = new StringBuilder();
+            foreach (INamedTypeSymbol item in @this)
             {
-                whereClause = tsct.GetWhereClause() + whereClause;
-                typeArguments = tsct.TypeArguments.Concat(typeArguments);
+                var parts = item.ToDisplayParts(SymbolDisplayFormats.WithWhereClause);
+                var pos = parts.IndexOf(p => p.Kind == SymbolDisplayPartKind.Keyword && p.ToString() == "where");
+                if (pos > 0)
+                {
+                    sb.AppendParts(new ImmutableArraySegment<SymbolDisplayPart>(parts, pos)).Append(' ');
+                }
             }
-
-            return (whereClause, typeArguments);
+            return sb.ToString();
         }
-
-        static string GetWhereClause(this INamedTypeSymbol @this)
-        {
-            var parts = @this.ToDisplayParts(SymbolDisplayFormats.WithWhereClause);
-            var pos = parts.IndexOf(p => p.Kind == SymbolDisplayPartKind.Keyword && p.ToString() == "where");
-            return pos >= 0 ? new ImmutableArraySegment<SymbolDisplayPart>(parts, pos).ToDisplayString() : "";
-        }
-
     }
 }

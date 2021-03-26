@@ -64,7 +64,9 @@ namespace LightMock.Generator
 
             @namespace = typeSymbol.ContainingNamespace.ToDisplayString(SymbolDisplayFormats.Namespace);
 
-            var (whereClause, typeArguments) = typeSymbol.GetWhereClauseAndTypeArguments();
+            var typeHierarchy = typeSymbol.GetTypeHierarchy();
+            var typeArguments = typeHierarchy.GetTypeArguments();
+            var whereClause = typeHierarchy.GetWhereClause();
 
             bool haveTypeArguments = typeSymbol.TypeArguments.Any();
 
