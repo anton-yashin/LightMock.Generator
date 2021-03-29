@@ -151,6 +151,22 @@ namespace LightMock.Generator
             => publicContext.AssertRemove(expression, times);
 
         ///<inheritdoc/>
+        public void AssertAdd_WhenAny(Action<T> expression)
+            => publicContext.AssertAdd_WhenAny(expression);
+
+        ///<inheritdoc/>
+        public void AssertAdd_WhenAny(Action<T> expression, Invoked times)
+            => publicContext.AssertAdd_WhenAny(expression, times);
+
+        ///<inheritdoc/>
+        public void AssertRemove_WhenAny(Action<T> expression)
+            => publicContext.AssertRemove_WhenAny(expression);
+
+        ///<inheritdoc/>
+        public void AssertRemove_WhenAny(Action<T> expression, Invoked times)
+            => publicContext.AssertRemove_WhenAny(expression, times);
+
+        ///<inheritdoc/>
         public IArrangement ArrangeSetter(Action<T> expression, [CallerFilePath] string uidPart1 = "", [CallerLineNumber] int uidPart2 = 0)
             => publicContext.ArrangeSetter(expression, uidPart1, uidPart2);
 

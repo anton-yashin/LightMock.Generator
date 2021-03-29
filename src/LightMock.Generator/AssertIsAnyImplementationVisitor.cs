@@ -39,6 +39,6 @@ namespace LightMock.Generator
             => VisitProperty(symbol, (sb, sym) => sb.AppendAssertIsAnyGetterAndSetter(symbol));
 
         public override string? VisitEvent(IEventSymbol symbol)
-            => VisitEvent(symbol, (sb, sym) => sb.AppendEventAddRemove(VariableNames.Context, sym, "Assert"));
+            => VisitEvent(symbol, (sb, sym) => sb.AppendAssertIsAnyEventAddRemove(VariableNames.Context, sym));
     }
 }

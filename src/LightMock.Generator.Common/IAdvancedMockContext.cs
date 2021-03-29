@@ -137,6 +137,28 @@ namespace LightMock
         /// </summary>
         /// <param name="expression">Expression to verify.</param>
         void AssertRemove(Action<T> expression);
+        /// <summary>
+        /// Verifies that any event was added to the mock.
+        /// </summary>
+        /// <param name="expression">Expression to verify.</param>
+        /// <param name="times">The number of times a method is expected to be called.</param>
+        void AssertAdd_WhenAny(Action<T> expression, Invoked times);
+        /// <summary>
+        /// Verifies that any event was removed from the mock.
+        /// </summary>
+        /// <param name="expression">Expression to verify.</param>
+        /// <param name="times">The number of times a method is expected to be called.</param>
+        void AssertRemove_WhenAny(Action<T> expression, Invoked times);
+        /// <summary>
+        /// Verifies that any event was removed from the mock.
+        /// </summary>
+        /// <param name="expression">Expression to verify.</param>
+        void AssertAdd_WhenAny(Action<T> expression);
+        /// <summary>
+        /// Verifies that any event was removed from the mock.
+        /// </summary>
+        /// <param name="expression">Expression to verify.</param>
+        void AssertRemove_WhenAny(Action<T> expression);
 
         /// <summary>
         /// Arranges a property setter.

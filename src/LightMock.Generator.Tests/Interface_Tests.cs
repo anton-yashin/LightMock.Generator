@@ -201,11 +201,16 @@ namespace LightMock.Generator.Tests
             var context = testScript.Context;
             var mock = testScript.MockObject;
 
+            Assert.Throws<MockException>(() => context.AssertAdd_WhenAny(f => f.OnEvent += null));
+            Assert.Throws<MockException>(() => context.AssertRemove_WhenAny(f => f.OnEvent -= null));
+
             mock.OnEvent += ExpectedEventHandler;
             mock.OnEvent -= ExpectedEventHandler;
 
             context.AssertAdd(f => f.OnEvent += ExpectedEventHandler);
             context.AssertRemove(f => f.OnEvent -= ExpectedEventHandler);
+            context.AssertAdd_WhenAny(f => f.OnEvent += null);
+            context.AssertRemove_WhenAny(f => f.OnEvent -= null);
             Assert.Throws<MockException>(() => context.AssertAdd(f => f.OnEvent += UnexpectedEventHandler));
             Assert.Throws<MockException>(() => context.AssertRemove(f => f.OnEvent -= UnexpectedEventHandler));
 
