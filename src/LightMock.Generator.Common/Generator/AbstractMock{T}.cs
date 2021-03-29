@@ -135,20 +135,20 @@ namespace LightMock.Generator
             => publicContext.AssertSet_When(expression, times);
 
         ///<inheritdoc/>
-        public void AssertAdd(Action<T> expression)
-            => publicContext.AssertAdd(expression);
+        public void AssertAdd_When(Action<T> expression)
+            => publicContext.AssertAdd_When(expression);
 
         ///<inheritdoc/>
-        public void AssertAdd(Action<T> expression, Invoked times)
-            => publicContext.AssertAdd(expression, times);
+        public void AssertAdd_When(Action<T> expression, Invoked times)
+            => publicContext.AssertAdd_When(expression, times);
 
         ///<inheritdoc/>
-        public void AssertRemove(Action<T> expression)
-            => publicContext.AssertRemove(expression);
+        public void AssertRemove_When(Action<T> expression)
+            => publicContext.AssertRemove_When(expression);
 
         ///<inheritdoc/>
-        public void AssertRemove(Action<T> expression, Invoked times)
-            => publicContext.AssertRemove(expression, times);
+        public void AssertRemove_When(Action<T> expression, Invoked times)
+            => publicContext.AssertRemove_When(expression, times);
 
         ///<inheritdoc/>
         public void AssertAdd_WhenAny(Action<T> expression)

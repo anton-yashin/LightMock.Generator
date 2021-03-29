@@ -111,10 +111,10 @@ namespace LightMock.Generator
         void AssertUsingAssertWhenAnyInstance(Action<T> expression, Invoked times)
             => expression(CreateAssertWhenAnyInstance(times));
 
-        public void AssertAdd(Action<T> expression, Invoked times)
+        public void AssertAdd_When(Action<T> expression, Invoked times)
             => AssertUsingAssertInstance(expression, times);
 
-        public void AssertAdd(Action<T> expression)
+        public void AssertAdd_When(Action<T> expression)
             => AssertUsingAssertInstance(expression, Invoked.AtLeast(1));
 
         public void AssertAdd_WhenAny(Action<T> expression, Invoked times)
@@ -129,10 +129,10 @@ namespace LightMock.Generator
         public void AssertGet<TProperty>(Func<T, TProperty> expression, Invoked times)
             => expression(CreateAssertWhenInstance(times));
 
-        public void AssertRemove(Action<T> expression, Invoked times)
+        public void AssertRemove_When(Action<T> expression, Invoked times)
             => AssertUsingAssertInstance(expression, times);
 
-        public void AssertRemove(Action<T> expression)
+        public void AssertRemove_When(Action<T> expression)
             => AssertUsingAssertInstance(expression, Invoked.AtLeast(1));
 
         public void AssertRemove_WhenAny(Action<T> expression, Invoked times)

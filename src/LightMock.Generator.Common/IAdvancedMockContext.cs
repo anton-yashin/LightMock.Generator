@@ -120,23 +120,23 @@ namespace LightMock
         /// </summary>
         /// <param name="expression">Expression to verify.</param>
         /// <param name="times">The number of times a method is expected to be called.</param>
-        void AssertAdd(Action<T> expression, Invoked times);
+        void AssertAdd_When(Action<T> expression, Invoked times);
         /// <summary>
         /// Verifies that an event was removed from the mock.
         /// </summary>
         /// <param name="expression">Expression to verify.</param>
         /// <param name="times">The number of times a method is expected to be called.</param>
-        void AssertRemove(Action<T> expression, Invoked times);
+        void AssertRemove_When(Action<T> expression, Invoked times);
         /// <summary>
         /// Verifies that an event was added to the mock.
         /// </summary>
         /// <param name="expression">Expression to verify.</param>
-        void AssertAdd(Action<T> expression);
+        void AssertAdd_When(Action<T> expression);
         /// <summary>
         /// Verifies that an event was removed from the mock.
         /// </summary>
         /// <param name="expression">Expression to verify.</param>
-        void AssertRemove(Action<T> expression);
+        void AssertRemove_When(Action<T> expression);
         /// <summary>
         /// Verifies that any event was added to the mock.
         /// </summary>
