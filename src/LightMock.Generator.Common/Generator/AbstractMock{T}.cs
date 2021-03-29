@@ -135,20 +135,36 @@ namespace LightMock.Generator
             => publicContext.AssertSet_When(expression, times);
 
         ///<inheritdoc/>
-        public void AssertAdd(Action<T> expression)
-            => publicContext.AssertAdd(expression);
+        public void AssertAdd_When(Action<T> expression)
+            => publicContext.AssertAdd_When(expression);
 
         ///<inheritdoc/>
-        public void AssertAdd(Action<T> expression, Invoked times)
-            => publicContext.AssertAdd(expression, times);
+        public void AssertAdd_When(Action<T> expression, Invoked times)
+            => publicContext.AssertAdd_When(expression, times);
 
         ///<inheritdoc/>
-        public void AssertRemove(Action<T> expression)
-            => publicContext.AssertRemove(expression);
+        public void AssertRemove_When(Action<T> expression)
+            => publicContext.AssertRemove_When(expression);
 
         ///<inheritdoc/>
-        public void AssertRemove(Action<T> expression, Invoked times)
-            => publicContext.AssertRemove(expression, times);
+        public void AssertRemove_When(Action<T> expression, Invoked times)
+            => publicContext.AssertRemove_When(expression, times);
+
+        ///<inheritdoc/>
+        public void AssertAdd_WhenAny(Action<T> expression)
+            => publicContext.AssertAdd_WhenAny(expression);
+
+        ///<inheritdoc/>
+        public void AssertAdd_WhenAny(Action<T> expression, Invoked times)
+            => publicContext.AssertAdd_WhenAny(expression, times);
+
+        ///<inheritdoc/>
+        public void AssertRemove_WhenAny(Action<T> expression)
+            => publicContext.AssertRemove_WhenAny(expression);
+
+        ///<inheritdoc/>
+        public void AssertRemove_WhenAny(Action<T> expression, Invoked times)
+            => publicContext.AssertRemove_WhenAny(expression, times);
 
         ///<inheritdoc/>
         public IArrangement ArrangeSetter(Action<T> expression, [CallerFilePath] string uidPart1 = "", [CallerLineNumber] int uidPart2 = 0)

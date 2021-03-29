@@ -69,7 +69,6 @@ namespace LightMock
         /// <typeparam name="T1">Type of first parameter of mocked method.</typeparam>
         /// <typeparam name="T2">Type of second parameter of mocked method.</typeparam>
         /// <typeparam name="T3">Type of third parameter of mocked method.</typeparam>
-        /// <typeparam name="T4">Type of fourth parameter of mocked method.</typeparam>
         /// <typeparam name="TResult">Type of return value</typeparam>
         /// <param name="this">The arrangement.</param>
         /// <param name="getResultFunc">The factory of <typeparamref name="TResult"/></param>

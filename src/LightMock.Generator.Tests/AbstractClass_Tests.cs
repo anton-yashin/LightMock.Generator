@@ -218,20 +218,27 @@ namespace LightMock.Generator.Tests
             var context = testScript.Context;
             var mock = testScript.MockObject;
 
+            Assert.Throws<MockException>(() => context.AssertAdd_WhenAny(f => f.OnAbstractEvent += null));
+            Assert.Throws<MockException>(() => context.AssertRemove_WhenAny(f => f.OnAbstractEvent -= null));
+
             mock.OnAbstractEvent += ExpectedEventHandler;
             mock.OnAbstractEvent -= ExpectedEventHandler;
 
-            context.AssertAdd(f => f.OnAbstractEvent += ExpectedEventHandler);
-            context.AssertRemove(f => f.OnAbstractEvent -= ExpectedEventHandler);
-            Assert.Throws<MockException>(() => context.AssertAdd(f => f.OnAbstractEvent += UnexpectedEventHandler));
-            Assert.Throws<MockException>(() => context.AssertRemove(f => f.OnAbstractEvent -= UnexpectedEventHandler));
+            context.AssertAdd_When(f => f.OnAbstractEvent += ExpectedEventHandler);
+            context.AssertRemove_When(f => f.OnAbstractEvent -= ExpectedEventHandler);
+            context.AssertAdd_WhenAny(f => f.OnAbstractEvent += null);
+            context.AssertAdd_WhenAny(f => f.OnAbstractEvent -= null);
+            Assert.Throws<MockException>(() => context.AssertAdd_When(f => f.OnAbstractEvent += UnexpectedEventHandler));
+            Assert.Throws<MockException>(() => context.AssertRemove_When(f => f.OnAbstractEvent -= UnexpectedEventHandler));
 
             mock.OnVirtualEvent += ExpectedEventHandler;
             mock.OnVirtualEvent -= ExpectedEventHandler;
-            context.AssertAdd(f => f.OnVirtualEvent += ExpectedEventHandler);
-            context.AssertRemove(f => f.OnVirtualEvent -= ExpectedEventHandler);
-            Assert.Throws<MockException>(() => context.AssertAdd(f => f.OnVirtualEvent += UnexpectedEventHandler));
-            Assert.Throws<MockException>(() => context.AssertRemove(f => f.OnVirtualEvent -= UnexpectedEventHandler));
+            context.AssertAdd_When(f => f.OnVirtualEvent += ExpectedEventHandler);
+            context.AssertRemove_When(f => f.OnVirtualEvent -= ExpectedEventHandler);
+            context.AssertAdd_WhenAny(f => f.OnVirtualEvent += null);
+            context.AssertRemove_WhenAny(f => f.OnVirtualEvent -= null);
+            Assert.Throws<MockException>(() => context.AssertAdd_When(f => f.OnVirtualEvent += UnexpectedEventHandler));
+            Assert.Throws<MockException>(() => context.AssertRemove_When(f => f.OnVirtualEvent -= UnexpectedEventHandler));
 
             Assert.Equal(expected: KExpected, testScript.DoRun());
 
@@ -249,18 +256,18 @@ namespace LightMock.Generator.Tests
             mock.OnAbstractEvent += ExpectedEventHandler;
             mock.OnAbstractEvent -= ExpectedEventHandler;
 
-            context.AssertAdd(f => f.OnAbstractEvent += ExpectedEventHandler);
-            context.AssertRemove(f => f.OnAbstractEvent -= ExpectedEventHandler);
-            Assert.Throws<MockException>(() => context.AssertAdd(f => f.OnAbstractEvent += UnexpectedEventHandler));
-            Assert.Throws<MockException>(() => context.AssertRemove(f => f.OnAbstractEvent -= UnexpectedEventHandler));
+            context.AssertAdd_When(f => f.OnAbstractEvent += ExpectedEventHandler);
+            context.AssertRemove_When(f => f.OnAbstractEvent -= ExpectedEventHandler);
+            Assert.Throws<MockException>(() => context.AssertAdd_When(f => f.OnAbstractEvent += UnexpectedEventHandler));
+            Assert.Throws<MockException>(() => context.AssertRemove_When(f => f.OnAbstractEvent -= UnexpectedEventHandler));
 
             mock.OnVirtualEvent += ExpectedEventHandler;
             mock.OnVirtualEvent -= ExpectedEventHandler;
 
-            context.AssertAdd(f => f.OnVirtualEvent += ExpectedEventHandler);
-            context.AssertRemove(f => f.OnVirtualEvent -= ExpectedEventHandler);
-            Assert.Throws<MockException>(() => context.AssertAdd(f => f.OnVirtualEvent += UnexpectedEventHandler));
-            Assert.Throws<MockException>(() => context.AssertRemove(f => f.OnVirtualEvent -= UnexpectedEventHandler));
+            context.AssertAdd_When(f => f.OnVirtualEvent += ExpectedEventHandler);
+            context.AssertRemove_When(f => f.OnVirtualEvent -= ExpectedEventHandler);
+            Assert.Throws<MockException>(() => context.AssertAdd_When(f => f.OnVirtualEvent += UnexpectedEventHandler));
+            Assert.Throws<MockException>(() => context.AssertRemove_When(f => f.OnVirtualEvent -= UnexpectedEventHandler));
 
             Assert.Equal(expected: KExpected, testScript.DoRun());
 
@@ -278,18 +285,18 @@ namespace LightMock.Generator.Tests
             mock.OnAbstractEvent += ExpectedEventHandler;
             mock.OnAbstractEvent -= ExpectedEventHandler;
 
-            context.AssertAdd(f => f.OnAbstractEvent += ExpectedEventHandler);
-            context.AssertRemove(f => f.OnAbstractEvent -= ExpectedEventHandler);
-            Assert.Throws<MockException>(() => context.AssertAdd(f => f.OnAbstractEvent += UnexpectedEventHandler));
-            Assert.Throws<MockException>(() => context.AssertRemove(f => f.OnAbstractEvent -= UnexpectedEventHandler));
+            context.AssertAdd_When(f => f.OnAbstractEvent += ExpectedEventHandler);
+            context.AssertRemove_When(f => f.OnAbstractEvent -= ExpectedEventHandler);
+            Assert.Throws<MockException>(() => context.AssertAdd_When(f => f.OnAbstractEvent += UnexpectedEventHandler));
+            Assert.Throws<MockException>(() => context.AssertRemove_When(f => f.OnAbstractEvent -= UnexpectedEventHandler));
 
             mock.OnVirtualEvent += ExpectedEventHandler;
             mock.OnVirtualEvent -= ExpectedEventHandler;
 
-            context.AssertAdd(f => f.OnVirtualEvent += ExpectedEventHandler);
-            context.AssertRemove(f => f.OnVirtualEvent -= ExpectedEventHandler);
-            Assert.Throws<MockException>(() => context.AssertAdd(f => f.OnVirtualEvent += UnexpectedEventHandler));
-            Assert.Throws<MockException>(() => context.AssertRemove(f => f.OnVirtualEvent -= UnexpectedEventHandler));
+            context.AssertAdd_When(f => f.OnVirtualEvent += ExpectedEventHandler);
+            context.AssertRemove_When(f => f.OnVirtualEvent -= ExpectedEventHandler);
+            Assert.Throws<MockException>(() => context.AssertAdd_When(f => f.OnVirtualEvent += UnexpectedEventHandler));
+            Assert.Throws<MockException>(() => context.AssertRemove_When(f => f.OnVirtualEvent -= UnexpectedEventHandler));
 
             Assert.Equal(expected: KExpected, testScript.DoRun());
 

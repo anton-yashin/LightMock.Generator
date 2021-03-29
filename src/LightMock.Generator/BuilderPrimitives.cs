@@ -553,6 +553,35 @@ namespace LightMock.Generator
             return @this;
         }
 
+        public static StringBuilder AppendAssertIsAnyEventAddRemove(this StringBuilder @this, string contextName, IEventSymbol symbol)
+        {
+            @this.Append("{");
+            if (symbol.AddMethod != null)
+            {
+                @this.Append(" add { ")
+                    .Append(contextName)
+                    .Append(".Assert(f => f.")
+                    .Append(symbol.Name)
+                    .Append(Suffix.Add)
+                    .Append("(The<")
+                    .Append(symbol.Type, SymbolDisplayFormats.WithTypeParams)
+                    .Append(">.IsAnyValue)); } ");
+            }
+            if (symbol.RemoveMethod != null)
+            {
+                @this.Append(" remove { ")
+                    .Append(contextName)
+                    .Append(".Assert(f => f.")
+                    .Append(symbol.Name)
+                    .Append(Suffix.Remove)
+                    .Append("(The<")
+                    .Append(symbol.Type, SymbolDisplayFormats.WithTypeParams)
+                    .Append(">.IsAnyValue)); } ");
+            }
+            @this.Append("}");
+            return @this;
+        }
+
         public static StringBuilder AppendDummyEventAddRemove(this StringBuilder @this, IEventSymbol symbol)
         {
             @this.Append("{");

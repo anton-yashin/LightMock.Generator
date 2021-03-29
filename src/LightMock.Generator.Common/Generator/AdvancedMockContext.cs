@@ -108,12 +108,20 @@ namespace LightMock.Generator
         void AssertUsingAssertInstance(Action<T> expression, Invoked times)
             => expression(CreateAssertWhenInstance(times));
 
+        void AssertUsingAssertWhenAnyInstance(Action<T> expression, Invoked times)
+            => expression(CreateAssertWhenAnyInstance(times));
 
-        public void AssertAdd(Action<T> expression, Invoked times)
+        public void AssertAdd_When(Action<T> expression, Invoked times)
             => AssertUsingAssertInstance(expression, times);
 
-        public void AssertAdd(Action<T> expression)
+        public void AssertAdd_When(Action<T> expression)
             => AssertUsingAssertInstance(expression, Invoked.AtLeast(1));
+
+        public void AssertAdd_WhenAny(Action<T> expression, Invoked times)
+            => AssertUsingAssertWhenAnyInstance(expression, times);
+
+        public void AssertAdd_WhenAny(Action<T> expression)
+            => AssertUsingAssertWhenAnyInstance(expression, Invoked.AtLeast(1));
 
         public void AssertGet<TProperty>(Func<T, TProperty> expression)
             => AssertGet(expression, Invoked.AtLeast(1));
@@ -121,11 +129,17 @@ namespace LightMock.Generator
         public void AssertGet<TProperty>(Func<T, TProperty> expression, Invoked times)
             => expression(CreateAssertWhenInstance(times));
 
-        public void AssertRemove(Action<T> expression, Invoked times)
+        public void AssertRemove_When(Action<T> expression, Invoked times)
             => AssertUsingAssertInstance(expression, times);
 
-        public void AssertRemove(Action<T> expression)
+        public void AssertRemove_When(Action<T> expression)
             => AssertUsingAssertInstance(expression, Invoked.AtLeast(1));
+
+        public void AssertRemove_WhenAny(Action<T> expression, Invoked times)
+            => AssertUsingAssertWhenAnyInstance(expression, times);
+
+        public void AssertRemove_WhenAny(Action<T> expression)
+            => AssertUsingAssertWhenAnyInstance(expression, Invoked.AtLeast(1));
 
         public void AssertSet(Action<T> expression, [CallerFilePath] string uidPart1 = "", [CallerLineNumber] int uidPart2 = 0)
             => AssertSet(expression, Invoked.AtLeast(1), uidPart1, uidPart2);
@@ -147,7 +161,7 @@ namespace LightMock.Generator
             => AssertSet_WhenAny(propertySelector, Invoked.AtLeast(1));
 
         public void AssertSet_WhenAny(Action<T> propertySelector, Invoked times)
-            => propertySelector(CreateAssertWhenAnyInstance(times));
+            => AssertUsingAssertWhenAnyInstance(propertySelector, times);
 
         public IEnumerable<IInvocationInfo> GetUnverifiedInvocations()
             => mockContext.GetUnverifiedInvocations();
