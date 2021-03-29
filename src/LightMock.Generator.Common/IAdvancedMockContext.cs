@@ -120,44 +120,68 @@ namespace LightMock
         /// </summary>
         /// <param name="expression">Expression to verify.</param>
         /// <param name="times">The number of times a method is expected to be called.</param>
+        /// <remarks>
+        /// No AOT transformations, thus pattern matching using <see cref="The{TValue}"/> type is not working.
+        /// </remarks>
         void AssertAdd_When(Action<T> expression, Invoked times);
         /// <summary>
         /// Verifies that an event was removed from the mock.
         /// </summary>
         /// <param name="expression">Expression to verify.</param>
         /// <param name="times">The number of times a method is expected to be called.</param>
+        /// <remarks>
+        /// No AOT transformations, thus pattern matching using <see cref="The{TValue}"/> type is not working.
+        /// </remarks>
         void AssertRemove_When(Action<T> expression, Invoked times);
         /// <summary>
         /// Verifies that an event was added to the mock.
         /// </summary>
         /// <param name="expression">Expression to verify.</param>
+        /// <remarks>
+        /// No AOT transformations, thus pattern matching using <see cref="The{TValue}"/> type is not working.
+        /// </remarks>
         void AssertAdd_When(Action<T> expression);
         /// <summary>
         /// Verifies that an event was removed from the mock.
         /// </summary>
         /// <param name="expression">Expression to verify.</param>
+        /// <remarks>
+        /// No AOT transformations, thus pattern matching using <see cref="The{TValue}"/> type is not working.
+        /// </remarks>
         void AssertRemove_When(Action<T> expression);
         /// <summary>
         /// Verifies that any event was added to the mock.
         /// </summary>
         /// <param name="expression">Expression to verify.</param>
         /// <param name="times">The number of times a method is expected to be called.</param>
+        /// <remarks>
+        /// No AOT transformations, thus pattern matching using <see cref="The{TValue}"/> type is not working.
+        /// </remarks>
         void AssertAdd_WhenAny(Action<T> expression, Invoked times);
         /// <summary>
         /// Verifies that any event was removed from the mock.
         /// </summary>
         /// <param name="expression">Expression to verify.</param>
         /// <param name="times">The number of times a method is expected to be called.</param>
+        /// <remarks>
+        /// No AOT transformations, thus pattern matching using <see cref="The{TValue}"/> type is not working.
+        /// </remarks>
         void AssertRemove_WhenAny(Action<T> expression, Invoked times);
         /// <summary>
         /// Verifies that any event was removed from the mock.
         /// </summary>
         /// <param name="expression">Expression to verify.</param>
+        /// <remarks>
+        /// No AOT transformations, thus pattern matching using <see cref="The{TValue}"/> type is not working.
+        /// </remarks>
         void AssertAdd_WhenAny(Action<T> expression);
         /// <summary>
         /// Verifies that any event was removed from the mock.
         /// </summary>
         /// <param name="expression">Expression to verify.</param>
+        /// <remarks>
+        /// No AOT transformations, thus pattern matching using <see cref="The{TValue}"/> type is not working.
+        /// </remarks>
         void AssertRemove_WhenAny(Action<T> expression);
 
         /// <summary>
