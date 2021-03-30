@@ -54,6 +54,7 @@ namespace LightMock.Generator.Tests.TestAbstractions
                     MetadataReference.CreateFromFile(typeof(MockContext<>).Assembly.Location),
                     MetadataReference.CreateFromFile(typeof(IMock<>).Assembly.Location),
                     MetadataReference.CreateFromFile(typeof(Xunit.Assert).Assembly.Location),
+                    MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("System.Threading.Tasks")).Location),
                     MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("System.Linq.Expressions")).Location),
                     MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("System.Runtime")).Location),
                     MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("netstandard")).Location),

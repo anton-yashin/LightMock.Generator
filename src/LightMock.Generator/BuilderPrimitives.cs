@@ -414,6 +414,24 @@ namespace LightMock.Generator
                     .Append(suffix);
         }
 
+        public static StringBuilder AppendE2FAdd(this StringBuilder @this, IEventSymbol symbol)
+            => @this.AppendE2FName(symbol, Suffix.Add, ReplaceDotWithUnderline);
+
+        public static StringBuilder AppendE2FRemove(this StringBuilder @this, IEventSymbol symbol)
+            => @this.AppendE2FName(symbol, Suffix.Remove, ReplaceDotWithUnderline);
+
+        public static StringBuilder AppendE2FName(
+            this StringBuilder @this,
+            IEventSymbol symbol,
+            string suffix,
+            Func<SymbolDisplayPart, SymbolDisplayPart> mutator)
+        {
+            return @this.Append(symbol.Name)
+                    .Append('_')
+                    .Append(symbol.ContainingType, SymbolDisplayFormats.Namespace, mutator)
+                    .Append(suffix);
+        }
+
         static SymbolDisplayPart ReplaceDotWithUnderline(SymbolDisplayPart p)
             => p.Kind == SymbolDisplayPartKind.Punctuation && p.ToString() == "."
             ? new SymbolDisplayPart(p.Kind, p.Symbol, "_")
@@ -506,8 +524,7 @@ namespace LightMock.Generator
             if (symbol.AddMethod != null)
             {
                 @this.Append("void ")
-                    .Append(symbol.Name)
-                    .Append(Suffix.Add)
+                    .AppendE2FAdd(symbol)
                     .Append("(")
                     .Append(symbol.Type, SymbolDisplayFormats.Interface)
                     .Append(" prm);");
@@ -515,8 +532,7 @@ namespace LightMock.Generator
             if (symbol.RemoveMethod != null)
             {
                 @this.Append("void ")
-                    .Append(symbol.Name)
-                    .Append(Suffix.Remove)
+                    .AppendE2FRemove(symbol)
                     .Append("(")
                     .Append(symbol.Type, SymbolDisplayFormats.Interface)
                     .Append(" prm);");
@@ -534,8 +550,7 @@ namespace LightMock.Generator
                     .Append(".")
                     .Append(methodName)
                     .Append("(f => f.")
-                    .Append(symbol.Name)
-                    .Append(Suffix.Add)
+                    .AppendE2FAdd(symbol)
                     .Append("(value));}");
             }
             if (symbol.RemoveMethod != null)
@@ -545,8 +560,7 @@ namespace LightMock.Generator
                     .Append(".")
                     .Append(methodName)
                     .Append("(f => f.")
-                    .Append(symbol.Name)
-                    .Append(Suffix.Remove)
+                    .AppendE2FRemove(symbol)
                     .Append("(value));}");
             }
             @this.Append("}");
@@ -561,8 +575,7 @@ namespace LightMock.Generator
                 @this.Append(" add { ")
                     .Append(contextName)
                     .Append(".Assert(f => f.")
-                    .Append(symbol.Name)
-                    .Append(Suffix.Add)
+                    .AppendE2FAdd(symbol)
                     .Append("(The<")
                     .Append(symbol.Type, SymbolDisplayFormats.WithTypeParams)
                     .Append(">.IsAnyValue)); } ");
@@ -572,8 +585,7 @@ namespace LightMock.Generator
                 @this.Append(" remove { ")
                     .Append(contextName)
                     .Append(".Assert(f => f.")
-                    .Append(symbol.Name)
-                    .Append(Suffix.Remove)
+                    .AppendE2FRemove(symbol)
                     .Append("(The<")
                     .Append(symbol.Type, SymbolDisplayFormats.WithTypeParams)
                     .Append(">.IsAnyValue)); } ");
@@ -581,6 +593,67 @@ namespace LightMock.Generator
             @this.Append("}");
             return @this;
         }
+
+        public static StringBuilder AppendArrangeOnAnyAddAndRemove(
+            this StringBuilder @this,
+            IEventSymbol symbol,
+            string propertyToFuncInterfaceName)
+        {
+            @this.Append("{");
+
+            if (symbol.AddMethod != null)
+            {
+                @this.Append("add { request.SetResult(global::LightMock.Generator.ExpressionUtils.Get<")
+                    .Append(propertyToFuncInterfaceName)
+                    .Append(">(f => f.")
+                    .AppendE2FAdd(symbol)
+                    .Append("(The<")
+                    .Append(symbol.Type, SymbolDisplayFormats.WithTypeParams)
+                    .Append(">.IsAnyValue))); }");
+            }
+            if (symbol.RemoveMethod != null)
+            {
+                @this.Append("remove { request.SetResult(global::LightMock.Generator.ExpressionUtils.Get<")
+                    .Append(propertyToFuncInterfaceName)
+                    .Append(">(f => f.")
+                    .AppendE2FRemove(symbol)
+                    .Append("(The<")
+                    .Append(symbol.Type, SymbolDisplayFormats.WithTypeParams)
+                    .Append(">.IsAnyValue))); }");
+            }
+
+            @this.Append("}");
+            return @this;
+        }
+
+        public static StringBuilder AppendArrangeOnAddAndRemove(
+            this StringBuilder @this,
+            IEventSymbol symbol,
+            string propertyToFuncInterfaceName)
+        {
+            @this.Append("{");
+
+            if (symbol.AddMethod != null)
+            {
+                @this.Append("add { request.SetResult(global::LightMock.Generator.ExpressionUtils.Get<")
+                    .Append(propertyToFuncInterfaceName)
+                    .Append(">(f => f.")
+                    .AppendE2FAdd(symbol)
+                    .Append("(value))); }");
+            }
+            if (symbol.RemoveMethod != null)
+            {
+                @this.Append("remove { request.SetResult(global::LightMock.Generator.ExpressionUtils.Get<")
+                    .Append(propertyToFuncInterfaceName)
+                    .Append(">(f => f.")
+                    .AppendE2FRemove(symbol)
+                    .Append("(value))); }");
+            }
+
+            @this.Append("}");
+            return @this;
+        }
+
 
         public static StringBuilder AppendDummyEventAddRemove(this StringBuilder @this, IEventSymbol symbol)
         {

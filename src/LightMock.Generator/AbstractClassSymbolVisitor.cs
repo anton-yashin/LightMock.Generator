@@ -95,14 +95,21 @@ namespace LightMock.Generator
 
         public override string? VisitEvent(IEventSymbol symbol)
         {
-            if (symbol.IsCanBeOverriden())
-            {
-                var result = new StringBuilder("override ")
-                    .Append(symbol, SymbolDisplayFormats.AbstractClass)
-                    .AppendEventAddRemove(VariableNames.PropertiesContext, symbol, methodName: "Invoke");
-                return result.ToString();
-            }
-            return null;
+            if (symbol.IsCanBeOverriden() == false)
+                return null;
+
+            var result = new StringBuilder("override ")
+                .Append(symbol, SymbolDisplayFormats.AbstractClass)
+                .AppendEventAddRemove(VariableNames.PropertiesContext, symbol, methodName: "Invoke");
+            if (symbol.IsInterfaceRequired())
+                AddInterfaceImplementation(symbol, result);
+            return result.ToString();
+        }
+
+        void AddInterfaceImplementation(IEventSymbol symbol, StringBuilder result)
+        {
+            result.Append(symbol, SymbolDisplayFormats.Interface, p => ToP2P(p, symbol))
+                .AppendEventAddRemove(VariableNames.PropertiesContext, symbol, methodName: "Invoke");
         }
 
         public override string? VisitNamedType(INamedTypeSymbol symbol)

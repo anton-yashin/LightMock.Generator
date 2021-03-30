@@ -59,5 +59,16 @@ namespace LightMock.Generator
 
             return result.ToString();
         }
+
+        public override string? VisitEvent(IEventSymbol symbol)
+        {
+            if (symbol.IsInterfaceRequired() == false)
+                return null;
+            var result = new StringBuilder()
+                .Append(symbol, SymbolDisplayFormats.KP2PInterfaceDeclaration)
+                .Append(';');
+
+            return result.ToString();
+        }
     }
 }

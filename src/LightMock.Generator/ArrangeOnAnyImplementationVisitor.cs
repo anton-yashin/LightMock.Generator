@@ -43,6 +43,6 @@ namespace LightMock.Generator
             => VisitProperty(symbol, (sb, sym) => sb.AppendArrangeOnAnyGetterAndSetter(symbol, propertyToFuncInterfaceName));
 
         public override string? VisitEvent(IEventSymbol symbol)
-            => VisitEvent(symbol, BuilderPrimitives.AppendDummyEventAddRemove);
+            => VisitEvent(symbol, (sb, sym) => sb.AppendArrangeOnAnyAddAndRemove(symbol, propertyToFuncInterfaceName));
     }
 }

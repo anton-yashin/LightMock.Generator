@@ -107,7 +107,7 @@ namespace LightMock.Generator
         public override string? VisitNamedType(INamedTypeSymbol symbol)
             => symbol.ToDisplayString(SymbolDisplayFormats.Interface);
 
-        protected static string? VisitEvent(IEventSymbol symbol, Func<StringBuilder, IEventSymbol, StringBuilder> appendEventAddRemove)
+        protected string? VisitEvent(IEventSymbol symbol, Func<StringBuilder, IEventSymbol, StringBuilder> appendEventAddRemove)
         {
             var ct = symbol.ContainingType;
             var result = new StringBuilder();
@@ -122,6 +122,19 @@ namespace LightMock.Generator
                 result.Append("override ")
                     .Append(symbol, SymbolDisplayFormats.AbstractClass);
                 appendEventAddRemove(result, symbol);
+
+                if (implementationName != null && symbol.IsInterfaceRequired())
+                {
+                    result.Append(symbol, SymbolDisplayFormats.Interface, Mutator);
+                    appendEventAddRemove(result, symbol);
+
+                    SymbolDisplayPart Mutator(SymbolDisplayPart part)
+                    {
+                        if (part.Kind == SymbolDisplayPartKind.ClassName && implementationName == part.ToString())
+                            return new SymbolDisplayPart(part.Kind, part.Symbol, Prefix.ProtectedToPublicInterface + implementationName);
+                        return part;
+                    }
+                }
                 return result.ToString();
             }
             return null;

@@ -179,6 +179,22 @@ namespace LightMock.Generator
             => publicContext.ArrangeSetter_When(expression);
 
         ///<inheritdoc/>
+        public IArrangement ArrangeAdd_WhenAny(Action<T> expression)
+                => publicContext.ArrangeAdd_WhenAny(expression);
+
+        ///<inheritdoc/>
+        public IArrangement ArrangeAdd_When(Action<T> expression)
+            => publicContext.ArrangeAdd_When(expression);
+
+        ///<inheritdoc/>
+        public IArrangement ArrangeRemove_WhenAny(Action<T> expression)
+                => publicContext.ArrangeRemove_WhenAny(expression);
+
+        ///<inheritdoc/>
+        public IArrangement ArrangeRemove_When(Action<T> expression)
+            => publicContext.ArrangeRemove_When(expression);
+
+        ///<inheritdoc/>
         public void AssertSet(Action<T> expression, [CallerFilePath] string uidPart1 = "", [CallerLineNumber] int uidPart2 = 0)
             => publicContext.AssertSet(expression, uidPart1, uidPart2);
 
