@@ -35,7 +35,8 @@ namespace Playground
             mock.Assert(f => f.Foo(123)); // Mock<T> uses MockContext<T> internally. Use it to assert or arrange context.
 
             o.Baz = "456"; 
-            mock.AssertSet(f => f.Baz = The<string>.Is(s => s == "456")); // There methods available to work with properties. See IMock<T> to complete list
+            mock.AssertSet(f => f.Baz = The<string>.Is(s => s == "456")); // There methods available to work with properties.
+            // See IMock<T>, IAdvancedMockContext<T> and IMockContext<T> to completed list
 
             const int expectedBar = 123;
             mock.Arrange(f => f.Bar()).Returns(expectedBar); // Mock<T> uses MockContext<T> internally. Use it to assert or arrange context.

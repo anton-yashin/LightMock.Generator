@@ -1,5 +1,8 @@
-﻿* feat: support for overrides with "new" keyword on interfaces;
-* feat: support for arrange getters with ArrangeGetter* methods;
-* feat: support for arrange setters with ArrangeSetter* methods;
-* fix: use lock keyword to access to list of arranges and to list of invocations;
-* fix: Assert* without times param now uses Invoked.AtLeast(1).
+﻿* fix: inherit specialized interface and abstract class
+* feat: indexer support for interfaces and for classes
+* feat: basic fluent interface
+* feat: new arrangement method ThrowsNothing to cancel previous Throw arrangement
+* feat: new assert method AssertNoOtherCalls
+* feat: new arrangement extension ReturnsAsync
+* refactor: ArrangeAdd renamed to ArrangeAdd_When & ArrangeRemove renamed to ArrangeRemove_When
+* feat: new arrangement methods ArrangeAdd_WhenAny and ArrangeRemove_WhenAny
