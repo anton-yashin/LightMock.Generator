@@ -581,6 +581,9 @@ namespace LightMock.Generator.Tests
 
             _ = mock["456"];
 
+            mock.EventHandler += SomeEventHandler;
+            mock.EventHandler -= SomeEventHandler;
+
             context.AssertSet_When(f => f.GetAndSet = nameof(mock.GetAndSet));
             context.AssertSet_When(f => f.SetOnly = nameof(mock.SetOnly));
 
@@ -593,14 +596,20 @@ namespace LightMock.Generator.Tests
             context.AssertGet(f => f["456"]);
             context.AssertSet_When(f => f["123"] = "indexer_set");
 
+            context.AssertAdd_When(f => f.EventHandler += SomeEventHandler);
+            context.AssertRemove_When(f => f.EventHandler -= SomeEventHandler);
+
             Assert.Equal(KExpected, testScript.DoRun());
 
             context.AssertNoOtherCalls();
+
+            void SomeEventHandler(object? sender, EventArgs args) { }
         }
 
         [Fact]
         public void AssertNoOtherCalls_Throws()
         {
+            EventHandler eh = SomeEventHandler;
             var expectedMessage = new StringBuilder()
                 .AppendLine("Detected unverified invocations: ")
                 .AppendLine("System.String LightMock.Generator.Tests.Interface.IAssertNoOtherCalls_Throws.Function(System.String a = \"Function\")")
@@ -611,6 +620,10 @@ namespace LightMock.Generator.Tests
                 .AppendLine("System.String LightMock.Generator.Tests.Interface.IAssertNoOtherCalls_Throws.GetAndSet")
                 .AppendLine("System.String LightMock.Generator.Tests.Interface.IAssertNoOtherCalls_Throws.GetOnly")
                 .AppendLine("System.String LightMock.Generator.Tests.Interface.IAssertNoOtherCalls_Throws[string \"456\"]")
+                .Append("System.Void LightMock.Generator.Tests.Interface.IAssertNoOtherCalls_Throws.EventHandler += ")
+                .AppendLine(eh.Method.ToString())
+                .Append("System.Void LightMock.Generator.Tests.Interface.IAssertNoOtherCalls_Throws.EventHandler -= ")
+                .AppendLine(eh.Method.ToString())
                 .ToString();
 
             var testScript = LoadAssembly<IAssertNoOtherCalls_Throws>();
@@ -629,8 +642,13 @@ namespace LightMock.Generator.Tests
 
             _ = mock["456"];
 
+            mock.EventHandler += SomeEventHandler;
+            mock.EventHandler -= SomeEventHandler;
+
             var ex = Assert.Throws<MockException>(() => context.AssertNoOtherCalls());
             Assert.Equal(expectedMessage, ex.Message);
+
+            void SomeEventHandler(object? sender, EventArgs args) { }
         }
 
         [Fact]

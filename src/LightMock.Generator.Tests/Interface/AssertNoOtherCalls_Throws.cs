@@ -10,5 +10,6 @@ namespace LightMock.Generator.Tests.Interface
         string Function(string a);
         void Method(string a);
         string this[string index] { get; set; }
+        event EventHandler EventHandler;
     }
 }
