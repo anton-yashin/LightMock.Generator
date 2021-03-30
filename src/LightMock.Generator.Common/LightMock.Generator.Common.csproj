@@ -34,4 +34,10 @@
     <PackageReference Include="System.Collections.Immutable" Version="5.0.0" />
   </ItemGroup>
 
+  <!-- Copy package to folder set by NuGetFolder environment variable if present -->
+  <Target Name="CopyPackage" AfterTargets="Pack" Condition=" '$(NuGetFolder)' != '' ">
+    <Copy SourceFiles="$(OutputPath)..\$(PackageId).$(PackageVersion).nupkg" DestinationFolder="$(NuGetFolder)" />
+    <Copy SourceFiles="$(OutputPath)..\$(PackageId).$(PackageVersion).snupkg" DestinationFolder="$(NuGetFolder)" />
+  </Target>
+  
 </Project>
