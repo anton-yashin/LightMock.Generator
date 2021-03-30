@@ -124,8 +124,10 @@ namespace LightMock
 					return d.ToString("G17");
 				case Enum @enum:
 					return @enum.GetType().ToString() + "." + @enum.ToString("F");
+				case Delegate d:
+					return d.Method.ToString();
             }
-			return value.ToString();
+			return value.ToString() ?? value.GetType().ToString();
 		}
 	}
 }

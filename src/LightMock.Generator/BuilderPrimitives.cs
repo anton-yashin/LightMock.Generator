@@ -523,7 +523,11 @@ namespace LightMock.Generator
         {
             if (symbol.AddMethod != null)
             {
-                @this.Append("void ")
+                @this
+                    .Append("[global::LightMock.Generator.OriginalNameAttribute(1, \".")
+                    .Append(symbol.Name)
+                    .Append(" += {0}\")] ")
+                    .Append("void ")
                     .AppendE2FAdd(symbol)
                     .Append("(")
                     .Append(symbol.Type, SymbolDisplayFormats.Interface)
@@ -531,7 +535,11 @@ namespace LightMock.Generator
             }
             if (symbol.RemoveMethod != null)
             {
-                @this.Append("void ")
+                @this
+                    .Append("[global::LightMock.Generator.OriginalNameAttribute(1, \".")
+                    .Append(symbol.Name)
+                    .Append(" -= {0}\")] ")
+                    .Append("void ")
                     .AppendE2FRemove(symbol)
                     .Append("(")
                     .Append(symbol.Type, SymbolDisplayFormats.Interface)
