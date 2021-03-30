@@ -766,6 +766,56 @@ namespace LightMock.Generator.Tests
             Assert.Equal(expectedMessage, ex.Message);
         }
 
+        [Fact]
+        public void ArrangeAddRemove_When()
+        {
+            var testScript = LoadAssembly<AArrangeAddRemove_When>();
+            var context = testScript.Context;
+            var mock = testScript.MockObject;
+
+            context.ArrangeAdd_When(f => f.EventHandler += SomeEventHandler).Throws<ValidProgramException>();
+            context.ArrangeRemove_When(f => f.EventHandler -= SomeEventHandler).Throws<ValidProgramException>();
+
+            Assert.Throws<ValidProgramException>(() => mock.EventHandler += SomeEventHandler);
+            Assert.Throws<ValidProgramException>(() => mock.EventHandler -= SomeEventHandler);
+
+            mock.EventHandler += AnotherEventHandler;
+            mock.EventHandler -= AnotherEventHandler;
+
+            Assert.Equal(KExpected, testScript.DoRun());
+
+            void SomeEventHandler(object? o, EventArgs a) { }
+            void AnotherEventHandler(object? o, EventArgs a) { }
+        }
+
+        [Fact]
+        public void ArrangeAddRemove_WhenAny()
+        {
+            var testScript = LoadAssembly<AArrangeAddRemove_WhenAny>();
+            var context = testScript.Context;
+            var mock = testScript.MockObject;
+
+            context.ArrangeAdd_WhenAny(f => f.EventHandler += null).Throws<ValidProgramException>();
+            context.ArrangeRemove_WhenAny(f => f.EventHandler -= null).Throws<ValidProgramException>();
+
+            Assert.Throws<ValidProgramException>(() => mock.EventHandler += SomeEventHandler);
+            Assert.Throws<ValidProgramException>(() => mock.EventHandler -= SomeEventHandler);
+
+            Assert.Throws<ValidProgramException>(() => mock.EventHandler += AnotherEventHandler);
+            Assert.Throws<ValidProgramException>(() => mock.EventHandler -= AnotherEventHandler);
+
+            Assert.Equal(KExpected, testScript.DoRun());
+
+            Assert.Throws<ValidProgramException>(() => mock.InvokeProtectedEventHandler += SomeEventHandler);
+            Assert.Throws<ValidProgramException>(() => mock.InvokeProtectedEventHandler -= SomeEventHandler);
+
+            Assert.Throws<ValidProgramException>(() => mock.InvokeProtectedEventHandler += AnotherEventHandler);
+            Assert.Throws<ValidProgramException>(() => mock.InvokeProtectedEventHandler -= AnotherEventHandler);
+
+            void SomeEventHandler(object? o, EventArgs a) { }
+            void AnotherEventHandler(object? o, EventArgs a) { }
+        }
+
         protected override string GetFullResourceName(string resourceName)
             => "AbstractClass." + resourceName + ".test.cs";
     }

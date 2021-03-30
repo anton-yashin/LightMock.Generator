@@ -218,6 +218,43 @@ namespace LightMock
         /// No AOT transformations, thus pattern matching using <see cref="The{TValue}"/> type is not working.
         /// </remarks>
         IArrangement ArrangeSetter_When(Action<T> expression);
+
+        /// <summary>
+        /// Arranges an event adder when specified event handler is set to it.
+        /// </summary>
+        /// <param name="expression">Expression used to select an event adder that will be arranged when specified event handler is added.</param>
+        /// <returns>A new <see cref="IArrangement"/> used to apply event behavior.</returns>
+        /// <remarks>
+        /// No AOT transformations, thus pattern matching using <see cref="The{TValue}"/> type is not working.
+        /// </remarks>
+        IArrangement ArrangeAdd_When(Action<T> expression);
+        /// <summary>
+        /// Arranges a event adder when any value is set to it.
+        /// </summary>
+        /// <param name="expression">Expression used to select an event adder that will be arranged when any event handler is added.</param>
+        /// <returns>A new <see cref="IArrangement"/> used to apply event behavior.</returns>
+        /// <remarks>
+        /// No AOT transformations, thus pattern matching using <see cref="The{TValue}"/> type is not working.
+        /// </remarks>
+        IArrangement ArrangeAdd_WhenAny(Action<T> expression);
+        /// <summary>
+        /// Arranges an event remover when specified event handler is set to it.
+        /// </summary>
+        /// <param name="expression">Expression used to select an event remover that will be arranged when specified event handler is removed.</param>
+        /// <returns>A new <see cref="IArrangement"/> used to apply event behavior.</returns>
+        /// <remarks>
+        /// No AOT transformations, thus pattern matching using <see cref="The{TValue}"/> type is not working.
+        /// </remarks>
+        IArrangement ArrangeRemove_When(Action<T> expression);
+        /// <summary>
+        /// Arranges a event remover when any event handler is set to it.
+        /// </summary>
+        /// <param name="expression">Expression used to select an event remover that will be arranged when any event handler is removed.</param>
+        /// <returns>A new <see cref="IArrangement"/> used to apply event behavior.</returns>
+        /// <remarks>
+        /// No AOT transformations, thus pattern matching using <see cref="The{TValue}"/> type is not working.
+        /// </remarks>
+        IArrangement ArrangeRemove_WhenAny(Action<T> expression);
     }
 
     internal interface IAdvancedMockContext

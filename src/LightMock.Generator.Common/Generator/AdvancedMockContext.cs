@@ -82,7 +82,7 @@ namespace LightMock.Generator
         T CreateArrangeWhenInstance(ILambdaRequest request)
             => typeResolver.ActivateArrangeWhenInstance<T>(GetArrangeArgs(request));
 
-        IArrangement ArrangeSetter_NoAot(Action<T> expression, Func<ILambdaRequest, T> instanceFactory)
+        IArrangement Arrange_NoAot(Action<T> expression, Func<ILambdaRequest, T> instanceFactory)
         {
             var request = new LambdaRequest();
             expression(instanceFactory(request));
@@ -100,10 +100,22 @@ namespace LightMock.Generator
         }
 
         public IArrangement ArrangeSetter_When(Action<T> expression)
-            => ArrangeSetter_NoAot(expression, CreateArrangeWhenInstance);
+            => Arrange_NoAot(expression, CreateArrangeWhenInstance);
 
         public IArrangement ArrangeSetter_WhenAny(Action<T> expression)
-            => ArrangeSetter_NoAot(expression, CreateArrangeWhenAnyInstance);
+            => Arrange_NoAot(expression, CreateArrangeWhenAnyInstance);
+
+        public IArrangement ArrangeAdd_When(Action<T> expression)
+            => Arrange_NoAot(expression, CreateArrangeWhenInstance);
+
+        public IArrangement ArrangeAdd_WhenAny(Action<T> expression)
+            => Arrange_NoAot(expression, CreateArrangeWhenAnyInstance);
+
+        public IArrangement ArrangeRemove_When(Action<T> expression)
+            => Arrange_NoAot(expression, CreateArrangeWhenInstance);
+
+        public IArrangement ArrangeRemove_WhenAny(Action<T> expression)
+            => Arrange_NoAot(expression, CreateArrangeWhenAnyInstance);
 
         void AssertUsingAssertInstance(Action<T> expression, Invoked times)
             => expression(CreateAssertWhenInstance(times));
