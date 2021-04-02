@@ -505,7 +505,7 @@ namespace LightMock.Generator
                     .Append(">");
             }
             return @this.Append("(")
-                .Append(string.Join(", ", symbol.Parameters.Select(i => i.Name)))
+                .Append(string.Join(", ", symbol.Parameters.Select(i => i.ToDisplayString(SymbolDisplayFormats.ConstructorCall))))
                 .Append(")));}");
         }
 
