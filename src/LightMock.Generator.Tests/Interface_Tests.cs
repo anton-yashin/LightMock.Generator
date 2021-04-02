@@ -691,6 +691,17 @@ namespace LightMock.Generator.Tests
             void AnotherEventHandler(object? o, EventArgs a) { }
         }
 
+        [Fact]
+        public void ReservedSymbols()
+        {
+            var testScript = LoadAssembly<IReservedSymbols>();
+            var context = testScript.Context;
+            var mock = testScript.MockObject;
+
+            Assert.NotNull(context);
+            Assert.NotNull(mock);
+        }
+
         protected override string GetFullResourceName(string resourceName)
             => "Interface." + resourceName + ".test.cs";
     }
