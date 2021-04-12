@@ -1,8 +1,1 @@
-﻿* fix: inherit specialized interface and abstract class
-* feat: indexer support for interfaces and for classes
-* feat: basic fluent interface
-* feat: new arrangement method ThrowsNothing to cancel previous Throw arrangement
-* feat: new assert method AssertNoOtherCalls
-* feat: new arrangement extension ReturnsAsync
-* refactor: ArrangeAdd renamed to ArrangeAdd_When & ArrangeRemove renamed to ArrangeRemove_When
-* feat: new arrangement methods ArrangeAdd_WhenAny and ArrangeRemove_WhenAny
+﻿* fix: allow to use reserved words as method parameters
