@@ -76,10 +76,5 @@ namespace ExpressionReflect
 
             return isPredicate;
         }
-
-        internal static bool IsInstanceOfType(this Type type, object obj)
-        {
-            return obj != null && type.GetTypeInfo().IsAssignableFrom(obj.GetType().GetTypeInfo());
-        }
     }
 }
