@@ -25,7 +25,6 @@
 using System.Collections;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Linq.Expressions;
@@ -36,7 +35,6 @@ namespace ExpressionReflect
     /// <summary>
     /// An expression visitor that translates the expression tree to reflection calls.
     /// </summary>
-    [ExcludeFromCodeCoverage]
 	sealed class ExpressionReflectionExecutor : ExpressionVisitor
 	{
 		private IDictionary<string, object?> args = new Dictionary<string, object?>();

@@ -23,12 +23,10 @@
 	https://github.com/mgernand
 ******************************************************************************/
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 namespace ExpressionReflect
 {
-    [ExcludeFromCodeCoverage]
     static class TypeExtensions
     {
         internal static bool IsFunc(this Type type)

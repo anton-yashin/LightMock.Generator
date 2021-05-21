@@ -24,7 +24,6 @@
 ******************************************************************************/
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 
 namespace ExpressionReflect
@@ -35,7 +34,6 @@ namespace ExpressionReflect
 	/// <remarks>
 	/// From http://msdn.microsoft.com/en-us/library/bb546158.aspx
 	/// </remarks>
-	[ExcludeFromCodeCoverage]
 	static class Evaluator
 	{
 		/// <summary>
