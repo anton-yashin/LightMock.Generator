@@ -25,6 +25,7 @@
     https://github.com/anton-yashin/
 *******************************************************************************/
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace LightMock.Generator
 {
@@ -32,6 +33,7 @@ namespace LightMock.Generator
     /// Virtual functions in the specified class will not be overriden.
     /// </summary>
     [AttributeUsage(validOn: AttributeTargets.Assembly, AllowMultiple = true, Inherited = false)]
+    [ExcludeFromCodeCoverage]
     public sealed class DontOverrideAttribute : Attribute
     {
         /// <summary>

@@ -22,12 +22,10 @@
 ******************************************************************************    
 	https://github.com/mgernand
 ******************************************************************************/
-using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 
 namespace ExpressionReflect
 {
-    [ExcludeFromCodeCoverage]
     static class ExpressionExtensions
     {
         public static object? Execute(this Expression expression, params object[] values)

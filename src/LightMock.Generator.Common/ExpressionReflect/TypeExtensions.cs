@@ -23,12 +23,10 @@
 	https://github.com/mgernand
 ******************************************************************************/
 using System;
-using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 
 namespace ExpressionReflect
 {
-    [ExcludeFromCodeCoverage]
     static class TypeExtensions
     {
         internal static bool IsFunc(this Type type)
@@ -77,11 +75,6 @@ namespace ExpressionReflect
             }
 
             return isPredicate;
-        }
-
-        internal static bool IsInstanceOfType(this Type type, object obj)
-        {
-            return obj != null && type.GetTypeInfo().IsAssignableFrom(obj.GetType().GetTypeInfo());
         }
     }
 }

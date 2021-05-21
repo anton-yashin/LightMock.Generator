@@ -26,6 +26,7 @@
 *******************************************************************************/
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 
 namespace LightMock.Generator
@@ -33,6 +34,7 @@ namespace LightMock.Generator
     /// <summary>
     /// Use this class with nameof operator
     /// </summary>
+    [ExcludeFromCodeCoverage]
     internal sealed class AbstractMockNameofProvider : AbstractMock<IDelegateProvider>
     {
         public AbstractMockNameofProvider(object[] prms) : base(prms)

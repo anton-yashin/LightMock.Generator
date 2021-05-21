@@ -25,6 +25,7 @@
     https://github.com/anton-yashin/
 *******************************************************************************/
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 namespace LightMock.Generator
 {
@@ -37,6 +38,7 @@ namespace LightMock.Generator
     /// because they use AOT transformations. This attribute useful when you want to create a separate library of mocks.
     /// </remarks>
     [AttributeUsage(validOn: AttributeTargets.Assembly, AllowMultiple = false, Inherited = false)]
+    [ExcludeFromCodeCoverage]
     public sealed class DisableCodeGenerationAttribute : Attribute
     {
         /// <summary>

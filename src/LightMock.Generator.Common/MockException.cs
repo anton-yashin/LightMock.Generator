@@ -25,15 +25,15 @@
     https://github.com/anton-yashin/
 *******************************************************************************/
 using System;
-using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.Serialization;
-using System.Text;
 
 namespace LightMock
 {
     /// <summary>
     /// <see cref="MockException"/> thrown when an assert is failed.
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public class MockException : Exception
     {
         internal MockException()
