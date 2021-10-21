@@ -20,6 +20,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		..\release-notes.txt = ..\release-notes.txt
 	EndProjectSection
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LightMock.Generator.Roslyn40", "LightMock.Generator\LightMock.Generator.Roslyn40.csproj", "{9139E0B5-B052-4B99-8635-46863D7CF6A3}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LightMock.Generator.Tests.Roslyn40", "LightMock.Generator.Tests\LightMock.Generator.Tests.Roslyn40.csproj", "{DC47D88C-B425-491B-B9B0-EEE6E1E4A5F8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -38,6 +42,14 @@ Global
 		{6D3D2D32-2E51-4139-B289-B5BE62C3C2B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6D3D2D32-2E51-4139-B289-B5BE62C3C2B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6D3D2D32-2E51-4139-B289-B5BE62C3C2B5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9139E0B5-B052-4B99-8635-46863D7CF6A3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9139E0B5-B052-4B99-8635-46863D7CF6A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9139E0B5-B052-4B99-8635-46863D7CF6A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9139E0B5-B052-4B99-8635-46863D7CF6A3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DC47D88C-B425-491B-B9B0-EEE6E1E4A5F8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DC47D88C-B425-491B-B9B0-EEE6E1E4A5F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DC47D88C-B425-491B-B9B0-EEE6E1E4A5F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DC47D88C-B425-491B-B9B0-EEE6E1E4A5F8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
