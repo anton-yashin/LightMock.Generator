@@ -9,11 +9,6 @@ namespace LightMock.Generator
     [ExcludeFromCodeCoverage]
     public static class ContextResolver
     {
-        public static IReadOnlyDictionary<Type, Type> TypeByType { get; } = new Dictionary<Type, Type>()
-        {
-            /*typeByTypeBuilder*/
-        };
-
         public static LambdaExpression ExchangeForExpression(string token)
         {
             switch (token)

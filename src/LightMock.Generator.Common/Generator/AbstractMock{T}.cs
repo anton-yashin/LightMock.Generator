@@ -29,6 +29,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
@@ -57,11 +58,8 @@ namespace LightMock.Generator
         [EditorBrowsable(EditorBrowsableState.Never)]
         protected AbstractMock(object[] prms)
         {
-            if (ContextResolverTable.TryGetValue(resolverType, out var t) == false)
-                throw new MockNotGeneratedException(contextType);
-
             this.prms = prms;
-            typeResolver = (TypeResolver)Activator.CreateInstance(t, contextType);
+            typeResolver = (TypeResolver)Activator.CreateInstance(GetResolverType(), contextType);
             publicContext = new AdvancedMockContext<T>(prms, typeResolver, ExchangeForExpression);
             protectedContext = typeResolver.ActivateProtectedContext<T>(GetProtectedContextArgs());
             propertiesContext = typeResolver.GetPropertiesContext<T>();
@@ -75,8 +73,22 @@ namespace LightMock.Generator
         object IProtectedContext<T>.ProtectedContext => protectedContext;
 
         static readonly Type contextType = typeof(T);
-        static readonly Type resolverType = contextType.IsGenericType ? contextType.GetGenericTypeDefinition() : contextType;
         static readonly bool isDelegate = contextType.IsDelegate();
+
+        static Type? __resolverType;
+        static Type GetResolverType()
+            => LazyInitializer.EnsureInitialized(ref __resolverType!, () =>
+            {
+                var rt = contextType.IsGenericType ? contextType.GetGenericTypeDefinition() : contextType;
+                Type? typeResolverType = (from assembly in AppDomain.CurrentDomain.GetAssemblies()
+                                          from type in assembly.GetTypes()
+                                          from attribute in type.GetCustomAttributes<TypeKeyAttribute>(false)
+                                          where attribute.Key == rt
+                                          select type).FirstOrDefault();
+                if (typeResolverType == null)
+                    throw new MockNotGeneratedException(contextType);
+                return typeResolverType;
+            });
 
         object[] GetMockInstanceArgs()
         {
@@ -110,11 +122,6 @@ namespace LightMock.Generator
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
         protected abstract LambdaExpression ExchangeForExpression(string token);
-        /// <summary>
-        /// For internal usage
-        /// </summary>
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        protected abstract IReadOnlyDictionary<Type, Type> ContextResolverTable { get; }
 
         #region IAdvancedMockContext<T> implementation
 

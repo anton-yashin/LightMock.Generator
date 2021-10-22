@@ -112,7 +112,6 @@ namespace LightMock.Generator
                 // process symbols under Mock<> generic
 
                 var mockContextMatcher = new TypeMatcher(typeof(AbstractMock<>));
-                var typeByTypeBuilder = new StringBuilder();
                 var exchangeForExpressionBuilder = new StringBuilder();
                 var processedTypes = new List<INamedTypeSymbol>();
                 var multicastDelegateType = typeof(MulticastDelegate);
@@ -157,7 +156,6 @@ namespace LightMock.Generator
                                 text, options, cancellationToken: cancellationToken));
                         }
                         cancellationToken.ThrowIfCancellationRequested();
-                        processor.DoGeneratePart_TypeByType(typeByTypeBuilder);
                         cancellationToken.ThrowIfCancellationRequested();
                         processedTypes.Add(mockedType.OriginalDefinition);
                     }
@@ -205,7 +203,6 @@ namespace LightMock.Generator
 
                 cancellationToken.ThrowIfCancellationRequested();
                 var impl = Utils.LoadResource(KContextResolver + Suffix.CSharpFile)
-                    .Replace("/*typeByTypeBuilder*/", typeByTypeBuilder.ToString())
                     .Replace("/*exchangeForExpressionBuilder*/", exchangeForExpressionBuilder.ToString());
 
                 cancellationToken.ThrowIfCancellationRequested();

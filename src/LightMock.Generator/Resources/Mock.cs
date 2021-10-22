@@ -21,7 +21,5 @@ namespace LightMock.Generator
 
         protected override LambdaExpression ExchangeForExpression(string token)
             => ContextResolver.ExchangeForExpression(token);
-
-        protected override IReadOnlyDictionary<Type, Type> ContextResolverTable => ContextResolver.TypeByType;
     }
 }
