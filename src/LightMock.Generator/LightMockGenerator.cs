@@ -39,7 +39,11 @@ using Microsoft.CodeAnalysis.Text;
 namespace LightMock.Generator
 {
     [Generator]
-    public sealed class LightMockGenerator : ISourceGenerator
+#if ROSLYN_4
+    public class LightMockGenerator : IIncrementalGenerator
+#else
+    public class LightMockGenerator : ISourceGenerator
+#endif
     {
         const string KMock = "Mock";
         const string KContextResolver = nameof(ContextResolver);
@@ -50,6 +54,8 @@ namespace LightMock.Generator
         public LightMockGenerator()
         {
         }
+
+#if ROSLYN_4 == false
 
         public void Execute(GeneratorExecutionContext context)
         {
@@ -178,6 +184,8 @@ namespace LightMock.Generator
             }
         }
 
+#endif
+
         private static bool IsDisableCodeGenerationAttributePresent(
             CSharpCompilation compilation,
             LightMockSyntaxReceiver receiver,
@@ -237,10 +245,31 @@ namespace LightMock.Generator
             }
             return haveIssues;
         }
+#if ROSLYN_4
+
+        public void Initialize(IncrementalGeneratorInitializationContext context)
+        {
+            var candidateMocks = context.SyntaxProvider.CreateSyntaxProvider(
+                (sn, ct) => sn is GenericNameSyntax gns && LightMockSyntaxReceiver.IsMock(gns),
+                (ctx, ct) => (GenericNameSyntax)ctx.Node);
+            var disableCodegenerationAttributes = context.SyntaxProvider.CreateSyntaxProvider(
+                (sn, ct) => sn is AttributeSyntax @as && LightMockSyntaxReceiver.IsDisableCodeGenerationAttribute(@as),
+                (ctx, ct) => (AttributeSyntax)ctx.Node);
+            var dontOverrideAttributes = context.SyntaxProvider.CreateSyntaxProvider(
+                (sn, ct) => sn is AttributeSyntax @as && LightMockSyntaxReceiver.IsDontOverrideAttribute(@as),
+                (ctx, ct) => (AttributeSyntax)ctx.Node);
+            var arrangeInvocations = context.SyntaxProvider.CreateSyntaxProvider(
+                (sn, ct) => sn is InvocationExpressionSyntax ies && LightMockSyntaxReceiver.IsArrangeInvocation(ies),
+                (ctx, ct) => (InvocationExpressionSyntax)ctx.Node);
+        }
+
+#else
 
         public void Initialize(GeneratorInitializationContext context)
         {
             context.RegisterForSyntaxNotifications(() => new LightMockSyntaxReceiver());
         }
+#endif
+
     }
 }

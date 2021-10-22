@@ -61,50 +61,75 @@ namespace LightMock.Generator
             }
         }
 
-        static bool IsMock(GenericNameSyntax gns)
+        internal static bool IsMock(GenericNameSyntax gns)
             => gns.Identifier.ValueText == "Mock" && gns.TypeArgumentList.Arguments.Any();
 
-        const string KDisableCodeGenerationAttribute = nameof(DisableCodeGenerationAttribute);
-        const string KDisableCodeGeneration = "DisableCodeGeneration";
-        const string KDontOverrideAttribute = nameof(DontOverrideAttribute);
-        const string KDontOverride = "DontOverride";
-        const string KMock = "Mock";
-
-
-        public override void VisitAttribute(AttributeSyntax node)
+        internal static bool IsDisableCodeGenerationAttribute(AttributeSyntax attributeSyntax)
         {
+            const string KDisableCodeGenerationAttribute = nameof(DisableCodeGenerationAttribute);
+            const string KDisableCodeGeneration = "DisableCodeGeneration";
 #if DEBUG
             if (KDisableCodeGenerationAttribute != KDisableCodeGeneration + nameof(Attribute))
                 throw new InvalidProgramException($@"constant {nameof(KDisableCodeGeneration)} is not valid");
-            if (KDontOverrideAttribute != KDontOverride + nameof(Attribute))
-                throw new InvalidProgramException($@"constant {nameof(KDontOverride)} is not valid");
 #endif
-            switch (node.Name.ToString())
+            switch (attributeSyntax.Name.ToString())
             {
                 case KDisableCodeGeneration:
                 case KDisableCodeGenerationAttribute:
-                    DisableCodeGenerationAttributes.Add(node);
-                    break;
+                    return true;
+            }
+            return false;
+        }
+
+        internal static bool IsDontOverrideAttribute(AttributeSyntax attributeSyntax)
+        {
+            const string KDontOverrideAttribute = nameof(DontOverrideAttribute);
+            const string KDontOverride = "DontOverride";
+#if DEBUG
+            if (KDontOverrideAttribute != KDontOverride + nameof(Attribute))
+                throw new InvalidProgramException($@"constant {nameof(KDontOverride)} is not valid");
+#endif
+            switch (attributeSyntax.Name.ToString())
+            {
                 case KDontOverride:
                 case KDontOverrideAttribute:
-                    DontOverrideAttributes.Add(node);
-                    break;
+                    return true;
+            }
+            return false;
+        }
+
+        public override void VisitAttribute(AttributeSyntax node)
+        {
+            if (IsDisableCodeGenerationAttribute(node))
+            {
+                DisableCodeGenerationAttributes.Add(node);
+                return;
+            }
+            if (IsDontOverrideAttribute(node))
+            {
+                DontOverrideAttributes.Add(node);
+                return;
             }
         }
 
-        public override void VisitInvocationExpression(InvocationExpressionSyntax node)
+        internal static bool IsArrangeInvocation(InvocationExpressionSyntax ies)
         {
-            if (node.Expression is MemberAccessExpressionSyntax maes)
+            if (ies.Expression is MemberAccessExpressionSyntax maes)
             {
                 switch (maes.Name.ToString())
                 {
                     case nameof(AbstractMockNameofProvider.ArrangeSetter):
                     case nameof(AbstractMockNameofProvider.AssertSet):
-                        ArrangeInvocations.Add(node);
-                        break;
+                        return true;
                 }
-
             }
+            return false;
+        }
+
+        public override void VisitInvocationExpression(InvocationExpressionSyntax node)
+        {
+            if (IsArrangeInvocation(node))
+                ArrangeInvocations.Add(node);
         }
     }
 }

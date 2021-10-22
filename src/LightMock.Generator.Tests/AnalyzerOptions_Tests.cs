@@ -28,7 +28,11 @@ namespace LightMock.Generator.Tests
             }.ToImmutableDictionary();
             var op = new MockAnalyzerConfigOptionsProvider(new MockAnalyzerConfigOptions(options));
             var driver = CSharpGeneratorDriver.Create(
+#if ROSLYN_4
+                ImmutableArray.Create(new LightMockGenerator().AsSourceGenerator()),
+#else
                 ImmutableArray.Create(new LightMockGenerator()),
+#endif
                 Enumerable.Empty<AdditionalText>(),
                 (CSharpParseOptions)compilation.SyntaxTrees.First().Options, op);
 

@@ -498,7 +498,11 @@ namespace LightMock.Generator.Tests
             var source = Utils.LoadResource(fn);
             var compilation = CreateCompilation(source, fn);
             var driver = CSharpGeneratorDriver.Create(
+#if ROSLYN_4
+                ImmutableArray.Create(new LightMockGenerator().AsSourceGenerator()),
+#else
                 ImmutableArray.Create(new LightMockGenerator()),
+#endif
                 Enumerable.Empty<AdditionalText>(),
                 (CSharpParseOptions)compilation.SyntaxTrees.First().Options);
 

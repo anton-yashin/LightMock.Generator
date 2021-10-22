@@ -23,7 +23,11 @@ namespace LightMock.Generator.Tests.TestAbstractions
         {
             var compilation = CreateCompilation(texts);
             var driver = CSharpGeneratorDriver.Create(
+#if ROSLYN_4
+                ImmutableArray.Create(new LightMockGenerator().AsSourceGenerator()),
+#else
                 ImmutableArray.Create(new LightMockGenerator()),
+#endif
                 Enumerable.Empty<AdditionalText>(),
                 (CSharpParseOptions)compilation.SyntaxTrees.First().Options);
 
