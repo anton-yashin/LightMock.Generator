@@ -34,6 +34,7 @@ using LightMock.Generator.Locators;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Diagnostics;
 using Microsoft.CodeAnalysis.Text;
 
 namespace LightMock.Generator
@@ -59,26 +60,54 @@ namespace LightMock.Generator
 
         public void Execute(GeneratorExecutionContext context)
         {
-            context.CancellationToken.ThrowIfCancellationRequested();
-            if (context.AnalyzerConfigOptions.GlobalOptions.TryGetValue(GlobalOptionsNames.Enable, out var value)
+            if (context.Compilation is CSharpCompilation compilation == false)
+                return;
+            if (context.SyntaxReceiver is LightMockSyntaxReceiver receiver == false)
+                return;
+            DoGenerate(
+                context,
+                static (context, diagnostic) => context.ReportDiagnostic(diagnostic),
+                static (context, hintName, sourceText) => context.AddSource(hintName, sourceText),
+                compilation,
+                context.AnalyzerConfigOptions,
+                receiver.CandidateMocks.ToImmutableArray(),
+                receiver.DisableCodeGenerationAttributes.ToImmutableArray(),
+                receiver.DontOverrideAttributes.ToImmutableArray(),
+                receiver.ArrangeInvocations.ToImmutableArray(),
+                context.CancellationToken);
+        }
+
+#endif
+        public void DoGenerate<TContext>(
+            TContext context,
+            Action<TContext, Diagnostic> reportDiagnostic,
+            Action<TContext, string, SourceText> addSource,
+            CSharpCompilation compilation,
+            AnalyzerConfigOptionsProvider optionsProvider,
+            ImmutableArray<GenericNameSyntax> candidateMocks,
+            ImmutableArray<AttributeSyntax> disableCodeGenerationAttributes,
+            ImmutableArray<AttributeSyntax> dontOverrideAttributes,
+            ImmutableArray<InvocationExpressionSyntax> arrangeInvocations,
+            CancellationToken cancellationToken)
+        { 
+            cancellationToken.ThrowIfCancellationRequested();
+            if (optionsProvider.GlobalOptions.TryGetValue(GlobalOptionsNames.Enable, out var value)
                 && value.Equals("false", StringComparison.InvariantCultureIgnoreCase))
             {
                 return;
             }
 
-            if (context.Compilation is CSharpCompilation compilation &&
-                context.SyntaxReceiver is LightMockSyntaxReceiver receiver &&
-                compilation.SyntaxTrees.First().Options is CSharpParseOptions options)
+            if (compilation.SyntaxTrees.First().Options is CSharpParseOptions options)
             {
-                if (IsDisableCodeGenerationAttributePresent(compilation, receiver, context.CancellationToken))
+                if (IsDisableCodeGenerationAttributePresent(compilation, disableCodeGenerationAttributes, cancellationToken))
                     return;
 
-                var dontOverrideList = GetClassExclusionList(compilation, receiver, context.CancellationToken);
+                var dontOverrideList = GetClassExclusionList(compilation, dontOverrideAttributes, cancellationToken);
 
-                context.AddSource(KMock + Suffix.FileName, mock.Value);
+                addSource(context, KMock + Suffix.FileName, mock.Value);
 
                 compilation = compilation.AddSyntaxTrees(CSharpSyntaxTree.ParseText(
-                    mock.Value, options, cancellationToken: context.CancellationToken));
+                    mock.Value, options, cancellationToken: cancellationToken));
 
                 // process symbols under Mock<> generic
 
@@ -89,14 +118,14 @@ namespace LightMock.Generator
                 var multicastDelegateType = typeof(MulticastDelegate);
                 var multicastDelegateNameSpaceAndName = multicastDelegateType.Namespace + "." + multicastDelegateType.Name;
 
-                foreach (var candidateGeneric in receiver.CandidateMocks)
+                foreach (var candidateGeneric in candidateMocks)
                 {
-                    context.CancellationToken.ThrowIfCancellationRequested();
+                    cancellationToken.ThrowIfCancellationRequested();
                     var mockContainer = compilation
                         .GetSemanticModel(candidateGeneric.SyntaxTree)
-                        .GetSymbolInfo(candidateGeneric, context.CancellationToken).Symbol
+                        .GetSymbolInfo(candidateGeneric, cancellationToken).Symbol
                         as INamedTypeSymbol;
-                    context.CancellationToken.ThrowIfCancellationRequested();
+                    cancellationToken.ThrowIfCancellationRequested();
                     var mcbt = mockContainer?.BaseType;
                     if (mcbt != null
                         && mockContextMatcher.IsMatch(mcbt)
@@ -115,21 +144,21 @@ namespace LightMock.Generator
                         else
                             processor = new InterfaceProcessor(mockedType);
 
-                        context.CancellationToken.ThrowIfCancellationRequested();
-                        if (EmitDiagnostics(context, processor.GetErrors()))
+                        cancellationToken.ThrowIfCancellationRequested();
+                        if (EmitDiagnostics(context, reportDiagnostic, processor.GetErrors()))
                             continue;
-                        context.CancellationToken.ThrowIfCancellationRequested();
-                        EmitDiagnostics(context, processor.GetWarnings());
+                        cancellationToken.ThrowIfCancellationRequested();
+                        EmitDiagnostics(context, reportDiagnostic, processor.GetWarnings());
                         var text = processor.DoGenerate();
-                        context.AddSource(processor.FileName, text);
+                        addSource(context, processor.FileName, text);
                         if (processor.IsUpdateCompilationRequired)
                         {
                             compilation = compilation.AddSyntaxTrees(CSharpSyntaxTree.ParseText(
-                                text, options, cancellationToken: context.CancellationToken));
+                                text, options, cancellationToken: cancellationToken));
                         }
-                        context.CancellationToken.ThrowIfCancellationRequested();
+                        cancellationToken.ThrowIfCancellationRequested();
                         processor.DoGeneratePart_TypeByType(typeByTypeBuilder);
-                        context.CancellationToken.ThrowIfCancellationRequested();
+                        cancellationToken.ThrowIfCancellationRequested();
                         processedTypes.Add(mockedType.OriginalDefinition);
                     }
                 }
@@ -138,12 +167,12 @@ namespace LightMock.Generator
                 
                 var expressionUids = new HashSet<string>();
                 var mockInterfaceMatcher = new TypeMatcher(typeof(IAdvancedMockContext<>));
-                foreach (var candidateInvocation in receiver.ArrangeInvocations)
+                foreach (var candidateInvocation in arrangeInvocations)
                 {
-                    context.CancellationToken.ThrowIfCancellationRequested();
+                    cancellationToken.ThrowIfCancellationRequested();
                     var st = compilation.GetSemanticModel(candidateInvocation.SyntaxTree);
-                    var methodSymbol = st.GetSymbolInfo(candidateInvocation, context.CancellationToken).Symbol as IMethodSymbol;
-                    context.CancellationToken.ThrowIfCancellationRequested();
+                    var methodSymbol = st.GetSymbolInfo(candidateInvocation, cancellationToken).Symbol as IMethodSymbol;
+                    cancellationToken.ThrowIfCancellationRequested();
 
                     if (methodSymbol != null 
                         && (mockContextMatcher.IsMatch(methodSymbol.ContainingType)
@@ -162,39 +191,37 @@ namespace LightMock.Generator
                                 continue;
                         }
 
-                        context.CancellationToken.ThrowIfCancellationRequested();
+                        cancellationToken.ThrowIfCancellationRequested();
 
                         processor.AppendExpression(exchangeForExpressionBuilder);
-                        context.CancellationToken.ThrowIfCancellationRequested();
-                        if (EmitDiagnostics(context, processor.GetErrors()))
+                        cancellationToken.ThrowIfCancellationRequested();
+                        if (EmitDiagnostics(context, reportDiagnostic, processor.GetErrors()))
                             continue;
-                        context.CancellationToken.ThrowIfCancellationRequested();
-                        EmitDiagnostics(context, processor.GetWarnings());
+                        cancellationToken.ThrowIfCancellationRequested();
+                        EmitDiagnostics(context, reportDiagnostic, processor.GetWarnings());
 
                     }
                 }
 
-                context.CancellationToken.ThrowIfCancellationRequested();
+                cancellationToken.ThrowIfCancellationRequested();
                 var impl = Utils.LoadResource(KContextResolver + Suffix.CSharpFile)
                     .Replace("/*typeByTypeBuilder*/", typeByTypeBuilder.ToString())
                     .Replace("/*exchangeForExpressionBuilder*/", exchangeForExpressionBuilder.ToString());
 
-                context.CancellationToken.ThrowIfCancellationRequested();
-                context.AddSource(KContextResolver + Suffix.FileName, SourceText.From(impl, Encoding.UTF8));
+                cancellationToken.ThrowIfCancellationRequested();
+                addSource(context, KContextResolver + Suffix.FileName, SourceText.From(impl, Encoding.UTF8));
             }
         }
 
-#endif
-
         private static bool IsDisableCodeGenerationAttributePresent(
             CSharpCompilation compilation,
-            LightMockSyntaxReceiver receiver,
+            ImmutableArray<AttributeSyntax> disableCodeGenerationAttributes,
             CancellationToken cancellationToken)
         {
             var disableCodeGenerationAttributeType = typeof(DisableCodeGenerationAttribute);
             var dcgaName = disableCodeGenerationAttributeType.Name;
             var dcgaNamespace = disableCodeGenerationAttributeType.Namespace;
-            foreach (var candidateAttribute in receiver.DisableCodeGenerationAttributes)
+            foreach (var candidateAttribute in disableCodeGenerationAttributes)
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 var model = compilation.GetSemanticModel(candidateAttribute.SyntaxTree);
@@ -211,14 +238,14 @@ namespace LightMock.Generator
 
         private static IReadOnlyList<INamedTypeSymbol> GetClassExclusionList(
             CSharpCompilation compilation,
-            LightMockSyntaxReceiver receiver,
+            ImmutableArray<AttributeSyntax> dontOverrideAttributes,
             CancellationToken cancellationToken)
         {
             var result = new List<INamedTypeSymbol>();
             var dontOverrideAttributeType = typeof(DontOverrideAttribute);
             var doatName = dontOverrideAttributeType.Name;
             var doatNamespace = dontOverrideAttributeType.Namespace;
-            foreach (var candidateAttribute in receiver.DontOverrideAttributes)
+            foreach (var candidateAttribute in dontOverrideAttributes)
             {
                 TypeSyntax? type;
                 cancellationToken.ThrowIfCancellationRequested();
@@ -235,16 +262,17 @@ namespace LightMock.Generator
             return result.ToImmutableArray();
         }
 
-        bool EmitDiagnostics(GeneratorExecutionContext context, IEnumerable<Diagnostic> diagnostics)
+        bool EmitDiagnostics<TContext>(TContext context, Action<TContext, Diagnostic> reportDiagnostic, IEnumerable<Diagnostic> diagnostics)
         {
             bool haveIssues = false;
             foreach (var d in diagnostics)
             {
                 haveIssues = true;
-                context.ReportDiagnostic(d);
+                reportDiagnostic(context, d);
             }
             return haveIssues;
         }
+
 #if ROSLYN_4
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
@@ -261,6 +289,7 @@ namespace LightMock.Generator
             var arrangeInvocations = context.SyntaxProvider.CreateSyntaxProvider(
                 (sn, ct) => sn is InvocationExpressionSyntax ies && LightMockSyntaxReceiver.IsArrangeInvocation(ies),
                 (ctx, ct) => (InvocationExpressionSyntax)ctx.Node);
+            //candidateMocks.Collect().Combine(disableCodegenerationAttributes.Collect()).
         }
 
 #else
