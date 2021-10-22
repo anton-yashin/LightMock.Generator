@@ -36,16 +36,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Resources\*.cs" />
-    <Compile Include="Resorces\*.cs" />
-    <Compile Include="*.cs" />
-    <Compile Include="*\*.cs" />
+    <EmbeddedResource Include="..\LightMock.Generator\Resources\*.cs" />
+    <Compile Include="..\LightMock.Generator\Resorces\*.cs" />
+    <Compile Include="..\LightMock.Generator\**\*.cs" Exclude="..\LightMock.Generator\bin\**;..\LightMock.Generator\obj\**"/>
     <None Include="..\..\nugetreadme.txt" PackagePath="readme.txt" Pack="true" Visible="false" />
   </ItemGroup>
 
   <ItemGroup>
-    <AdditionalFiles Include="AnalyzerReleases.Shipped.md" />
-    <AdditionalFiles Include="AnalyzerReleases.Unshipped.md" />
+    <AdditionalFiles Include="..\LightMock.Generator\AnalyzerReleases.Shipped.md" />
+    <AdditionalFiles Include="..\LightMock.Generator\AnalyzerReleases.Unshipped.md" />
   </ItemGroup>
 
   <ItemGroup>

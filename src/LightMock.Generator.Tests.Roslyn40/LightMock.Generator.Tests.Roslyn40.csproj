@@ -6,6 +6,7 @@
     <IsPackable>false</IsPackable>
     <LangVersion>preview</LangVersion>
     <Nullable>enable</Nullable>
+    <DefineConstants>$(DefineConstants);ROSLYN_4</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
@@ -28,20 +29,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\LightMock.Generator.Common\LightMock.Generator.Common.csproj" />
-    <ProjectReference Include="..\LightMock.Generator\LightMock.Generator.Roslyn40.csproj" />
+    <ProjectReference Include="..\LightMock.Generator.Roslyn40\LightMock.Generator.Roslyn40.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Remove="Interface\*.test.cs" />
-    <Compile Remove="AbstractClass\*.test.cs" />
-    <Compile Remove="Delegate\*.test.cs" />
-    <Compile Remove="Issues\*.test.cs" />
-    <Compile Remove="Attributes\*.test.cs" />
+    <Compile Include="..\LightMock.Generator.Tests\**\*.cs"
+             Exclude="..\LightMock.Generator.Tests\obj\**;..\LightMock.Generator.Tests\bin\**;..\LightMock.Generator.Tests\**\*.test.cs;"/>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Interface\*.test.cs" />
-    <EmbeddedResource Include="AbstractClass\*.test.cs" />
-    <EmbeddedResource Include="Delegate\*.test.cs" />
-    <EmbeddedResource Include="Issues\*.test.cs" />
-    <EmbeddedResource Include="Attributes\*.test.cs" />
+    <EmbeddedResource Include="..\LightMock.Generator.Tests\**\*.test.cs" />
   </ItemGroup>
 </Project>
