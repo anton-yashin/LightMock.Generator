@@ -117,11 +117,8 @@ namespace LightMock.Generator
             return typeResolver.ActivateInstance<T>(GetMockInstanceArgs());
         }
 
-        /// <summary>
-        /// For internal usage
-        /// </summary>
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        protected abstract LambdaExpression ExchangeForExpression(string token);
+        LambdaExpression ExchangeForExpression(string token)
+            => TokenToLambdaTable.Instance.Exchange(token);
 
         #region IAdvancedMockContext<T> implementation
 

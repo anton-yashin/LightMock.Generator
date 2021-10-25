@@ -18,8 +18,5 @@ namespace LightMock.Generator
         public Mock(params object[] prms)
             : base(prms)
         { }
-
-        protected override LambdaExpression ExchangeForExpression(string token)
-            => ContextResolver.ExchangeForExpression(token);
     }
 }

@@ -190,14 +190,13 @@ namespace LightMock.Generator
                         }
 
                         cancellationToken.ThrowIfCancellationRequested();
-
-                        processor.AppendExpression(exchangeForExpressionBuilder);
-                        cancellationToken.ThrowIfCancellationRequested();
                         if (EmitDiagnostics(context, reportDiagnostic, processor.GetErrors()))
                             continue;
                         cancellationToken.ThrowIfCancellationRequested();
                         EmitDiagnostics(context, reportDiagnostic, processor.GetWarnings());
-
+                        cancellationToken.ThrowIfCancellationRequested();
+                        var text = processor.DoGenerate();
+                        addSource(context, processor.FileName, text);
                     }
                 }
 

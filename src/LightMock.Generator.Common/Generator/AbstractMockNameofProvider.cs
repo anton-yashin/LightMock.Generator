@@ -40,8 +40,5 @@ namespace LightMock.Generator
         public AbstractMockNameofProvider(object[] prms) : base(prms)
         {
         }
-
-        protected override LambdaExpression ExchangeForExpression(string token)
-            => throw new NotImplementedException();
     }
 }
