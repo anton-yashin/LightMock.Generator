@@ -111,7 +111,6 @@ namespace LightMock.Generator
                 // process symbols under Mock<> generic
 
                 var mockContextMatcher = new TypeMatcher(typeof(AbstractMock<>));
-                var exchangeForExpressionBuilder = new StringBuilder();
                 var processedTypes = new List<INamedTypeSymbol>();
                 var multicastDelegateType = typeof(MulticastDelegate);
                 var multicastDelegateNameSpaceAndName = multicastDelegateType.Namespace + "." + multicastDelegateType.Name;
@@ -154,7 +153,6 @@ namespace LightMock.Generator
                             compilation = compilation.AddSyntaxTrees(CSharpSyntaxTree.ParseText(
                                 text, options, cancellationToken: cancellationToken));
                         }
-                        cancellationToken.ThrowIfCancellationRequested();
                         cancellationToken.ThrowIfCancellationRequested();
                         processedTypes.Add(mockedType.OriginalDefinition);
                     }
