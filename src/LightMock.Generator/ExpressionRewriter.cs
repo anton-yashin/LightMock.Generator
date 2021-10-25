@@ -41,8 +41,6 @@ namespace LightMock.Generator
     abstract class ExpressionRewriter
     {
         protected readonly IMethodSymbol method;
-        private readonly InvocationExpressionSyntax invocationExpressionSyntax;
-        private readonly CSharpCompilation compilation;
         private readonly Location location;
         private readonly string className;
         private readonly string uid;
@@ -56,8 +54,6 @@ namespace LightMock.Generator
             CSharpCompilation compilation)
         {
             this.method = method;
-            this.invocationExpressionSyntax = invocationExpressionSyntax;
-            this.compilation = compilation;
 
             const int KEditorFirstLineNumber = 1;
             location = invocationExpressionSyntax.ArgumentList.GetLocation();
