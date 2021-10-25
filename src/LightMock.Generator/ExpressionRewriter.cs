@@ -72,9 +72,7 @@ namespace LightMock.Generator
             var uidPart1 = syntaxUidPart1 == null || (le = LiteralExpressionLocator.Locate(syntaxUidPart1)) == null
                 ? Path.GetFullPath(lineSpan.Path)
                 : le.ToString()
-                    // unescape string
-                    .Replace("\"", "")
-                    .Replace(@"\\", @"\");
+                    .Replace("\"", "").Replace(@"\\", @"\"); // unescape string
 
             var uidPart2 = syntaxUidPart2 == null || (le = LiteralExpressionLocator.Locate(syntaxUidPart2)) == null
                 ? (lineSpan.StartLinePosition.Line + KEditorFirstLineNumber).ToString()
@@ -82,7 +80,8 @@ namespace LightMock.Generator
 
             using (var hash = SHA256.Create())
                 className = '_' + Convert.ToBase64String(hash.ComputeHash(Encoding.UTF8.GetBytes(uidPart1)))
-                    .Replace('+', 'ф').Replace('=', 'ы').Replace('/', 'п') + "_" + uidPart2;
+                    .Replace('+', 'ф').Replace('=', 'ы').Replace('/', 'п') // replace to random symbols that not prohibited by file system
+                    + "_" + uidPart2;
 
             uid = uidPart2 + uidPart1;
             var (lambda, parameter) = LambdaLocator.Locate(lambdaSyntax);
