@@ -33,7 +33,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace LightMock.Generator
 {
-    sealed class LightMockSyntaxReceiver : CSharpSyntaxVisitor, ISyntaxContextReceiver
+    sealed class LightMockSyntaxReceiver : ISyntaxContextReceiver
     {
         public LightMockSyntaxReceiver() { }
 
@@ -44,19 +44,34 @@ namespace LightMock.Generator
 
         public void OnVisitSyntaxNode(GeneratorSyntaxContext context)
         {
-            if (context.Node is CSharpSyntaxNode cssn)
-                cssn.Accept(this);
-        }
-
-        public override void VisitObjectCreationExpression(ObjectCreationExpressionSyntax node)
-        {
-            switch (node.Type)
+            switch (context.Node)
             {
-                case GenericNameSyntax gns when IsMock(gns):
-                    CandidateMocks.Add(gns);
+                case ObjectCreationExpressionSyntax oces:
+                    switch (oces.Type)
+                    {
+                        case GenericNameSyntax gns when IsMock(gns):
+                            CandidateMocks.Add(gns);
+                            break;
+                        case QualifiedNameSyntax qns when qns.Right is GenericNameSyntax gns && IsMock(gns):
+                            CandidateMocks.Add(gns);
+                            break;
+                    }
                     break;
-                case QualifiedNameSyntax qns when qns.Right is GenericNameSyntax gns && IsMock(gns):
-                    CandidateMocks.Add(gns);
+                case AttributeSyntax @as:
+                    if (IsDisableCodeGenerationAttribute(@as))
+                    {
+                        DisableCodeGenerationAttributes.Add(@as);
+                        break;
+                    }
+                    if (IsDontOverrideAttribute(@as))
+                    {
+                        DontOverrideAttributes.Add(@as);
+                        break;
+                    }
+                    break;
+                case InvocationExpressionSyntax ies:
+                    if (IsArrangeInvocation(ies))
+                        ArrangeInvocations.Add(ies);
                     break;
             }
         }
@@ -98,20 +113,6 @@ namespace LightMock.Generator
             return false;
         }
 
-        public override void VisitAttribute(AttributeSyntax node)
-        {
-            if (IsDisableCodeGenerationAttribute(node))
-            {
-                DisableCodeGenerationAttributes.Add(node);
-                return;
-            }
-            if (IsDontOverrideAttribute(node))
-            {
-                DontOverrideAttributes.Add(node);
-                return;
-            }
-        }
-
         internal static bool IsArrangeInvocation(InvocationExpressionSyntax ies)
         {
             if (ies.Expression is MemberAccessExpressionSyntax maes)
@@ -124,12 +125,6 @@ namespace LightMock.Generator
                 }
             }
             return false;
-        }
-
-        public override void VisitInvocationExpression(InvocationExpressionSyntax node)
-        {
-            if (IsArrangeInvocation(node))
-                ArrangeInvocations.Add(node);
         }
     }
 }
