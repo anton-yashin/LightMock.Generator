@@ -96,19 +96,6 @@ namespace LightMock.Generator
             }
         }
 
-        private static void NotifyUniqueIdError(
-            IMethodSymbol method,
-            InvocationExpressionSyntax invocationExpressionSyntax,
-            ICollection<Diagnostic> errors)
-        {
-            errors.Add(Diagnostic.Create(
-                DiagnosticsDescriptors.KPropertyExpressionMustHaveUniqueId,
-                invocationExpressionSyntax.GetLocation(), method.Name));
-        }
-
-        private static void NotifyPropertyAssignmentError(ICollection<Diagnostic> errors, Location location)
-            => errors.Add(Diagnostic.Create(DiagnosticsDescriptors.KLambdaAssignmentNotFound, location));
-
         public SourceText DoGenerate()
         {
             if (leftPart == null || parameter == null || assignment == null)
@@ -161,20 +148,16 @@ namespace LightMock.Generator.Tokens
 
         public IEnumerable<Diagnostic> GetErrors()
         {
-            List<Diagnostic> errors = new List<Diagnostic>();
             if (uids.Contains(uid))
             {
-                NotifyUniqueIdError(method, invocationExpressionSyntax, errors);
+                yield return Diagnostic.Create(
+                    DiagnosticsDescriptors.KPropertyExpressionMustHaveUniqueId,
+                    invocationExpressionSyntax.GetLocation(), method.Name);
             }
-            if (leftPart == null)
+            if (leftPart == null || assignment == null)
             {
-                NotifyPropertyAssignmentError(errors, location);
+                yield return Diagnostic.Create(DiagnosticsDescriptors.KLambdaAssignmentNotFound, location);
             }
-            if (assignment == null)
-            {
-                NotifyPropertyAssignmentError(errors, location);
-            }
-            return errors;
         }
 
         public IEnumerable<Diagnostic> GetWarnings() => Enumerable.Empty<Diagnostic>();
