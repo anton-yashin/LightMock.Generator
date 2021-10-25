@@ -33,7 +33,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace LightMock.Generator
 {
-    sealed class LightMockSyntaxReceiver : CSharpSyntaxVisitor, ISyntaxReceiver
+    sealed class LightMockSyntaxReceiver : CSharpSyntaxVisitor, ISyntaxContextReceiver
     {
         public LightMockSyntaxReceiver() { }
 
@@ -42,9 +42,9 @@ namespace LightMock.Generator
         public List<AttributeSyntax> DontOverrideAttributes { get; } = new List<AttributeSyntax>();
         public List<InvocationExpressionSyntax> ArrangeInvocations { get; } = new();
 
-        public void OnVisitSyntaxNode(SyntaxNode syntaxNode)
+        public void OnVisitSyntaxNode(GeneratorSyntaxContext context)
         {
-            if (syntaxNode is CSharpSyntaxNode cssn)
+            if (context.Node is CSharpSyntaxNode cssn)
                 cssn.Accept(this);
         }
 

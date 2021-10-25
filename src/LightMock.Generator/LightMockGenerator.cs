@@ -61,7 +61,7 @@ namespace LightMock.Generator
         {
             if (context.Compilation is CSharpCompilation compilation == false)
                 return;
-            if (context.SyntaxReceiver is LightMockSyntaxReceiver receiver == false)
+            if (context.SyntaxContextReceiver is LightMockSyntaxReceiver receiver == false)
                 return;
             DoGenerate(
                 context,
