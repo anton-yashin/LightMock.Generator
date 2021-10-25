@@ -127,7 +127,6 @@ namespace LightMock.Generator.Tokens
     }
 }
 ");
-            var text = code.ToString();
             return SourceText.From(code.ToString(), Encoding.UTF8);
         }
 
