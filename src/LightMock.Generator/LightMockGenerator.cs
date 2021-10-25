@@ -47,7 +47,6 @@ namespace LightMock.Generator
 #endif
     {
         const string KMock = "Mock";
-        const string KContextResolver = nameof(ContextResolver);
 
         readonly Lazy<SourceText> mock = new(
             () => SourceText.From(Utils.LoadResource(KMock + Suffix.CSharpFile), Encoding.UTF8));
@@ -199,13 +198,6 @@ namespace LightMock.Generator
                         addSource(context, processor.FileName, text);
                     }
                 }
-
-                cancellationToken.ThrowIfCancellationRequested();
-                var impl = Utils.LoadResource(KContextResolver + Suffix.CSharpFile)
-                    .Replace("/*exchangeForExpressionBuilder*/", exchangeForExpressionBuilder.ToString());
-
-                cancellationToken.ThrowIfCancellationRequested();
-                addSource(context, KContextResolver + Suffix.FileName, SourceText.From(impl, Encoding.UTF8));
             }
         }
 
