@@ -43,7 +43,6 @@ namespace LightMock.Generator
         protected readonly IMethodSymbol method;
         private readonly InvocationExpressionSyntax invocationExpressionSyntax;
         private readonly CSharpCompilation compilation;
-        private readonly ICollection<string> uids;
         private readonly Location location;
         private readonly string className;
         private readonly string uid;
@@ -54,13 +53,11 @@ namespace LightMock.Generator
         protected ExpressionRewriter(
             IMethodSymbol method,
             InvocationExpressionSyntax invocationExpressionSyntax,
-            CSharpCompilation compilation,
-            ICollection<string> uids)
+            CSharpCompilation compilation)
         {
             this.method = method;
             this.invocationExpressionSyntax = invocationExpressionSyntax;
             this.compilation = compilation;
-            this.uids = uids;
 
             const int KEditorFirstLineNumber = 1;
             location = invocationExpressionSyntax.ArgumentList.GetLocation();
@@ -146,12 +143,6 @@ namespace LightMock.Generator.Tokens
 
         public IEnumerable<Diagnostic> GetErrors()
         {
-            if (uids.Contains(uid))
-            {
-                yield return Diagnostic.Create(
-                    DiagnosticsDescriptors.KPropertyExpressionMustHaveUniqueId,
-                    invocationExpressionSyntax.GetLocation(), method.Name);
-            }
             if (leftPart == null || assignment == null)
             {
                 yield return Diagnostic.Create(DiagnosticsDescriptors.KLambdaAssignmentNotFound, location);

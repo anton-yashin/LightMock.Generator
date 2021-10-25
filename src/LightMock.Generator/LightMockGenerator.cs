@@ -160,7 +160,7 @@ namespace LightMock.Generator
 
                 // process symbols under ArrangeSetter
                 
-                var expressionUids = new HashSet<string>();
+                var processedFiles = new HashSet<string>();
                 var mockInterfaceMatcher = new TypeMatcher(typeof(IAdvancedMockContext<>));
                 foreach (var candidateInvocation in arrangeInvocations)
                 {
@@ -177,16 +177,23 @@ namespace LightMock.Generator
                         switch (methodSymbol.Name)
                         {
                             case nameof(AbstractMockNameofProvider.ArrangeSetter):
-                                processor = new ArrangeExpressionRewriter(methodSymbol, candidateInvocation, compilation, expressionUids);
+                                processor = new ArrangeExpressionRewriter(methodSymbol, candidateInvocation, compilation);
                                 break;
                             case nameof(AbstractMockNameofProvider.AssertSet):
-                                processor = new AssertExpressionRewriter(methodSymbol, candidateInvocation, compilation, expressionUids);
+                                processor = new AssertExpressionRewriter(methodSymbol, candidateInvocation, compilation);
                                 break;
                             default:
                                 continue;
                         }
 
                         cancellationToken.ThrowIfCancellationRequested();
+                        if (processedFiles.Contains(processor.FileName))
+                        {
+                            reportDiagnostic(context, Diagnostic.Create(
+                                DiagnosticsDescriptors.KPropertyExpressionMustHaveUniqueId,
+                                candidateInvocation.GetLocation(), methodSymbol.Name));
+                            continue;
+                        }
                         if (EmitDiagnostics(context, reportDiagnostic, processor.GetErrors()))
                             continue;
                         cancellationToken.ThrowIfCancellationRequested();
