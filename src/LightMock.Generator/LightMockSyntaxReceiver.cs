@@ -46,32 +46,20 @@ namespace LightMock.Generator
         {
             switch (context.Node)
             {
-                case ObjectCreationExpressionSyntax oces:
-                    switch (oces.Type)
-                    {
-                        case GenericNameSyntax gns when IsMock(gns):
-                            CandidateMocks.Add(gns);
-                            break;
-                        case QualifiedNameSyntax qns when qns.Right is GenericNameSyntax gns && IsMock(gns):
-                            CandidateMocks.Add(gns);
-                            break;
-                    }
+                case ObjectCreationExpressionSyntax { Type: GenericNameSyntax gns } when IsMock(gns):
+                    CandidateMocks.Add(gns);
                     break;
-                case AttributeSyntax @as:
-                    if (IsDisableCodeGenerationAttribute(@as))
-                    {
-                        DisableCodeGenerationAttributes.Add(@as);
-                        break;
-                    }
-                    if (IsDontOverrideAttribute(@as))
-                    {
-                        DontOverrideAttributes.Add(@as);
-                        break;
-                    }
+                case ObjectCreationExpressionSyntax { Type: QualifiedNameSyntax { Right: GenericNameSyntax gns } } when IsMock(gns):
+                    CandidateMocks.Add(gns);
                     break;
-                case InvocationExpressionSyntax ies:
-                    if (IsArrangeInvocation(ies))
-                        ArrangeInvocations.Add(ies);
+                case AttributeSyntax @as when IsDisableCodeGenerationAttribute(@as):
+                    DisableCodeGenerationAttributes.Add(@as);
+                    break;
+                case AttributeSyntax @as when IsDontOverrideAttribute(@as):
+                    DontOverrideAttributes.Add(@as);
+                    break;
+                case InvocationExpressionSyntax ies when IsArrangeInvocation(ies):
+                    ArrangeInvocations.Add(ies);
                     break;
             }
         }
