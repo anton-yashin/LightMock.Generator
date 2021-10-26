@@ -58,6 +58,25 @@ namespace LightMock.Generator
                 return;
             if (context.SyntaxContextReceiver is LightMockSyntaxReceiver receiver == false)
                 return;
+            compilation = DoGenerateAbstractClasses(
+                context,
+                ContextReportDiagnostic,
+                ContextAddSource,
+                compilation,
+                context.AnalyzerConfigOptions,
+                receiver.AbstractClasses.ToImmutableArray(),
+                receiver.DisableCodeGenerationAttributes.ToImmutableArray(),
+                receiver.DontOverrideAttributes.ToImmutableArray(),
+                context.CancellationToken);
+            compilation = DoGenerateInterfaces(
+                context,
+                ContextReportDiagnostic,
+                ContextAddSource,
+                compilation,
+                context.AnalyzerConfigOptions,
+                receiver.Interfaces.ToImmutableArray(),
+                receiver.DisableCodeGenerationAttributes.ToImmutableArray(),
+                context.CancellationToken);
             compilation = DoGenerate(
                 context,
                 ContextReportDiagnostic,
@@ -68,15 +87,6 @@ namespace LightMock.Generator
                 receiver.DisableCodeGenerationAttributes.ToImmutableArray(),
                 receiver.DontOverrideAttributes.ToImmutableArray(),
                 receiver.ArrangeInvocations.ToImmutableArray(),
-                context.CancellationToken);
-            compilation = DoGenerateInterfaces(
-                context,
-                ContextReportDiagnostic,
-                ContextAddSource,
-                compilation,
-                context.AnalyzerConfigOptions,
-                receiver.Interfaces.ToImmutableArray(),
-                receiver.DisableCodeGenerationAttributes.ToImmutableArray(),
                 context.CancellationToken);
         }
 
@@ -138,7 +148,7 @@ namespace LightMock.Generator
                             if (mtbt.ToDisplayString(SymbolDisplayFormats.Namespace) == multicastDelegateNameSpaceAndName)
                                 processor = new DelegateProcessor(mockedType);
                             else
-                                processor = new AbstractClassProcessor(candidateGeneric, mockedType, dontOverrideList);
+                                continue;
                         }
                         else
                             continue;
@@ -203,6 +213,53 @@ namespace LightMock.Generator
                         var text = processor.DoGenerate();
                         addSource(context, processor.FileName, text);
                     }
+                }
+            }
+            return compilation;
+        }
+
+        public CSharpCompilation DoGenerateAbstractClasses<TContext>(
+            TContext context,
+            Action<TContext, Diagnostic> reportDiagnostic,
+            Action<TContext, string, SourceText> addSource,
+            CSharpCompilation compilation,
+            AnalyzerConfigOptionsProvider optionsProvider,
+            ImmutableArray<(GenericNameSyntax mock, INamedTypeSymbol mockedType)> abstractClasses,
+            ImmutableArray<AttributeSyntax> disableCodeGenerationAttributes,
+            ImmutableArray<AttributeSyntax> dontOverrideAttributes,
+            CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (optionsProvider.GlobalOptions.TryGetValue(GlobalOptionsNames.Enable, out var value)
+                && value.Equals("false", StringComparison.InvariantCultureIgnoreCase))
+            {
+                return compilation;
+            }
+
+            if (compilation.SyntaxTrees.First().Options is CSharpParseOptions options)
+            {
+                if (IsDisableCodeGenerationAttributePresent(compilation, disableCodeGenerationAttributes, cancellationToken))
+                    return compilation;
+
+                var dontOverrideList = GetClassExclusionList(compilation, dontOverrideAttributes, cancellationToken);
+
+                foreach (var (candidateGeneric, mockedType) in abstractClasses)
+                {
+                    var processor = new AbstractClassProcessor(candidateGeneric, mockedType, dontOverrideList);
+
+                    cancellationToken.ThrowIfCancellationRequested();
+                    if (EmitDiagnostics(context, reportDiagnostic, processor.GetErrors()))
+                        continue;
+                    cancellationToken.ThrowIfCancellationRequested();
+                    EmitDiagnostics(context, reportDiagnostic, processor.GetWarnings());
+                    var text = processor.DoGenerate();
+                    addSource(context, processor.FileName, text);
+                    if (processor.IsUpdateCompilationRequired)
+                    {
+                        compilation = compilation.AddSyntaxTrees(CSharpSyntaxTree.ParseText(
+                            text, options, cancellationToken: cancellationToken));
+                    }
+                    cancellationToken.ThrowIfCancellationRequested();
                 }
             }
             return compilation;
