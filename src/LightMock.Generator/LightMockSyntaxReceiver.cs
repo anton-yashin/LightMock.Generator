@@ -26,6 +26,7 @@
 *******************************************************************************/
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -35,22 +36,37 @@ namespace LightMock.Generator
 {
     sealed class LightMockSyntaxReceiver : ISyntaxContextReceiver
     {
-        public LightMockSyntaxReceiver() { }
+        private readonly TypeMatcher mockContextMatcher;
+        private readonly TypeMatcher mockInterfaceMatcher;
+        private readonly List<INamedTypeSymbol> processedTypes;
+
+        public LightMockSyntaxReceiver()
+        {
+            mockContextMatcher = new TypeMatcher(typeof(AbstractMock<>));
+            mockInterfaceMatcher = new TypeMatcher(typeof(IAdvancedMockContext<>));
+            processedTypes = new List<INamedTypeSymbol>();
+        }
 
         public List<GenericNameSyntax> CandidateMocks { get; } = new List<GenericNameSyntax>();
         public List<AttributeSyntax> DisableCodeGenerationAttributes { get; } = new List<AttributeSyntax>();
         public List<AttributeSyntax> DontOverrideAttributes { get; } = new List<AttributeSyntax>();
         public List<InvocationExpressionSyntax> ArrangeInvocations { get; } = new();
 
+        public List<INamedTypeSymbol> Delegates { get; } = new();
+        public List<INamedTypeSymbol> Interfaces { get; } = new();
+        public List<(GenericNameSyntax mock, INamedTypeSymbol mockedType)> AbstractClasses { get; } = new();
+
         public void OnVisitSyntaxNode(GeneratorSyntaxContext context)
         {
             switch (context.Node)
             {
-                case ObjectCreationExpressionSyntax { Type: GenericNameSyntax gns } when IsMock(gns):
-                    CandidateMocks.Add(gns);
+                case ObjectCreationExpressionSyntax { Type: GenericNameSyntax gns }
+                when IsMock(gns) && IsValidForProcessing(gns, context.SemanticModel):
+                    AddCandidateMock(gns, context.SemanticModel);
                     break;
-                case ObjectCreationExpressionSyntax { Type: QualifiedNameSyntax { Right: GenericNameSyntax gns } } when IsMock(gns):
-                    CandidateMocks.Add(gns);
+                case ObjectCreationExpressionSyntax { Type: QualifiedNameSyntax { Right: GenericNameSyntax gns } }
+                when IsMock(gns) && IsValidForProcessing(gns, context.SemanticModel):
+                    AddCandidateMock(gns, context.SemanticModel);
                     break;
                 case AttributeSyntax @as when IsDisableCodeGenerationAttribute(@as):
                     DisableCodeGenerationAttributes.Add(@as);
@@ -62,6 +78,27 @@ namespace LightMock.Generator
                     ArrangeInvocations.Add(ies);
                     break;
             }
+        }
+
+        void AddCandidateMock(GenericNameSyntax gns, SemanticModel semanticModel)
+        {
+            CandidateMocks.Add(gns);
+        }
+
+        bool IsValidForProcessing(GenericNameSyntax candidateGeneric, SemanticModel semanticModel)
+        {
+            var mockContainer = semanticModel.GetSymbolInfo(candidateGeneric).Symbol
+                as INamedTypeSymbol;
+            var mcbt = mockContainer?.BaseType;
+            if (mcbt != null
+                && mockContextMatcher.IsMatch(mcbt)
+                && mcbt.TypeArguments.FirstOrDefault() is INamedTypeSymbol mockedType
+                && processedTypes.Contains(mockedType.OriginalDefinition) == false)
+            {
+                processedTypes.Add(mockedType.OriginalDefinition);
+                return true;
+            }
+            return false;
         }
 
         internal static bool IsMock(GenericNameSyntax gns)

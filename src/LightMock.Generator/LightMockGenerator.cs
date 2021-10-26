@@ -103,15 +103,14 @@ namespace LightMock.Generator
 
                 var dontOverrideList = GetClassExclusionList(compilation, dontOverrideAttributes, cancellationToken);
 
-                addSource(context, KMock + Suffix.FileName, mock.Value);
+                //addSource(context, KMock + Suffix.FileName, mock.Value);
 
-                compilation = compilation.AddSyntaxTrees(CSharpSyntaxTree.ParseText(
-                    mock.Value, options, cancellationToken: cancellationToken));
+                //compilation = compilation.AddSyntaxTrees(CSharpSyntaxTree.ParseText(
+                //    mock.Value, options, cancellationToken: cancellationToken));
 
                 // process symbols under Mock<> generic
 
                 var mockContextMatcher = new TypeMatcher(typeof(AbstractMock<>));
-                var processedTypes = new List<INamedTypeSymbol>();
                 var multicastDelegateType = typeof(MulticastDelegate);
                 var multicastDelegateNameSpaceAndName = multicastDelegateType.Namespace + "." + multicastDelegateType.Name;
 
@@ -125,9 +124,8 @@ namespace LightMock.Generator
                     cancellationToken.ThrowIfCancellationRequested();
                     var mcbt = mockContainer?.BaseType;
                     if (mcbt != null
-                        && mockContextMatcher.IsMatch(mcbt)
                         && mcbt.TypeArguments.FirstOrDefault() is INamedTypeSymbol mockedType
-                        && processedTypes.Contains(mockedType.OriginalDefinition) == false)
+                        )
                     {
                         ClassProcessor processor;
                         var mtbt = mockedType.BaseType;
@@ -154,7 +152,6 @@ namespace LightMock.Generator
                                 text, options, cancellationToken: cancellationToken));
                         }
                         cancellationToken.ThrowIfCancellationRequested();
-                        processedTypes.Add(mockedType.OriginalDefinition);
                     }
                 }
 
@@ -290,6 +287,10 @@ namespace LightMock.Generator
         public void Initialize(GeneratorInitializationContext context)
         {
             context.RegisterForSyntaxNotifications(() => new LightMockSyntaxReceiver());
+            context.RegisterForPostInitialization((gpic) => 
+            {
+                gpic.AddSource(KMock + Suffix.FileName, mock.Value);
+            });
         }
 #endif
 
