@@ -58,7 +58,7 @@ namespace LightMock.Generator
                 return;
             if (context.SyntaxContextReceiver is LightMockSyntaxReceiver receiver == false)
                 return;
-            DoGenerate(
+            compilation = DoGenerate(
                 context,
                 ContextReportDiagnostic,
                 ContextAddSource,
@@ -69,7 +69,7 @@ namespace LightMock.Generator
                 receiver.DontOverrideAttributes.ToImmutableArray(),
                 receiver.ArrangeInvocations.ToImmutableArray(),
                 context.CancellationToken);
-            DoGenerateInterfaces(
+            compilation = DoGenerateInterfaces(
                 context,
                 ContextReportDiagnostic,
                 ContextAddSource,
@@ -86,7 +86,7 @@ namespace LightMock.Generator
             => context.AddSource(hintName, sourceText);
 
 #endif
-        public void DoGenerate<TContext>(
+        public CSharpCompilation DoGenerate<TContext>(
             TContext context,
             Action<TContext, Diagnostic> reportDiagnostic,
             Action<TContext, string, SourceText> addSource,
@@ -102,13 +102,13 @@ namespace LightMock.Generator
             if (optionsProvider.GlobalOptions.TryGetValue(GlobalOptionsNames.Enable, out var value)
                 && value.Equals("false", StringComparison.InvariantCultureIgnoreCase))
             {
-                return;
+                return compilation;
             }
 
             if (compilation.SyntaxTrees.First().Options is CSharpParseOptions options)
             {
                 if (IsDisableCodeGenerationAttributePresent(compilation, disableCodeGenerationAttributes, cancellationToken))
-                    return;
+                    return compilation;
 
                 var dontOverrideList = GetClassExclusionList(compilation, dontOverrideAttributes, cancellationToken);
 
@@ -205,9 +205,10 @@ namespace LightMock.Generator
                     }
                 }
             }
+            return compilation;
         }
 
-        public void DoGenerateInterfaces<TContext>(
+        public CSharpCompilation DoGenerateInterfaces<TContext>(
             TContext context,
             Action<TContext, Diagnostic> reportDiagnostic,
             Action<TContext, string, SourceText> addSource,
@@ -221,13 +222,13 @@ namespace LightMock.Generator
             if (optionsProvider.GlobalOptions.TryGetValue(GlobalOptionsNames.Enable, out var value)
                 && value.Equals("false", StringComparison.InvariantCultureIgnoreCase))
             {
-                return;
+                return compilation;
             }
 
             if (compilation.SyntaxTrees.First().Options is CSharpParseOptions options)
             {
                 if (IsDisableCodeGenerationAttributePresent(compilation, disableCodeGenerationAttributes, cancellationToken))
-                    return;
+                    return compilation;
 
                 foreach (var @interface in interfaces)
                 {
@@ -248,6 +249,7 @@ namespace LightMock.Generator
                     cancellationToken.ThrowIfCancellationRequested();
                 }
             }
+            return compilation;
         }
 
         private static bool IsDisableCodeGenerationAttributePresent(
