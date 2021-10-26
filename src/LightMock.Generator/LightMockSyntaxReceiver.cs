@@ -39,12 +39,15 @@ namespace LightMock.Generator
         private readonly TypeMatcher mockContextMatcher;
         private readonly TypeMatcher mockInterfaceMatcher;
         private readonly List<INamedTypeSymbol> processedTypes;
+        private readonly string multicastDelegateNameSpaceAndName;
 
         public LightMockSyntaxReceiver()
         {
             mockContextMatcher = new TypeMatcher(typeof(AbstractMock<>));
             mockInterfaceMatcher = new TypeMatcher(typeof(IAdvancedMockContext<>));
             processedTypes = new List<INamedTypeSymbol>();
+            var multicastDelegateType = typeof(MulticastDelegate);
+            multicastDelegateNameSpaceAndName = multicastDelegateType.Namespace + "." + multicastDelegateType.Name;
         }
 
         public List<GenericNameSyntax> CandidateMocks { get; } = new List<GenericNameSyntax>();
@@ -61,11 +64,11 @@ namespace LightMock.Generator
             switch (context.Node)
             {
                 case ObjectCreationExpressionSyntax { Type: GenericNameSyntax gns }
-                when IsMock(gns) && IsValidForProcessing(gns, context.SemanticModel):
+                when IsMock(gns):
                     AddCandidateMock(gns, context.SemanticModel);
                     break;
                 case ObjectCreationExpressionSyntax { Type: QualifiedNameSyntax { Right: GenericNameSyntax gns } }
-                when IsMock(gns) && IsValidForProcessing(gns, context.SemanticModel):
+                when IsMock(gns):
                     AddCandidateMock(gns, context.SemanticModel);
                     break;
                 case AttributeSyntax @as when IsDisableCodeGenerationAttribute(@as):
@@ -80,12 +83,7 @@ namespace LightMock.Generator
             }
         }
 
-        void AddCandidateMock(GenericNameSyntax gns, SemanticModel semanticModel)
-        {
-            CandidateMocks.Add(gns);
-        }
-
-        bool IsValidForProcessing(GenericNameSyntax candidateGeneric, SemanticModel semanticModel)
+        void AddCandidateMock(GenericNameSyntax candidateGeneric, SemanticModel semanticModel)
         {
             var mockContainer = semanticModel.GetSymbolInfo(candidateGeneric).Symbol
                 as INamedTypeSymbol;
@@ -95,10 +93,20 @@ namespace LightMock.Generator
                 && mcbt.TypeArguments.FirstOrDefault() is INamedTypeSymbol mockedType
                 && processedTypes.Contains(mockedType.OriginalDefinition) == false)
             {
+                CandidateMocks.Add(candidateGeneric);
                 processedTypes.Add(mockedType.OriginalDefinition);
-                return true;
+
+                var mtbt = mockedType.BaseType;
+                if (mtbt != null)
+                {
+                    if (mtbt.ToDisplayString(SymbolDisplayFormats.Namespace) == multicastDelegateNameSpaceAndName)
+                        Delegates.Add(mockedType);
+                    else
+                        AbstractClasses.Add((candidateGeneric, mockedType));
+                }
+                else
+                    Interfaces.Add(mockedType);
             }
-            return false;
         }
 
         internal static bool IsMock(GenericNameSyntax gns)

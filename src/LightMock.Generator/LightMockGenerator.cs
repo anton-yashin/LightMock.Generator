@@ -69,6 +69,15 @@ namespace LightMock.Generator
                 receiver.DontOverrideAttributes.ToImmutableArray(),
                 receiver.ArrangeInvocations.ToImmutableArray(),
                 context.CancellationToken);
+            DoGenerateInterfaces(
+                context,
+                static (context, diagnostic) => context.ReportDiagnostic(diagnostic),
+                static (context, hintName, sourceText) => context.AddSource(hintName, sourceText),
+                compilation,
+                context.AnalyzerConfigOptions,
+                receiver.Interfaces.ToImmutableArray(),
+                receiver.DisableCodeGenerationAttributes.ToImmutableArray(),
+                context.CancellationToken);
         }
 
 #endif
@@ -127,7 +136,7 @@ namespace LightMock.Generator
                                 processor = new AbstractClassProcessor(candidateGeneric, mockedType, dontOverrideList);
                         }
                         else
-                            processor = new InterfaceProcessor(mockedType);
+                            continue;
 
                         cancellationToken.ThrowIfCancellationRequested();
                         if (EmitDiagnostics(context, reportDiagnostic, processor.GetErrors()))
@@ -189,6 +198,49 @@ namespace LightMock.Generator
                         var text = processor.DoGenerate();
                         addSource(context, processor.FileName, text);
                     }
+                }
+            }
+        }
+
+        public void DoGenerateInterfaces<TContext>(
+            TContext context,
+            Action<TContext, Diagnostic> reportDiagnostic,
+            Action<TContext, string, SourceText> addSource,
+            CSharpCompilation compilation,
+            AnalyzerConfigOptionsProvider optionsProvider,
+            ImmutableArray<INamedTypeSymbol> interfaces,
+            ImmutableArray<AttributeSyntax> disableCodeGenerationAttributes,
+            CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (optionsProvider.GlobalOptions.TryGetValue(GlobalOptionsNames.Enable, out var value)
+                && value.Equals("false", StringComparison.InvariantCultureIgnoreCase))
+            {
+                return;
+            }
+
+            if (compilation.SyntaxTrees.First().Options is CSharpParseOptions options)
+            {
+                if (IsDisableCodeGenerationAttributePresent(compilation, disableCodeGenerationAttributes, cancellationToken))
+                    return;
+
+                foreach (var @interface in interfaces)
+                {
+                    var processor = new InterfaceProcessor(@interface);
+
+                    cancellationToken.ThrowIfCancellationRequested();
+                    if (EmitDiagnostics(context, reportDiagnostic, processor.GetErrors()))
+                        continue;
+                    cancellationToken.ThrowIfCancellationRequested();
+                    EmitDiagnostics(context, reportDiagnostic, processor.GetWarnings());
+                    var text = processor.DoGenerate();
+                    addSource(context, processor.FileName, text);
+                    if (processor.IsUpdateCompilationRequired)
+                    {
+                        compilation = compilation.AddSyntaxTrees(CSharpSyntaxTree.ParseText(
+                            text, options, cancellationToken: cancellationToken));
+                    }
+                    cancellationToken.ThrowIfCancellationRequested();
                 }
             }
         }
