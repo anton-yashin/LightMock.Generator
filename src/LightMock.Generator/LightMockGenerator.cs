@@ -60,8 +60,8 @@ namespace LightMock.Generator
                 return;
             DoGenerate(
                 context,
-                static (context, diagnostic) => context.ReportDiagnostic(diagnostic),
-                static (context, hintName, sourceText) => context.AddSource(hintName, sourceText),
+                ContextReportDiagnostic,
+                ContextAddSource,
                 compilation,
                 context.AnalyzerConfigOptions,
                 receiver.CandidateMocks.ToImmutableArray(),
@@ -71,14 +71,19 @@ namespace LightMock.Generator
                 context.CancellationToken);
             DoGenerateInterfaces(
                 context,
-                static (context, diagnostic) => context.ReportDiagnostic(diagnostic),
-                static (context, hintName, sourceText) => context.AddSource(hintName, sourceText),
+                ContextReportDiagnostic,
+                ContextAddSource,
                 compilation,
                 context.AnalyzerConfigOptions,
                 receiver.Interfaces.ToImmutableArray(),
                 receiver.DisableCodeGenerationAttributes.ToImmutableArray(),
                 context.CancellationToken);
         }
+
+        static void ContextReportDiagnostic(GeneratorExecutionContext context, Diagnostic diagnostic)
+            => context.ReportDiagnostic(diagnostic);
+        static void ContextAddSource(GeneratorExecutionContext context, string hintName, SourceText sourceText)
+            => context.AddSource(hintName, sourceText);
 
 #endif
         public void DoGenerate<TContext>(
