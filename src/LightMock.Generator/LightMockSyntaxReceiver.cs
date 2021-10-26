@@ -50,7 +50,6 @@ namespace LightMock.Generator
             multicastDelegateNameSpaceAndName = multicastDelegateType.Namespace + "." + multicastDelegateType.Name;
         }
 
-        public List<GenericNameSyntax> CandidateMocks { get; } = new List<GenericNameSyntax>();
         public List<AttributeSyntax> DisableCodeGenerationAttributes { get; } = new List<AttributeSyntax>();
         public List<AttributeSyntax> DontOverrideAttributes { get; } = new List<AttributeSyntax>();
         public List<InvocationExpressionSyntax> ArrangeInvocations { get; } = new();
@@ -93,7 +92,6 @@ namespace LightMock.Generator
                 && mcbt.TypeArguments.FirstOrDefault() is INamedTypeSymbol mockedType
                 && processedTypes.Contains(mockedType.OriginalDefinition) == false)
             {
-                CandidateMocks.Add(candidateGeneric);
                 processedTypes.Add(mockedType.OriginalDefinition);
 
                 var mtbt = mockedType.BaseType;
