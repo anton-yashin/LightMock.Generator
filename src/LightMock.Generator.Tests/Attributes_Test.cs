@@ -2,13 +2,10 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using System;
-using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
 using System.Runtime.Loader;
-using System.Text;
-using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -25,11 +22,11 @@ namespace LightMock.Generator.Tests
         [Theory, InlineData(false), InlineData(true)]
         public void DisableCodeGeneration(bool enable)
         {
-            string code = enable
-                ? "/* nothing */"
-                : Utils.LoadResource(GetFullResourceName(nameof(DisableCodeGeneration)));
-
-            var compilation = CreateCompilation(code, nameof(DisableCodeGeneration) + ".cs");
+            var name = nameof(DisableCodeGeneration);
+            if (enable)
+                name = name.Replace("Disable", "Enable");
+            var compilation = CreateCompilation(Utils.LoadResource(
+                GetFullResourceName(name)), name + Suffix.CSharpFile);
             var driver = CSharpGeneratorDriver.Create(
 #if ROSLYN_4
                 ImmutableArray.Create(new LightMockGenerator().AsSourceGenerator()),
@@ -46,10 +43,8 @@ namespace LightMock.Generator.Tests
             ms.Position = 0;
             var alc = new AssemblyLoadContext(nameof(DisableCodeGeneration));
             var loadedAssembly = alc.LoadFromStream(ms);
-            var mockType = typeof(Mock<>);
-            var mock_T_IsGenerated = loadedAssembly.ExportedTypes.Where(
-                t => t.Name == mockType.Name && t.Namespace == mockType.Namespace).Any();
-            Assert.Equal(expected: enable, actual: mock_T_IsGenerated);
+            var mockIsGenerated = loadedAssembly.ExportedTypes.Where(t => t.Name == "Property_IDisableCodeGeneration").Any();
+            Assert.Equal(expected: enable, actual: mockIsGenerated);
         }
 
         protected override string GetFullResourceName(string resourceName)

@@ -36,7 +36,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Resources\*.cs" />
     <Compile Include="Resorces\*.cs" />
     <Compile Include="*.cs" />
     <Compile Include="*\*.cs" />

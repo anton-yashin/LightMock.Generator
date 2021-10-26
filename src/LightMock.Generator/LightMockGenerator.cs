@@ -46,11 +46,6 @@ namespace LightMock.Generator
     public class LightMockGenerator : ISourceGenerator
 #endif
     {
-        const string KMock = "Mock";
-
-        readonly Lazy<SourceText> mock = new(
-            () => SourceText.From(Utils.LoadResource(KMock + Suffix.CSharpFile), Encoding.UTF8));
-
         public LightMockGenerator()
         {
         }
@@ -102,11 +97,6 @@ namespace LightMock.Generator
                     return;
 
                 var dontOverrideList = GetClassExclusionList(compilation, dontOverrideAttributes, cancellationToken);
-
-                //addSource(context, KMock + Suffix.FileName, mock.Value);
-
-                //compilation = compilation.AddSyntaxTrees(CSharpSyntaxTree.ParseText(
-                //    mock.Value, options, cancellationToken: cancellationToken));
 
                 // process symbols under Mock<> generic
 
@@ -287,10 +277,6 @@ namespace LightMock.Generator
         public void Initialize(GeneratorInitializationContext context)
         {
             context.RegisterForSyntaxNotifications(() => new LightMockSyntaxReceiver());
-            context.RegisterForPostInitialization((gpic) => 
-            {
-                gpic.AddSource(KMock + Suffix.FileName, mock.Value);
-            });
         }
 #endif
 
