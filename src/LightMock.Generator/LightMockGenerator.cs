@@ -77,6 +77,15 @@ namespace LightMock.Generator
                 receiver.Interfaces.ToImmutableArray(),
                 receiver.DisableCodeGenerationAttributes.ToImmutableArray(),
                 context.CancellationToken);
+            compilation = DoGenerateDelegates(
+                context,
+                ContextReportDiagnostic,
+                ContextAddSource,
+                compilation,
+                context.AnalyzerConfigOptions,
+                receiver.Delegates.ToImmutableArray(),
+                receiver.DisableCodeGenerationAttributes.ToImmutableArray(),
+                context.CancellationToken);
             compilation = DoGenerate(
                 context,
                 ContextReportDiagnostic,
@@ -120,57 +129,9 @@ namespace LightMock.Generator
                 if (IsDisableCodeGenerationAttributePresent(compilation, disableCodeGenerationAttributes, cancellationToken))
                     return compilation;
 
-                var dontOverrideList = GetClassExclusionList(compilation, dontOverrideAttributes, cancellationToken);
-
-                // process symbols under Mock<> generic
+                // process symbols under ArrangeSetter
 
                 var mockContextMatcher = new TypeMatcher(typeof(AbstractMock<>));
-                var multicastDelegateType = typeof(MulticastDelegate);
-                var multicastDelegateNameSpaceAndName = multicastDelegateType.Namespace + "." + multicastDelegateType.Name;
-
-                foreach (var candidateGeneric in candidateMocks)
-                {
-                    cancellationToken.ThrowIfCancellationRequested();
-                    var mockContainer = compilation
-                        .GetSemanticModel(candidateGeneric.SyntaxTree)
-                        .GetSymbolInfo(candidateGeneric, cancellationToken).Symbol
-                        as INamedTypeSymbol;
-                    cancellationToken.ThrowIfCancellationRequested();
-                    var mcbt = mockContainer?.BaseType;
-                    if (mcbt != null
-                        && mcbt.TypeArguments.FirstOrDefault() is INamedTypeSymbol mockedType
-                        )
-                    {
-                        ClassProcessor processor;
-                        var mtbt = mockedType.BaseType;
-                        if (mtbt != null)
-                        {
-                            if (mtbt.ToDisplayString(SymbolDisplayFormats.Namespace) == multicastDelegateNameSpaceAndName)
-                                processor = new DelegateProcessor(mockedType);
-                            else
-                                continue;
-                        }
-                        else
-                            continue;
-
-                        cancellationToken.ThrowIfCancellationRequested();
-                        if (EmitDiagnostics(context, reportDiagnostic, processor.GetErrors()))
-                            continue;
-                        cancellationToken.ThrowIfCancellationRequested();
-                        EmitDiagnostics(context, reportDiagnostic, processor.GetWarnings());
-                        var text = processor.DoGenerate();
-                        addSource(context, processor.FileName, text);
-                        if (processor.IsUpdateCompilationRequired)
-                        {
-                            compilation = compilation.AddSyntaxTrees(CSharpSyntaxTree.ParseText(
-                                text, options, cancellationToken: cancellationToken));
-                        }
-                        cancellationToken.ThrowIfCancellationRequested();
-                    }
-                }
-
-                // process symbols under ArrangeSetter
-                
                 var processedFiles = new HashSet<string>();
                 var mockInterfaceMatcher = new TypeMatcher(typeof(IAdvancedMockContext<>));
                 foreach (var candidateInvocation in arrangeInvocations)
@@ -217,6 +178,51 @@ namespace LightMock.Generator
             }
             return compilation;
         }
+
+        public CSharpCompilation DoGenerateDelegates<TContext>(
+            TContext context,
+            Action<TContext, Diagnostic> reportDiagnostic,
+            Action<TContext, string, SourceText> addSource,
+            CSharpCompilation compilation,
+            AnalyzerConfigOptionsProvider optionsProvider,
+            ImmutableArray<INamedTypeSymbol> delegates,
+            ImmutableArray<AttributeSyntax> disableCodeGenerationAttributes,
+            CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (optionsProvider.GlobalOptions.TryGetValue(GlobalOptionsNames.Enable, out var value)
+                && value.Equals("false", StringComparison.InvariantCultureIgnoreCase))
+            {
+                return compilation;
+            }
+
+            if (compilation.SyntaxTrees.First().Options is CSharpParseOptions options)
+            {
+                if (IsDisableCodeGenerationAttributePresent(compilation, disableCodeGenerationAttributes, cancellationToken))
+                    return compilation;
+
+                foreach (var @delegate in delegates)
+                {
+                    ClassProcessor processor = new DelegateProcessor(@delegate);
+
+                    cancellationToken.ThrowIfCancellationRequested();
+                    if (EmitDiagnostics(context, reportDiagnostic, processor.GetErrors()))
+                        continue;
+                    cancellationToken.ThrowIfCancellationRequested();
+                    EmitDiagnostics(context, reportDiagnostic, processor.GetWarnings());
+                    var text = processor.DoGenerate();
+                    addSource(context, processor.FileName, text);
+                    if (processor.IsUpdateCompilationRequired)
+                    {
+                        compilation = compilation.AddSyntaxTrees(CSharpSyntaxTree.ParseText(
+                            text, options, cancellationToken: cancellationToken));
+                    }
+                    cancellationToken.ThrowIfCancellationRequested();
+                }
+            }
+            return compilation;
+        }
+
 
         public CSharpCompilation DoGenerateAbstractClasses<TContext>(
             TContext context,
