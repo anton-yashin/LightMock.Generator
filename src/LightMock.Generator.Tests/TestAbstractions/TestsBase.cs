@@ -1,5 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Diagnostics;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.IO;
@@ -22,21 +23,31 @@ namespace LightMock.Generator.Tests.TestAbstractions
         protected (ImmutableArray<Diagnostic> diagnostics, bool success, byte[] assembly) DoCompile(IEnumerable<TestableSourceText> texts)
         {
             var compilation = CreateCompilation(texts);
-            var driver = CSharpGeneratorDriver.Create(
-#if ROSLYN_4
-                ImmutableArray.Create(new LightMockGenerator().AsSourceGenerator()),
-#else
-                ImmutableArray.Create(new LightMockGenerator()),
-#endif
-                Enumerable.Empty<AdditionalText>(),
-                (CSharpParseOptions)compilation.SyntaxTrees.First().Options);
-
+            var driver = CreateGenerationDriver(compilation);
             driver.RunGeneratorsAndUpdateCompilation(compilation, out var updatedCompilation, out var diagnostics);
             var ms = new MemoryStream();
             var result = updatedCompilation.Emit(ms);
             foreach (var i in result.Diagnostics)
                 testOutputHelper.WriteLine(i.ToString());
             return (diagnostics, result.Success, ms.ToArray());
+        }
+
+        protected GeneratorDriver CreateGenerationDriver(CSharpCompilation compilation, AnalyzerConfigOptionsProvider? analyzerConfigOptions = null)
+        {
+            GeneratorDriver result;
+#if ROSLYN_4
+            result = CSharpGeneratorDriver.Create(new LightMockGenerator())
+                .WithUpdatedParseOptions(compilation.SyntaxTrees.First().Options);
+            if (analyzerConfigOptions != null)
+                result = result.WithUpdatedAnalyzerConfigOptions(analyzerConfigOptions);
+#else
+            result = CSharpGeneratorDriver.Create(
+                ImmutableArray.Create(new LightMockGenerator()),
+                Enumerable.Empty<AdditionalText>(),
+                (CSharpParseOptions)compilation.SyntaxTrees.First().Options, analyzerConfigOptions);
+#endif
+            return result;
+
         }
 
         protected static CSharpCompilation CreateCompilation(string sourceCode, string hint)

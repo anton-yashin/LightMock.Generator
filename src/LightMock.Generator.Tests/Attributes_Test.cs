@@ -27,15 +27,7 @@ namespace LightMock.Generator.Tests
                 name = name.Replace("Disable", "Enable");
             var compilation = CreateCompilation(Utils.LoadResource(
                 GetFullResourceName(name)), name + Suffix.CSharpFile);
-            var driver = CSharpGeneratorDriver.Create(
-#if ROSLYN_4
-                ImmutableArray.Create(new LightMockGenerator().AsSourceGenerator()),
-#else
-                ImmutableArray.Create(new LightMockGenerator()),
-#endif
-                Enumerable.Empty<AdditionalText>(),
-                (CSharpParseOptions)compilation.SyntaxTrees.First().Options);
-
+            var driver = CreateGenerationDriver(compilation);
             driver.RunGeneratorsAndUpdateCompilation(compilation, out var updatedCompilation, out var diagnostics);
             var ms = new MemoryStream();
             var result = updatedCompilation.Emit(ms);

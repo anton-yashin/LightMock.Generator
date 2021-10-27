@@ -497,15 +497,7 @@ namespace LightMock.Generator.Tests
             var fn = GetFullResourceName(nameof(ObsoleteSupport));
             var source = Utils.LoadResource(fn);
             var compilation = CreateCompilation(source, fn);
-            var driver = CSharpGeneratorDriver.Create(
-#if ROSLYN_4
-                ImmutableArray.Create(new LightMockGenerator().AsSourceGenerator()),
-#else
-                ImmutableArray.Create(new LightMockGenerator()),
-#endif
-                Enumerable.Empty<AdditionalText>(),
-                (CSharpParseOptions)compilation.SyntaxTrees.First().Options);
-
+            var driver = CreateGenerationDriver(compilation);
             driver.RunGeneratorsAndUpdateCompilation(compilation, out var updatedCompilation, out var diagnostics);
             var ms = new MemoryStream();
             var result = updatedCompilation.Emit(ms);
