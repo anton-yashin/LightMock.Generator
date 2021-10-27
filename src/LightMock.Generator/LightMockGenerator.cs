@@ -65,7 +65,7 @@ namespace LightMock.Generator
                 compilation,
                 context.AnalyzerConfigOptions,
                 receiver.AbstractClasses.ToImmutableArray(),
-                receiver.DisableCodeGenerationAttributes.ToImmutableArray(),
+                receiver.DisableCodeGeneration,
                 receiver.DontOverrideAttributes.ToImmutableArray(),
                 context.CancellationToken);
             compilation = DoGenerateInterfaces(
@@ -75,7 +75,7 @@ namespace LightMock.Generator
                 compilation,
                 context.AnalyzerConfigOptions,
                 receiver.Interfaces.ToImmutableArray(),
-                receiver.DisableCodeGenerationAttributes.ToImmutableArray(),
+                receiver.DisableCodeGeneration,
                 context.CancellationToken);
             compilation = DoGenerateDelegates(
                 context,
@@ -84,7 +84,7 @@ namespace LightMock.Generator
                 compilation,
                 context.AnalyzerConfigOptions,
                 receiver.Delegates.ToImmutableArray(),
-                receiver.DisableCodeGenerationAttributes.ToImmutableArray(),
+                receiver.DisableCodeGeneration,
                 context.CancellationToken);
             compilation = DoGenerate(
                 context,
@@ -92,7 +92,7 @@ namespace LightMock.Generator
                 ContextAddSource,
                 compilation,
                 context.AnalyzerConfigOptions,
-                receiver.DisableCodeGenerationAttributes.ToImmutableArray(),
+                receiver.DisableCodeGeneration,
                 receiver.DontOverrideAttributes.ToImmutableArray(),
                 receiver.ArrangeInvocations.ToImmutableArray(),
                 context.CancellationToken);
@@ -110,7 +110,7 @@ namespace LightMock.Generator
             Action<TContext, string, SourceText> addSource,
             CSharpCompilation compilation,
             AnalyzerConfigOptionsProvider optionsProvider,
-            ImmutableArray<AttributeSyntax> disableCodeGenerationAttributes,
+            bool disableCodeGeneration,
             ImmutableArray<AttributeSyntax> dontOverrideAttributes,
             ImmutableArray<InvocationExpressionSyntax> arrangeInvocations,
             CancellationToken cancellationToken)
@@ -124,7 +124,7 @@ namespace LightMock.Generator
 
             if (compilation.SyntaxTrees.First().Options is CSharpParseOptions options)
             {
-                if (IsDisableCodeGenerationAttributePresent(compilation, disableCodeGenerationAttributes, cancellationToken))
+                if (disableCodeGeneration)
                     return compilation;
 
                 // process symbols under ArrangeSetter
@@ -184,7 +184,7 @@ namespace LightMock.Generator
             CSharpCompilation compilation,
             AnalyzerConfigOptionsProvider optionsProvider,
             ImmutableArray<INamedTypeSymbol> delegates,
-            ImmutableArray<AttributeSyntax> disableCodeGenerationAttributes,
+            bool disableCodeGeneration,
             CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -196,7 +196,7 @@ namespace LightMock.Generator
 
             if (compilation.SyntaxTrees.First().Options is CSharpParseOptions options)
             {
-                if (IsDisableCodeGenerationAttributePresent(compilation, disableCodeGenerationAttributes, cancellationToken))
+                if (disableCodeGeneration)
                     return compilation;
 
                 foreach (var @delegate in delegates)
@@ -229,7 +229,7 @@ namespace LightMock.Generator
             CSharpCompilation compilation,
             AnalyzerConfigOptionsProvider optionsProvider,
             ImmutableArray<(GenericNameSyntax mock, INamedTypeSymbol mockedType)> abstractClasses,
-            ImmutableArray<AttributeSyntax> disableCodeGenerationAttributes,
+            bool disableCodeGeneration,
             ImmutableArray<AttributeSyntax> dontOverrideAttributes,
             CancellationToken cancellationToken)
         {
@@ -242,7 +242,7 @@ namespace LightMock.Generator
 
             if (compilation.SyntaxTrees.First().Options is CSharpParseOptions options)
             {
-                if (IsDisableCodeGenerationAttributePresent(compilation, disableCodeGenerationAttributes, cancellationToken))
+                if (disableCodeGeneration)
                     return compilation;
 
                 var dontOverrideList = GetClassExclusionList(compilation, dontOverrideAttributes, cancellationToken);
@@ -276,7 +276,7 @@ namespace LightMock.Generator
             CSharpCompilation compilation,
             AnalyzerConfigOptionsProvider optionsProvider,
             ImmutableArray<INamedTypeSymbol> interfaces,
-            ImmutableArray<AttributeSyntax> disableCodeGenerationAttributes,
+            bool disableCodeGeneration,
             CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -288,7 +288,7 @@ namespace LightMock.Generator
 
             if (compilation.SyntaxTrees.First().Options is CSharpParseOptions options)
             {
-                if (IsDisableCodeGenerationAttributePresent(compilation, disableCodeGenerationAttributes, cancellationToken))
+                if (disableCodeGeneration)
                     return compilation;
 
                 foreach (var @interface in interfaces)
@@ -311,29 +311,6 @@ namespace LightMock.Generator
                 }
             }
             return compilation;
-        }
-
-        private static bool IsDisableCodeGenerationAttributePresent(
-            CSharpCompilation compilation,
-            ImmutableArray<AttributeSyntax> disableCodeGenerationAttributes,
-            CancellationToken cancellationToken)
-        {
-            var disableCodeGenerationAttributeType = typeof(DisableCodeGenerationAttribute);
-            var dcgaName = disableCodeGenerationAttributeType.Name;
-            var dcgaNamespace = disableCodeGenerationAttributeType.Namespace;
-            foreach (var candidateAttribute in disableCodeGenerationAttributes)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                var model = compilation.GetSemanticModel(candidateAttribute.SyntaxTree);
-                var si = model.GetSymbolInfo(candidateAttribute, cancellationToken);
-                if (si.Symbol is IMethodSymbol methodSymbol
-                    && methodSymbol.ToDisplayString(SymbolDisplayFormats.Namespace) == dcgaName
-                    && methodSymbol.ContainingNamespace.ToDisplayString(SymbolDisplayFormats.Namespace) == dcgaNamespace)
-                {
-                    return true;
-                }
-            }
-            return false;
         }
 
         private static IReadOnlyList<INamedTypeSymbol> GetClassExclusionList(

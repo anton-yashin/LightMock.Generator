@@ -50,7 +50,7 @@ namespace LightMock.Generator
             multicastDelegateNameSpaceAndName = multicastDelegateType.Namespace + "." + multicastDelegateType.Name;
         }
 
-        public List<AttributeSyntax> DisableCodeGenerationAttributes { get; } = new List<AttributeSyntax>();
+        public bool DisableCodeGeneration { get; private set; }
         public List<AttributeSyntax> DontOverrideAttributes { get; } = new List<AttributeSyntax>();
         public List<InvocationExpressionSyntax> ArrangeInvocations { get; } = new();
 
@@ -70,11 +70,11 @@ namespace LightMock.Generator
                 when IsMock(gns):
                     AddCandidateMock(gns, context.SemanticModel);
                     break;
-                case AttributeSyntax @as when IsDisableCodeGenerationAttribute(@as):
-                    DisableCodeGenerationAttributes.Add(@as);
-                    break;
                 case AttributeSyntax @as when IsDontOverrideAttribute(@as):
                     DontOverrideAttributes.Add(@as);
+                    break;
+                case AttributeSyntax @as:
+                    DisableCodeGeneration = DisableCodeGeneration || IsDisableCodeGenerationAttribute(context.SemanticModel, @as);
                     break;
                 case InvocationExpressionSyntax ies when IsArrangeInvocation(ies):
                     ArrangeInvocations.Add(ies);
@@ -123,6 +123,24 @@ namespace LightMock.Generator
                 case KDisableCodeGeneration:
                 case KDisableCodeGenerationAttribute:
                     return true;
+            }
+            return false;
+        }
+
+        internal static bool IsDisableCodeGenerationAttribute(SemanticModel semanticModel, AttributeSyntax attributeSyntax)
+        {
+            if (IsDisableCodeGenerationAttribute(attributeSyntax))
+            {
+                var disableCodeGenerationAttributeType = typeof(DisableCodeGenerationAttribute);
+                var dcgaName = disableCodeGenerationAttributeType.Name;
+                var dcgaNamespace = disableCodeGenerationAttributeType.Namespace;
+                var si = semanticModel.GetSymbolInfo(attributeSyntax);
+                if (si.Symbol is IMethodSymbol methodSymbol
+                    && methodSymbol.ToDisplayString(SymbolDisplayFormats.Namespace) == dcgaName
+                    && methodSymbol.ContainingNamespace.ToDisplayString(SymbolDisplayFormats.Namespace) == dcgaNamespace)
+                {
+                    return true;
+                }
             }
             return false;
         }
