@@ -211,6 +211,10 @@ namespace LightMock.Generator
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
+            var disableCodegenerationAttributes = context.SyntaxProvider.CreateSyntaxProvider(
+                (sn, ct) => sn is AttributeSyntax @as && LightMockSyntaxReceiver.IsDisableCodeGenerationAttribute(@as),
+                (ctx, ct) => LightMockSyntaxReceiver.IsDisableCodeGenerationAttribute(ctx.SemanticModel, (AttributeSyntax)ctx.Node));
+
             var interfaces1 = context.SyntaxProvider.CreateSyntaxProvider(
                 (sn, ct) => sn is ObjectCreationExpressionSyntax { Type: GenericNameSyntax gns}
                 && LightMockSyntaxReceiver.IsMock(gns),
@@ -219,9 +223,6 @@ namespace LightMock.Generator
                 (sn, ct) => sn is ObjectCreationExpressionSyntax { Type: QualifiedNameSyntax { Right: GenericNameSyntax gns } }
                 && LightMockSyntaxReceiver.IsMock(gns),
                 (ctx, ct) => ConvertToInterface(ctx));
-            var disableCodegenerationAttributes = context.SyntaxProvider.CreateSyntaxProvider(
-                (sn, ct) => sn is AttributeSyntax @as && LightMockSyntaxReceiver.IsDisableCodeGenerationAttribute(@as),
-                (ctx, ct) => LightMockSyntaxReceiver.IsDisableCodeGenerationAttribute(ctx.SemanticModel, (AttributeSyntax)ctx.Node));
             context.RegisterSourceOutput(interfaces1
                 .Combine(context.CompilationProvider)
                 .Combine(context.AnalyzerConfigOptionsProvider)
@@ -233,6 +234,24 @@ namespace LightMock.Generator
                 .Where(t
                 => IsCodeGenerationDisabledByAttributes(t.disableCodegenerationAttributes)
                 && IsGenerationDisabledByOptions(t.options) == false 
+                && t.candidate != null
+                && t.compilation is CSharpCompilation
+                && t.parseOptions is CSharpParseOptions),
+                (sp, sr) => DoGenerateCode(
+                    new CodeGenerationContext(sp, (CSharpCompilation)sr.compilation, (CSharpParseOptions)sr.parseOptions),
+                    new InterfaceProcessor(sr.candidate!),
+                    sp.CancellationToken));
+            context.RegisterSourceOutput(interfaces2
+                .Combine(context.CompilationProvider)
+                .Combine(context.AnalyzerConfigOptionsProvider)
+                .Select((comb, ct) => (candidate: comb.Left.Left, compilation: comb.Left.Right, options: comb.Right))
+                .Combine(disableCodegenerationAttributes.Collect())
+                .Select((comb, ct) => (comb.Left.candidate, comb.Left.compilation, comb.Left.options, disableCodegenerationAttributes: comb.Right))
+                .Combine(context.ParseOptionsProvider)
+                .Select((comb, ct) => (comb.Left.candidate, comb.Left.compilation, comb.Left.options, comb.Left.disableCodegenerationAttributes, parseOptions: comb.Right))
+                .Where(t
+                => IsCodeGenerationDisabledByAttributes(t.disableCodegenerationAttributes)
+                && IsGenerationDisabledByOptions(t.options) == false
                 && t.candidate != null
                 && t.compilation is CSharpCompilation
                 && t.parseOptions is CSharpParseOptions),
