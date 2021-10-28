@@ -64,6 +64,8 @@ namespace LightMock.Generator
         {
             if (context.Compilation is CSharpCompilation compilation == false)
                 return;
+            if (context.ParseOptions is CSharpParseOptions parseOptions == false)
+                return;
             if (context.SyntaxContextReceiver is LightMockSyntaxReceiver receiver == false)
                 return;
             if (IsCompilationDisabledByOptions(context.AnalyzerConfigOptions) || receiver.DisableCodeGeneration)
@@ -73,6 +75,7 @@ namespace LightMock.Generator
                 ContextReportDiagnostic,
                 ContextAddSource,
                 compilation,
+                parseOptions,
                 receiver.AbstractClasses.ToImmutableArray(),
                 receiver.DontOverrideTypes.ToImmutableArray(),
                 context.CancellationToken);
@@ -81,6 +84,7 @@ namespace LightMock.Generator
                 ContextReportDiagnostic,
                 ContextAddSource,
                 compilation,
+                parseOptions,
                 receiver.Interfaces.ToImmutableArray(),
                 context.CancellationToken);
             compilation = DoGenerateDelegates(
@@ -88,6 +92,7 @@ namespace LightMock.Generator
                 ContextReportDiagnostic,
                 ContextAddSource,
                 compilation,
+                parseOptions,
                 receiver.Delegates.ToImmutableArray(),
                 context.CancellationToken);
             compilation = DoGenerate(
@@ -95,6 +100,7 @@ namespace LightMock.Generator
                 ContextReportDiagnostic,
                 ContextAddSource,
                 compilation,
+                parseOptions,
                 receiver.ArrangeInvocations.ToImmutableArray(),
                 context.CancellationToken);
         }
@@ -110,58 +116,56 @@ namespace LightMock.Generator
             Action<TContext, Diagnostic> reportDiagnostic,
             Action<TContext, string, SourceText> addSource,
             CSharpCompilation compilation,
+            CSharpParseOptions options,
             ImmutableArray<InvocationExpressionSyntax> arrangeInvocations,
             CancellationToken cancellationToken)
-        { 
+        {
             cancellationToken.ThrowIfCancellationRequested();
 
-            if (compilation.SyntaxTrees.First().Options is CSharpParseOptions options)
+            // process symbols under ArrangeSetter
+
+            var mockContextMatcher = new TypeMatcher(typeof(AbstractMock<>));
+            var processedFiles = new HashSet<string>();
+            var mockInterfaceMatcher = new TypeMatcher(typeof(IAdvancedMockContext<>));
+            foreach (var candidateInvocation in arrangeInvocations)
             {
-                // process symbols under ArrangeSetter
+                cancellationToken.ThrowIfCancellationRequested();
+                var st = compilation.GetSemanticModel(candidateInvocation.SyntaxTree);
+                var methodSymbol = st.GetSymbolInfo(candidateInvocation, cancellationToken).Symbol as IMethodSymbol;
+                cancellationToken.ThrowIfCancellationRequested();
 
-                var mockContextMatcher = new TypeMatcher(typeof(AbstractMock<>));
-                var processedFiles = new HashSet<string>();
-                var mockInterfaceMatcher = new TypeMatcher(typeof(IAdvancedMockContext<>));
-                foreach (var candidateInvocation in arrangeInvocations)
+                if (methodSymbol != null
+                    && (mockContextMatcher.IsMatch(methodSymbol.ContainingType)
+                        || mockInterfaceMatcher.IsMatch(methodSymbol.ContainingType)))
                 {
-                    cancellationToken.ThrowIfCancellationRequested();
-                    var st = compilation.GetSemanticModel(candidateInvocation.SyntaxTree);
-                    var methodSymbol = st.GetSymbolInfo(candidateInvocation, cancellationToken).Symbol as IMethodSymbol;
-                    cancellationToken.ThrowIfCancellationRequested();
-
-                    if (methodSymbol != null 
-                        && (mockContextMatcher.IsMatch(methodSymbol.ContainingType)
-                            || mockInterfaceMatcher.IsMatch(methodSymbol.ContainingType)))
+                    ExpressionRewriter processor;
+                    switch (methodSymbol.Name)
                     {
-                        ExpressionRewriter processor;
-                        switch (methodSymbol.Name)
-                        {
-                            case nameof(AbstractMockNameofProvider.ArrangeSetter):
-                                processor = new ArrangeExpressionRewriter(methodSymbol, candidateInvocation, compilation);
-                                break;
-                            case nameof(AbstractMockNameofProvider.AssertSet):
-                                processor = new AssertExpressionRewriter(methodSymbol, candidateInvocation, compilation);
-                                break;
-                            default:
-                                continue;
-                        }
-
-                        cancellationToken.ThrowIfCancellationRequested();
-                        if (processedFiles.Contains(processor.FileName))
-                        {
-                            reportDiagnostic(context, Diagnostic.Create(
-                                DiagnosticsDescriptors.KPropertyExpressionMustHaveUniqueId,
-                                candidateInvocation.GetLocation(), methodSymbol.Name));
+                        case nameof(AbstractMockNameofProvider.ArrangeSetter):
+                            processor = new ArrangeExpressionRewriter(methodSymbol, candidateInvocation, compilation);
+                            break;
+                        case nameof(AbstractMockNameofProvider.AssertSet):
+                            processor = new AssertExpressionRewriter(methodSymbol, candidateInvocation, compilation);
+                            break;
+                        default:
                             continue;
-                        }
-                        if (EmitDiagnostics(context, reportDiagnostic, processor.GetErrors()))
-                            continue;
-                        cancellationToken.ThrowIfCancellationRequested();
-                        EmitDiagnostics(context, reportDiagnostic, processor.GetWarnings());
-                        cancellationToken.ThrowIfCancellationRequested();
-                        var text = processor.DoGenerate();
-                        addSource(context, processor.FileName, text);
                     }
+
+                    cancellationToken.ThrowIfCancellationRequested();
+                    if (processedFiles.Contains(processor.FileName))
+                    {
+                        reportDiagnostic(context, Diagnostic.Create(
+                            DiagnosticsDescriptors.KPropertyExpressionMustHaveUniqueId,
+                            candidateInvocation.GetLocation(), methodSymbol.Name));
+                        continue;
+                    }
+                    if (EmitDiagnostics(context, reportDiagnostic, processor.GetErrors()))
+                        continue;
+                    cancellationToken.ThrowIfCancellationRequested();
+                    EmitDiagnostics(context, reportDiagnostic, processor.GetWarnings());
+                    cancellationToken.ThrowIfCancellationRequested();
+                    var text = processor.DoGenerate();
+                    addSource(context, processor.FileName, text);
                 }
             }
             return compilation;
@@ -172,31 +176,29 @@ namespace LightMock.Generator
             Action<TContext, Diagnostic> reportDiagnostic,
             Action<TContext, string, SourceText> addSource,
             CSharpCompilation compilation,
+            CSharpParseOptions options,
             ImmutableArray<INamedTypeSymbol> delegates,
             CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            if (compilation.SyntaxTrees.First().Options is CSharpParseOptions options)
+            foreach (var @delegate in delegates)
             {
-                foreach (var @delegate in delegates)
-                {
-                    ClassProcessor processor = new DelegateProcessor(@delegate);
+                ClassProcessor processor = new DelegateProcessor(@delegate);
 
-                    cancellationToken.ThrowIfCancellationRequested();
-                    if (EmitDiagnostics(context, reportDiagnostic, processor.GetErrors()))
-                        continue;
-                    cancellationToken.ThrowIfCancellationRequested();
-                    EmitDiagnostics(context, reportDiagnostic, processor.GetWarnings());
-                    var text = processor.DoGenerate();
-                    addSource(context, processor.FileName, text);
-                    if (processor.IsUpdateCompilationRequired)
-                    {
-                        compilation = compilation.AddSyntaxTrees(CSharpSyntaxTree.ParseText(
-                            text, options, cancellationToken: cancellationToken));
-                    }
-                    cancellationToken.ThrowIfCancellationRequested();
+                cancellationToken.ThrowIfCancellationRequested();
+                if (EmitDiagnostics(context, reportDiagnostic, processor.GetErrors()))
+                    continue;
+                cancellationToken.ThrowIfCancellationRequested();
+                EmitDiagnostics(context, reportDiagnostic, processor.GetWarnings());
+                var text = processor.DoGenerate();
+                addSource(context, processor.FileName, text);
+                if (processor.IsUpdateCompilationRequired)
+                {
+                    compilation = compilation.AddSyntaxTrees(CSharpSyntaxTree.ParseText(
+                        text, options, cancellationToken: cancellationToken));
                 }
+                cancellationToken.ThrowIfCancellationRequested();
             }
             return compilation;
         }
@@ -207,32 +209,30 @@ namespace LightMock.Generator
             Action<TContext, Diagnostic> reportDiagnostic,
             Action<TContext, string, SourceText> addSource,
             CSharpCompilation compilation,
+            CSharpParseOptions options,
             ImmutableArray<(GenericNameSyntax mock, INamedTypeSymbol mockedType)> abstractClasses,
             ImmutableArray<INamedTypeSymbol> dontOverrideTypes,
             CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            if (compilation.SyntaxTrees.First().Options is CSharpParseOptions options)
+            foreach (var (candidateGeneric, mockedType) in abstractClasses)
             {
-                foreach (var (candidateGeneric, mockedType) in abstractClasses)
-                {
-                    var processor = new AbstractClassProcessor(candidateGeneric, mockedType, dontOverrideTypes);
+                var processor = new AbstractClassProcessor(candidateGeneric, mockedType, dontOverrideTypes);
 
-                    cancellationToken.ThrowIfCancellationRequested();
-                    if (EmitDiagnostics(context, reportDiagnostic, processor.GetErrors()))
-                        continue;
-                    cancellationToken.ThrowIfCancellationRequested();
-                    EmitDiagnostics(context, reportDiagnostic, processor.GetWarnings());
-                    var text = processor.DoGenerate();
-                    addSource(context, processor.FileName, text);
-                    if (processor.IsUpdateCompilationRequired)
-                    {
-                        compilation = compilation.AddSyntaxTrees(CSharpSyntaxTree.ParseText(
-                            text, options, cancellationToken: cancellationToken));
-                    }
-                    cancellationToken.ThrowIfCancellationRequested();
+                cancellationToken.ThrowIfCancellationRequested();
+                if (EmitDiagnostics(context, reportDiagnostic, processor.GetErrors()))
+                    continue;
+                cancellationToken.ThrowIfCancellationRequested();
+                EmitDiagnostics(context, reportDiagnostic, processor.GetWarnings());
+                var text = processor.DoGenerate();
+                addSource(context, processor.FileName, text);
+                if (processor.IsUpdateCompilationRequired)
+                {
+                    compilation = compilation.AddSyntaxTrees(CSharpSyntaxTree.ParseText(
+                        text, options, cancellationToken: cancellationToken));
                 }
+                cancellationToken.ThrowIfCancellationRequested();
             }
             return compilation;
         }
@@ -242,31 +242,29 @@ namespace LightMock.Generator
             Action<TContext, Diagnostic> reportDiagnostic,
             Action<TContext, string, SourceText> addSource,
             CSharpCompilation compilation,
+            CSharpParseOptions options,
             ImmutableArray<INamedTypeSymbol> interfaces,
             CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            if (compilation.SyntaxTrees.First().Options is CSharpParseOptions options)
+            foreach (var @interface in interfaces)
             {
-                foreach (var @interface in interfaces)
-                {
-                    var processor = new InterfaceProcessor(@interface);
+                var processor = new InterfaceProcessor(@interface);
 
-                    cancellationToken.ThrowIfCancellationRequested();
-                    if (EmitDiagnostics(context, reportDiagnostic, processor.GetErrors()))
-                        continue;
-                    cancellationToken.ThrowIfCancellationRequested();
-                    EmitDiagnostics(context, reportDiagnostic, processor.GetWarnings());
-                    var text = processor.DoGenerate();
-                    addSource(context, processor.FileName, text);
-                    if (processor.IsUpdateCompilationRequired)
-                    {
-                        compilation = compilation.AddSyntaxTrees(CSharpSyntaxTree.ParseText(
-                            text, options, cancellationToken: cancellationToken));
-                    }
-                    cancellationToken.ThrowIfCancellationRequested();
+                cancellationToken.ThrowIfCancellationRequested();
+                if (EmitDiagnostics(context, reportDiagnostic, processor.GetErrors()))
+                    continue;
+                cancellationToken.ThrowIfCancellationRequested();
+                EmitDiagnostics(context, reportDiagnostic, processor.GetWarnings());
+                var text = processor.DoGenerate();
+                addSource(context, processor.FileName, text);
+                if (processor.IsUpdateCompilationRequired)
+                {
+                    compilation = compilation.AddSyntaxTrees(CSharpSyntaxTree.ParseText(
+                        text, options, cancellationToken: cancellationToken));
                 }
+                cancellationToken.ThrowIfCancellationRequested();
             }
             return compilation;
         }
