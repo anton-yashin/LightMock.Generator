@@ -318,6 +318,7 @@ namespace LightMock.Generator
             Action<TContext, Diagnostic> reportDiagnostic,
             Action<TContext, string, SourceText> addSource,
             CSharpCompilation compilation,
+            CSharpParseOptions parseOptions,
             INamedTypeSymbol @interface,
             CancellationToken cancellationToken)
         {
@@ -325,24 +326,21 @@ namespace LightMock.Generator
             if (@interface == null)
                 throw new ArgumentNullException(nameof(@interface));
 
-            if (compilation.SyntaxTrees.First().Options is CSharpParseOptions options) // <-- move to predicate
-            {
-                var processor = new InterfaceProcessor(@interface);
+            var processor = new InterfaceProcessor(@interface);
 
-                cancellationToken.ThrowIfCancellationRequested();
-                if (EmitDiagnostics(context, reportDiagnostic, processor.GetErrors()))
-                    return compilation;
-                cancellationToken.ThrowIfCancellationRequested();
-                EmitDiagnostics(context, reportDiagnostic, processor.GetWarnings());
-                var text = processor.DoGenerate();
-                addSource(context, processor.FileName, text);
-                if (processor.IsUpdateCompilationRequired)
-                {
-                    compilation = compilation.AddSyntaxTrees(CSharpSyntaxTree.ParseText(
-                        text, options, cancellationToken: cancellationToken));
-                }
-                cancellationToken.ThrowIfCancellationRequested();
+            cancellationToken.ThrowIfCancellationRequested();
+            if (EmitDiagnostics(context, reportDiagnostic, processor.GetErrors()))
+                return compilation;
+            cancellationToken.ThrowIfCancellationRequested();
+            EmitDiagnostics(context, reportDiagnostic, processor.GetWarnings());
+            var text = processor.DoGenerate();
+            addSource(context, processor.FileName, text);
+            if (processor.IsUpdateCompilationRequired)
+            {
+                compilation = compilation.AddSyntaxTrees(CSharpSyntaxTree.ParseText(
+                    text, parseOptions, cancellationToken: cancellationToken));
             }
+            cancellationToken.ThrowIfCancellationRequested();
             return compilation;
         }
 
@@ -382,12 +380,16 @@ namespace LightMock.Generator
                 .Select((comb, ct) => (candidate: comb.Left.Left, compilation: comb.Left.Right, options: comb.Right))
                 .Combine(disableCodegenerationAttributes.Collect())
                 .Select((comb, ct) => (comb.Left.candidate, comb.Left.compilation, comb.Left.options, disableCodegenerationAttributes: comb.Right))
+                .Combine(context.ParseOptionsProvider)
+                .Select((comb, ct) => (comb.Left.candidate, comb.Left.compilation, comb.Left.options, comb.Left.disableCodegenerationAttributes, parseOptions: comb.Right))
                 .Where(t => t.disableCodegenerationAttributes.Where(t => t == true).Any() == false
-                && t.candidate != null && IsCompilationDisabledByOptions(t.options) == false),
+                && t.candidate != null && IsCompilationDisabledByOptions(t.options) == false
+                && t.compilation is CSharpCompilation && t.parseOptions is CSharpParseOptions),
                 (sp, sr) => DoGenerateInterfaces2(sp, 
                 static (ctx, diag) => ctx.ReportDiagnostic(diag),
                 static (ctx, hint, text) => ctx.AddSource(hint, text),
                 (CSharpCompilation)sr.compilation,
+                (CSharpParseOptions)sr.parseOptions,
                 sr.candidate!,
                 sp.CancellationToken));
 
