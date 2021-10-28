@@ -46,8 +46,16 @@ namespace LightMock.Generator
     public class LightMockGenerator : ISourceGenerator
 #endif
     {
+        private readonly TypeMatcher mockContextMatcher;
+        private readonly TypeMatcher mockInterfaceMatcher;
+        private readonly string multicastDelegateNameSpaceAndName;
+
         public LightMockGenerator()
         {
+            mockContextMatcher = new TypeMatcher(typeof(AbstractMock<>));
+            mockInterfaceMatcher = new TypeMatcher(typeof(IAdvancedMockContext<>));
+            var multicastDelegateType = typeof(MulticastDelegate);
+            multicastDelegateNameSpaceAndName = multicastDelegateType.Namespace + "." + multicastDelegateType.Name;
         }
 
 #if ROSLYN_4 == false
@@ -313,6 +321,45 @@ namespace LightMock.Generator
             return compilation;
         }
 
+        public CSharpCompilation DoGenerateInterfaces2<TContext>(
+            TContext context,
+            Action<TContext, Diagnostic> reportDiagnostic,
+            Action<TContext, string, SourceText> addSource,
+            CSharpCompilation compilation,
+            AnalyzerConfigOptionsProvider optionsProvider,
+            INamedTypeSymbol? @interface,
+            CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (@interface == null)
+                return compilation;
+            if (optionsProvider.GlobalOptions.TryGetValue(GlobalOptionsNames.Enable, out var value)
+                && value.Equals("false", StringComparison.InvariantCultureIgnoreCase)) // <-- move to predicate
+            {
+                return compilation;
+            }
+
+            if (compilation.SyntaxTrees.First().Options is CSharpParseOptions options) // <-- move to predicate
+            {
+                var processor = new InterfaceProcessor(@interface);
+
+                cancellationToken.ThrowIfCancellationRequested();
+                if (EmitDiagnostics(context, reportDiagnostic, processor.GetErrors()))
+                    return compilation;
+                cancellationToken.ThrowIfCancellationRequested();
+                EmitDiagnostics(context, reportDiagnostic, processor.GetWarnings());
+                var text = processor.DoGenerate();
+                addSource(context, processor.FileName, text);
+                if (processor.IsUpdateCompilationRequired)
+                {
+                    compilation = compilation.AddSyntaxTrees(CSharpSyntaxTree.ParseText(
+                        text, options, cancellationToken: cancellationToken));
+                }
+                cancellationToken.ThrowIfCancellationRequested();
+            }
+            return compilation;
+        }
+
         private static IReadOnlyList<INamedTypeSymbol> GetClassExclusionList(
             CSharpCompilation compilation,
             ImmutableArray<AttributeSyntax> dontOverrideAttributes,
@@ -354,20 +401,79 @@ namespace LightMock.Generator
 
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
-            var candidateMocks = context.SyntaxProvider.CreateSyntaxProvider(
-                (sn, ct) => sn is GenericNameSyntax gns && LightMockSyntaxReceiver.IsMock(gns),
-                (ctx, ct) => (GenericNameSyntax)ctx.Node);
+            var interfaces1 = context.SyntaxProvider.CreateSyntaxProvider(
+                (sn, ct) => sn is ObjectCreationExpressionSyntax { Type: GenericNameSyntax gns}
+                && LightMockSyntaxReceiver.IsMock(gns),
+                (ctx, ct) => ConvertToInterface(ctx));
+            var interfaces2 = context.SyntaxProvider.CreateSyntaxProvider(
+                (sn, ct) => sn is ObjectCreationExpressionSyntax { Type: QualifiedNameSyntax { Right: GenericNameSyntax gns } }
+                && LightMockSyntaxReceiver.IsMock(gns),
+                (ctx, ct) => ConvertToInterface(ctx));
             var disableCodegenerationAttributes = context.SyntaxProvider.CreateSyntaxProvider(
                 (sn, ct) => sn is AttributeSyntax @as && LightMockSyntaxReceiver.IsDisableCodeGenerationAttribute(@as),
-                (ctx, ct) => (AttributeSyntax)ctx.Node);
-            var dontOverrideAttributes = context.SyntaxProvider.CreateSyntaxProvider(
-                (sn, ct) => sn is AttributeSyntax @as && LightMockSyntaxReceiver.IsDontOverrideAttribute(@as),
-                (ctx, ct) => (AttributeSyntax)ctx.Node);
-            var arrangeInvocations = context.SyntaxProvider.CreateSyntaxProvider(
-                (sn, ct) => sn is InvocationExpressionSyntax ies && LightMockSyntaxReceiver.IsArrangeInvocation(ies),
-                (ctx, ct) => (InvocationExpressionSyntax)ctx.Node);
+                (ctx, ct) => LightMockSyntaxReceiver.IsDisableCodeGenerationAttribute(ctx.SemanticModel, (AttributeSyntax)ctx.Node));
+            context.RegisterSourceOutput(interfaces1
+                .Combine(context.CompilationProvider)
+                .Combine(context.AnalyzerConfigOptionsProvider)
+                .Select((comb, ct) => (candidate: comb.Left.Left, compilation: comb.Left.Right, options: comb.Right))
+                .Combine(disableCodegenerationAttributes.Collect())
+                .Select((comb, ct) => (comb.Left.candidate, comb.Left.compilation, comb.Left.options, disableCodegenerationAttributes: comb.Right))
+                .Where(t => t.disableCodegenerationAttributes.Where(t => t == true).Any() == false),
+                (sp, sr) => DoGenerateInterfaces2(sp, 
+                static (ctx, diag) => ctx.ReportDiagnostic(diag),
+                static (ctx, hint, text) => ctx.AddSource(hint, text),
+                (CSharpCompilation)sr.compilation,
+                sr.options,
+                sr.candidate,
+                sp.CancellationToken));
+
+            //var candidateMocks = context.SyntaxProvider.CreateSyntaxProvider(
+            //    (sn, ct) => sn is GenericNameSyntax gns && LightMockSyntaxReceiver.IsMock(gns),
+            //    (ctx, ct) => (GenericNameSyntax)ctx.Node);
+            //var disableCodegenerationAttributes = context.SyntaxProvider.CreateSyntaxProvider(
+            //    (sn, ct) => sn is AttributeSyntax @as && LightMockSyntaxReceiver.IsDisableCodeGenerationAttribute(@as),
+            //    (ctx, ct) => (AttributeSyntax)ctx.Node);
+            //var dontOverrideAttributes = context.SyntaxProvider.CreateSyntaxProvider(
+            //    (sn, ct) => sn is AttributeSyntax @as && LightMockSyntaxReceiver.IsDontOverrideAttribute(@as),
+            //    (ctx, ct) => (AttributeSyntax)ctx.Node);
+            //var arrangeInvocations = context.SyntaxProvider.CreateSyntaxProvider(
+            //    (sn, ct) => sn is InvocationExpressionSyntax ies && LightMockSyntaxReceiver.IsArrangeInvocation(ies),
+            //    (ctx, ct) => (InvocationExpressionSyntax)ctx.Node);
             //candidateMocks.Collect().Combine(disableCodegenerationAttributes.Collect()).
         }
+
+        INamedTypeSymbol? ConvertToInterface(GeneratorSyntaxContext context)
+        {
+            GenericNameSyntax candidateGeneric;
+            var semanticModel = context.SemanticModel;
+
+            switch (context.Node)
+            {
+                case ObjectCreationExpressionSyntax { Type: GenericNameSyntax gns }:
+                    candidateGeneric = gns;
+                    break;
+                case ObjectCreationExpressionSyntax { Type: QualifiedNameSyntax { Right: GenericNameSyntax gns } }:
+                    candidateGeneric = gns;
+                    break;
+                default:
+                    return null;
+            }
+
+            var mockContainer = semanticModel.GetSymbolInfo(candidateGeneric).Symbol
+                as INamedTypeSymbol;
+            var mcbt = mockContainer?.BaseType;
+            if (mcbt != null
+                && mockContextMatcher.IsMatch(mcbt)
+                && mcbt.TypeArguments.FirstOrDefault() is INamedTypeSymbol mockedType)
+            {
+
+                var mtbt = mockedType.BaseType;
+                if (mtbt == null)
+                    return mockedType;
+            }
+            return null;
+        }
+
 
 #else
 
