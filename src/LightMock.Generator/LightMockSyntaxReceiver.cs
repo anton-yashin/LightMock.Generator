@@ -41,6 +41,8 @@ namespace LightMock.Generator
         private readonly TypeMatcher mockInterfaceMatcher;
         private readonly List<INamedTypeSymbol> processedTypes;
         private readonly string multicastDelegateNameSpaceAndName;
+        private readonly string doatName;
+        private readonly string doatNamespace;
 
         public LightMockSyntaxReceiver()
         {
@@ -49,6 +51,9 @@ namespace LightMock.Generator
             processedTypes = new List<INamedTypeSymbol>();
             var multicastDelegateType = typeof(MulticastDelegate);
             multicastDelegateNameSpaceAndName = multicastDelegateType.Namespace + "." + multicastDelegateType.Name;
+            var dontOverrideAttributeType = typeof(DontOverrideAttribute);
+            doatName = dontOverrideAttributeType.Name;
+            doatNamespace = dontOverrideAttributeType.Namespace;
         }
 
         public bool DisableCodeGeneration { get; private set; }
@@ -176,9 +181,6 @@ namespace LightMock.Generator
 
         private void AddDontOverrideType(SemanticModel semanticModel, AttributeSyntax @as)
         {
-            var dontOverrideAttributeType = typeof(DontOverrideAttribute);
-            var doatName = dontOverrideAttributeType.Name;
-            var doatNamespace = dontOverrideAttributeType.Namespace;
             TypeSyntax? type;
             if (semanticModel.GetSymbolInfo(@as).Symbol is IMethodSymbol methodSymbol
                 && methodSymbol.ToDisplayString(SymbolDisplayFormats.Namespace) == doatName
