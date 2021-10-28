@@ -116,10 +116,20 @@ namespace LightMock.Generator
             Action<TContext, Diagnostic> reportDiagnostic,
             Action<TContext, string, SourceText> addSource,
             CSharpCompilation compilation,
-            CSharpParseOptions options,
+            CSharpParseOptions parseOptions,
             ImmutableArray<InvocationExpressionSyntax> arrangeInvocations,
             CancellationToken cancellationToken)
+            where TContext : struct
         {
+            if (reportDiagnostic is null)
+                throw new ArgumentNullException(nameof(reportDiagnostic));
+            if (addSource is null)
+                throw new ArgumentNullException(nameof(addSource));
+            if (compilation is null)
+                throw new ArgumentNullException(nameof(compilation));
+            if (parseOptions is null)
+                throw new ArgumentNullException(nameof(parseOptions));
+
             cancellationToken.ThrowIfCancellationRequested();
 
             // process symbols under ArrangeSetter
@@ -176,10 +186,20 @@ namespace LightMock.Generator
             Action<TContext, Diagnostic> reportDiagnostic,
             Action<TContext, string, SourceText> addSource,
             CSharpCompilation compilation,
-            CSharpParseOptions options,
+            CSharpParseOptions parseOptions,
             ImmutableArray<INamedTypeSymbol> delegates,
             CancellationToken cancellationToken)
+            where TContext : struct
         {
+            if (reportDiagnostic is null)
+                throw new ArgumentNullException(nameof(reportDiagnostic));
+            if (addSource is null)
+                throw new ArgumentNullException(nameof(addSource));
+            if (compilation is null)
+                throw new ArgumentNullException(nameof(compilation));
+            if (parseOptions is null)
+                throw new ArgumentNullException(nameof(parseOptions));
+
             cancellationToken.ThrowIfCancellationRequested();
 
             foreach (var @delegate in delegates)
@@ -196,7 +216,7 @@ namespace LightMock.Generator
                 if (processor.IsUpdateCompilationRequired)
                 {
                     compilation = compilation.AddSyntaxTrees(CSharpSyntaxTree.ParseText(
-                        text, options, cancellationToken: cancellationToken));
+                        text, parseOptions, cancellationToken: cancellationToken));
                 }
                 cancellationToken.ThrowIfCancellationRequested();
             }
@@ -209,11 +229,21 @@ namespace LightMock.Generator
             Action<TContext, Diagnostic> reportDiagnostic,
             Action<TContext, string, SourceText> addSource,
             CSharpCompilation compilation,
-            CSharpParseOptions options,
+            CSharpParseOptions parseOptions,
             ImmutableArray<(GenericNameSyntax mock, INamedTypeSymbol mockedType)> abstractClasses,
             ImmutableArray<INamedTypeSymbol> dontOverrideTypes,
             CancellationToken cancellationToken)
+            where TContext : struct
         {
+            if (reportDiagnostic is null)
+                throw new ArgumentNullException(nameof(reportDiagnostic));
+            if (addSource is null)
+                throw new ArgumentNullException(nameof(addSource));
+            if (compilation is null)
+                throw new ArgumentNullException(nameof(compilation));
+            if (parseOptions is null)
+                throw new ArgumentNullException(nameof(parseOptions));
+
             cancellationToken.ThrowIfCancellationRequested();
 
             foreach (var (candidateGeneric, mockedType) in abstractClasses)
@@ -230,7 +260,7 @@ namespace LightMock.Generator
                 if (processor.IsUpdateCompilationRequired)
                 {
                     compilation = compilation.AddSyntaxTrees(CSharpSyntaxTree.ParseText(
-                        text, options, cancellationToken: cancellationToken));
+                        text, parseOptions, cancellationToken: cancellationToken));
                 }
                 cancellationToken.ThrowIfCancellationRequested();
             }
@@ -242,10 +272,20 @@ namespace LightMock.Generator
             Action<TContext, Diagnostic> reportDiagnostic,
             Action<TContext, string, SourceText> addSource,
             CSharpCompilation compilation,
-            CSharpParseOptions options,
+            CSharpParseOptions parseOptions,
             ImmutableArray<INamedTypeSymbol> interfaces,
             CancellationToken cancellationToken)
+            where TContext : struct
         {
+            if (reportDiagnostic is null)
+                throw new ArgumentNullException(nameof(reportDiagnostic));
+            if (addSource is null)
+                throw new ArgumentNullException(nameof(addSource));
+            if (compilation is null)
+                throw new ArgumentNullException(nameof(compilation));
+            if (parseOptions is null)
+                throw new ArgumentNullException(nameof(parseOptions));
+
             cancellationToken.ThrowIfCancellationRequested();
 
             foreach (var @interface in interfaces)
@@ -262,14 +302,14 @@ namespace LightMock.Generator
                 if (processor.IsUpdateCompilationRequired)
                 {
                     compilation = compilation.AddSyntaxTrees(CSharpSyntaxTree.ParseText(
-                        text, options, cancellationToken: cancellationToken));
+                        text, parseOptions, cancellationToken: cancellationToken));
                 }
                 cancellationToken.ThrowIfCancellationRequested();
             }
             return compilation;
         }
 
-        public CSharpCompilation DoGenerateInterfaces2<TContext>(
+        public CSharpCompilation DoGenerateInterface<TContext>(
             TContext context,
             Action<TContext, Diagnostic> reportDiagnostic,
             Action<TContext, string, SourceText> addSource,
@@ -277,10 +317,20 @@ namespace LightMock.Generator
             CSharpParseOptions parseOptions,
             INamedTypeSymbol @interface,
             CancellationToken cancellationToken)
+            where TContext : struct
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            if (@interface == null)
+            if (reportDiagnostic is null)
+                throw new ArgumentNullException(nameof(reportDiagnostic));
+            if (addSource is null)
+                throw new ArgumentNullException(nameof(addSource));
+            if (compilation is null)
+                throw new ArgumentNullException(nameof(compilation));
+            if (parseOptions is null)
+                throw new ArgumentNullException(nameof(parseOptions));
+            if (@interface is null)
                 throw new ArgumentNullException(nameof(@interface));
+
+            cancellationToken.ThrowIfCancellationRequested();
 
             var processor = new InterfaceProcessor(@interface);
 
@@ -341,7 +391,7 @@ namespace LightMock.Generator
                 .Where(t => t.disableCodegenerationAttributes.Where(t => t == true).Any() == false
                 && t.candidate != null && IsCompilationDisabledByOptions(t.options) == false
                 && t.compilation is CSharpCompilation && t.parseOptions is CSharpParseOptions),
-                (sp, sr) => DoGenerateInterfaces2(sp, 
+                (sp, sr) => DoGenerateInterface(sp, 
                 static (ctx, diag) => ctx.ReportDiagnostic(diag),
                 static (ctx, hint, text) => ctx.AddSource(hint, text),
                 (CSharpCompilation)sr.compilation,
