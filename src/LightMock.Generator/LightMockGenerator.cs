@@ -304,6 +304,58 @@ namespace LightMock.Generator
                     new CodeGenerationContext(sp, (CSharpCompilation)sr.compilation, (CSharpParseOptions)sr.parseOptions),
                     new DelegateProcessor(sr.candidate!),
                     sp.CancellationToken));
+
+            var classes1 = context.SyntaxProvider.CreateSyntaxProvider(
+                (sn, ct) => sn is ObjectCreationExpressionSyntax { Type: GenericNameSyntax gns }
+                && LightMockSyntaxReceiver.IsMock(gns),
+                (ctx, ct) => ConvertToAbstractClass(ctx));
+            var classes2 = context.SyntaxProvider.CreateSyntaxProvider(
+                (sn, ct) => sn is ObjectCreationExpressionSyntax { Type: QualifiedNameSyntax { Right: GenericNameSyntax gns } }
+                && LightMockSyntaxReceiver.IsMock(gns),
+                (ctx, ct) => ConvertToAbstractClass(ctx));
+            var dontOverrideTypes = context.SyntaxProvider.CreateSyntaxProvider(
+                (sn, ct) => sn is AttributeSyntax @as && LightMockSyntaxReceiver.IsDontOverrideAttribute(@as),
+                (ctx, ct) => CovertToDontOverride(ctx.SemanticModel, (AttributeSyntax)ctx.Node));
+            context.RegisterSourceOutput(classes1
+                .Combine(context.CompilationProvider)
+                .Combine(context.AnalyzerConfigOptionsProvider)
+                .Select((comb, ct) => (candidate: comb.Left.Left, compilation: comb.Left.Right, options: comb.Right))
+                .Combine(disableCodegenerationAttributes.Collect())
+                .Select((comb, ct) => (comb.Left.candidate, comb.Left.compilation, comb.Left.options, disableCodegenerationAttributes: comb.Right))
+                .Combine(context.ParseOptionsProvider)
+                .Select((comb, ct) => (comb.Left.candidate, comb.Left.compilation, comb.Left.options, comb.Left.disableCodegenerationAttributes, parseOptions: comb.Right))
+                .Combine(dontOverrideTypes.Collect())
+                .Select((comb, ct) => (comb.Left.candidate, comb.Left.compilation, comb.Left.options, comb.Left.disableCodegenerationAttributes, comb.Left.parseOptions, dontOverrideTypes: comb.Right))
+                .Where(t
+                => IsCodeGenerationDisabledByAttributes(t.disableCodegenerationAttributes)
+                && IsGenerationDisabledByOptions(t.options) == false
+                && t.candidate != null
+                && t.compilation is CSharpCompilation
+                && t.parseOptions is CSharpParseOptions),
+                (sp, sr) => DoGenerateCode(
+                    new CodeGenerationContext(sp, (CSharpCompilation)sr.compilation, (CSharpParseOptions)sr.parseOptions),
+                    new AbstractClassProcessor(sr.candidate!.Value.mock, sr.candidate!.Value.mockedType, sr.dontOverrideTypes),
+                    sp.CancellationToken));
+            context.RegisterSourceOutput(classes2
+                .Combine(context.CompilationProvider)
+                .Combine(context.AnalyzerConfigOptionsProvider)
+                .Select((comb, ct) => (candidate: comb.Left.Left, compilation: comb.Left.Right, options: comb.Right))
+                .Combine(disableCodegenerationAttributes.Collect())
+                .Select((comb, ct) => (comb.Left.candidate, comb.Left.compilation, comb.Left.options, disableCodegenerationAttributes: comb.Right))
+                .Combine(context.ParseOptionsProvider)
+                .Select((comb, ct) => (comb.Left.candidate, comb.Left.compilation, comb.Left.options, comb.Left.disableCodegenerationAttributes, parseOptions: comb.Right))
+                .Combine(dontOverrideTypes.Collect())
+                .Select((comb, ct) => (comb.Left.candidate, comb.Left.compilation, comb.Left.options, comb.Left.disableCodegenerationAttributes, comb.Left.parseOptions, dontOverrideTypes: comb.Right))
+                .Where(t
+                => IsCodeGenerationDisabledByAttributes(t.disableCodegenerationAttributes)
+                && IsGenerationDisabledByOptions(t.options) == false
+                && t.candidate != null
+                && t.compilation is CSharpCompilation
+                && t.parseOptions is CSharpParseOptions),
+                (sp, sr) => DoGenerateCode(
+                    new CodeGenerationContext(sp, (CSharpCompilation)sr.compilation, (CSharpParseOptions)sr.parseOptions),
+                    new AbstractClassProcessor(sr.candidate!.Value.mock, sr.candidate!.Value.mockedType, sr.dontOverrideTypes),
+                    sp.CancellationToken));
         }
 
         static bool IsCodeGenerationDisabledByAttributes(ImmutableArray<bool> attributes)
@@ -372,6 +424,59 @@ namespace LightMock.Generator
             }
             return null;
         }
+
+        (GenericNameSyntax mock, INamedTypeSymbol mockedType)? ConvertToAbstractClass(GeneratorSyntaxContext context)
+        {
+            GenericNameSyntax candidateGeneric;
+            var semanticModel = context.SemanticModel;
+
+            switch (context.Node)
+            {
+                case ObjectCreationExpressionSyntax { Type: GenericNameSyntax gns }:
+                    candidateGeneric = gns;
+                    break;
+                case ObjectCreationExpressionSyntax { Type: QualifiedNameSyntax { Right: GenericNameSyntax gns } }:
+                    candidateGeneric = gns;
+                    break;
+                default:
+                    return null;
+            }
+
+            var mockContainer = semanticModel.GetSymbolInfo(candidateGeneric).Symbol
+                as INamedTypeSymbol;
+            var mcbt = mockContainer?.BaseType;
+            if (mcbt != null
+                && mockContextMatcher.IsMatch(mcbt)
+                && mcbt.TypeArguments.FirstOrDefault() is INamedTypeSymbol mockedType)
+            {
+
+                var mtbt = mockedType.BaseType;
+                if (mtbt != null)
+                {
+                    if (mtbt.ToDisplayString(SymbolDisplayFormats.Namespace) != multicastDelegateNameSpaceAndName)
+                        return (candidateGeneric, mockedType);
+                }
+            }
+            return null;
+        }
+
+        INamedTypeSymbol? CovertToDontOverride(SemanticModel semanticModel, AttributeSyntax @as)
+        {
+            var dontOverrideAttributeType = typeof(DontOverrideAttribute);
+            var doatName = dontOverrideAttributeType.Name;
+            var doatNamespace = dontOverrideAttributeType.Namespace;
+            TypeSyntax? type;
+            if (semanticModel.GetSymbolInfo(@as).Symbol is IMethodSymbol methodSymbol
+                && methodSymbol.ToDisplayString(SymbolDisplayFormats.Namespace) == doatName
+                && methodSymbol.ContainingNamespace.ToDisplayString(SymbolDisplayFormats.Namespace) == doatNamespace
+                && (type = TypeOfLocator.Locate(@as)?.Type) != null
+                && semanticModel.GetSymbolInfo(type).Symbol is INamedTypeSymbol typeSymbol)
+            {
+                return typeSymbol;
+            }
+            return null;
+        }
+
 
 #else
 

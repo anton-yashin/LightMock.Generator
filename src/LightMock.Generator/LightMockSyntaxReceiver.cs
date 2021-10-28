@@ -165,7 +165,6 @@ namespace LightMock.Generator
 
         private void AddDontOverrideType(SemanticModel semanticModel, AttributeSyntax @as)
         {
-            var result = new List<INamedTypeSymbol>();
             var dontOverrideAttributeType = typeof(DontOverrideAttribute);
             var doatName = dontOverrideAttributeType.Name;
             var doatNamespace = dontOverrideAttributeType.Namespace;
