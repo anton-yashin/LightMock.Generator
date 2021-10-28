@@ -260,19 +260,50 @@ namespace LightMock.Generator
                     new InterfaceProcessor(sr.candidate!),
                     sp.CancellationToken));
 
-            //var candidateMocks = context.SyntaxProvider.CreateSyntaxProvider(
-            //    (sn, ct) => sn is GenericNameSyntax gns && LightMockSyntaxReceiver.IsMock(gns),
-            //    (ctx, ct) => (GenericNameSyntax)ctx.Node);
-            //var disableCodegenerationAttributes = context.SyntaxProvider.CreateSyntaxProvider(
-            //    (sn, ct) => sn is AttributeSyntax @as && LightMockSyntaxReceiver.IsDisableCodeGenerationAttribute(@as),
-            //    (ctx, ct) => (AttributeSyntax)ctx.Node);
-            //var dontOverrideAttributes = context.SyntaxProvider.CreateSyntaxProvider(
-            //    (sn, ct) => sn is AttributeSyntax @as && LightMockSyntaxReceiver.IsDontOverrideAttribute(@as),
-            //    (ctx, ct) => (AttributeSyntax)ctx.Node);
-            //var arrangeInvocations = context.SyntaxProvider.CreateSyntaxProvider(
-            //    (sn, ct) => sn is InvocationExpressionSyntax ies && LightMockSyntaxReceiver.IsArrangeInvocation(ies),
-            //    (ctx, ct) => (InvocationExpressionSyntax)ctx.Node);
-            //candidateMocks.Collect().Combine(disableCodegenerationAttributes.Collect()).
+            var delegates1 = context.SyntaxProvider.CreateSyntaxProvider(
+                (sn, ct) => sn is ObjectCreationExpressionSyntax { Type: GenericNameSyntax gns }
+                && LightMockSyntaxReceiver.IsMock(gns),
+                (ctx, ct) => ConvertToDelegate(ctx));
+            var delegates2 = context.SyntaxProvider.CreateSyntaxProvider(
+                (sn, ct) => sn is ObjectCreationExpressionSyntax { Type: QualifiedNameSyntax { Right: GenericNameSyntax gns } }
+                && LightMockSyntaxReceiver.IsMock(gns),
+                (ctx, ct) => ConvertToDelegate(ctx));
+            context.RegisterSourceOutput(delegates1
+                .Combine(context.CompilationProvider)
+                .Combine(context.AnalyzerConfigOptionsProvider)
+                .Select((comb, ct) => (candidate: comb.Left.Left, compilation: comb.Left.Right, options: comb.Right))
+                .Combine(disableCodegenerationAttributes.Collect())
+                .Select((comb, ct) => (comb.Left.candidate, comb.Left.compilation, comb.Left.options, disableCodegenerationAttributes: comb.Right))
+                .Combine(context.ParseOptionsProvider)
+                .Select((comb, ct) => (comb.Left.candidate, comb.Left.compilation, comb.Left.options, comb.Left.disableCodegenerationAttributes, parseOptions: comb.Right))
+                .Where(t
+                => IsCodeGenerationDisabledByAttributes(t.disableCodegenerationAttributes)
+                && IsGenerationDisabledByOptions(t.options) == false
+                && t.candidate != null
+                && t.compilation is CSharpCompilation
+                && t.parseOptions is CSharpParseOptions),
+                (sp, sr) => DoGenerateCode(
+                    new CodeGenerationContext(sp, (CSharpCompilation)sr.compilation, (CSharpParseOptions)sr.parseOptions),
+                    new DelegateProcessor(sr.candidate!),
+                    sp.CancellationToken));
+            context.RegisterSourceOutput(delegates2
+                .Combine(context.CompilationProvider)
+                .Combine(context.AnalyzerConfigOptionsProvider)
+                .Select((comb, ct) => (candidate: comb.Left.Left, compilation: comb.Left.Right, options: comb.Right))
+                .Combine(disableCodegenerationAttributes.Collect())
+                .Select((comb, ct) => (comb.Left.candidate, comb.Left.compilation, comb.Left.options, disableCodegenerationAttributes: comb.Right))
+                .Combine(context.ParseOptionsProvider)
+                .Select((comb, ct) => (comb.Left.candidate, comb.Left.compilation, comb.Left.options, comb.Left.disableCodegenerationAttributes, parseOptions: comb.Right))
+                .Where(t
+                => IsCodeGenerationDisabledByAttributes(t.disableCodegenerationAttributes)
+                && IsGenerationDisabledByOptions(t.options) == false
+                && t.candidate != null
+                && t.compilation is CSharpCompilation
+                && t.parseOptions is CSharpParseOptions),
+                (sp, sr) => DoGenerateCode(
+                    new CodeGenerationContext(sp, (CSharpCompilation)sr.compilation, (CSharpParseOptions)sr.parseOptions),
+                    new DelegateProcessor(sr.candidate!),
+                    sp.CancellationToken));
         }
 
         static bool IsCodeGenerationDisabledByAttributes(ImmutableArray<bool> attributes)
@@ -310,6 +341,37 @@ namespace LightMock.Generator
             return null;
         }
 
+        INamedTypeSymbol? ConvertToDelegate(GeneratorSyntaxContext context)
+        {
+            GenericNameSyntax candidateGeneric;
+            var semanticModel = context.SemanticModel;
+
+            switch (context.Node)
+            {
+                case ObjectCreationExpressionSyntax { Type: GenericNameSyntax gns }:
+                    candidateGeneric = gns;
+                    break;
+                case ObjectCreationExpressionSyntax { Type: QualifiedNameSyntax { Right: GenericNameSyntax gns } }:
+                    candidateGeneric = gns;
+                    break;
+                default:
+                    return null;
+            }
+
+            var mockContainer = semanticModel.GetSymbolInfo(candidateGeneric).Symbol
+                as INamedTypeSymbol;
+            var mcbt = mockContainer?.BaseType;
+            if (mcbt != null
+                && mockContextMatcher.IsMatch(mcbt)
+                && mcbt.TypeArguments.FirstOrDefault() is INamedTypeSymbol mockedType)
+            {
+
+                var mtbt = mockedType.BaseType;
+                if (mtbt != null && mtbt.ToDisplayString(SymbolDisplayFormats.Namespace) == multicastDelegateNameSpaceAndName)
+                    return mockedType;
+            }
+            return null;
+        }
 
 #else
 
