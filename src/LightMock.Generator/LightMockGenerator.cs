@@ -66,7 +66,7 @@ namespace LightMock.Generator
                 return;
             if (context.SyntaxContextReceiver is LightMockSyntaxReceiver receiver == false)
                 return;
-            if (IsCompilationDisabledByOptions(context.AnalyzerConfigOptions))
+            if (IsCompilationDisabledByOptions(context.AnalyzerConfigOptions) || receiver.DisableCodeGeneration)
                 return;
             compilation = DoGenerateAbstractClasses(
                 context,
@@ -74,7 +74,6 @@ namespace LightMock.Generator
                 ContextAddSource,
                 compilation,
                 receiver.AbstractClasses.ToImmutableArray(),
-                receiver.DisableCodeGeneration,
                 receiver.DontOverrideTypes.ToImmutableArray(),
                 context.CancellationToken);
             compilation = DoGenerateInterfaces(
@@ -83,7 +82,6 @@ namespace LightMock.Generator
                 ContextAddSource,
                 compilation,
                 receiver.Interfaces.ToImmutableArray(),
-                receiver.DisableCodeGeneration,
                 context.CancellationToken);
             compilation = DoGenerateDelegates(
                 context,
@@ -91,14 +89,12 @@ namespace LightMock.Generator
                 ContextAddSource,
                 compilation,
                 receiver.Delegates.ToImmutableArray(),
-                receiver.DisableCodeGeneration,
                 context.CancellationToken);
             compilation = DoGenerate(
                 context,
                 ContextReportDiagnostic,
                 ContextAddSource,
                 compilation,
-                receiver.DisableCodeGeneration,
                 receiver.ArrangeInvocations.ToImmutableArray(),
                 context.CancellationToken);
         }
@@ -114,7 +110,6 @@ namespace LightMock.Generator
             Action<TContext, Diagnostic> reportDiagnostic,
             Action<TContext, string, SourceText> addSource,
             CSharpCompilation compilation,
-            bool disableCodeGeneration,
             ImmutableArray<InvocationExpressionSyntax> arrangeInvocations,
             CancellationToken cancellationToken)
         { 
@@ -122,9 +117,6 @@ namespace LightMock.Generator
 
             if (compilation.SyntaxTrees.First().Options is CSharpParseOptions options)
             {
-                if (disableCodeGeneration)
-                    return compilation;
-
                 // process symbols under ArrangeSetter
 
                 var mockContextMatcher = new TypeMatcher(typeof(AbstractMock<>));
@@ -181,16 +173,12 @@ namespace LightMock.Generator
             Action<TContext, string, SourceText> addSource,
             CSharpCompilation compilation,
             ImmutableArray<INamedTypeSymbol> delegates,
-            bool disableCodeGeneration,
             CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
             if (compilation.SyntaxTrees.First().Options is CSharpParseOptions options)
             {
-                if (disableCodeGeneration)
-                    return compilation;
-
                 foreach (var @delegate in delegates)
                 {
                     ClassProcessor processor = new DelegateProcessor(@delegate);
@@ -220,7 +208,6 @@ namespace LightMock.Generator
             Action<TContext, string, SourceText> addSource,
             CSharpCompilation compilation,
             ImmutableArray<(GenericNameSyntax mock, INamedTypeSymbol mockedType)> abstractClasses,
-            bool disableCodeGeneration,
             ImmutableArray<INamedTypeSymbol> dontOverrideTypes,
             CancellationToken cancellationToken)
         {
@@ -228,9 +215,6 @@ namespace LightMock.Generator
 
             if (compilation.SyntaxTrees.First().Options is CSharpParseOptions options)
             {
-                if (disableCodeGeneration)
-                    return compilation;
-
                 foreach (var (candidateGeneric, mockedType) in abstractClasses)
                 {
                     var processor = new AbstractClassProcessor(candidateGeneric, mockedType, dontOverrideTypes);
@@ -259,16 +243,12 @@ namespace LightMock.Generator
             Action<TContext, string, SourceText> addSource,
             CSharpCompilation compilation,
             ImmutableArray<INamedTypeSymbol> interfaces,
-            bool disableCodeGeneration,
             CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
             if (compilation.SyntaxTrees.First().Options is CSharpParseOptions options)
             {
-                if (disableCodeGeneration)
-                    return compilation;
-
                 foreach (var @interface in interfaces)
                 {
                     var processor = new InterfaceProcessor(@interface);
