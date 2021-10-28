@@ -71,68 +71,35 @@ namespace LightMock.Generator
             if (IsCompilationDisabledByOptions(context.AnalyzerConfigOptions) || receiver.DisableCodeGeneration)
                 return;
 
-            compilation = DoGenerateCode(
-                context,
-                ContextReportDiagnostic,
-                ContextAddSource,
-                compilation,
-                parseOptions,
+            var cc = new CodeGenerationContext(context, compilation, parseOptions);
+
+            cc = DoGenerateCode(
+                cc,
                 receiver.AbstractClasses.Select(
                     t => new AbstractClassProcessor(
                         t.mock, t.mockedType, receiver.DontOverrideTypes)),
                 context.CancellationToken);
-            compilation = DoGenerateCode(
-                context,
-                ContextReportDiagnostic,
-                ContextAddSource,
-                compilation,
-                parseOptions,
+            cc = DoGenerateCode(
+                cc,
                 receiver.Interfaces.Select(t => new InterfaceProcessor(t)),
                 context.CancellationToken);
-            compilation = DoGenerateCode(
-                context,
-                ContextReportDiagnostic,
-                ContextAddSource,
-                compilation,
-                parseOptions,
+            cc = DoGenerateCode(
+                cc,
                 receiver.Delegates.Select(t => new DelegateProcessor(t)),
                 context.CancellationToken);
-
-            compilation = DoGenerate(
-                context,
-                ContextReportDiagnostic,
-                ContextAddSource,
-                compilation,
-                parseOptions,
+            cc = DoGenerate(
+                cc,
                 receiver.ArrangeInvocations.ToImmutableArray(),
                 context.CancellationToken);
         }
 
-        static void ContextReportDiagnostic(GeneratorExecutionContext context, Diagnostic diagnostic)
-            => context.ReportDiagnostic(diagnostic);
-        static void ContextAddSource(GeneratorExecutionContext context, string hintName, SourceText sourceText)
-            => context.AddSource(hintName, sourceText);
-
 #endif
-        public CSharpCompilation DoGenerate<TContext>(
-            TContext context,
-            Action<TContext, Diagnostic> reportDiagnostic,
-            Action<TContext, string, SourceText> addSource,
-            CSharpCompilation compilation,
-            CSharpParseOptions parseOptions,
+
+        CodeGenerationContext DoGenerate(
+            CodeGenerationContext context,
             ImmutableArray<InvocationExpressionSyntax> arrangeInvocations,
             CancellationToken cancellationToken)
-            where TContext : struct
         {
-            if (reportDiagnostic is null)
-                throw new ArgumentNullException(nameof(reportDiagnostic));
-            if (addSource is null)
-                throw new ArgumentNullException(nameof(addSource));
-            if (compilation is null)
-                throw new ArgumentNullException(nameof(compilation));
-            if (parseOptions is null)
-                throw new ArgumentNullException(nameof(parseOptions));
-
             cancellationToken.ThrowIfCancellationRequested();
 
             // process symbols under ArrangeSetter
@@ -143,7 +110,7 @@ namespace LightMock.Generator
             foreach (var candidateInvocation in arrangeInvocations)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                var st = compilation.GetSemanticModel(candidateInvocation.SyntaxTree);
+                var st = context.Compilation.GetSemanticModel(candidateInvocation.SyntaxTree);
                 var methodSymbol = st.GetSymbolInfo(candidateInvocation, cancellationToken).Symbol as IMethodSymbol;
                 cancellationToken.ThrowIfCancellationRequested();
 
@@ -155,10 +122,10 @@ namespace LightMock.Generator
                     switch (methodSymbol.Name)
                     {
                         case nameof(AbstractMockNameofProvider.ArrangeSetter):
-                            processor = new ArrangeExpressionRewriter(methodSymbol, candidateInvocation, compilation);
+                            processor = new ArrangeExpressionRewriter(methodSymbol, candidateInvocation, context.Compilation);
                             break;
                         case nameof(AbstractMockNameofProvider.AssertSet):
-                            processor = new AssertExpressionRewriter(methodSymbol, candidateInvocation, compilation);
+                            processor = new AssertExpressionRewriter(methodSymbol, candidateInvocation, context.Compilation);
                             break;
                         default:
                             continue;
@@ -167,101 +134,63 @@ namespace LightMock.Generator
                     cancellationToken.ThrowIfCancellationRequested();
                     if (processedFiles.Contains(processor.FileName))
                     {
-                        reportDiagnostic(context, Diagnostic.Create(
+                        context.ReportDiagnostic(Diagnostic.Create(
                             DiagnosticsDescriptors.KPropertyExpressionMustHaveUniqueId,
                             candidateInvocation.GetLocation(), methodSymbol.Name));
                         continue;
                     }
-                    if (EmitDiagnostics(context, reportDiagnostic, processor.GetErrors()))
+                    if (context.EmitDiagnostics(processor.GetErrors()))
                         continue;
                     cancellationToken.ThrowIfCancellationRequested();
-                    EmitDiagnostics(context, reportDiagnostic, processor.GetWarnings());
+                    context.EmitDiagnostics(processor.GetWarnings());
                     cancellationToken.ThrowIfCancellationRequested();
                     var text = processor.DoGenerate();
-                    addSource(context, processor.FileName, text);
+                    context.AddSource(processor.FileName, text);
                 }
             }
-            return compilation;
+            return context;
         }
 
-        CSharpCompilation DoGenerateCode<TContext>(
-            TContext context,
-            Action<TContext, Diagnostic> reportDiagnostic,
-            Action<TContext, string, SourceText> addSource,
-            CSharpCompilation compilation,
-            CSharpParseOptions parseOptions,
+        CodeGenerationContext DoGenerateCode(
+            CodeGenerationContext context,
             IEnumerable<ClassProcessor> classProcessors,
             CancellationToken cancellationToken)
-            where TContext : struct
         {
-            if (reportDiagnostic is null)
-                throw new ArgumentNullException(nameof(reportDiagnostic));
-            if (addSource is null)
-                throw new ArgumentNullException(nameof(addSource));
-            if (compilation is null)
-                throw new ArgumentNullException(nameof(compilation));
-            if (parseOptions is null)
-                throw new ArgumentNullException(nameof(parseOptions));
-            if (classProcessors is null)
-                throw new ArgumentNullException(nameof(classProcessors));
 
             cancellationToken.ThrowIfCancellationRequested();
 
             foreach (var classProcessor in classProcessors)
             {
-                compilation = DoGenerateCode(
+                context = DoGenerateCode(
                     context,
-                    reportDiagnostic,
-                    addSource,
-                    compilation,
-                    parseOptions,
                     classProcessor,
                     cancellationToken);
             }
-            return compilation;
+            return context;
         }
 
 
-        CSharpCompilation DoGenerateCode<TContext>(
-            TContext context,
-            Action<TContext, Diagnostic> reportDiagnostic,
-            Action<TContext, string, SourceText> addSource,
-            CSharpCompilation compilation,
-            CSharpParseOptions parseOptions,
+        CodeGenerationContext DoGenerateCode(
+            CodeGenerationContext context,
             ClassProcessor classProcessor,
             CancellationToken cancellationToken)
-            where TContext : struct
         {
-            if (reportDiagnostic is null)
-                throw new ArgumentNullException(nameof(reportDiagnostic));
-            if (addSource is null)
-                throw new ArgumentNullException(nameof(addSource));
-            if (compilation is null)
-                throw new ArgumentNullException(nameof(compilation));
-            if (parseOptions is null)
-                throw new ArgumentNullException(nameof(parseOptions));
-            if (classProcessor is null)
-                throw new ArgumentNullException(nameof(classProcessor));
-
             cancellationToken.ThrowIfCancellationRequested();
-
+            if (context.EmitDiagnostics(classProcessor.GetErrors()))
+                return context;
             cancellationToken.ThrowIfCancellationRequested();
-            if (EmitDiagnostics(context, reportDiagnostic, classProcessor.GetErrors()))
-                return compilation;
-            cancellationToken.ThrowIfCancellationRequested();
-            EmitDiagnostics(context, reportDiagnostic, classProcessor.GetWarnings());
+            context.EmitDiagnostics(classProcessor.GetWarnings());
             var text = classProcessor.DoGenerate();
-            addSource(context, classProcessor.FileName, text);
+            context.AddSource(classProcessor.FileName, text);
             if (classProcessor.IsUpdateCompilationRequired)
             {
-                compilation = compilation.AddSyntaxTrees(CSharpSyntaxTree.ParseText(
-                    text, parseOptions, cancellationToken: cancellationToken));
+                context = context.AddSyntaxTrees(CSharpSyntaxTree.ParseText(
+                    text, context.ParseOptions, cancellationToken: cancellationToken)
+                    );
             }
             cancellationToken.ThrowIfCancellationRequested();
-            return compilation;
+            return context;
         }
-
-
 
         bool IsCompilationDisabledByOptions(AnalyzerConfigOptionsProvider optionsProvider)
             => optionsProvider.GlobalOptions.TryGetValue(GlobalOptionsNames.Enable, out var value)
@@ -304,13 +233,10 @@ namespace LightMock.Generator
                 .Where(t => t.disableCodegenerationAttributes.Where(t => t == true).Any() == false
                 && t.candidate != null && IsCompilationDisabledByOptions(t.options) == false
                 && t.compilation is CSharpCompilation && t.parseOptions is CSharpParseOptions),
-                (sp, sr) => DoGenerateCode(sp, 
-                static (ctx, diag) => ctx.ReportDiagnostic(diag),
-                static (ctx, hint, text) => ctx.AddSource(hint, text),
-                (CSharpCompilation)sr.compilation,
-                (CSharpParseOptions)sr.parseOptions,
-                new InterfaceProcessor(sr.candidate!),
-                sp.CancellationToken));
+                (sp, sr) => DoGenerateCode(
+                    new CodeGenerationContext(sp, (CSharpCompilation)sr.compilation, (CSharpParseOptions)sr.parseOptions),
+                    new InterfaceProcessor(sr.candidate!),
+                    sp.CancellationToken));
 
             //var candidateMocks = context.SyntaxProvider.CreateSyntaxProvider(
             //    (sn, ct) => sn is GenericNameSyntax gns && LightMockSyntaxReceiver.IsMock(gns),
