@@ -66,12 +66,13 @@ namespace LightMock.Generator
                 return;
             if (context.SyntaxContextReceiver is LightMockSyntaxReceiver receiver == false)
                 return;
+            if (IsCompilationDisabledByOptions(context.AnalyzerConfigOptions))
+                return;
             compilation = DoGenerateAbstractClasses(
                 context,
                 ContextReportDiagnostic,
                 ContextAddSource,
                 compilation,
-                context.AnalyzerConfigOptions,
                 receiver.AbstractClasses.ToImmutableArray(),
                 receiver.DisableCodeGeneration,
                 receiver.DontOverrideTypes.ToImmutableArray(),
@@ -81,7 +82,6 @@ namespace LightMock.Generator
                 ContextReportDiagnostic,
                 ContextAddSource,
                 compilation,
-                context.AnalyzerConfigOptions,
                 receiver.Interfaces.ToImmutableArray(),
                 receiver.DisableCodeGeneration,
                 context.CancellationToken);
@@ -90,7 +90,6 @@ namespace LightMock.Generator
                 ContextReportDiagnostic,
                 ContextAddSource,
                 compilation,
-                context.AnalyzerConfigOptions,
                 receiver.Delegates.ToImmutableArray(),
                 receiver.DisableCodeGeneration,
                 context.CancellationToken);
@@ -99,7 +98,6 @@ namespace LightMock.Generator
                 ContextReportDiagnostic,
                 ContextAddSource,
                 compilation,
-                context.AnalyzerConfigOptions,
                 receiver.DisableCodeGeneration,
                 receiver.ArrangeInvocations.ToImmutableArray(),
                 context.CancellationToken);
@@ -116,16 +114,11 @@ namespace LightMock.Generator
             Action<TContext, Diagnostic> reportDiagnostic,
             Action<TContext, string, SourceText> addSource,
             CSharpCompilation compilation,
-            AnalyzerConfigOptionsProvider optionsProvider,
             bool disableCodeGeneration,
             ImmutableArray<InvocationExpressionSyntax> arrangeInvocations,
             CancellationToken cancellationToken)
         { 
             cancellationToken.ThrowIfCancellationRequested();
-            if (IsCompilationDisabledByOptions(optionsProvider))
-            {
-                return compilation;
-            }
 
             if (compilation.SyntaxTrees.First().Options is CSharpParseOptions options)
             {
@@ -187,16 +180,11 @@ namespace LightMock.Generator
             Action<TContext, Diagnostic> reportDiagnostic,
             Action<TContext, string, SourceText> addSource,
             CSharpCompilation compilation,
-            AnalyzerConfigOptionsProvider optionsProvider,
             ImmutableArray<INamedTypeSymbol> delegates,
             bool disableCodeGeneration,
             CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            if (IsCompilationDisabledByOptions(optionsProvider))
-            {
-                return compilation;
-            }
 
             if (compilation.SyntaxTrees.First().Options is CSharpParseOptions options)
             {
@@ -231,17 +219,12 @@ namespace LightMock.Generator
             Action<TContext, Diagnostic> reportDiagnostic,
             Action<TContext, string, SourceText> addSource,
             CSharpCompilation compilation,
-            AnalyzerConfigOptionsProvider optionsProvider,
             ImmutableArray<(GenericNameSyntax mock, INamedTypeSymbol mockedType)> abstractClasses,
             bool disableCodeGeneration,
             ImmutableArray<INamedTypeSymbol> dontOverrideTypes,
             CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            if (IsCompilationDisabledByOptions(optionsProvider))
-            {
-                return compilation;
-            }
 
             if (compilation.SyntaxTrees.First().Options is CSharpParseOptions options)
             {
@@ -275,16 +258,11 @@ namespace LightMock.Generator
             Action<TContext, Diagnostic> reportDiagnostic,
             Action<TContext, string, SourceText> addSource,
             CSharpCompilation compilation,
-            AnalyzerConfigOptionsProvider optionsProvider,
             ImmutableArray<INamedTypeSymbol> interfaces,
             bool disableCodeGeneration,
             CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            if (IsCompilationDisabledByOptions(optionsProvider))
-            {
-                return compilation;
-            }
 
             if (compilation.SyntaxTrees.First().Options is CSharpParseOptions options)
             {
