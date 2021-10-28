@@ -61,25 +61,21 @@ namespace LightMock.Generator
 
         public void OnVisitSyntaxNode(GeneratorSyntaxContext context)
         {
-            switch (context.Node)
+            GenericNameSyntax? gns;
+            if ((gns = GetMockSymbol(context.Node)) != null)
             {
-                case ObjectCreationExpressionSyntax { Type: GenericNameSyntax gns }
-                when IsMock(gns):
-                    AddCandidateMock(gns, context.SemanticModel);
-                    break;
-                case ObjectCreationExpressionSyntax { Type: QualifiedNameSyntax { Right: GenericNameSyntax gns } }
-                when IsMock(gns):
-                    AddCandidateMock(gns, context.SemanticModel);
-                    break;
-                case AttributeSyntax @as when IsDontOverrideAttribute(@as):
+                AddCandidateMock(gns, context.SemanticModel);
+            }
+            else if (context.Node is AttributeSyntax @as)
+            {
+                if (IsDontOverrideAttribute(@as))
                     AddDontOverrideType(context.SemanticModel, @as);
-                    break;
-                case AttributeSyntax @as:
-                    DisableCodeGeneration = DisableCodeGeneration || IsDisableCodeGenerationAttribute(context.SemanticModel, @as);
-                    break;
-                case InvocationExpressionSyntax ies when IsArrangeInvocation(ies):
-                    ArrangeInvocations.Add(ies);
-                    break;
+                else if (IsDisableCodeGenerationAttribute(context.SemanticModel, @as))
+                    DisableCodeGeneration = true;
+            }
+            else if (context.Node is InvocationExpressionSyntax ies && IsArrangeInvocation(ies))
+            {
+                ArrangeInvocations.Add(ies);
             }
         }
 
@@ -108,8 +104,23 @@ namespace LightMock.Generator
             }
         }
 
-        internal static bool IsMock(GenericNameSyntax gns)
-            => gns.Identifier.ValueText == "Mock" && gns.TypeArgumentList.Arguments.Any();
+        internal static GenericNameSyntax? GetMockSymbol(SyntaxNode node)
+        {
+            switch (node)
+            {
+                case ObjectCreationExpressionSyntax { Type: GenericNameSyntax gns }:
+                    return gns;
+                case ObjectCreationExpressionSyntax { Type: QualifiedNameSyntax { Right: GenericNameSyntax gns } }:
+                    return gns;
+            }
+            return null;
+        }
+
+        internal static bool IsMock(SyntaxNode node)
+        {
+            var gns = GetMockSymbol(node);
+            return gns != null && gns.Identifier.ValueText == "Mock" && gns.TypeArgumentList.Arguments.Any();
+        }
 
         internal static bool IsDisableCodeGenerationAttribute(AttributeSyntax attributeSyntax)
         {
