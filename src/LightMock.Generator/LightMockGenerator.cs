@@ -215,10 +215,10 @@ namespace LightMock.Generator
                 (sn, ct) => sn is AttributeSyntax @as && LightMockSyntaxReceiver.IsDisableCodeGenerationAttribute(@as),
                 (ctx, ct) => LightMockSyntaxReceiver.IsDisableCodeGenerationAttribute(ctx.SemanticModel, (AttributeSyntax)ctx.Node));
 
-            var interfaces1 = context.SyntaxProvider.CreateSyntaxProvider(
+            var interfaces = context.SyntaxProvider.CreateSyntaxProvider(
                 (sn, ct) => IsMock(sn),
                 (ctx, ct) => ConvertToInterface(ctx));
-            context.RegisterSourceOutput(interfaces1
+            context.RegisterSourceOutput(interfaces
                 .Combine(context.CompilationProvider)
                 .Combine(context.AnalyzerConfigOptionsProvider)
                 .Select((comb, ct) => (candidate: comb.Left.Left, compilation: comb.Left.Right, options: comb.Right))
@@ -237,10 +237,10 @@ namespace LightMock.Generator
                     new InterfaceProcessor(sr.candidate!),
                     sp.CancellationToken));
 
-            var delegates1 = context.SyntaxProvider.CreateSyntaxProvider(
+            var delegates = context.SyntaxProvider.CreateSyntaxProvider(
                 (sn, ct) => IsMock(sn),
                 (ctx, ct) => ConvertToDelegate(ctx));
-            context.RegisterSourceOutput(delegates1
+            context.RegisterSourceOutput(delegates
                 .Combine(context.CompilationProvider)
                 .Combine(context.AnalyzerConfigOptionsProvider)
                 .Select((comb, ct) => (candidate: comb.Left.Left, compilation: comb.Left.Right, options: comb.Right))
@@ -259,13 +259,13 @@ namespace LightMock.Generator
                     new DelegateProcessor(sr.candidate!),
                     sp.CancellationToken));
 
-            var classes1 = context.SyntaxProvider.CreateSyntaxProvider(
+            var classes = context.SyntaxProvider.CreateSyntaxProvider(
                 (sn, ct) => IsMock(sn),
                 (ctx, ct) => ConvertToAbstractClass(ctx));
             var dontOverrideTypes = context.SyntaxProvider.CreateSyntaxProvider(
                 (sn, ct) => sn is AttributeSyntax @as && LightMockSyntaxReceiver.IsDontOverrideAttribute(@as),
                 (ctx, ct) => CovertToDontOverride(ctx.SemanticModel, (AttributeSyntax)ctx.Node));
-            context.RegisterSourceOutput(classes1
+            context.RegisterSourceOutput(classes
                 .Combine(context.CompilationProvider)
                 .Combine(context.AnalyzerConfigOptionsProvider)
                 .Select((comb, ct) => (candidate: comb.Left.Left, compilation: comb.Left.Right, options: comb.Right))
