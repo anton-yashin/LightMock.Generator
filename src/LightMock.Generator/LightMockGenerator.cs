@@ -122,8 +122,7 @@ namespace LightMock.Generator
             CancellationToken cancellationToken)
         { 
             cancellationToken.ThrowIfCancellationRequested();
-            if (optionsProvider.GlobalOptions.TryGetValue(GlobalOptionsNames.Enable, out var value)
-                && value.Equals("false", StringComparison.InvariantCultureIgnoreCase))
+            if (IsCompilationDisabledByOptions(optionsProvider))
             {
                 return compilation;
             }
@@ -194,8 +193,7 @@ namespace LightMock.Generator
             CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            if (optionsProvider.GlobalOptions.TryGetValue(GlobalOptionsNames.Enable, out var value)
-                && value.Equals("false", StringComparison.InvariantCultureIgnoreCase))
+            if (IsCompilationDisabledByOptions(optionsProvider))
             {
                 return compilation;
             }
@@ -240,8 +238,7 @@ namespace LightMock.Generator
             CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            if (optionsProvider.GlobalOptions.TryGetValue(GlobalOptionsNames.Enable, out var value)
-                && value.Equals("false", StringComparison.InvariantCultureIgnoreCase))
+            if (IsCompilationDisabledByOptions(optionsProvider))
             {
                 return compilation;
             }
@@ -284,8 +281,7 @@ namespace LightMock.Generator
             CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            if (optionsProvider.GlobalOptions.TryGetValue(GlobalOptionsNames.Enable, out var value)
-                && value.Equals("false", StringComparison.InvariantCultureIgnoreCase))
+            if (IsCompilationDisabledByOptions(optionsProvider))
             {
                 return compilation;
             }
@@ -323,14 +319,13 @@ namespace LightMock.Generator
             Action<TContext, string, SourceText> addSource,
             CSharpCompilation compilation,
             AnalyzerConfigOptionsProvider optionsProvider,
-            INamedTypeSymbol? @interface,
+            INamedTypeSymbol @interface,
             CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             if (@interface == null)
-                return compilation;
-            if (optionsProvider.GlobalOptions.TryGetValue(GlobalOptionsNames.Enable, out var value)
-                && value.Equals("false", StringComparison.InvariantCultureIgnoreCase)) // <-- move to predicate
+                throw new ArgumentNullException(nameof(@interface));
+            if (IsCompilationDisabledByOptions(optionsProvider)) // <-- move to predicate
             {
                 return compilation;
             }
@@ -355,6 +350,10 @@ namespace LightMock.Generator
             }
             return compilation;
         }
+
+        bool IsCompilationDisabledByOptions(AnalyzerConfigOptionsProvider optionsProvider)
+            => optionsProvider.GlobalOptions.TryGetValue(GlobalOptionsNames.Enable, out var value)
+                && value.Equals("false", StringComparison.InvariantCultureIgnoreCase);
 
         bool EmitDiagnostics<TContext>(TContext context, Action<TContext, Diagnostic> reportDiagnostic, IEnumerable<Diagnostic> diagnostics)
         {
@@ -388,13 +387,14 @@ namespace LightMock.Generator
                 .Select((comb, ct) => (candidate: comb.Left.Left, compilation: comb.Left.Right, options: comb.Right))
                 .Combine(disableCodegenerationAttributes.Collect())
                 .Select((comb, ct) => (comb.Left.candidate, comb.Left.compilation, comb.Left.options, disableCodegenerationAttributes: comb.Right))
-                .Where(t => t.disableCodegenerationAttributes.Where(t => t == true).Any() == false),
+                .Where(t => t.disableCodegenerationAttributes.Where(t => t == true).Any() == false
+                && t.candidate != null),
                 (sp, sr) => DoGenerateInterfaces2(sp, 
                 static (ctx, diag) => ctx.ReportDiagnostic(diag),
                 static (ctx, hint, text) => ctx.AddSource(hint, text),
                 (CSharpCompilation)sr.compilation,
                 sr.options,
-                sr.candidate,
+                sr.candidate!,
                 sp.CancellationToken));
 
             //var candidateMocks = context.SyntaxProvider.CreateSyntaxProvider(
