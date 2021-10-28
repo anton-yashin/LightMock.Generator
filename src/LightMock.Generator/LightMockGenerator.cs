@@ -202,20 +202,15 @@ namespace LightMock.Generator
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            foreach (var @delegate in delegates)
-            {
-                compilation = DoGenerateCode(
-                    context,
-                    reportDiagnostic,
-                    addSource,
-                    compilation,
-                    parseOptions,
-                    new DelegateProcessor(@delegate),
-                    cancellationToken);
-            }
-            return compilation;
+            return DoGenerateCode(
+                context,
+                reportDiagnostic,
+                addSource,
+                compilation,
+                parseOptions,
+                delegates.Select(t => new DelegateProcessor(t)),
+                cancellationToken);
         }
-
 
         public CSharpCompilation DoGenerateAbstractClasses<TContext>(
             TContext context,
@@ -239,18 +234,14 @@ namespace LightMock.Generator
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            foreach (var (candidateGeneric, mockedType) in abstractClasses)
-            {
-                compilation = DoGenerateCode(
-                    context,
-                    reportDiagnostic,
-                    addSource,
-                    compilation,
-                    parseOptions,
-                    new AbstractClassProcessor(candidateGeneric, mockedType, dontOverrideTypes),
-                    cancellationToken);
-            }
-            return compilation;
+            return DoGenerateCode(
+                context,
+                reportDiagnostic,
+                addSource,
+                compilation,
+                parseOptions,
+                abstractClasses.Select(t => new AbstractClassProcessor(t.mock, t.mockedType, dontOverrideTypes)),
+                cancellationToken);
         }
 
         public CSharpCompilation DoGenerateInterfaces<TContext>(
@@ -274,7 +265,40 @@ namespace LightMock.Generator
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            foreach (var @interface in interfaces)
+            return DoGenerateCode(
+                context,
+                reportDiagnostic,
+                addSource,
+                compilation,
+                parseOptions,
+                interfaces.Select(t => new InterfaceProcessor(t)),
+                cancellationToken);
+        }
+
+        CSharpCompilation DoGenerateCode<TContext>(
+            TContext context,
+            Action<TContext, Diagnostic> reportDiagnostic,
+            Action<TContext, string, SourceText> addSource,
+            CSharpCompilation compilation,
+            CSharpParseOptions parseOptions,
+            IEnumerable<ClassProcessor> classProcessors,
+            CancellationToken cancellationToken)
+            where TContext : struct
+        {
+            if (reportDiagnostic is null)
+                throw new ArgumentNullException(nameof(reportDiagnostic));
+            if (addSource is null)
+                throw new ArgumentNullException(nameof(addSource));
+            if (compilation is null)
+                throw new ArgumentNullException(nameof(compilation));
+            if (parseOptions is null)
+                throw new ArgumentNullException(nameof(parseOptions));
+            if (classProcessors is null)
+                throw new ArgumentNullException(nameof(classProcessors));
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            foreach (var classProcessor in classProcessors)
             {
                 compilation = DoGenerateCode(
                     context,
@@ -282,11 +306,12 @@ namespace LightMock.Generator
                     addSource,
                     compilation,
                     parseOptions,
-                    new InterfaceProcessor(@interface),
+                    classProcessor,
                     cancellationToken);
             }
             return compilation;
         }
+
 
         CSharpCompilation DoGenerateCode<TContext>(
             TContext context,
