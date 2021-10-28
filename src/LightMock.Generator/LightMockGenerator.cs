@@ -70,31 +70,34 @@ namespace LightMock.Generator
                 return;
             if (IsCompilationDisabledByOptions(context.AnalyzerConfigOptions) || receiver.DisableCodeGeneration)
                 return;
-            compilation = DoGenerateAbstractClasses(
+
+            compilation = DoGenerateCode(
                 context,
                 ContextReportDiagnostic,
                 ContextAddSource,
                 compilation,
                 parseOptions,
-                receiver.AbstractClasses.ToImmutableArray(),
-                receiver.DontOverrideTypes.ToImmutableArray(),
+                receiver.AbstractClasses.Select(
+                    t => new AbstractClassProcessor(
+                        t.mock, t.mockedType, receiver.DontOverrideTypes)),
                 context.CancellationToken);
-            compilation = DoGenerateInterfaces(
+            compilation = DoGenerateCode(
                 context,
                 ContextReportDiagnostic,
                 ContextAddSource,
                 compilation,
                 parseOptions,
-                receiver.Interfaces.ToImmutableArray(),
+                receiver.Interfaces.Select(t => new InterfaceProcessor(t)),
                 context.CancellationToken);
-            compilation = DoGenerateDelegates(
+            compilation = DoGenerateCode(
                 context,
                 ContextReportDiagnostic,
                 ContextAddSource,
                 compilation,
                 parseOptions,
-                receiver.Delegates.ToImmutableArray(),
+                receiver.Delegates.Select(t => new DelegateProcessor(t)),
                 context.CancellationToken);
+
             compilation = DoGenerate(
                 context,
                 ContextReportDiagnostic,
@@ -179,100 +182,6 @@ namespace LightMock.Generator
                 }
             }
             return compilation;
-        }
-
-        public CSharpCompilation DoGenerateDelegates<TContext>(
-            TContext context,
-            Action<TContext, Diagnostic> reportDiagnostic,
-            Action<TContext, string, SourceText> addSource,
-            CSharpCompilation compilation,
-            CSharpParseOptions parseOptions,
-            ImmutableArray<INamedTypeSymbol> delegates,
-            CancellationToken cancellationToken)
-            where TContext : struct
-        {
-            if (reportDiagnostic is null)
-                throw new ArgumentNullException(nameof(reportDiagnostic));
-            if (addSource is null)
-                throw new ArgumentNullException(nameof(addSource));
-            if (compilation is null)
-                throw new ArgumentNullException(nameof(compilation));
-            if (parseOptions is null)
-                throw new ArgumentNullException(nameof(parseOptions));
-
-            cancellationToken.ThrowIfCancellationRequested();
-
-            return DoGenerateCode(
-                context,
-                reportDiagnostic,
-                addSource,
-                compilation,
-                parseOptions,
-                delegates.Select(t => new DelegateProcessor(t)),
-                cancellationToken);
-        }
-
-        public CSharpCompilation DoGenerateAbstractClasses<TContext>(
-            TContext context,
-            Action<TContext, Diagnostic> reportDiagnostic,
-            Action<TContext, string, SourceText> addSource,
-            CSharpCompilation compilation,
-            CSharpParseOptions parseOptions,
-            ImmutableArray<(GenericNameSyntax mock, INamedTypeSymbol mockedType)> abstractClasses,
-            ImmutableArray<INamedTypeSymbol> dontOverrideTypes,
-            CancellationToken cancellationToken)
-            where TContext : struct
-        {
-            if (reportDiagnostic is null)
-                throw new ArgumentNullException(nameof(reportDiagnostic));
-            if (addSource is null)
-                throw new ArgumentNullException(nameof(addSource));
-            if (compilation is null)
-                throw new ArgumentNullException(nameof(compilation));
-            if (parseOptions is null)
-                throw new ArgumentNullException(nameof(parseOptions));
-
-            cancellationToken.ThrowIfCancellationRequested();
-
-            return DoGenerateCode(
-                context,
-                reportDiagnostic,
-                addSource,
-                compilation,
-                parseOptions,
-                abstractClasses.Select(t => new AbstractClassProcessor(t.mock, t.mockedType, dontOverrideTypes)),
-                cancellationToken);
-        }
-
-        public CSharpCompilation DoGenerateInterfaces<TContext>(
-            TContext context,
-            Action<TContext, Diagnostic> reportDiagnostic,
-            Action<TContext, string, SourceText> addSource,
-            CSharpCompilation compilation,
-            CSharpParseOptions parseOptions,
-            ImmutableArray<INamedTypeSymbol> interfaces,
-            CancellationToken cancellationToken)
-            where TContext : struct
-        {
-            if (reportDiagnostic is null)
-                throw new ArgumentNullException(nameof(reportDiagnostic));
-            if (addSource is null)
-                throw new ArgumentNullException(nameof(addSource));
-            if (compilation is null)
-                throw new ArgumentNullException(nameof(compilation));
-            if (parseOptions is null)
-                throw new ArgumentNullException(nameof(parseOptions));
-
-            cancellationToken.ThrowIfCancellationRequested();
-
-            return DoGenerateCode(
-                context,
-                reportDiagnostic,
-                addSource,
-                compilation,
-                parseOptions,
-                interfaces.Select(t => new InterfaceProcessor(t)),
-                cancellationToken);
         }
 
         CSharpCompilation DoGenerateCode<TContext>(
