@@ -318,17 +318,12 @@ namespace LightMock.Generator
             Action<TContext, Diagnostic> reportDiagnostic,
             Action<TContext, string, SourceText> addSource,
             CSharpCompilation compilation,
-            AnalyzerConfigOptionsProvider optionsProvider,
             INamedTypeSymbol @interface,
             CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             if (@interface == null)
                 throw new ArgumentNullException(nameof(@interface));
-            if (IsCompilationDisabledByOptions(optionsProvider)) // <-- move to predicate
-            {
-                return compilation;
-            }
 
             if (compilation.SyntaxTrees.First().Options is CSharpParseOptions options) // <-- move to predicate
             {
@@ -388,12 +383,11 @@ namespace LightMock.Generator
                 .Combine(disableCodegenerationAttributes.Collect())
                 .Select((comb, ct) => (comb.Left.candidate, comb.Left.compilation, comb.Left.options, disableCodegenerationAttributes: comb.Right))
                 .Where(t => t.disableCodegenerationAttributes.Where(t => t == true).Any() == false
-                && t.candidate != null),
+                && t.candidate != null && IsCompilationDisabledByOptions(t.options) == false),
                 (sp, sr) => DoGenerateInterfaces2(sp, 
                 static (ctx, diag) => ctx.ReportDiagnostic(diag),
                 static (ctx, hint, text) => ctx.AddSource(hint, text),
                 (CSharpCompilation)sr.compilation,
-                sr.options,
                 sr.candidate!,
                 sp.CancellationToken));
 
