@@ -226,11 +226,14 @@ namespace LightMock.Generator
             context.RegisterSourceOutput(interfaces
                 .Combine(context.CompilationProvider)
                 .Combine(context.AnalyzerConfigOptionsProvider)
-                .Select((comb, ct) => (candidate: comb.Left.Left, compilation: comb.Left.Right, options: comb.Right))
                 .Combine(disableCodegenerationAttributes.Collect())
-                .Select((comb, ct) => (comb.Left.candidate, comb.Left.compilation, comb.Left.options, disableCodegenerationAttributes: comb.Right))
                 .Combine(context.ParseOptionsProvider)
-                .Select((comb, ct) => (comb.Left.candidate, comb.Left.compilation, comb.Left.options, comb.Left.disableCodegenerationAttributes, parseOptions: comb.Right))
+                .Select((comb, ct) => (
+                    candidate:                          comb.Left.Left.Left.Left,
+                    compilation:                        comb.Left.Left.Left.Right,
+                    options:                            comb.Left.Left.Right,
+                    disableCodegenerationAttributes:    comb.Left.Right,
+                    parseOptions:                       comb.Right))
                 .Where(t
                 => IsCodeGenerationDisabledByAttributes(t.disableCodegenerationAttributes)
                 && IsGenerationDisabledByOptions(t.options) == false 
@@ -248,11 +251,14 @@ namespace LightMock.Generator
             context.RegisterSourceOutput(delegates
                 .Combine(context.CompilationProvider)
                 .Combine(context.AnalyzerConfigOptionsProvider)
-                .Select((comb, ct) => (candidate: comb.Left.Left, compilation: comb.Left.Right, options: comb.Right))
                 .Combine(disableCodegenerationAttributes.Collect())
-                .Select((comb, ct) => (comb.Left.candidate, comb.Left.compilation, comb.Left.options, disableCodegenerationAttributes: comb.Right))
                 .Combine(context.ParseOptionsProvider)
-                .Select((comb, ct) => (comb.Left.candidate, comb.Left.compilation, comb.Left.options, comb.Left.disableCodegenerationAttributes, parseOptions: comb.Right))
+                .Select((comb, ct) => (
+                    candidate:                          comb.Left.Left.Left.Left,
+                    compilation:                        comb.Left.Left.Left.Right,
+                    options:                            comb.Left.Left.Right,
+                    disableCodegenerationAttributes:    comb.Left.Right,
+                    parseOptions:                       comb.Right))
                 .Where(t
                 => IsCodeGenerationDisabledByAttributes(t.disableCodegenerationAttributes)
                 && IsGenerationDisabledByOptions(t.options) == false
@@ -273,13 +279,16 @@ namespace LightMock.Generator
             context.RegisterSourceOutput(classes
                 .Combine(context.CompilationProvider)
                 .Combine(context.AnalyzerConfigOptionsProvider)
-                .Select((comb, ct) => (candidate: comb.Left.Left, compilation: comb.Left.Right, options: comb.Right))
                 .Combine(disableCodegenerationAttributes.Collect())
-                .Select((comb, ct) => (comb.Left.candidate, comb.Left.compilation, comb.Left.options, disableCodegenerationAttributes: comb.Right))
                 .Combine(context.ParseOptionsProvider)
-                .Select((comb, ct) => (comb.Left.candidate, comb.Left.compilation, comb.Left.options, comb.Left.disableCodegenerationAttributes, parseOptions: comb.Right))
                 .Combine(dontOverrideTypes.Collect())
-                .Select((comb, ct) => (comb.Left.candidate, comb.Left.compilation, comb.Left.options, comb.Left.disableCodegenerationAttributes, comb.Left.parseOptions, dontOverrideTypes: comb.Right))
+                .Select((comb, ct) => (
+                    candidate:                          comb.Left.Left.Left.Left.Left,
+                    compilation:                        comb.Left.Left.Left.Left.Right,
+                    options:                            comb.Left.Left.Left.Right,
+                    disableCodegenerationAttributes:    comb.Left.Left.Right,
+                    parseOptions:                       comb.Left.Right,
+                    dontOverrideTypes:                  comb.Right))
                 .Where(t
                 => IsCodeGenerationDisabledByAttributes(t.disableCodegenerationAttributes)
                 && IsGenerationDisabledByOptions(t.options) == false
