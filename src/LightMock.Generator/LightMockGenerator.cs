@@ -68,7 +68,7 @@ namespace LightMock.Generator
                 return;
             if (context.SyntaxContextReceiver is LightMockSyntaxReceiver receiver == false)
                 return;
-            if (IsCompilationDisabledByOptions(context.AnalyzerConfigOptions) || receiver.DisableCodeGeneration)
+            if (IsGenerationDisabledByOptions(context.AnalyzerConfigOptions) || receiver.DisableCodeGeneration)
                 return;
 
             var cc = new CodeGenerationContext(context, compilation, parseOptions);
@@ -192,7 +192,7 @@ namespace LightMock.Generator
             return context;
         }
 
-        bool IsCompilationDisabledByOptions(AnalyzerConfigOptionsProvider optionsProvider)
+        bool IsGenerationDisabledByOptions(AnalyzerConfigOptionsProvider optionsProvider)
             => optionsProvider.GlobalOptions.TryGetValue(GlobalOptionsNames.Enable, out var value)
                 && value.Equals("false", StringComparison.InvariantCultureIgnoreCase);
 
@@ -231,7 +231,7 @@ namespace LightMock.Generator
                 .Combine(context.ParseOptionsProvider)
                 .Select((comb, ct) => (comb.Left.candidate, comb.Left.compilation, comb.Left.options, comb.Left.disableCodegenerationAttributes, parseOptions: comb.Right))
                 .Where(t => t.disableCodegenerationAttributes.Where(t => t == true).Any() == false
-                && t.candidate != null && IsCompilationDisabledByOptions(t.options) == false
+                && t.candidate != null && IsGenerationDisabledByOptions(t.options) == false
                 && t.compilation is CSharpCompilation && t.parseOptions is CSharpParseOptions),
                 (sp, sr) => DoGenerateCode(
                     new CodeGenerationContext(sp, (CSharpCompilation)sr.compilation, (CSharpParseOptions)sr.parseOptions),
