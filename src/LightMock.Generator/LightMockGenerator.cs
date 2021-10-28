@@ -310,98 +310,71 @@ namespace LightMock.Generator
 
         INamedTypeSymbol? ConvertToInterface(GeneratorSyntaxContext context)
         {
-            GenericNameSyntax candidateGeneric;
+            var candidateGeneric = GetMockSymbol(context.Node);
             var semanticModel = context.SemanticModel;
 
-            switch (context.Node)
+            if (candidateGeneric != null)
             {
-                case ObjectCreationExpressionSyntax { Type: GenericNameSyntax gns }:
-                    candidateGeneric = gns;
-                    break;
-                case ObjectCreationExpressionSyntax { Type: QualifiedNameSyntax { Right: GenericNameSyntax gns } }:
-                    candidateGeneric = gns;
-                    break;
-                default:
-                    return null;
-            }
+                var mockContainer = semanticModel.GetSymbolInfo(candidateGeneric).Symbol
+                    as INamedTypeSymbol;
+                var mcbt = mockContainer?.BaseType;
+                if (mcbt != null
+                    && mockContextMatcher.IsMatch(mcbt)
+                    && mcbt.TypeArguments.FirstOrDefault() is INamedTypeSymbol mockedType)
+                {
 
-            var mockContainer = semanticModel.GetSymbolInfo(candidateGeneric).Symbol
-                as INamedTypeSymbol;
-            var mcbt = mockContainer?.BaseType;
-            if (mcbt != null
-                && mockContextMatcher.IsMatch(mcbt)
-                && mcbt.TypeArguments.FirstOrDefault() is INamedTypeSymbol mockedType)
-            {
-
-                var mtbt = mockedType.BaseType;
-                if (mtbt == null)
-                    return mockedType;
+                    var mtbt = mockedType.BaseType;
+                    if (mtbt == null)
+                        return mockedType;
+                }
             }
             return null;
         }
 
         INamedTypeSymbol? ConvertToDelegate(GeneratorSyntaxContext context)
         {
-            GenericNameSyntax candidateGeneric;
+            var candidateGeneric = GetMockSymbol(context.Node);
             var semanticModel = context.SemanticModel;
 
-            switch (context.Node)
+            if (candidateGeneric != null)
             {
-                case ObjectCreationExpressionSyntax { Type: GenericNameSyntax gns }:
-                    candidateGeneric = gns;
-                    break;
-                case ObjectCreationExpressionSyntax { Type: QualifiedNameSyntax { Right: GenericNameSyntax gns } }:
-                    candidateGeneric = gns;
-                    break;
-                default:
-                    return null;
-            }
+                var mockContainer = semanticModel.GetSymbolInfo(candidateGeneric).Symbol
+                    as INamedTypeSymbol;
+                var mcbt = mockContainer?.BaseType;
+                if (mcbt != null
+                    && mockContextMatcher.IsMatch(mcbt)
+                    && mcbt.TypeArguments.FirstOrDefault() is INamedTypeSymbol mockedType)
+                {
 
-            var mockContainer = semanticModel.GetSymbolInfo(candidateGeneric).Symbol
-                as INamedTypeSymbol;
-            var mcbt = mockContainer?.BaseType;
-            if (mcbt != null
-                && mockContextMatcher.IsMatch(mcbt)
-                && mcbt.TypeArguments.FirstOrDefault() is INamedTypeSymbol mockedType)
-            {
-
-                var mtbt = mockedType.BaseType;
-                if (mtbt != null && mtbt.ToDisplayString(SymbolDisplayFormats.Namespace) == multicastDelegateNameSpaceAndName)
-                    return mockedType;
+                    var mtbt = mockedType.BaseType;
+                    if (mtbt != null && mtbt.ToDisplayString(SymbolDisplayFormats.Namespace) == multicastDelegateNameSpaceAndName)
+                        return mockedType;
+                }
             }
             return null;
         }
 
         (GenericNameSyntax mock, INamedTypeSymbol mockedType)? ConvertToAbstractClass(GeneratorSyntaxContext context)
         {
-            GenericNameSyntax candidateGeneric;
+            var candidateGeneric = GetMockSymbol(context.Node);
             var semanticModel = context.SemanticModel;
 
-            switch (context.Node)
+            if (candidateGeneric != null)
             {
-                case ObjectCreationExpressionSyntax { Type: GenericNameSyntax gns }:
-                    candidateGeneric = gns;
-                    break;
-                case ObjectCreationExpressionSyntax { Type: QualifiedNameSyntax { Right: GenericNameSyntax gns } }:
-                    candidateGeneric = gns;
-                    break;
-                default:
-                    return null;
-            }
-
-            var mockContainer = semanticModel.GetSymbolInfo(candidateGeneric).Symbol
-                as INamedTypeSymbol;
-            var mcbt = mockContainer?.BaseType;
-            if (mcbt != null
-                && mockContextMatcher.IsMatch(mcbt)
-                && mcbt.TypeArguments.FirstOrDefault() is INamedTypeSymbol mockedType)
-            {
-
-                var mtbt = mockedType.BaseType;
-                if (mtbt != null)
+                var mockContainer = semanticModel.GetSymbolInfo(candidateGeneric).Symbol
+                    as INamedTypeSymbol;
+                var mcbt = mockContainer?.BaseType;
+                if (mcbt != null
+                    && mockContextMatcher.IsMatch(mcbt)
+                    && mcbt.TypeArguments.FirstOrDefault() is INamedTypeSymbol mockedType)
                 {
-                    if (mtbt.ToDisplayString(SymbolDisplayFormats.Namespace) != multicastDelegateNameSpaceAndName)
-                        return (candidateGeneric, mockedType);
+
+                    var mtbt = mockedType.BaseType;
+                    if (mtbt != null)
+                    {
+                        if (mtbt.ToDisplayString(SymbolDisplayFormats.Namespace) != multicastDelegateNameSpaceAndName)
+                            return (candidateGeneric, mockedType);
+                    }
                 }
             }
             return null;
