@@ -74,7 +74,7 @@ namespace LightMock.Generator
                 context.AnalyzerConfigOptions,
                 receiver.AbstractClasses.ToImmutableArray(),
                 receiver.DisableCodeGeneration,
-                receiver.DontOverrideAttributes.ToImmutableArray(),
+                receiver.DontOverrideTypes.ToImmutableArray(),
                 context.CancellationToken);
             compilation = DoGenerateInterfaces(
                 context,
@@ -101,7 +101,6 @@ namespace LightMock.Generator
                 compilation,
                 context.AnalyzerConfigOptions,
                 receiver.DisableCodeGeneration,
-                receiver.DontOverrideAttributes.ToImmutableArray(),
                 receiver.ArrangeInvocations.ToImmutableArray(),
                 context.CancellationToken);
         }
@@ -119,7 +118,6 @@ namespace LightMock.Generator
             CSharpCompilation compilation,
             AnalyzerConfigOptionsProvider optionsProvider,
             bool disableCodeGeneration,
-            ImmutableArray<AttributeSyntax> dontOverrideAttributes,
             ImmutableArray<InvocationExpressionSyntax> arrangeInvocations,
             CancellationToken cancellationToken)
         { 
@@ -238,7 +236,7 @@ namespace LightMock.Generator
             AnalyzerConfigOptionsProvider optionsProvider,
             ImmutableArray<(GenericNameSyntax mock, INamedTypeSymbol mockedType)> abstractClasses,
             bool disableCodeGeneration,
-            ImmutableArray<AttributeSyntax> dontOverrideAttributes,
+            ImmutableArray<INamedTypeSymbol> dontOverrideTypes,
             CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -253,11 +251,9 @@ namespace LightMock.Generator
                 if (disableCodeGeneration)
                     return compilation;
 
-                var dontOverrideList = GetClassExclusionList(compilation, dontOverrideAttributes, cancellationToken);
-
                 foreach (var (candidateGeneric, mockedType) in abstractClasses)
                 {
-                    var processor = new AbstractClassProcessor(candidateGeneric, mockedType, dontOverrideList);
+                    var processor = new AbstractClassProcessor(candidateGeneric, mockedType, dontOverrideTypes);
 
                     cancellationToken.ThrowIfCancellationRequested();
                     if (EmitDiagnostics(context, reportDiagnostic, processor.GetErrors()))
@@ -358,32 +354,6 @@ namespace LightMock.Generator
                 cancellationToken.ThrowIfCancellationRequested();
             }
             return compilation;
-        }
-
-        private static IReadOnlyList<INamedTypeSymbol> GetClassExclusionList(
-            CSharpCompilation compilation,
-            ImmutableArray<AttributeSyntax> dontOverrideAttributes,
-            CancellationToken cancellationToken)
-        {
-            var result = new List<INamedTypeSymbol>();
-            var dontOverrideAttributeType = typeof(DontOverrideAttribute);
-            var doatName = dontOverrideAttributeType.Name;
-            var doatNamespace = dontOverrideAttributeType.Namespace;
-            foreach (var candidateAttribute in dontOverrideAttributes)
-            {
-                TypeSyntax? type;
-                cancellationToken.ThrowIfCancellationRequested();
-                var sm = compilation.GetSemanticModel(candidateAttribute.SyntaxTree);
-                if (sm.GetSymbolInfo(candidateAttribute, cancellationToken).Symbol is IMethodSymbol methodSymbol
-                    && methodSymbol.ToDisplayString(SymbolDisplayFormats.Namespace) == doatName
-                    && methodSymbol.ContainingNamespace.ToDisplayString(SymbolDisplayFormats.Namespace) == doatNamespace
-                    && (type = TypeOfLocator.Locate(candidateAttribute)?.Type) != null
-                    && sm.GetSymbolInfo(type, cancellationToken).Symbol is INamedTypeSymbol typeSymbol)
-                {
-                    result.Add(typeSymbol);
-                }
-            }
-            return result.ToImmutableArray();
         }
 
         bool EmitDiagnostics<TContext>(TContext context, Action<TContext, Diagnostic> reportDiagnostic, IEnumerable<Diagnostic> diagnostics)

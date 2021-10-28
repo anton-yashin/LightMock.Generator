@@ -28,6 +28,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using LightMock.Generator.Locators;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -51,7 +52,7 @@ namespace LightMock.Generator
         }
 
         public bool DisableCodeGeneration { get; private set; }
-        public List<AttributeSyntax> DontOverrideAttributes { get; } = new List<AttributeSyntax>();
+        public List<INamedTypeSymbol> DontOverrideTypes { get; } = new();
         public List<InvocationExpressionSyntax> ArrangeInvocations { get; } = new();
 
         public List<INamedTypeSymbol> Delegates { get; } = new();
@@ -71,7 +72,7 @@ namespace LightMock.Generator
                     AddCandidateMock(gns, context.SemanticModel);
                     break;
                 case AttributeSyntax @as when IsDontOverrideAttribute(@as):
-                    DontOverrideAttributes.Add(@as);
+                    AddDontOverrideType(context.SemanticModel, @as);
                     break;
                 case AttributeSyntax @as:
                     DisableCodeGeneration = DisableCodeGeneration || IsDisableCodeGenerationAttribute(context.SemanticModel, @as);
@@ -160,6 +161,23 @@ namespace LightMock.Generator
                     return true;
             }
             return false;
+        }
+
+        private void AddDontOverrideType(SemanticModel semanticModel, AttributeSyntax @as)
+        {
+            var result = new List<INamedTypeSymbol>();
+            var dontOverrideAttributeType = typeof(DontOverrideAttribute);
+            var doatName = dontOverrideAttributeType.Name;
+            var doatNamespace = dontOverrideAttributeType.Namespace;
+            TypeSyntax? type;
+            if (semanticModel.GetSymbolInfo(@as).Symbol is IMethodSymbol methodSymbol
+                && methodSymbol.ToDisplayString(SymbolDisplayFormats.Namespace) == doatName
+                && methodSymbol.ContainingNamespace.ToDisplayString(SymbolDisplayFormats.Namespace) == doatNamespace
+                && (type = TypeOfLocator.Locate(@as)?.Type) != null
+                && semanticModel.GetSymbolInfo(type).Symbol is INamedTypeSymbol typeSymbol)
+            {
+                DontOverrideTypes.Add(typeSymbol);
+            }
         }
 
         internal static bool IsArrangeInvocation(InvocationExpressionSyntax ies)
