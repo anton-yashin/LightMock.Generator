@@ -231,11 +231,11 @@ namespace LightMock.Generator
         public void Initialize(IncrementalGeneratorInitializationContext context)
         {
             var disableCodegenerationAttributes = context.SyntaxProvider.CreateSyntaxProvider(
-                (sn, ct) => sn is AttributeSyntax @as && LightMockSyntaxReceiver.IsDisableCodeGenerationAttribute(@as),
-                (ctx, ct) => LightMockSyntaxReceiver.IsDisableCodeGenerationAttribute(ctx.SemanticModel, (AttributeSyntax)ctx.Node));
+                (sn, ct) => sn is AttributeSyntax @as && SyntaxHelpers.IsDisableCodeGenerationAttribute(@as),
+                (ctx, ct) => SyntaxHelpers.IsDisableCodeGenerationAttribute(ctx.SemanticModel, (AttributeSyntax)ctx.Node));
 
             var interfaces = context.SyntaxProvider.CreateSyntaxProvider(
-                (sn, ct) => LightMockSyntaxReceiver.IsMock(sn),
+                (sn, ct) => SyntaxHelpers.IsMock(sn),
                 (ctx, ct) => ConvertToInterface(ctx));
             context.RegisterSourceOutput(interfaces
                 .Combine(context.CompilationProvider)
@@ -263,7 +263,7 @@ namespace LightMock.Generator
                     sp.CancellationToken));
 
             var delegates = context.SyntaxProvider.CreateSyntaxProvider(
-                (sn, ct) => LightMockSyntaxReceiver.IsMock(sn),
+                (sn, ct) => SyntaxHelpers.IsMock(sn),
                 (ctx, ct) => ConvertToDelegate(ctx));
             context.RegisterSourceOutput(delegates
                 .Combine(context.CompilationProvider)
@@ -291,10 +291,10 @@ namespace LightMock.Generator
                     sp.CancellationToken));
 
             var classes = context.SyntaxProvider.CreateSyntaxProvider(
-                (sn, ct) => LightMockSyntaxReceiver.IsMock(sn),
+                (sn, ct) => SyntaxHelpers.IsMock(sn),
                 (ctx, ct) => ConvertToAbstractClass(ctx));
             var dontOverrideTypes = context.SyntaxProvider.CreateSyntaxProvider(
-                (sn, ct) => sn is AttributeSyntax @as && LightMockSyntaxReceiver.IsDontOverrideAttribute(@as),
+                (sn, ct) => sn is AttributeSyntax @as && SyntaxHelpers.IsDontOverrideAttribute(@as),
                 (ctx, ct) => CovertToDontOverride(ctx.SemanticModel, (AttributeSyntax)ctx.Node));
             context.RegisterSourceOutput(classes
                 .Combine(context.CompilationProvider)
@@ -324,7 +324,7 @@ namespace LightMock.Generator
                     sp.CancellationToken));
 
             var invocations = context.SyntaxProvider.CreateSyntaxProvider(
-                (sn, ct) => sn is InvocationExpressionSyntax ies && LightMockSyntaxReceiver.IsArrangeInvocation(ies),
+                (sn, ct) => sn is InvocationExpressionSyntax ies && SyntaxHelpers.IsArrangeInvocation(ies),
                 (ctx, ct) => ConvertToInvocation(ctx.Node, ctx.SemanticModel, ct));
             context.RegisterSourceOutput(invocations
                 .Combine(context.CompilationProvider)
@@ -356,7 +356,7 @@ namespace LightMock.Generator
 
         INamedTypeSymbol? ConvertToInterface(GeneratorSyntaxContext context)
         {
-            var candidateGeneric = LightMockSyntaxReceiver.GetMockSymbol(context.Node);
+            var candidateGeneric = SyntaxHelpers.GetMockSymbol(context.Node);
             var semanticModel = context.SemanticModel;
 
             if (candidateGeneric != null)
@@ -379,7 +379,7 @@ namespace LightMock.Generator
 
         INamedTypeSymbol? ConvertToDelegate(GeneratorSyntaxContext context)
         {
-            var candidateGeneric = LightMockSyntaxReceiver.GetMockSymbol(context.Node);
+            var candidateGeneric = SyntaxHelpers.GetMockSymbol(context.Node);
             var semanticModel = context.SemanticModel;
 
             if (candidateGeneric != null)
@@ -402,7 +402,7 @@ namespace LightMock.Generator
 
         (GenericNameSyntax mock, INamedTypeSymbol mockedType)? ConvertToAbstractClass(GeneratorSyntaxContext context)
         {
-            var candidateGeneric = LightMockSyntaxReceiver.GetMockSymbol(context.Node);
+            var candidateGeneric = SyntaxHelpers.GetMockSymbol(context.Node);
             var semanticModel = context.SemanticModel;
 
             if (candidateGeneric != null)
