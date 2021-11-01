@@ -275,14 +275,7 @@ namespace LightMock.Generator
         CompilationContext GetCompilationContext(Compilation compilation)
         {
             lock (compilationContexts)
-            {
-                if (compilationContexts.TryGetValue(compilation, out var context) == false)
-                {
-                    context = new CompilationContext();
-                    compilationContexts.Add(compilation, context);
-                }
-                return context;
-            }
+                return compilationContexts.GetOrCreateValue(compilation);
         }
 
 #if ROSLYN_4
