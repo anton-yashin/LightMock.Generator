@@ -27,17 +27,13 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
-using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Text;
 using System.Threading;
-using LightMock.Generator.Locators;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Diagnostics;
-using Microsoft.CodeAnalysis.Text;
 
 namespace LightMock.Generator
 {
@@ -48,14 +44,12 @@ namespace LightMock.Generator
     public class LightMockGenerator : ISourceGenerator
 #endif
     {
-        private readonly TypeMatcher mockContextMatcher;
         private readonly string multicastDelegateNameSpaceAndName;
         private readonly ConditionalWeakTable<Compilation, CompilationContext> compilationContexts;
         private readonly SyntaxHelpers syntaxHelpers;
 
         public LightMockGenerator()
         {
-            mockContextMatcher = new TypeMatcher(typeof(AbstractMock<>));
             var multicastDelegateType = typeof(MulticastDelegate);
             multicastDelegateNameSpaceAndName = multicastDelegateType.Namespace + "." + multicastDelegateType.Name;
             compilationContexts = new ConditionalWeakTable<Compilation, CompilationContext>();
