@@ -8,6 +8,16 @@ namespace LightMock.Generator
 {
     sealed class SyntaxHelpers
     {
+        private readonly string dcgaName;
+        private readonly string dcgaNamespace;
+
+        public SyntaxHelpers()
+        {
+            var disableCodeGenerationAttributeType = typeof(DisableCodeGenerationAttribute);
+            dcgaName = disableCodeGenerationAttributeType.Name;
+            dcgaNamespace = disableCodeGenerationAttributeType.Namespace;
+        }
+
         public static GenericNameSyntax? GetMockSymbol(SyntaxNode node)
         {
             switch (node)
@@ -43,13 +53,10 @@ namespace LightMock.Generator
             return false;
         }
 
-        public static bool IsDisableCodeGenerationAttribute(SemanticModel semanticModel, AttributeSyntax attributeSyntax)
+        public bool IsDisableCodeGenerationAttribute(SemanticModel semanticModel, AttributeSyntax attributeSyntax)
         {
             if (IsDisableCodeGenerationAttribute(attributeSyntax))
             {
-                var disableCodeGenerationAttributeType = typeof(DisableCodeGenerationAttribute);
-                var dcgaName = disableCodeGenerationAttributeType.Name;
-                var dcgaNamespace = disableCodeGenerationAttributeType.Namespace;
                 var si = semanticModel.GetSymbolInfo(attributeSyntax);
                 if (si.Symbol is IMethodSymbol methodSymbol
                     && methodSymbol.ToDisplayString(SymbolDisplayFormats.Namespace) == dcgaName

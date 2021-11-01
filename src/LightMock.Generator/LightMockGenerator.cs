@@ -54,6 +54,7 @@ namespace LightMock.Generator
         private readonly string doatName;
         private readonly string doatNamespace;
         private readonly ConditionalWeakTable<Compilation, CompilationContext> compilationContexts;
+        private readonly SyntaxHelpers syntaxHelpers;
 
         public LightMockGenerator()
         {
@@ -65,6 +66,7 @@ namespace LightMock.Generator
             doatName = dontOverrideAttributeType.Name;
             doatNamespace = dontOverrideAttributeType.Namespace;
             compilationContexts = new ConditionalWeakTable<Compilation, CompilationContext>();
+            syntaxHelpers = new SyntaxHelpers();
         }
 
 #if ROSLYN_4 == false
@@ -232,7 +234,7 @@ namespace LightMock.Generator
         {
             var disableCodegenerationAttributes = context.SyntaxProvider.CreateSyntaxProvider(
                 (sn, ct) => sn is AttributeSyntax @as && SyntaxHelpers.IsDisableCodeGenerationAttribute(@as),
-                (ctx, ct) => SyntaxHelpers.IsDisableCodeGenerationAttribute(ctx.SemanticModel, (AttributeSyntax)ctx.Node));
+                (ctx, ct) => syntaxHelpers.IsDisableCodeGenerationAttribute(ctx.SemanticModel, (AttributeSyntax)ctx.Node));
 
             var interfaces = context.SyntaxProvider.CreateSyntaxProvider(
                 (sn, ct) => SyntaxHelpers.IsMock(sn),

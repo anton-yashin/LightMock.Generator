@@ -77,7 +77,7 @@ namespace LightMock.Generator
             {
                 if (SyntaxHelpers.IsDontOverrideAttribute(@as))
                     AddDontOverrideType(context.SemanticModel, @as);
-                else if (SyntaxHelpers.IsDisableCodeGenerationAttribute(context.SemanticModel, @as))
+                else if (syntaxHelpers.IsDisableCodeGenerationAttribute(context.SemanticModel, @as))
                     DisableCodeGeneration = true;
             }
             else if (context.Node is InvocationExpressionSyntax ies && SyntaxHelpers.IsArrangeInvocation(ies))
