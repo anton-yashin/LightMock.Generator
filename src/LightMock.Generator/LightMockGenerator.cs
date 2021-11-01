@@ -27,6 +27,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -111,7 +112,7 @@ namespace LightMock.Generator
             cancellationToken.ThrowIfCancellationRequested();
 
             foreach (var candidate in arrangeInvocations
-                .Select(ci => ConvertToInvocation(ci, context.Compilation.GetSemanticModel(ci.SyntaxTree))))
+                .Select(ci => ConvertToInvocation(ci, context.Compilation.GetSemanticModel(ci.SyntaxTree), cancellationToken)))
             {
                 DoGenerateInvocation(context, candidate, cancellationToken);
             }
@@ -126,7 +127,7 @@ namespace LightMock.Generator
             if (methodSymbol == null || candidateInvocation == null)
             {
                 context = context.UpdateFromCompilationContext();
-                (methodSymbol, candidateInvocation, node) = ConvertToInvocation(node, context.Compilation.GetSemanticModel(node.SyntaxTree));
+                (methodSymbol, candidateInvocation, node) = ConvertToInvocation(node, context.Compilation.GetSemanticModel(node.SyntaxTree), cancellationToken);
                 if (methodSymbol == null || candidateInvocation == null)
                     return;
             }
@@ -324,7 +325,7 @@ namespace LightMock.Generator
 
             var invocations = context.SyntaxProvider.CreateSyntaxProvider(
                 (sn, ct) => sn is InvocationExpressionSyntax ies && LightMockSyntaxReceiver.IsArrangeInvocation(ies),
-                (ctx, ct) => ConvertToInvocation(ctx.Node, ctx.SemanticModel));
+                (ctx, ct) => ConvertToInvocation(ctx.Node, ctx.SemanticModel, ct));
             context.RegisterSourceOutput(invocations
                 .Combine(context.CompilationProvider)
                 .Combine(context.AnalyzerConfigOptionsProvider)
@@ -447,11 +448,11 @@ namespace LightMock.Generator
         }
 #endif
 
-        CandidateInvocation ConvertToInvocation(SyntaxNode node, SemanticModel semanticModel)
+        CandidateInvocation ConvertToInvocation(SyntaxNode node, SemanticModel semanticModel, CancellationToken cancellationToken)
         {
             var candidateInvocation = (InvocationExpressionSyntax)node;
 
-            var methodSymbol = semanticModel.GetSymbolInfo(candidateInvocation).Symbol as IMethodSymbol;
+            var methodSymbol = semanticModel.GetSymbolInfo(candidateInvocation, cancellationToken).Symbol as IMethodSymbol;
 
             if (methodSymbol != null
                 && (mockContextMatcher.IsMatch(methodSymbol.ContainingType)
