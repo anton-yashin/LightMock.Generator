@@ -41,8 +41,6 @@ namespace LightMock.Generator
         private readonly TypeMatcher mockInterfaceMatcher;
         private readonly List<INamedTypeSymbol> processedTypes;
         private readonly string multicastDelegateNameSpaceAndName;
-        private readonly string doatName;
-        private readonly string doatNamespace;
         private readonly SyntaxHelpers syntaxHelpers;
 
         public LightMockSyntaxReceiver()
@@ -52,9 +50,6 @@ namespace LightMock.Generator
             processedTypes = new List<INamedTypeSymbol>();
             var multicastDelegateType = typeof(MulticastDelegate);
             multicastDelegateNameSpaceAndName = multicastDelegateType.Namespace + "." + multicastDelegateType.Name;
-            var dontOverrideAttributeType = typeof(DontOverrideAttribute);
-            doatName = dontOverrideAttributeType.Name;
-            doatNamespace = dontOverrideAttributeType.Namespace;
             syntaxHelpers = new SyntaxHelpers();
         }
 
@@ -115,16 +110,9 @@ namespace LightMock.Generator
 
         private void AddDontOverrideType(SemanticModel semanticModel, AttributeSyntax @as)
         {
-            TypeSyntax? type;
-            if (semanticModel.GetSymbolInfo(@as).Symbol is IMethodSymbol methodSymbol
-                && methodSymbol.ToDisplayString(SymbolDisplayFormats.Namespace) == doatName
-                && methodSymbol.ContainingNamespace.ToDisplayString(SymbolDisplayFormats.Namespace) == doatNamespace
-                && (type = TypeOfLocator.Locate(@as)?.Type) != null
-                && semanticModel.GetSymbolInfo(type).Symbol is INamedTypeSymbol typeSymbol)
-            {
+            var typeSymbol = syntaxHelpers.CovertToDontOverride(semanticModel, @as);
+            if (typeSymbol != null)
                 DontOverrideTypes.Add(typeSymbol);
-            }
         }
-
     }
 }

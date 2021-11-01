@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using LightMock.Generator.Locators;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
@@ -13,6 +14,8 @@ namespace LightMock.Generator
         private readonly string dcgaNamespace;
         private readonly TypeMatcher mockContextMatcher;
         private readonly TypeMatcher mockInterfaceMatcher;
+        private readonly string doatName;
+        private readonly string doatNamespace;
 
         public SyntaxHelpers()
         {
@@ -21,6 +24,9 @@ namespace LightMock.Generator
             var disableCodeGenerationAttributeType = typeof(DisableCodeGenerationAttribute);
             dcgaName = disableCodeGenerationAttributeType.Name;
             dcgaNamespace = disableCodeGenerationAttributeType.Namespace;
+            var dontOverrideAttributeType = typeof(DontOverrideAttribute);
+            doatName = dontOverrideAttributeType.Name;
+            doatNamespace = dontOverrideAttributeType.Namespace;
         }
 
         public static GenericNameSyntax? GetMockSymbol(SyntaxNode node)
@@ -124,6 +130,21 @@ namespace LightMock.Generator
             }
             return new CandidateInvocation(null, null, candidateInvocation);
         }
+
+        public INamedTypeSymbol? CovertToDontOverride(SemanticModel semanticModel, AttributeSyntax @as)
+        {
+            TypeSyntax? type;
+            if (semanticModel.GetSymbolInfo(@as).Symbol is IMethodSymbol methodSymbol
+                && methodSymbol.ToDisplayString(SymbolDisplayFormats.Namespace) == doatName
+                && methodSymbol.ContainingNamespace.ToDisplayString(SymbolDisplayFormats.Namespace) == doatNamespace
+                && (type = TypeOfLocator.Locate(@as)?.Type) != null
+                && semanticModel.GetSymbolInfo(type).Symbol is INamedTypeSymbol typeSymbol)
+            {
+                return typeSymbol;
+            }
+            return null;
+        }
+
 
     }
 }

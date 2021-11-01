@@ -49,22 +49,15 @@ namespace LightMock.Generator
 #endif
     {
         private readonly TypeMatcher mockContextMatcher;
-        private readonly TypeMatcher mockInterfaceMatcher;
         private readonly string multicastDelegateNameSpaceAndName;
-        private readonly string doatName;
-        private readonly string doatNamespace;
         private readonly ConditionalWeakTable<Compilation, CompilationContext> compilationContexts;
         private readonly SyntaxHelpers syntaxHelpers;
 
         public LightMockGenerator()
         {
             mockContextMatcher = new TypeMatcher(typeof(AbstractMock<>));
-            mockInterfaceMatcher = new TypeMatcher(typeof(IAdvancedMockContext<>));
             var multicastDelegateType = typeof(MulticastDelegate);
             multicastDelegateNameSpaceAndName = multicastDelegateType.Namespace + "." + multicastDelegateType.Name;
-            var dontOverrideAttributeType = typeof(DontOverrideAttribute);
-            doatName = dontOverrideAttributeType.Name;
-            doatNamespace = dontOverrideAttributeType.Namespace;
             compilationContexts = new ConditionalWeakTable<Compilation, CompilationContext>();
             syntaxHelpers = new SyntaxHelpers();
         }
@@ -287,7 +280,7 @@ namespace LightMock.Generator
                 (ctx, ct) => ConvertToAbstractClass(ctx));
             var dontOverrideTypes = context.SyntaxProvider.CreateSyntaxProvider(
                 (sn, ct) => sn is AttributeSyntax @as && SyntaxHelpers.IsDontOverrideAttribute(@as),
-                (ctx, ct) => CovertToDontOverride(ctx.SemanticModel, (AttributeSyntax)ctx.Node));
+                (ctx, ct) => syntaxHelpers.CovertToDontOverride(ctx.SemanticModel, (AttributeSyntax)ctx.Node));
             context.RegisterSourceOutput(classes
                 .Combine(context.CompilationProvider)
                 .Combine(context.AnalyzerConfigOptionsProvider)
@@ -414,20 +407,6 @@ namespace LightMock.Generator
                             return (candidateGeneric, mockedType);
                     }
                 }
-            }
-            return null;
-        }
-
-        INamedTypeSymbol? CovertToDontOverride(SemanticModel semanticModel, AttributeSyntax @as)
-        {
-            TypeSyntax? type;
-            if (semanticModel.GetSymbolInfo(@as).Symbol is IMethodSymbol methodSymbol
-                && methodSymbol.ToDisplayString(SymbolDisplayFormats.Namespace) == doatName
-                && methodSymbol.ContainingNamespace.ToDisplayString(SymbolDisplayFormats.Namespace) == doatNamespace
-                && (type = TypeOfLocator.Locate(@as)?.Type) != null
-                && semanticModel.GetSymbolInfo(type).Symbol is INamedTypeSymbol typeSymbol)
-            {
-                return typeSymbol;
             }
             return null;
         }
