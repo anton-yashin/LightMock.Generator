@@ -38,14 +38,12 @@ namespace LightMock.Generator
     sealed class LightMockSyntaxReceiver : ISyntaxContextReceiver
     {
         private readonly TypeMatcher mockContextMatcher;
-        private readonly List<INamedTypeSymbol> processedTypes;
         private readonly string multicastDelegateNameSpaceAndName;
         private readonly SyntaxHelpers syntaxHelpers;
 
         public LightMockSyntaxReceiver()
         {
             mockContextMatcher = new TypeMatcher(typeof(AbstractMock<>));
-            processedTypes = new List<INamedTypeSymbol>();
             var multicastDelegateType = typeof(MulticastDelegate);
             multicastDelegateNameSpaceAndName = multicastDelegateType.Namespace + "." + multicastDelegateType.Name;
             syntaxHelpers = new SyntaxHelpers();
@@ -88,11 +86,8 @@ namespace LightMock.Generator
             var mcbt = mockContainer?.BaseType;
             if (mcbt != null
                 && mockContextMatcher.IsMatch(mcbt)
-                && mcbt.TypeArguments.FirstOrDefault() is INamedTypeSymbol mockedType
-                && processedTypes.Contains(mockedType.OriginalDefinition) == false)
+                && mcbt.TypeArguments.FirstOrDefault() is INamedTypeSymbol mockedType)
             {
-                processedTypes.Add(mockedType.OriginalDefinition);
-
                 var mtbt = mockedType.BaseType;
                 if (mtbt != null)
                 {
