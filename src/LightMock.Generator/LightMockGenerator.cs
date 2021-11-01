@@ -346,14 +346,9 @@ namespace LightMock.Generator
 
             if (candidateGeneric != null)
             {
-                var mockContainer = semanticModel.GetSymbolInfo(candidateGeneric).Symbol
-                    as INamedTypeSymbol;
-                var mcbt = mockContainer?.BaseType;
-                if (mcbt != null
-                    && mockContextMatcher.IsMatch(mcbt)
-                    && mcbt.TypeArguments.FirstOrDefault() is INamedTypeSymbol mockedType)
+                var mockedType = syntaxHelpers.GetMockedType(candidateGeneric, semanticModel);
+                if (mockedType != null)
                 {
-
                     var mtbt = mockedType.BaseType;
                     if (mtbt == null)
                         return mockedType;
@@ -369,12 +364,8 @@ namespace LightMock.Generator
 
             if (candidateGeneric != null)
             {
-                var mockContainer = semanticModel.GetSymbolInfo(candidateGeneric).Symbol
-                    as INamedTypeSymbol;
-                var mcbt = mockContainer?.BaseType;
-                if (mcbt != null
-                    && mockContextMatcher.IsMatch(mcbt)
-                    && mcbt.TypeArguments.FirstOrDefault() is INamedTypeSymbol mockedType)
+                var mockedType = syntaxHelpers.GetMockedType(candidateGeneric, semanticModel);
+                if (mockedType != null)
                 {
 
                     var mtbt = mockedType.BaseType;
@@ -392,14 +383,9 @@ namespace LightMock.Generator
 
             if (candidateGeneric != null)
             {
-                var mockContainer = semanticModel.GetSymbolInfo(candidateGeneric).Symbol
-                    as INamedTypeSymbol;
-                var mcbt = mockContainer?.BaseType;
-                if (mcbt != null
-                    && mockContextMatcher.IsMatch(mcbt)
-                    && mcbt.TypeArguments.FirstOrDefault() is INamedTypeSymbol mockedType)
+                var mockedType = syntaxHelpers.GetMockedType(candidateGeneric, semanticModel);
+                if (mockedType != null)
                 {
-
                     var mtbt = mockedType.BaseType;
                     if (mtbt != null)
                     {

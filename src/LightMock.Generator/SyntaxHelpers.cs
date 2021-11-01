@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading;
 
@@ -141,6 +142,20 @@ namespace LightMock.Generator
                 && semanticModel.GetSymbolInfo(type).Symbol is INamedTypeSymbol typeSymbol)
             {
                 return typeSymbol;
+            }
+            return null;
+        }
+
+        public INamedTypeSymbol? GetMockedType(GenericNameSyntax candidateGeneric, SemanticModel semanticModel)
+        {
+            var mockContainer = semanticModel.GetSymbolInfo(candidateGeneric).Symbol
+                as INamedTypeSymbol;
+            var mcbt = mockContainer?.BaseType;
+            if (mcbt != null
+                && mockContextMatcher.IsMatch(mcbt)
+                && mcbt.TypeArguments.FirstOrDefault() is INamedTypeSymbol mockedType)
+            {
+                return mockedType;
             }
             return null;
         }
