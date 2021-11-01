@@ -81,21 +81,21 @@ namespace LightMock.Generator
 
             var cc = new CodeGenerationContext(context, compilation, parseOptions, GetCompilationContext(compilation));
 
-            cc = DoGenerateCode(
+            DoGenerateCode(
                 cc,
                 receiver.AbstractClasses.Select(
                     t => new AbstractClassProcessor(
                         t.mock, t.mockedType, receiver.DontOverrideTypes)),
                 context.CancellationToken);
-            cc = DoGenerateCode(
+            DoGenerateCode(
                 cc,
                 receiver.Interfaces.Select(t => new InterfaceProcessor(t)),
                 context.CancellationToken);
-            cc = DoGenerateCode(
+            DoGenerateCode(
                 cc,
                 receiver.Delegates.Select(t => new DelegateProcessor(t)),
                 context.CancellationToken);
-            cc = DoGenerateInvocations(
+            DoGenerateInvocations(
                 cc,
                 receiver.ArrangeInvocations.ToImmutableArray(),
                 context.CancellationToken);
@@ -103,7 +103,7 @@ namespace LightMock.Generator
 
 #endif
 
-        CodeGenerationContext DoGenerateInvocations(
+        void DoGenerateInvocations(
             CodeGenerationContext context,
             ImmutableArray<InvocationExpressionSyntax> arrangeInvocations,
             CancellationToken cancellationToken)
@@ -113,12 +113,11 @@ namespace LightMock.Generator
             foreach (var candidate in arrangeInvocations
                 .Select(ci => ConvertToInvocation(ci, context.Compilation.GetSemanticModel(ci.SyntaxTree))))
             {
-                context = DoGenerateInvocation(context, candidate, cancellationToken);
+                DoGenerateInvocation(context, candidate, cancellationToken);
             }
-            return context;
         }
 
-        CodeGenerationContext DoGenerateInvocation(
+        void DoGenerateInvocation(
             CodeGenerationContext context,
             CandidateInvocation candidate,
             CancellationToken cancellationToken)
@@ -129,7 +128,7 @@ namespace LightMock.Generator
                 context = context.UpdateFromCompilationContext();
                 (methodSymbol, candidateInvocation, node) = ConvertToInvocation(node, context.Compilation.GetSemanticModel(node.SyntaxTree));
                 if (methodSymbol == null || candidateInvocation == null)
-                    return context;
+                    return;
             }
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -143,7 +142,7 @@ namespace LightMock.Generator
                     processor = new AssertExpressionRewriter(methodSymbol, candidateInvocation, context.Compilation);
                     break;
                 default:
-                    return context;
+                    return;
             }
 
             cancellationToken.ThrowIfCancellationRequested();
@@ -152,20 +151,19 @@ namespace LightMock.Generator
                 context.ReportDiagnostic(Diagnostic.Create(
                     DiagnosticsDescriptors.KPropertyExpressionMustHaveUniqueId,
                     candidateInvocation.GetLocation(), methodSymbol.Name));
-                return context;
+                return;
             }
             if (context.EmitDiagnostics(processor.GetErrors()))
-                return context;
+                return;
             cancellationToken.ThrowIfCancellationRequested();
             context.EmitDiagnostics(processor.GetWarnings());
             cancellationToken.ThrowIfCancellationRequested();
             var text = processor.DoGenerate();
             context.AddSource(processor.FileName, text);
             context.CompilationContext.AddTag(processor.FileName);
-            return context;
         }
 
-        CodeGenerationContext DoGenerateCode(
+        void DoGenerateCode(
             CodeGenerationContext context,
             IEnumerable<ClassProcessor> classProcessors,
             CancellationToken cancellationToken)
@@ -175,23 +173,21 @@ namespace LightMock.Generator
 
             foreach (var classProcessor in classProcessors)
             {
-                context = DoGenerateCode(
+                DoGenerateCode(
                     context,
                     classProcessor,
                     cancellationToken);
             }
-            return context;
         }
 
-
-        CodeGenerationContext DoGenerateCode(
+        void DoGenerateCode(
             CodeGenerationContext context,
             ClassProcessor classProcessor,
             CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
             if (context.EmitDiagnostics(classProcessor.GetErrors()))
-                return context;
+                return;
             cancellationToken.ThrowIfCancellationRequested();
             context.EmitDiagnostics(classProcessor.GetWarnings());
             var text = classProcessor.DoGenerate();
@@ -201,19 +197,11 @@ namespace LightMock.Generator
                 context.CompilationContext.AddTag(classProcessor.FileName);
                 if (classProcessor.IsUpdateCompilationRequired)
                 {
-#if ROSLYN_4
                     context.CompilationContext.AddSyntaxTree(CSharpSyntaxTree.ParseText(
                         text, context.ParseOptions, cancellationToken: cancellationToken));
-
-#else
-                context = context.AddSyntaxTrees(CSharpSyntaxTree.ParseText(
-                    text, context.ParseOptions, cancellationToken: cancellationToken)
-                    );
-#endif
                 }
             }
             cancellationToken.ThrowIfCancellationRequested();
-            return context;
         }
 
         static bool IsGenerationDisabledByOptions(AnalyzerConfigOptionsProvider optionsProvider)
