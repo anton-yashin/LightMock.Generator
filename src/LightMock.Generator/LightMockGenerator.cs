@@ -28,6 +28,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using LightMock.Generator.Locators;
@@ -51,6 +52,7 @@ namespace LightMock.Generator
         private readonly string multicastDelegateNameSpaceAndName;
         private readonly string doatName;
         private readonly string doatNamespace;
+        private readonly ConditionalWeakTable<Compilation, CompilationContext> compilationContexts;
 
         public LightMockGenerator()
         {
@@ -61,6 +63,7 @@ namespace LightMock.Generator
             var dontOverrideAttributeType = typeof(DontOverrideAttribute);
             doatName = dontOverrideAttributeType.Name;
             doatNamespace = dontOverrideAttributeType.Namespace;
+            compilationContexts = new ConditionalWeakTable<Compilation, CompilationContext>();
         }
 
 #if ROSLYN_4 == false
@@ -76,7 +79,7 @@ namespace LightMock.Generator
             if (IsGenerationDisabledByOptions(context.AnalyzerConfigOptions) || receiver.DisableCodeGeneration)
                 return;
 
-            var cc = new CodeGenerationContext(context, compilation, parseOptions);
+            var cc = new CodeGenerationContext(context, compilation, parseOptions, GetCompilationContext(compilation));
 
             cc = DoGenerateCode(
                 cc,
@@ -161,10 +164,15 @@ namespace LightMock.Generator
             CandidateInvocation candidate,
             CancellationToken cancellationToken)
         {
-            var (methodSymbol, candidateInvocation) = candidate;
+            var (methodSymbol, candidateInvocation, node) = candidate;
+            if (methodSymbol == null || candidateInvocation == null)
+            {
+                context = context.UpdateFromCompilationContext();
+                (methodSymbol, candidateInvocation, node) = ConvertToInvocation(node, context.Compilation.GetSemanticModel(node.SyntaxTree));
+                if (methodSymbol == null || candidateInvocation == null)
+                    return context;
+            }
             cancellationToken.ThrowIfCancellationRequested();
-
-            // process symbols under ArrangeSetter
 
             ExpressionRewriter processor;
             switch (methodSymbol.Name)
@@ -180,13 +188,13 @@ namespace LightMock.Generator
             }
 
             cancellationToken.ThrowIfCancellationRequested();
-            //if (processedFiles.Contains(processor.FileName))
-            //{
-            //    context.ReportDiagnostic(Diagnostic.Create(
-            //        DiagnosticsDescriptors.KPropertyExpressionMustHaveUniqueId,
-            //        candidateInvocation.GetLocation(), methodSymbol.Name));
-            //    continue;
-            //}
+            if (context.CompilationContext.IsTagExits(processor.FileName))
+            {
+                context.ReportDiagnostic(Diagnostic.Create(
+                    DiagnosticsDescriptors.KPropertyExpressionMustHaveUniqueId,
+                    candidateInvocation.GetLocation(), methodSymbol.Name));
+                return context;
+            }
             if (context.EmitDiagnostics(processor.GetErrors()))
                 return context;
             cancellationToken.ThrowIfCancellationRequested();
@@ -194,6 +202,7 @@ namespace LightMock.Generator
             cancellationToken.ThrowIfCancellationRequested();
             var text = processor.DoGenerate();
             context.AddSource(processor.FileName, text);
+            context.CompilationContext.AddTag(processor.FileName);
             return context;
         }
 
@@ -227,12 +236,22 @@ namespace LightMock.Generator
             cancellationToken.ThrowIfCancellationRequested();
             context.EmitDiagnostics(classProcessor.GetWarnings());
             var text = classProcessor.DoGenerate();
-            context.AddSource(classProcessor.FileName, text);
-            if (classProcessor.IsUpdateCompilationRequired)
+            if (context.CompilationContext.IsTagExits(classProcessor.FileName) == false)
             {
+                context.AddSource(classProcessor.FileName, text);
+                context.CompilationContext.AddTag(classProcessor.FileName);
+                if (classProcessor.IsUpdateCompilationRequired)
+                {
+#if ROSLYN_4
+                    context.CompilationContext.AddSyntaxTree(CSharpSyntaxTree.ParseText(
+                        text, context.ParseOptions, cancellationToken: cancellationToken));
+
+#else
                 context = context.AddSyntaxTrees(CSharpSyntaxTree.ParseText(
                     text, context.ParseOptions, cancellationToken: cancellationToken)
                     );
+#endif
+                }
             }
             cancellationToken.ThrowIfCancellationRequested();
             return context;
@@ -251,6 +270,19 @@ namespace LightMock.Generator
                 reportDiagnostic(context, d);
             }
             return haveIssues;
+        }
+
+        CompilationContext GetCompilationContext(Compilation compilation)
+        {
+            lock (compilationContexts)
+            {
+                if (compilationContexts.TryGetValue(compilation, out var context) == false)
+                {
+                    context = new CompilationContext();
+                    compilationContexts.Add(compilation, context);
+                }
+                return context;
+            }
         }
 
 #if ROSLYN_4
@@ -282,7 +314,10 @@ namespace LightMock.Generator
                 && t.compilation is CSharpCompilation
                 && t.parseOptions is CSharpParseOptions),
                 (sp, sr) => DoGenerateCode(
-                    new CodeGenerationContext(sp, (CSharpCompilation)sr.compilation, (CSharpParseOptions)sr.parseOptions),
+                    new CodeGenerationContext(sp,
+                        (CSharpCompilation)sr.compilation,
+                        (CSharpParseOptions)sr.parseOptions,
+                        GetCompilationContext(sr.compilation)),
                     new InterfaceProcessor(sr.candidate!),
                     sp.CancellationToken));
 
@@ -307,7 +342,10 @@ namespace LightMock.Generator
                 && t.compilation is CSharpCompilation
                 && t.parseOptions is CSharpParseOptions),
                 (sp, sr) => DoGenerateCode(
-                    new CodeGenerationContext(sp, (CSharpCompilation)sr.compilation, (CSharpParseOptions)sr.parseOptions),
+                    new CodeGenerationContext(sp,
+                        (CSharpCompilation)sr.compilation,
+                        (CSharpParseOptions)sr.parseOptions,
+                        GetCompilationContext(sr.compilation)),
                     new DelegateProcessor(sr.candidate!),
                     sp.CancellationToken));
 
@@ -337,13 +375,16 @@ namespace LightMock.Generator
                 && t.compilation is CSharpCompilation
                 && t.parseOptions is CSharpParseOptions),
                 (sp, sr) => DoGenerateCode(
-                    new CodeGenerationContext(sp, (CSharpCompilation)sr.compilation, (CSharpParseOptions)sr.parseOptions),
+                    new CodeGenerationContext(sp,
+                        (CSharpCompilation)sr.compilation,
+                        (CSharpParseOptions)sr.parseOptions,
+                        GetCompilationContext(sr.compilation)),
                     new AbstractClassProcessor(sr.candidate!.Value.mock, sr.candidate!.Value.mockedType, sr.dontOverrideTypes),
                     sp.CancellationToken));
 
             var invocations = context.SyntaxProvider.CreateSyntaxProvider(
                 (sn, ct) => sn is InvocationExpressionSyntax ies && LightMockSyntaxReceiver.IsArrangeInvocation(ies),
-                (ctx, ct) => ConvertToInvocation(ctx));
+                (ctx, ct) => ConvertToInvocation(ctx.Node, ctx.SemanticModel));
             context.RegisterSourceOutput(invocations
                 .Combine(context.CompilationProvider)
                 .Combine(context.AnalyzerConfigOptionsProvider)
@@ -358,12 +399,14 @@ namespace LightMock.Generator
                 .Where(t
                 => IsCodeGenerationDisabledByAttributes(t.disableCodegenerationAttributes)
                 && IsGenerationDisabledByOptions(t.options) == false
-                && t.candidate != null
                 && t.compilation is CSharpCompilation
                 && t.parseOptions is CSharpParseOptions),
                 (sp, sr) => DoGenerateInvocation(
-                    new CodeGenerationContext(sp, (CSharpCompilation)sr.compilation, (CSharpParseOptions)sr.parseOptions),
-                    sr.candidate!.Value,
+                    new CodeGenerationContext(sp,
+                        (CSharpCompilation)sr.compilation,
+                        (CSharpParseOptions)sr.parseOptions,
+                        GetCompilationContext(sr.compilation)),
+                    sr.candidate,
                     sp.CancellationToken));
         }
 
@@ -456,11 +499,19 @@ namespace LightMock.Generator
             return null;
         }
 
-        CandidateInvocation? ConvertToInvocation(GeneratorSyntaxContext context)
-        {
-            var candidateInvocation = (InvocationExpressionSyntax)context.Node;
+#else
 
-            var methodSymbol = context.SemanticModel.GetSymbolInfo(candidateInvocation).Symbol as IMethodSymbol;
+        public void Initialize(GeneratorInitializationContext context)
+        {
+            context.RegisterForSyntaxNotifications(() => new LightMockSyntaxReceiver());
+        }
+#endif
+
+        CandidateInvocation ConvertToInvocation(SyntaxNode node, SemanticModel semanticModel)
+        {
+            var candidateInvocation = (InvocationExpressionSyntax)node;
+
+            var methodSymbol = semanticModel.GetSymbolInfo(candidateInvocation).Symbol as IMethodSymbol;
 
             if (methodSymbol != null
                 && (mockContextMatcher.IsMatch(methodSymbol.ContainingType)
@@ -469,21 +520,14 @@ namespace LightMock.Generator
                 switch (methodSymbol.Name)
                 {
                     case nameof(AbstractMockNameofProvider.ArrangeSetter):
-                        return new CandidateInvocation(methodSymbol, candidateInvocation);
+                        return new CandidateInvocation(methodSymbol, candidateInvocation, node);
                     case nameof(AbstractMockNameofProvider.AssertSet):
-                        return new CandidateInvocation(methodSymbol, candidateInvocation);
+                        return new CandidateInvocation(methodSymbol, candidateInvocation, node);
                 }
             }
-            return null;
+            return new CandidateInvocation(null, null, node);
         }
 
-#else
-
-        public void Initialize(GeneratorInitializationContext context)
-        {
-            context.RegisterForSyntaxNotifications(() => new LightMockSyntaxReceiver());
-        }
-#endif
 
     }
 }

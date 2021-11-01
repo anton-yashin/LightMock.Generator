@@ -29,16 +29,16 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace LightMock.Generator
 {
-    internal record struct CandidateInvocation(IMethodSymbol methodSymbol, InvocationExpressionSyntax candidateInvocation)
+    internal record struct CandidateInvocation(IMethodSymbol? methodSymbol, InvocationExpressionSyntax? candidateInvocation, SyntaxNode node)
     {
-        public static implicit operator (IMethodSymbol methodSymbol, InvocationExpressionSyntax candidateInvocation)(CandidateInvocation value)
+        public static implicit operator (IMethodSymbol? methodSymbol, InvocationExpressionSyntax? candidateInvocation, SyntaxNode node)(CandidateInvocation value)
         {
-            return (value.methodSymbol, value.candidateInvocation);
+            return (value.methodSymbol, value.candidateInvocation, value.node);
         }
 
-        public static implicit operator CandidateInvocation((IMethodSymbol methodSymbol, InvocationExpressionSyntax candidateInvocation) value)
+        public static implicit operator CandidateInvocation((IMethodSymbol? methodSymbol, InvocationExpressionSyntax? candidateInvocation, SyntaxNode node) value)
         {
-            return new CandidateInvocation(value.methodSymbol, value.candidateInvocation);
+            return new CandidateInvocation(value.methodSymbol, value.candidateInvocation, value.node);
         }
     }
 }

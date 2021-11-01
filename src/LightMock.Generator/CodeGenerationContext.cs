@@ -13,7 +13,8 @@ namespace LightMock.Generator
         GeneratorExecutionContext Context,
 #endif
         CSharpCompilation Compilation,
-        CSharpParseOptions ParseOptions)
+        CSharpParseOptions ParseOptions,
+        CompilationContext CompilationContext)
     {
         public void ReportDiagnostic(Diagnostic diagnostic) 
             => Context.ReportDiagnostic(diagnostic);
@@ -22,7 +23,7 @@ namespace LightMock.Generator
             => Context.AddSource(hint, text);
 
         public CodeGenerationContext Update(CSharpCompilation compilation)
-            => new CodeGenerationContext(Context, compilation, ParseOptions);
+            => new CodeGenerationContext(Context, compilation, ParseOptions, CompilationContext);
 
         public bool EmitDiagnostics(IEnumerable<Diagnostic> diagnostics)
         {
@@ -40,5 +41,7 @@ namespace LightMock.Generator
             return Update(Compilation.AddSyntaxTrees(trees));
         }
 
+        public CodeGenerationContext UpdateFromCompilationContext()
+            => Update(CompilationContext.Update(Compilation));
     }
 }
