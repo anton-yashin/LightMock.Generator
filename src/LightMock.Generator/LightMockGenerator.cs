@@ -95,7 +95,7 @@ namespace LightMock.Generator
                 cc,
                 receiver.Delegates.Select(t => new DelegateProcessor(t)),
                 context.CancellationToken);
-            cc = DoGenerate(
+            cc = DoGenerateInvocations(
                 cc,
                 receiver.ArrangeInvocations.ToImmutableArray(),
                 context.CancellationToken);
@@ -103,58 +103,17 @@ namespace LightMock.Generator
 
 #endif
 
-        CodeGenerationContext DoGenerate(
+        CodeGenerationContext DoGenerateInvocations(
             CodeGenerationContext context,
             ImmutableArray<InvocationExpressionSyntax> arrangeInvocations,
             CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            // process symbols under ArrangeSetter
-
-            var mockContextMatcher = new TypeMatcher(typeof(AbstractMock<>));
-            var processedFiles = new HashSet<string>();
-            var mockInterfaceMatcher = new TypeMatcher(typeof(IAdvancedMockContext<>));
-            foreach (var candidateInvocation in arrangeInvocations)
+            foreach (var candidate in arrangeInvocations
+                .Select(ci => ConvertToInvocation(ci, context.Compilation.GetSemanticModel(ci.SyntaxTree))))
             {
-                cancellationToken.ThrowIfCancellationRequested();
-                var st = context.Compilation.GetSemanticModel(candidateInvocation.SyntaxTree);
-                var methodSymbol = st.GetSymbolInfo(candidateInvocation, cancellationToken).Symbol as IMethodSymbol;
-                cancellationToken.ThrowIfCancellationRequested();
-
-                if (methodSymbol != null
-                    && (mockContextMatcher.IsMatch(methodSymbol.ContainingType)
-                        || mockInterfaceMatcher.IsMatch(methodSymbol.ContainingType)))
-                {
-                    ExpressionRewriter processor;
-                    switch (methodSymbol.Name)
-                    {
-                        case nameof(AbstractMockNameofProvider.ArrangeSetter):
-                            processor = new ArrangeExpressionRewriter(methodSymbol, candidateInvocation, context.Compilation);
-                            break;
-                        case nameof(AbstractMockNameofProvider.AssertSet):
-                            processor = new AssertExpressionRewriter(methodSymbol, candidateInvocation, context.Compilation);
-                            break;
-                        default:
-                            continue;
-                    }
-
-                    cancellationToken.ThrowIfCancellationRequested();
-                    if (processedFiles.Contains(processor.FileName))
-                    {
-                        context.ReportDiagnostic(Diagnostic.Create(
-                            DiagnosticsDescriptors.KPropertyExpressionMustHaveUniqueId,
-                            candidateInvocation.GetLocation(), methodSymbol.Name));
-                        continue;
-                    }
-                    if (context.EmitDiagnostics(processor.GetErrors()))
-                        continue;
-                    cancellationToken.ThrowIfCancellationRequested();
-                    context.EmitDiagnostics(processor.GetWarnings());
-                    cancellationToken.ThrowIfCancellationRequested();
-                    var text = processor.DoGenerate();
-                    context.AddSource(processor.FileName, text);
-                }
+                context = DoGenerateInvocation(context, candidate, cancellationToken);
             }
             return context;
         }
