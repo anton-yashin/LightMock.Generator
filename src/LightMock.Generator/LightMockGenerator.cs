@@ -513,12 +513,12 @@ namespace LightMock.Generator
                 switch (methodSymbol.Name)
                 {
                     case nameof(AbstractMockNameofProvider.ArrangeSetter):
-                        return new CandidateInvocation(methodSymbol, candidateInvocation, node);
+                        return new CandidateInvocation(methodSymbol, candidateInvocation, candidateInvocation);
                     case nameof(AbstractMockNameofProvider.AssertSet):
-                        return new CandidateInvocation(methodSymbol, candidateInvocation, node);
+                        return new CandidateInvocation(methodSymbol, candidateInvocation, candidateInvocation);
                 }
             }
-            return new CandidateInvocation(null, null, node);
+            return new CandidateInvocation(null, null, candidateInvocation);
         }
 
 
