@@ -335,37 +335,24 @@ namespace LightMock.Generator
 
         INamedTypeSymbol? ConvertToInterface(GeneratorSyntaxContext context)
         {
-            var candidateGeneric = SyntaxHelpers.GetMockSymbol(context.Node);
-            var semanticModel = context.SemanticModel;
-
-            if (candidateGeneric != null)
+            var mockedType = GetMockedType(context);
+            if (mockedType != null)
             {
-                var mockedType = syntaxHelpers.GetMockedType(candidateGeneric, semanticModel);
-                if (mockedType != null)
-                {
-                    var mtbt = mockedType.BaseType;
-                    if (mtbt == null)
-                        return mockedType;
-                }
+                var mtbt = mockedType.BaseType;
+                if (mtbt == null)
+                    return mockedType;
             }
             return null;
         }
 
         INamedTypeSymbol? ConvertToDelegate(GeneratorSyntaxContext context)
         {
-            var candidateGeneric = SyntaxHelpers.GetMockSymbol(context.Node);
-            var semanticModel = context.SemanticModel;
-
-            if (candidateGeneric != null)
+            var mockedType = GetMockedType(context);
+            if (mockedType != null)
             {
-                var mockedType = syntaxHelpers.GetMockedType(candidateGeneric, semanticModel);
-                if (mockedType != null)
-                {
-
-                    var mtbt = mockedType.BaseType;
-                    if (mtbt != null && mtbt.ToDisplayString(SymbolDisplayFormats.Namespace) == multicastDelegateNameSpaceAndName)
-                        return mockedType;
-                }
+                var mtbt = mockedType.BaseType;
+                if (mtbt != null && mtbt.ToDisplayString(SymbolDisplayFormats.Namespace) == multicastDelegateNameSpaceAndName)
+                    return mockedType;
             }
             return null;
         }
@@ -373,11 +360,10 @@ namespace LightMock.Generator
         (GenericNameSyntax mock, INamedTypeSymbol mockedType)? ConvertToAbstractClass(GeneratorSyntaxContext context)
         {
             var candidateGeneric = SyntaxHelpers.GetMockSymbol(context.Node);
-            var semanticModel = context.SemanticModel;
 
             if (candidateGeneric != null)
             {
-                var mockedType = syntaxHelpers.GetMockedType(candidateGeneric, semanticModel);
+                var mockedType = syntaxHelpers.GetMockedType(candidateGeneric, context.SemanticModel);
                 if (mockedType != null)
                 {
                     var mtbt = mockedType.BaseType;
@@ -389,6 +375,16 @@ namespace LightMock.Generator
                 }
             }
             return null;
+        }
+
+        INamedTypeSymbol? GetMockedType(GeneratorSyntaxContext context)
+        {
+            var candidateGeneric = SyntaxHelpers.GetMockSymbol(context.Node);
+            var semanticModel = context.SemanticModel;
+
+            return candidateGeneric != null
+                ? syntaxHelpers.GetMockedType(candidateGeneric, semanticModel)
+                : null;
         }
 
 #else
