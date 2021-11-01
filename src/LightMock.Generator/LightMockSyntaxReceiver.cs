@@ -38,7 +38,6 @@ namespace LightMock.Generator
     sealed class LightMockSyntaxReceiver : ISyntaxContextReceiver
     {
         private readonly TypeMatcher mockContextMatcher;
-        private readonly TypeMatcher mockInterfaceMatcher;
         private readonly List<INamedTypeSymbol> processedTypes;
         private readonly string multicastDelegateNameSpaceAndName;
         private readonly SyntaxHelpers syntaxHelpers;
@@ -46,7 +45,6 @@ namespace LightMock.Generator
         public LightMockSyntaxReceiver()
         {
             mockContextMatcher = new TypeMatcher(typeof(AbstractMock<>));
-            mockInterfaceMatcher = new TypeMatcher(typeof(IAdvancedMockContext<>));
             processedTypes = new List<INamedTypeSymbol>();
             var multicastDelegateType = typeof(MulticastDelegate);
             multicastDelegateNameSpaceAndName = multicastDelegateType.Namespace + "." + multicastDelegateType.Name;
