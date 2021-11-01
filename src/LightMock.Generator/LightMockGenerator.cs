@@ -211,17 +211,6 @@ namespace LightMock.Generator
             => optionsProvider.GlobalOptions.TryGetValue(GlobalOptionsNames.Enable, out var value)
                 && value.Equals("false", StringComparison.InvariantCultureIgnoreCase);
 
-        bool EmitDiagnostics<TContext>(TContext context, Action<TContext, Diagnostic> reportDiagnostic, IEnumerable<Diagnostic> diagnostics)
-        {
-            bool haveIssues = false;
-            foreach (var d in diagnostics)
-            {
-                haveIssues = true;
-                reportDiagnostic(context, d);
-            }
-            return haveIssues;
-        }
-
         CompilationContext GetCompilationContext(Compilation compilation)
         {
             lock (compilationContexts)
