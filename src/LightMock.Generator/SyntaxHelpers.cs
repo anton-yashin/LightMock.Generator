@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading;
 
 namespace LightMock.Generator
 {
@@ -10,9 +11,13 @@ namespace LightMock.Generator
     {
         private readonly string dcgaName;
         private readonly string dcgaNamespace;
+        private readonly TypeMatcher mockContextMatcher;
+        private readonly TypeMatcher mockInterfaceMatcher;
 
         public SyntaxHelpers()
         {
+            mockContextMatcher = new TypeMatcher(typeof(AbstractMock<>));
+            mockInterfaceMatcher = new TypeMatcher(typeof(IAdvancedMockContext<>));
             var disableCodeGenerationAttributeType = typeof(DisableCodeGenerationAttribute);
             dcgaName = disableCodeGenerationAttributeType.Name;
             dcgaNamespace = disableCodeGenerationAttributeType.Namespace;
@@ -97,6 +102,27 @@ namespace LightMock.Generator
                 }
             }
             return false;
+        }
+
+        public CandidateInvocation ConvertToInvocation(SyntaxNode node, SemanticModel semanticModel, CancellationToken cancellationToken)
+        {
+            var candidateInvocation = (InvocationExpressionSyntax)node;
+
+            var methodSymbol = semanticModel.GetSymbolInfo(candidateInvocation, cancellationToken).Symbol as IMethodSymbol;
+
+            if (methodSymbol != null
+                && (mockContextMatcher.IsMatch(methodSymbol.ContainingType)
+                    || mockInterfaceMatcher.IsMatch(methodSymbol.ContainingType)))
+            {
+                switch (methodSymbol.Name)
+                {
+                    case nameof(AbstractMockNameofProvider.ArrangeSetter):
+                        return new CandidateInvocation(methodSymbol, candidateInvocation, candidateInvocation);
+                    case nameof(AbstractMockNameofProvider.AssertSet):
+                        return new CandidateInvocation(methodSymbol, candidateInvocation, candidateInvocation);
+                }
+            }
+            return new CandidateInvocation(null, null, candidateInvocation);
         }
 
     }

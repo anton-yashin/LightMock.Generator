@@ -60,7 +60,7 @@ namespace LightMock.Generator
 
         public bool DisableCodeGeneration { get; private set; }
         public List<INamedTypeSymbol> DontOverrideTypes { get; } = new();
-        public List<InvocationExpressionSyntax> ArrangeInvocations { get; } = new();
+        public List<CandidateInvocation> CandidateInvocations { get; } = new();
 
         public List<INamedTypeSymbol> Delegates { get; } = new();
         public List<INamedTypeSymbol> Interfaces { get; } = new();
@@ -82,7 +82,9 @@ namespace LightMock.Generator
             }
             else if (context.Node is InvocationExpressionSyntax ies && SyntaxHelpers.IsArrangeInvocation(ies))
             {
-                ArrangeInvocations.Add(ies);
+                CandidateInvocations.Add(
+                    syntaxHelpers.ConvertToInvocation(
+                        context.Node, context.SemanticModel, default));
             }
         }
 

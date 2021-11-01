@@ -100,7 +100,7 @@ namespace LightMock.Generator
                 context.CancellationToken);
             DoGenerateInvocations(
                 cc,
-                receiver.ArrangeInvocations.ToImmutableArray(),
+                receiver.CandidateInvocations.ToImmutableArray(),
                 context.CancellationToken);
         }
 
@@ -108,16 +108,13 @@ namespace LightMock.Generator
 
         void DoGenerateInvocations(
             CodeGenerationContext context,
-            ImmutableArray<InvocationExpressionSyntax> arrangeInvocations,
+            ImmutableArray<CandidateInvocation> candidateInvocations,
             CancellationToken cancellationToken)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            foreach (var candidate in arrangeInvocations
-                .Select(ci => ConvertToInvocation(ci, context.Compilation.GetSemanticModel(ci.SyntaxTree), cancellationToken)))
-            {
+            foreach (var candidate in candidateInvocations)
                 DoGenerateInvocation(context, candidate, cancellationToken);
-            }
         }
 
         void DoGenerateInvocation(
@@ -129,10 +126,20 @@ namespace LightMock.Generator
             if (methodSymbol == null || candidateInvocation == null)
             {
                 context = context.UpdateFromCompilationContext();
-                (methodSymbol, candidateInvocation, node) = ConvertToInvocation(node, context.Compilation.GetSemanticModel(node.SyntaxTree), cancellationToken);
+                (methodSymbol, candidateInvocation, node) = syntaxHelpers.ConvertToInvocation(
+                    node, context.Compilation.GetSemanticModel(node.SyntaxTree), cancellationToken);
                 if (methodSymbol == null || candidateInvocation == null)
                     return;
             }
+            DoGenerateInvocation(context, methodSymbol, candidateInvocation, cancellationToken);
+        }
+
+        private static void DoGenerateInvocation(
+            CodeGenerationContext context,
+            IMethodSymbol methodSymbol,
+            InvocationExpressionSyntax candidateInvocation,
+            CancellationToken cancellationToken)
+        {
             cancellationToken.ThrowIfCancellationRequested();
 
             ExpressionRewriter processor;
@@ -171,16 +178,10 @@ namespace LightMock.Generator
             IEnumerable<ClassProcessor> classProcessors,
             CancellationToken cancellationToken)
         {
-
             cancellationToken.ThrowIfCancellationRequested();
 
             foreach (var classProcessor in classProcessors)
-            {
-                DoGenerateCode(
-                    context,
-                    classProcessor,
-                    cancellationToken);
-            }
+                DoGenerateCode(context, classProcessor, cancellationToken);
         }
 
         void DoGenerateCode(
@@ -316,7 +317,7 @@ namespace LightMock.Generator
 
             var invocations = context.SyntaxProvider.CreateSyntaxProvider(
                 (sn, ct) => sn is InvocationExpressionSyntax ies && SyntaxHelpers.IsArrangeInvocation(ies),
-                (ctx, ct) => ConvertToInvocation(ctx.Node, ctx.SemanticModel, ct));
+                (ctx, ct) => syntaxHelpers.ConvertToInvocation(ctx.Node, ctx.SemanticModel, ct));
             context.RegisterSourceOutput(invocations
                 .Combine(context.CompilationProvider)
                 .Combine(context.AnalyzerConfigOptionsProvider)
@@ -438,28 +439,6 @@ namespace LightMock.Generator
             context.RegisterForSyntaxNotifications(() => new LightMockSyntaxReceiver());
         }
 #endif
-
-        CandidateInvocation ConvertToInvocation(SyntaxNode node, SemanticModel semanticModel, CancellationToken cancellationToken)
-        {
-            var candidateInvocation = (InvocationExpressionSyntax)node;
-
-            var methodSymbol = semanticModel.GetSymbolInfo(candidateInvocation, cancellationToken).Symbol as IMethodSymbol;
-
-            if (methodSymbol != null
-                && (mockContextMatcher.IsMatch(methodSymbol.ContainingType)
-                    || mockInterfaceMatcher.IsMatch(methodSymbol.ContainingType)))
-            {
-                switch (methodSymbol.Name)
-                {
-                    case nameof(AbstractMockNameofProvider.ArrangeSetter):
-                        return new CandidateInvocation(methodSymbol, candidateInvocation, candidateInvocation);
-                    case nameof(AbstractMockNameofProvider.AssertSet):
-                        return new CandidateInvocation(methodSymbol, candidateInvocation, candidateInvocation);
-                }
-            }
-            return new CandidateInvocation(null, null, candidateInvocation);
-        }
-
 
     }
 }
