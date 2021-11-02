@@ -28,18 +28,19 @@
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.11.0" PrivateAssets="all" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
-    <None Include="$(PkgLightMock)\lib\netstandard2.0\*.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+  <ItemGroup Label="Package">
+    <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/roslyn3.8/cs" Visible="false" />
+    <None Include="..\LightMock.Generator.Roslyn40\$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/roslyn4.0/cs" Visible="false" />
     <None Include="LightMock.Generator.props" Pack="true" PackagePath="build" />
-    <None Include="..\LightMock.Generator.Common\$(OutputPath)\LightMock.Generator.Common.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
+    <None Include="..\LightMock.Generator.Common\$(OutputPath)\LightMock.Generator.Common.dll" Pack="true" PackagePath="analyzers/dotnet/roslyn3.8/cs" Visible="false" />
+    <None Include="..\LightMock.Generator.Common\$(OutputPath)\LightMock.Generator.Common.dll" Pack="true" PackagePath="analyzers/dotnet/roslyn4.0/cs" Visible="false" />
+    <None Include="..\..\nugetreadme.txt" PackagePath="readme.txt" Pack="true" Visible="false" />
   </ItemGroup>
 
   <ItemGroup>
     <Compile Include="Resorces\*.cs" />
     <Compile Include="*.cs" />
     <Compile Include="*\*.cs" />
-    <None Include="..\..\nugetreadme.txt" PackagePath="readme.txt" Pack="true" Visible="false" />
   </ItemGroup>
 
   <ItemGroup>
@@ -49,6 +50,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\LightMock.Generator.Common\LightMock.Generator.Common.csproj" />
+    <ProjectReference Include="..\LightMock.Generator.Roslyn40\LightMock.Generator.Roslyn40.csproj" ReferenceOutputAssembly="false"/>
   </ItemGroup>
 
   <!-- Copy package to folder set by NuGetFolder environment variable if present -->

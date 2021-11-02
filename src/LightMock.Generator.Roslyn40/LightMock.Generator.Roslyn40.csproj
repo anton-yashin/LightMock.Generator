@@ -3,19 +3,13 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <IncludeBuildOutput>false</IncludeBuildOutput>
 
-    <AssemblyName>LightMock.Generator.v40</AssemblyName>
+    <AssemblyName>LightMock.Generator</AssemblyName>
     <RootNamespace>LightMock.Generator</RootNamespace>
-    <PackageId>LightMock.Generator</PackageId>
-    <Summary>LightMock.Generator: Source generator that generates mocks by provided interfaces and abstract classes.</Summary>
-    <Description>LightMock.Generator: Source generator that generates mocks by provided interfaces and abstract classes.</Description>
-    <PackageTags>mock generator roslyn aot lightmock android ios uwp xamarin</PackageTags>
-    <Title>LightMock.Generator</Title>
-    <PackageReleaseNotes>$([System.IO.File]::ReadAllText("$(MSBuildProjectDirectory)/../../release-notes.txt"))</PackageReleaseNotes>
     <DefineConstants>$(DefineConstants);ROSLYN_4</DefineConstants>
-    <UseFullSemVerForNuGet>false</UseFullSemVerForNuGet>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
     <DebugType>portable</DebugType>
     <Configurations>Debug;Release</Configurations>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <Import Project="../common.props" />
@@ -29,17 +23,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
-    <None Include="$(PkgLightMock)\lib\netstandard2.0\*.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
-    <None Include="LightMock.Generator.props" Pack="true" PackagePath="build" />
-    <None Include="..\LightMock.Generator.Common\$(OutputPath)\LightMock.Generator.Common.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
-  </ItemGroup>
-
-  <ItemGroup>
     <EmbeddedResource Include="..\LightMock.Generator\Resources\*.cs" />
     <Compile Include="..\LightMock.Generator\Resorces\*.cs" />
     <Compile Include="..\LightMock.Generator\**\*.cs" Exclude="..\LightMock.Generator\bin\**;..\LightMock.Generator\obj\**"/>
-    <None Include="..\..\nugetreadme.txt" PackagePath="readme.txt" Pack="true" Visible="false" />
   </ItemGroup>
 
   <ItemGroup>
@@ -50,10 +36,4 @@
   <ItemGroup>
     <ProjectReference Include="..\LightMock.Generator.Common\LightMock.Generator.Common.csproj" />
   </ItemGroup>
-
-  <!-- Copy package to folder set by NuGetFolder environment variable if present -->
-  <Target Name="CopyPackage" AfterTargets="Pack" Condition=" '$(NuGetFolder)' != '' ">
-    <Copy SourceFiles="$(OutputPath)..\$(PackageId).$(PackageVersion).nupkg" DestinationFolder="$(NuGetFolder)" />
-  </Target>
-
 </Project>
