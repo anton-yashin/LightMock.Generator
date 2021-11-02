@@ -29,12 +29,15 @@
   </ItemGroup>
 
   <ItemGroup Label="Package">
-    <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/roslyn3.8/cs" Visible="false" />
-    <None Include="..\LightMock.Generator.Roslyn40\$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/roslyn4.0/cs" Visible="false" />
-    <None Include="LightMock.Generator.props" Pack="true" PackagePath="build" />
-    <None Include="..\LightMock.Generator.Common\$(OutputPath)\LightMock.Generator.Common.dll" Pack="true" PackagePath="analyzers/dotnet/roslyn3.8/cs" Visible="false" />
-    <None Include="..\LightMock.Generator.Common\$(OutputPath)\LightMock.Generator.Common.dll" Pack="true" PackagePath="analyzers/dotnet/roslyn4.0/cs" Visible="false" />
-    <None Include="..\..\nugetreadme.txt" PackagePath="readme.txt" Pack="true" Visible="false" />
+    <None Include="LightMock.Generator.targets" Pack="true" PackagePath="buildTransitive/netstandard2.0"  />
+    <None Include="LightMock.Generator.props" Pack="true" PackagePath="buildTransitive/netstandard2.0" />
+    <None Include="LightMock.Generator.props" Pack="true" PackagePath="build/netstandard2.0" />
+
+    <None Include="$(OutputPath)/$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/roslyn3.8/cs" Visible="false" />
+    <None Include="../LightMock.Generator.Roslyn40/$(OutputPath)/$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/roslyn4.0/cs" Visible="false" />
+    <None Include="../LightMock.Generator.Common/$(OutputPath)/LightMock.Generator.Common.dll" Pack="true" PackagePath="analyzers/dotnet/roslyn3.8/cs" Visible="false" />
+    <None Include="../LightMock.Generator.Common/$(OutputPath)/LightMock.Generator.Common.dll" Pack="true" PackagePath="analyzers/dotnet/roslyn4.0/cs" Visible="false" />
+    <None Include="../../nugetreadme.txt" PackagePath="readme.txt" Pack="true" Visible="false" />
   </ItemGroup>
 
   <ItemGroup>
