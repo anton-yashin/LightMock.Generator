@@ -1,1 +1,3 @@
-﻿* docs: remove "beta" from readme.
+﻿* feat: roslyn 4.0-final.6 support
+* feat: roslyn 3.11 support
+* fix: internal class support
