@@ -9,6 +9,7 @@ using System;
 using System.Collections.Immutable;
 using System.IO;
 using System.Linq;
+using System.Runtime.Loader;
 using System.Text;
 using System.Threading.Tasks;
 using Xunit;
@@ -821,6 +822,22 @@ namespace LightMock.Generator.Tests
 
             Assert.NotNull(context);
             Assert.NotNull(mock);
+        }
+
+        [Fact]
+        public void GenerateForInternalClass()
+        {
+            var (diagnostics, success, assembly) = DoCompileResource();
+
+            Assert.True(success);
+            Assert.Empty(diagnostics);
+
+            const string testClassName = nameof(GenerateForInternalClass);
+            var alc = new AssemblyLoadContext(testClassName);
+            var loadedAssembly = alc.LoadFromStream(new MemoryStream(assembly));
+            var testClassType = loadedAssembly.DefinedTypes.Where(t => t.Name == testClassName).First();
+            var testClass = Activator.CreateInstance(testClassType) ?? throw new InvalidOperationException("can't create test class");
+            Assert.NotNull(testClass);
         }
 
         protected override string GetFullResourceName(string resourceName)

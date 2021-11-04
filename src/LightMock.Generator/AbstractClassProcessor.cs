@@ -372,7 +372,7 @@ namespace LightMock.Generator
     public static partial class MockExtensions
     {{
         [DebuggerStepThrough]
-        public static IAdvancedMockContext<global::{@namespace}.{Prefix.ProtectedToPublicInterface}{className}{typeArgumentsWithBrackets}> Protected{typeArgumentsWithBrackets}(this IProtectedContext<{baseNameWithTypeArguments}> @this)
+        {GetTypeAccessibility()} static IAdvancedMockContext<global::{@namespace}.{Prefix.ProtectedToPublicInterface}{className}{typeArgumentsWithBrackets}> Protected{typeArgumentsWithBrackets}(this IProtectedContext<{baseNameWithTypeArguments}> @this)
             {whereClause}
             => (IAdvancedMockContext<global::{@namespace}.{Prefix.ProtectedToPublicInterface}{className}{typeArgumentsWithBrackets}>)@this.{nameof(IProtectedContext<object>.ProtectedContext)};
     }}
@@ -442,6 +442,16 @@ namespace LightMock.Generator
             return typeSymbol.IsGenericType
                 ? $"return MakeGenericType(typeof(global::{@namespace}.{Prefix.ArrangeWhenImplementation}{className}<{commaArguments}>));"
                 : $"return typeof(global::{@namespace}.{Prefix.ArrangeWhenImplementation}{className});";
+        }
+
+        string GetTypeAccessibility()
+        {
+            switch (typeSymbol.DeclaredAccessibility)
+            {
+                case Accessibility.Public:
+                    return "public";
+            }
+            return "internal";
         }
 
         static IEnumerable<INamedTypeSymbol> GetAllBaseTypes(INamedTypeSymbol type)
