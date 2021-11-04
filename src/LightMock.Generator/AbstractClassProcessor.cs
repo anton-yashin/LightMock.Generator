@@ -315,6 +315,7 @@ namespace {@namespace}
         {string.Join("\r\n        ", members.Select(i => i.Accept(arrangeOnImplementationVisitor)))}
     }}
 
+    [global::LightMock.Generator.TypeKeyAttribute(typeof(global::{@namespace}.{baseNameWithCommaArguments}))]
     sealed class {Prefix.TypeByType}{className}{typeArgumentsWithUnderlines} : global::LightMock.Generator.{nameof(TypeResolver)}
     {{
         public {Prefix.TypeByType}{className}{typeArgumentsWithUnderlines}(global::System.Type contextType)
@@ -393,12 +394,6 @@ namespace LightMock.Generator
         public override IEnumerable<Diagnostic> GetWarnings() => Enumerable.Empty<Diagnostic>();
 
         public override bool IsUpdateCompilationRequired => true;
-
-        public override void DoGeneratePart_TypeByType(StringBuilder here)
-        {
-            var toAppend = $"{{ typeof(global::{@namespace}.{baseNameWithCommaArguments}), typeof(global::{@namespace}.{Prefix.TypeByType}{className}{typeArgumentsWithUnderlines}) }},";
-            here.Append(toAppend);
-        }
 
         string GetInstanceType()
         {

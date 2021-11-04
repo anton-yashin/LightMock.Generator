@@ -26,85 +26,76 @@
 *******************************************************************************/
 using System;
 using System.Collections.Generic;
-using System.Threading;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace LightMock.Generator
 {
-    sealed class LightMockSyntaxReceiver : CSharpSyntaxVisitor, ISyntaxReceiver
+    sealed class LightMockSyntaxReceiver : ISyntaxContextReceiver
     {
-        public LightMockSyntaxReceiver() { }
+        private readonly string multicastDelegateNameSpaceAndName;
+        private readonly SyntaxHelpers syntaxHelpers;
 
-        public List<GenericNameSyntax> CandidateMocks { get; } = new List<GenericNameSyntax>();
-        public List<AttributeSyntax> DisableCodeGenerationAttributes { get; } = new List<AttributeSyntax>();
-        public List<AttributeSyntax> DontOverrideAttributes { get; } = new List<AttributeSyntax>();
-        public List<InvocationExpressionSyntax> ArrangeInvocations { get; } = new();
-
-        public void OnVisitSyntaxNode(SyntaxNode syntaxNode)
+        public LightMockSyntaxReceiver()
         {
-            if (syntaxNode is CSharpSyntaxNode cssn)
-                cssn.Accept(this);
+            var multicastDelegateType = typeof(MulticastDelegate);
+            multicastDelegateNameSpaceAndName = multicastDelegateType.Namespace + "." + multicastDelegateType.Name;
+            syntaxHelpers = new SyntaxHelpers();
         }
 
-        public override void VisitObjectCreationExpression(ObjectCreationExpressionSyntax node)
+        public bool DisableCodeGeneration { get; private set; }
+        public List<INamedTypeSymbol> DontOverrideTypes { get; } = new();
+        public List<CandidateInvocation> CandidateInvocations { get; } = new();
+
+        public List<INamedTypeSymbol> Delegates { get; } = new();
+        public List<INamedTypeSymbol> Interfaces { get; } = new();
+        public List<(GenericNameSyntax mock, INamedTypeSymbol mockedType)> AbstractClasses { get; } = new();
+
+        public void OnVisitSyntaxNode(GeneratorSyntaxContext context)
         {
-            switch (node.Type)
+            GenericNameSyntax? gns;
+            if ((gns = SyntaxHelpers.GetMockSymbol(context.Node)) != null)
             {
-                case GenericNameSyntax gns when IsMock(gns):
-                    CandidateMocks.Add(gns);
-                    break;
-                case QualifiedNameSyntax qns when qns.Right is GenericNameSyntax gns && IsMock(gns):
-                    CandidateMocks.Add(gns);
-                    break;
+                AddCandidateMock(gns, context.SemanticModel);
+            }
+            else if (context.Node is AttributeSyntax @as)
+            {
+                if (SyntaxHelpers.IsDontOverrideAttribute(@as))
+                    AddDontOverrideType(context.SemanticModel, @as);
+                else if (syntaxHelpers.IsDisableCodeGenerationAttribute(context.SemanticModel, @as))
+                    DisableCodeGeneration = true;
+            }
+            else if (context.Node is InvocationExpressionSyntax ies && SyntaxHelpers.IsArrangeInvocation(ies))
+            {
+                CandidateInvocations.Add(
+                    syntaxHelpers.ConvertToInvocation(
+                        context.Node, context.SemanticModel, default));
             }
         }
 
-        static bool IsMock(GenericNameSyntax gns)
-            => gns.Identifier.ValueText == "Mock" && gns.TypeArgumentList.Arguments.Any();
-
-        const string KDisableCodeGenerationAttribute = nameof(DisableCodeGenerationAttribute);
-        const string KDisableCodeGeneration = "DisableCodeGeneration";
-        const string KDontOverrideAttribute = nameof(DontOverrideAttribute);
-        const string KDontOverride = "DontOverride";
-        const string KMock = "Mock";
-
-
-        public override void VisitAttribute(AttributeSyntax node)
+        void AddCandidateMock(GenericNameSyntax candidateGeneric, SemanticModel semanticModel)
         {
-#if DEBUG
-            if (KDisableCodeGenerationAttribute != KDisableCodeGeneration + nameof(Attribute))
-                throw new InvalidProgramException($@"constant {nameof(KDisableCodeGeneration)} is not valid");
-            if (KDontOverrideAttribute != KDontOverride + nameof(Attribute))
-                throw new InvalidProgramException($@"constant {nameof(KDontOverride)} is not valid");
-#endif
-            switch (node.Name.ToString())
+            var mockedType = syntaxHelpers.GetMockedType(candidateGeneric, semanticModel);
+            if (mockedType != null)
             {
-                case KDisableCodeGeneration:
-                case KDisableCodeGenerationAttribute:
-                    DisableCodeGenerationAttributes.Add(node);
-                    break;
-                case KDontOverride:
-                case KDontOverrideAttribute:
-                    DontOverrideAttributes.Add(node);
-                    break;
-            }
-        }
-
-        public override void VisitInvocationExpression(InvocationExpressionSyntax node)
-        {
-            if (node.Expression is MemberAccessExpressionSyntax maes)
-            {
-                switch (maes.Name.ToString())
+                var mtbt = mockedType.BaseType;
+                if (mtbt != null)
                 {
-                    case nameof(AbstractMockNameofProvider.ArrangeSetter):
-                    case nameof(AbstractMockNameofProvider.AssertSet):
-                        ArrangeInvocations.Add(node);
-                        break;
+                    if (mtbt.ToDisplayString(SymbolDisplayFormats.Namespace) == multicastDelegateNameSpaceAndName)
+                        Delegates.Add(mockedType);
+                    else
+                        AbstractClasses.Add((candidateGeneric, mockedType));
                 }
-
+                else
+                    Interfaces.Add(mockedType);
             }
+        }
+
+        private void AddDontOverrideType(SemanticModel semanticModel, AttributeSyntax @as)
+        {
+            var typeSymbol = syntaxHelpers.CovertToDontOverride(semanticModel, @as);
+            if (typeSymbol != null)
+                DontOverrideTypes.Add(typeSymbol);
         }
     }
 }

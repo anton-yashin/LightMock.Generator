@@ -48,8 +48,6 @@ namespace LightMock.Generator
 
         public virtual bool IsUpdateCompilationRequired => false;
 
-        public virtual void DoGeneratePart_TypeByType(StringBuilder here) { }
-
         public string FileName
             => new StringBuilder().AppendFileName(typeSymbol).ToString();
     }

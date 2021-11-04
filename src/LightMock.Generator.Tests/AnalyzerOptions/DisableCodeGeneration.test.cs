@@ -1,10 +1,7 @@
 ﻿using LightMock.Generator.Tests.TestAbstractions;
-using LightMock.Generator;
 using System;
 
-[assembly: DisableCodeGeneration]
-
-namespace LightMock.Generator.Tests.Attributes
+namespace LightMock.Generator.Tests.AnalyzerOptions
 {
     public class DisableCodeGeneration : ITestScript<IDisableCodeGeneration>
     {
@@ -18,5 +15,4 @@ namespace LightMock.Generator.Tests.Attributes
 
         public int DoRun() => 42;
     }
-
 }

@@ -6,6 +6,7 @@
     <IsPackable>false</IsPackable>
     <LangVersion>preview</LangVersion>
     <Nullable>enable</Nullable>
+    <DefineConstants>$(DefineConstants);ROSLYN_4</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
@@ -19,7 +20,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.11.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.0.0-6.final" />
     <PackageReference Include="Microsoft.CodeAnalysis.Analyzers" Version="3.3.2">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
@@ -28,12 +29,13 @@
 
   <ItemGroup>
     <ProjectReference Include="..\LightMock.Generator.Common\LightMock.Generator.Common.csproj" />
-    <ProjectReference Include="..\LightMock.Generator\LightMock.Generator.csproj" />
+    <ProjectReference Include="..\LightMock.Generator.Roslyn40\LightMock.Generator.Roslyn40.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Remove="**\*.test.cs" />
+    <Compile Include="..\LightMock.Generator.Tests\**\*.cs"
+             Exclude="..\LightMock.Generator.Tests\obj\**;..\LightMock.Generator.Tests\bin\**;..\LightMock.Generator.Tests\**\*.test.cs;"/>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="**\*.test.cs" />
+    <EmbeddedResource Include="..\LightMock.Generator.Tests\**\*.test.cs" />
   </ItemGroup>
 </Project>

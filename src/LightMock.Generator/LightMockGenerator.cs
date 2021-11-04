@@ -28,219 +28,372 @@ using System;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using System.Linq;
-using System.Text;
+using System.Runtime.CompilerServices;
 using System.Threading;
-using LightMock.Generator.Locators;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Microsoft.CodeAnalysis.Text;
+using Microsoft.CodeAnalysis.Diagnostics;
 
 namespace LightMock.Generator
 {
     [Generator]
-    public sealed class LightMockGenerator : ISourceGenerator
+#if ROSLYN_4
+    public class LightMockGenerator : IIncrementalGenerator
+#else
+    public class LightMockGenerator : ISourceGenerator
+#endif
     {
-        const string KMock = "Mock";
-        const string KContextResolver = nameof(ContextResolver);
-
-        readonly Lazy<SourceText> mock = new(
-            () => SourceText.From(Utils.LoadResource(KMock + Suffix.CSharpFile), Encoding.UTF8));
+        private readonly string multicastDelegateNameSpaceAndName;
+        private readonly ConditionalWeakTable<Compilation, CompilationContext> compilationContexts;
+        private readonly SyntaxHelpers syntaxHelpers;
 
         public LightMockGenerator()
         {
+            var multicastDelegateType = typeof(MulticastDelegate);
+            multicastDelegateNameSpaceAndName = multicastDelegateType.Namespace + "." + multicastDelegateType.Name;
+            compilationContexts = new ConditionalWeakTable<Compilation, CompilationContext>();
+            syntaxHelpers = new SyntaxHelpers();
         }
+
+#if ROSLYN_4 == false
 
         public void Execute(GeneratorExecutionContext context)
         {
-            context.CancellationToken.ThrowIfCancellationRequested();
-            if (context.AnalyzerConfigOptions.GlobalOptions.TryGetValue(GlobalOptionsNames.Enable, out var value)
-                && value.Equals("false", StringComparison.InvariantCultureIgnoreCase))
+            if (context.Compilation is CSharpCompilation compilation == false)
+                return;
+            if (context.ParseOptions is CSharpParseOptions parseOptions == false)
+                return;
+            if (context.SyntaxContextReceiver is LightMockSyntaxReceiver receiver == false)
+                return;
+            if (IsGenerationDisabledByOptions(context.AnalyzerConfigOptions) || receiver.DisableCodeGeneration)
+                return;
+
+            var cc = new CodeGenerationContext(context, compilation, parseOptions, GetCompilationContext(compilation));
+
+            DoGenerateCode(
+                cc,
+                receiver.AbstractClasses.Select(
+                    t => new AbstractClassProcessor(
+                        t.mock, t.mockedType, receiver.DontOverrideTypes)),
+                context.CancellationToken);
+            DoGenerateCode(
+                cc,
+                receiver.Interfaces.Select(t => new InterfaceProcessor(t)),
+                context.CancellationToken);
+            DoGenerateCode(
+                cc,
+                receiver.Delegates.Select(t => new DelegateProcessor(t)),
+                context.CancellationToken);
+            DoGenerateInvocations(
+                cc,
+                receiver.CandidateInvocations.ToImmutableArray(),
+                context.CancellationToken);
+        }
+
+#endif
+
+        void DoGenerateInvocations(
+            CodeGenerationContext context,
+            ImmutableArray<CandidateInvocation> candidateInvocations,
+            CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            foreach (var candidate in candidateInvocations)
+                DoGenerateInvocation(context, candidate, cancellationToken);
+        }
+
+        void DoGenerateInvocation(
+            CodeGenerationContext context,
+            CandidateInvocation candidate,
+            CancellationToken cancellationToken)
+        {
+            var (methodSymbol, candidateInvocation, node) = candidate;
+            if (methodSymbol == null || candidateInvocation == null)
             {
+                context = context.UpdateFromCompilationContext();
+                (methodSymbol, candidateInvocation, node) = syntaxHelpers.ConvertToInvocation(
+                    node, context.Compilation.GetSemanticModel(node.SyntaxTree), cancellationToken);
+                if (methodSymbol == null || candidateInvocation == null)
+                    return;
+            }
+            DoGenerateInvocation(context, methodSymbol, candidateInvocation, cancellationToken);
+        }
+
+        private static void DoGenerateInvocation(
+            CodeGenerationContext context,
+            IMethodSymbol methodSymbol,
+            InvocationExpressionSyntax candidateInvocation,
+            CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            ExpressionRewriter processor;
+            switch (methodSymbol.Name)
+            {
+                case nameof(AbstractMockNameofProvider.ArrangeSetter):
+                    processor = new ArrangeExpressionRewriter(methodSymbol, candidateInvocation, context.Compilation);
+                    break;
+                case nameof(AbstractMockNameofProvider.AssertSet):
+                    processor = new AssertExpressionRewriter(methodSymbol, candidateInvocation, context.Compilation);
+                    break;
+                default:
+                    return;
+            }
+
+            cancellationToken.ThrowIfCancellationRequested();
+            if (context.CompilationContext.IsTagExits(processor.FileName))
+            {
+                context.ReportDiagnostic(Diagnostic.Create(
+                    DiagnosticsDescriptors.KPropertyExpressionMustHaveUniqueId,
+                    candidateInvocation.GetLocation(), methodSymbol.Name));
                 return;
             }
-
-            if (context.Compilation is CSharpCompilation compilation &&
-                context.SyntaxReceiver is LightMockSyntaxReceiver receiver &&
-                compilation.SyntaxTrees.First().Options is CSharpParseOptions options)
-            {
-                if (IsDisableCodeGenerationAttributePresent(compilation, receiver, context.CancellationToken))
-                    return;
-
-                var dontOverrideList = GetClassExclusionList(compilation, receiver, context.CancellationToken);
-
-                context.AddSource(KMock + Suffix.FileName, mock.Value);
-
-                compilation = compilation.AddSyntaxTrees(CSharpSyntaxTree.ParseText(
-                    mock.Value, options, cancellationToken: context.CancellationToken));
-
-                // process symbols under Mock<> generic
-
-                var mockContextMatcher = new TypeMatcher(typeof(AbstractMock<>));
-                var typeByTypeBuilder = new StringBuilder();
-                var exchangeForExpressionBuilder = new StringBuilder();
-                var processedTypes = new List<INamedTypeSymbol>();
-                var multicastDelegateType = typeof(MulticastDelegate);
-                var multicastDelegateNameSpaceAndName = multicastDelegateType.Namespace + "." + multicastDelegateType.Name;
-
-                foreach (var candidateGeneric in receiver.CandidateMocks)
-                {
-                    context.CancellationToken.ThrowIfCancellationRequested();
-                    var mockContainer = compilation
-                        .GetSemanticModel(candidateGeneric.SyntaxTree)
-                        .GetSymbolInfo(candidateGeneric, context.CancellationToken).Symbol
-                        as INamedTypeSymbol;
-                    context.CancellationToken.ThrowIfCancellationRequested();
-                    var mcbt = mockContainer?.BaseType;
-                    if (mcbt != null
-                        && mockContextMatcher.IsMatch(mcbt)
-                        && mcbt.TypeArguments.FirstOrDefault() is INamedTypeSymbol mockedType
-                        && processedTypes.Contains(mockedType.OriginalDefinition) == false)
-                    {
-                        ClassProcessor processor;
-                        var mtbt = mockedType.BaseType;
-                        if (mtbt != null)
-                        {
-                            if (mtbt.ToDisplayString(SymbolDisplayFormats.Namespace) == multicastDelegateNameSpaceAndName)
-                                processor = new DelegateProcessor(mockedType);
-                            else
-                                processor = new AbstractClassProcessor(candidateGeneric, mockedType, dontOverrideList);
-                        }
-                        else
-                            processor = new InterfaceProcessor(mockedType);
-
-                        context.CancellationToken.ThrowIfCancellationRequested();
-                        if (EmitDiagnostics(context, processor.GetErrors()))
-                            continue;
-                        context.CancellationToken.ThrowIfCancellationRequested();
-                        EmitDiagnostics(context, processor.GetWarnings());
-                        var text = processor.DoGenerate();
-                        context.AddSource(processor.FileName, text);
-                        if (processor.IsUpdateCompilationRequired)
-                        {
-                            compilation = compilation.AddSyntaxTrees(CSharpSyntaxTree.ParseText(
-                                text, options, cancellationToken: context.CancellationToken));
-                        }
-                        context.CancellationToken.ThrowIfCancellationRequested();
-                        processor.DoGeneratePart_TypeByType(typeByTypeBuilder);
-                        context.CancellationToken.ThrowIfCancellationRequested();
-                        processedTypes.Add(mockedType.OriginalDefinition);
-                    }
-                }
-
-                // process symbols under ArrangeSetter
-                
-                var expressionUids = new HashSet<string>();
-                var mockInterfaceMatcher = new TypeMatcher(typeof(IAdvancedMockContext<>));
-                foreach (var candidateInvocation in receiver.ArrangeInvocations)
-                {
-                    context.CancellationToken.ThrowIfCancellationRequested();
-                    var st = compilation.GetSemanticModel(candidateInvocation.SyntaxTree);
-                    var methodSymbol = st.GetSymbolInfo(candidateInvocation, context.CancellationToken).Symbol as IMethodSymbol;
-                    context.CancellationToken.ThrowIfCancellationRequested();
-
-                    if (methodSymbol != null 
-                        && (mockContextMatcher.IsMatch(methodSymbol.ContainingType)
-                            || mockInterfaceMatcher.IsMatch(methodSymbol.ContainingType)))
-                    {
-                        ExpressionRewriter processor;
-                        switch (methodSymbol.Name)
-                        {
-                            case nameof(AbstractMockNameofProvider.ArrangeSetter):
-                                processor = new ArrangeExpressionRewriter(methodSymbol, candidateInvocation, compilation, expressionUids);
-                                break;
-                            case nameof(AbstractMockNameofProvider.AssertSet):
-                                processor = new AssertExpressionRewriter(methodSymbol, candidateInvocation, compilation, expressionUids);
-                                break;
-                            default:
-                                continue;
-                        }
-
-                        context.CancellationToken.ThrowIfCancellationRequested();
-
-                        processor.AppendExpression(exchangeForExpressionBuilder);
-                        context.CancellationToken.ThrowIfCancellationRequested();
-                        if (EmitDiagnostics(context, processor.GetErrors()))
-                            continue;
-                        context.CancellationToken.ThrowIfCancellationRequested();
-                        EmitDiagnostics(context, processor.GetWarnings());
-
-                    }
-                }
-
-                context.CancellationToken.ThrowIfCancellationRequested();
-                var impl = Utils.LoadResource(KContextResolver + Suffix.CSharpFile)
-                    .Replace("/*typeByTypeBuilder*/", typeByTypeBuilder.ToString())
-                    .Replace("/*exchangeForExpressionBuilder*/", exchangeForExpressionBuilder.ToString());
-
-                context.CancellationToken.ThrowIfCancellationRequested();
-                context.AddSource(KContextResolver + Suffix.FileName, SourceText.From(impl, Encoding.UTF8));
-            }
+            if (context.EmitDiagnostics(processor.GetErrors()))
+                return;
+            cancellationToken.ThrowIfCancellationRequested();
+            context.EmitDiagnostics(processor.GetWarnings());
+            cancellationToken.ThrowIfCancellationRequested();
+            var text = processor.DoGenerate();
+            context.AddSource(processor.FileName, text);
+            context.CompilationContext.AddTag(processor.FileName);
         }
 
-        private static bool IsDisableCodeGenerationAttributePresent(
-            CSharpCompilation compilation,
-            LightMockSyntaxReceiver receiver,
+        void DoGenerateCode(
+            CodeGenerationContext context,
+            IEnumerable<ClassProcessor> classProcessors,
             CancellationToken cancellationToken)
         {
-            var disableCodeGenerationAttributeType = typeof(DisableCodeGenerationAttribute);
-            var dcgaName = disableCodeGenerationAttributeType.Name;
-            var dcgaNamespace = disableCodeGenerationAttributeType.Namespace;
-            foreach (var candidateAttribute in receiver.DisableCodeGenerationAttributes)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                var model = compilation.GetSemanticModel(candidateAttribute.SyntaxTree);
-                var si = model.GetSymbolInfo(candidateAttribute, cancellationToken);
-                if (si.Symbol is IMethodSymbol methodSymbol
-                    && methodSymbol.ToDisplayString(SymbolDisplayFormats.Namespace) == dcgaName
-                    && methodSymbol.ContainingNamespace.ToDisplayString(SymbolDisplayFormats.Namespace) == dcgaNamespace)
-                {
-                    return true;
-                }
-            }
-            return false;
+            cancellationToken.ThrowIfCancellationRequested();
+
+            foreach (var classProcessor in classProcessors)
+                DoGenerateCode(context, classProcessor, cancellationToken);
         }
 
-        private static IReadOnlyList<INamedTypeSymbol> GetClassExclusionList(
-            CSharpCompilation compilation,
-            LightMockSyntaxReceiver receiver,
+        void DoGenerateCode(
+            CodeGenerationContext context,
+            ClassProcessor classProcessor,
             CancellationToken cancellationToken)
         {
-            var result = new List<INamedTypeSymbol>();
-            var dontOverrideAttributeType = typeof(DontOverrideAttribute);
-            var doatName = dontOverrideAttributeType.Name;
-            var doatNamespace = dontOverrideAttributeType.Namespace;
-            foreach (var candidateAttribute in receiver.DontOverrideAttributes)
+            cancellationToken.ThrowIfCancellationRequested();
+            if (context.EmitDiagnostics(classProcessor.GetErrors()))
+                return;
+            cancellationToken.ThrowIfCancellationRequested();
+            context.EmitDiagnostics(classProcessor.GetWarnings());
+            var text = classProcessor.DoGenerate();
+            if (context.CompilationContext.IsTagExits(classProcessor.FileName) == false)
             {
-                TypeSyntax? type;
-                cancellationToken.ThrowIfCancellationRequested();
-                var sm = compilation.GetSemanticModel(candidateAttribute.SyntaxTree);
-                if (sm.GetSymbolInfo(candidateAttribute, cancellationToken).Symbol is IMethodSymbol methodSymbol
-                    && methodSymbol.ToDisplayString(SymbolDisplayFormats.Namespace) == doatName
-                    && methodSymbol.ContainingNamespace.ToDisplayString(SymbolDisplayFormats.Namespace) == doatNamespace
-                    && (type = TypeOfLocator.Locate(candidateAttribute)?.Type) != null
-                    && sm.GetSymbolInfo(type, cancellationToken).Symbol is INamedTypeSymbol typeSymbol)
+                context.AddSource(classProcessor.FileName, text);
+                context.CompilationContext.AddTag(classProcessor.FileName);
+                if (classProcessor.IsUpdateCompilationRequired)
                 {
-                    result.Add(typeSymbol);
+                    context.CompilationContext.AddSyntaxTree(CSharpSyntaxTree.ParseText(
+                        text, context.ParseOptions, cancellationToken: cancellationToken));
                 }
             }
-            return result.ToImmutableArray();
+            cancellationToken.ThrowIfCancellationRequested();
         }
 
-        bool EmitDiagnostics(GeneratorExecutionContext context, IEnumerable<Diagnostic> diagnostics)
+        static bool IsGenerationDisabledByOptions(AnalyzerConfigOptionsProvider optionsProvider)
+            => optionsProvider.GlobalOptions.TryGetValue(GlobalOptionsNames.Enable, out var value)
+                && value.Equals("false", StringComparison.InvariantCultureIgnoreCase);
+
+        CompilationContext GetCompilationContext(Compilation compilation)
         {
-            bool haveIssues = false;
-            foreach (var d in diagnostics)
-            {
-                haveIssues = true;
-                context.ReportDiagnostic(d);
-            }
-            return haveIssues;
+            lock (compilationContexts)
+                return compilationContexts.GetOrCreateValue(compilation);
         }
+
+#if ROSLYN_4
+
+        public void Initialize(IncrementalGeneratorInitializationContext context)
+        {
+            var disableCodegenerationAttributes = context.SyntaxProvider.CreateSyntaxProvider(
+                (sn, ct) => sn is AttributeSyntax @as && SyntaxHelpers.IsDisableCodeGenerationAttribute(@as),
+                (ctx, ct) => syntaxHelpers.IsDisableCodeGenerationAttribute(ctx.SemanticModel, (AttributeSyntax)ctx.Node));
+
+            var interfaces = context.SyntaxProvider.CreateSyntaxProvider(
+                (sn, ct) => SyntaxHelpers.IsMock(sn),
+                (ctx, ct) => ConvertToInterface(ctx));
+            context.RegisterSourceOutput(interfaces
+                .Combine(context.CompilationProvider)
+                .Combine(context.AnalyzerConfigOptionsProvider)
+                .Combine(disableCodegenerationAttributes.Collect())
+                .Combine(context.ParseOptionsProvider)
+                .Select((comb, ct) => (
+                    candidate:                          comb.Left.Left.Left.Left,
+                    compilation:                        comb.Left.Left.Left.Right,
+                    options:                            comb.Left.Left.Right,
+                    disableCodegenerationAttributes:    comb.Left.Right,
+                    parseOptions:                       comb.Right))
+                .Where(t
+                => IsCodeGenerationDisabledByAttributes(t.disableCodegenerationAttributes)
+                && IsGenerationDisabledByOptions(t.options) == false 
+                && t.candidate != null
+                && t.compilation is CSharpCompilation
+                && t.parseOptions is CSharpParseOptions),
+                (sp, sr) => DoGenerateCode(
+                    new CodeGenerationContext(sp,
+                        (CSharpCompilation)sr.compilation,
+                        (CSharpParseOptions)sr.parseOptions,
+                        GetCompilationContext(sr.compilation)),
+                    new InterfaceProcessor(sr.candidate!),
+                    sp.CancellationToken));
+
+            var delegates = context.SyntaxProvider.CreateSyntaxProvider(
+                (sn, ct) => SyntaxHelpers.IsMock(sn),
+                (ctx, ct) => ConvertToDelegate(ctx));
+            context.RegisterSourceOutput(delegates
+                .Combine(context.CompilationProvider)
+                .Combine(context.AnalyzerConfigOptionsProvider)
+                .Combine(disableCodegenerationAttributes.Collect())
+                .Combine(context.ParseOptionsProvider)
+                .Select((comb, ct) => (
+                    candidate:                          comb.Left.Left.Left.Left,
+                    compilation:                        comb.Left.Left.Left.Right,
+                    options:                            comb.Left.Left.Right,
+                    disableCodegenerationAttributes:    comb.Left.Right,
+                    parseOptions:                       comb.Right))
+                .Where(t
+                => IsCodeGenerationDisabledByAttributes(t.disableCodegenerationAttributes)
+                && IsGenerationDisabledByOptions(t.options) == false
+                && t.candidate != null
+                && t.compilation is CSharpCompilation
+                && t.parseOptions is CSharpParseOptions),
+                (sp, sr) => DoGenerateCode(
+                    new CodeGenerationContext(sp,
+                        (CSharpCompilation)sr.compilation,
+                        (CSharpParseOptions)sr.parseOptions,
+                        GetCompilationContext(sr.compilation)),
+                    new DelegateProcessor(sr.candidate!),
+                    sp.CancellationToken));
+
+            var classes = context.SyntaxProvider.CreateSyntaxProvider(
+                (sn, ct) => SyntaxHelpers.IsMock(sn),
+                (ctx, ct) => ConvertToAbstractClass(ctx));
+            var dontOverrideTypes = context.SyntaxProvider.CreateSyntaxProvider(
+                (sn, ct) => sn is AttributeSyntax @as && SyntaxHelpers.IsDontOverrideAttribute(@as),
+                (ctx, ct) => syntaxHelpers.CovertToDontOverride(ctx.SemanticModel, (AttributeSyntax)ctx.Node));
+            context.RegisterSourceOutput(classes
+                .Combine(context.CompilationProvider)
+                .Combine(context.AnalyzerConfigOptionsProvider)
+                .Combine(disableCodegenerationAttributes.Collect())
+                .Combine(context.ParseOptionsProvider)
+                .Combine(dontOverrideTypes.Collect())
+                .Select((comb, ct) => (
+                    candidate:                          comb.Left.Left.Left.Left.Left,
+                    compilation:                        comb.Left.Left.Left.Left.Right,
+                    options:                            comb.Left.Left.Left.Right,
+                    disableCodegenerationAttributes:    comb.Left.Left.Right,
+                    parseOptions:                       comb.Left.Right,
+                    dontOverrideTypes:                  comb.Right))
+                .Where(t
+                => IsCodeGenerationDisabledByAttributes(t.disableCodegenerationAttributes)
+                && IsGenerationDisabledByOptions(t.options) == false
+                && t.candidate != null
+                && t.compilation is CSharpCompilation
+                && t.parseOptions is CSharpParseOptions),
+                (sp, sr) => DoGenerateCode(
+                    new CodeGenerationContext(sp,
+                        (CSharpCompilation)sr.compilation,
+                        (CSharpParseOptions)sr.parseOptions,
+                        GetCompilationContext(sr.compilation)),
+                    new AbstractClassProcessor(sr.candidate!.Value.mock, sr.candidate!.Value.mockedType, sr.dontOverrideTypes),
+                    sp.CancellationToken));
+
+            var invocations = context.SyntaxProvider.CreateSyntaxProvider(
+                (sn, ct) => sn is InvocationExpressionSyntax ies && SyntaxHelpers.IsArrangeInvocation(ies),
+                (ctx, ct) => syntaxHelpers.ConvertToInvocation(ctx.Node, ctx.SemanticModel, ct));
+            context.RegisterSourceOutput(invocations
+                .Combine(context.CompilationProvider)
+                .Combine(context.AnalyzerConfigOptionsProvider)
+                .Combine(disableCodegenerationAttributes.Collect())
+                .Combine(context.ParseOptionsProvider)
+                .Select((comb, ct) => (
+                    candidate: comb.Left.Left.Left.Left,
+                    compilation: comb.Left.Left.Left.Right,
+                    options: comb.Left.Left.Right,
+                    disableCodegenerationAttributes: comb.Left.Right,
+                    parseOptions: comb.Right))
+                .Where(t
+                => IsCodeGenerationDisabledByAttributes(t.disableCodegenerationAttributes)
+                && IsGenerationDisabledByOptions(t.options) == false
+                && t.compilation is CSharpCompilation
+                && t.parseOptions is CSharpParseOptions),
+                (sp, sr) => DoGenerateInvocation(
+                    new CodeGenerationContext(sp,
+                        (CSharpCompilation)sr.compilation,
+                        (CSharpParseOptions)sr.parseOptions,
+                        GetCompilationContext(sr.compilation)),
+                    sr.candidate,
+                    sp.CancellationToken));
+        }
+
+        static bool IsCodeGenerationDisabledByAttributes(ImmutableArray<bool> attributes)
+            => attributes.Where(t => t == true).Any() == false;
+
+        INamedTypeSymbol? ConvertToInterface(GeneratorSyntaxContext context)
+        {
+            var mockedType = GetMockedType(context);
+            if (mockedType != null)
+            {
+                var mtbt = mockedType.BaseType;
+                if (mtbt == null)
+                    return mockedType;
+            }
+            return null;
+        }
+
+        INamedTypeSymbol? ConvertToDelegate(GeneratorSyntaxContext context)
+        {
+            var mockedType = GetMockedType(context);
+            if (mockedType != null)
+            {
+                var mtbt = mockedType.BaseType;
+                if (mtbt != null && mtbt.ToDisplayString(SymbolDisplayFormats.Namespace) == multicastDelegateNameSpaceAndName)
+                    return mockedType;
+            }
+            return null;
+        }
+
+        (GenericNameSyntax mock, INamedTypeSymbol mockedType)? ConvertToAbstractClass(GeneratorSyntaxContext context)
+        {
+            var candidateGeneric = SyntaxHelpers.GetMockSymbol(context.Node);
+
+            if (candidateGeneric != null)
+            {
+                var mockedType = syntaxHelpers.GetMockedType(candidateGeneric, context.SemanticModel);
+                if (mockedType != null)
+                {
+                    var mtbt = mockedType.BaseType;
+                    if (mtbt != null)
+                    {
+                        if (mtbt.ToDisplayString(SymbolDisplayFormats.Namespace) != multicastDelegateNameSpaceAndName)
+                            return (candidateGeneric, mockedType);
+                    }
+                }
+            }
+            return null;
+        }
+
+        INamedTypeSymbol? GetMockedType(GeneratorSyntaxContext context)
+        {
+            var candidateGeneric = SyntaxHelpers.GetMockSymbol(context.Node);
+            var semanticModel = context.SemanticModel;
+
+            return candidateGeneric != null
+                ? syntaxHelpers.GetMockedType(candidateGeneric, semanticModel)
+                : null;
+        }
+
+#else
 
         public void Initialize(GeneratorInitializationContext context)
         {
             context.RegisterForSyntaxNotifications(() => new LightMockSyntaxReceiver());
         }
+#endif
+
     }
 }

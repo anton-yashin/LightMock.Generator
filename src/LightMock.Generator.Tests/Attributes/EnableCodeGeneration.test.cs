@@ -1,8 +1,5 @@
 ﻿using LightMock.Generator.Tests.TestAbstractions;
-using LightMock.Generator;
 using System;
-
-[assembly: DisableCodeGeneration]
 
 namespace LightMock.Generator.Tests.Attributes
 {

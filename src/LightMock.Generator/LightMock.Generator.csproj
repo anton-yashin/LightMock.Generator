@@ -25,22 +25,25 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.9.0" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="3.11.0" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup Label="Package">
+    <None Include="LightMock.Generator.targets" Pack="true" PackagePath="buildTransitive/netstandard2.0"  />
+    <None Include="LightMock.Generator.props" Pack="true" PackagePath="buildTransitive/netstandard2.0" />
+    <None Include="LightMock.Generator.props" Pack="true" PackagePath="build/netstandard2.0" />
+
+    <None Include="$(OutputPath)/$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/roslyn3.8/cs" Visible="false" />
+    <None Include="../LightMock.Generator.Roslyn40/$(OutputPath)/$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/roslyn4.0/cs" Visible="false" />
+    <None Include="../LightMock.Generator.Common/$(OutputPath)/LightMock.Generator.Common.dll" Pack="true" PackagePath="analyzers/dotnet/roslyn3.8/cs" Visible="false" />
+    <None Include="../LightMock.Generator.Common/$(OutputPath)/LightMock.Generator.Common.dll" Pack="true" PackagePath="analyzers/dotnet/roslyn4.0/cs" Visible="false" />
+    <None Include="../../nugetreadme.txt" PackagePath="readme.txt" Pack="true" Visible="false" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="$(OutputPath)\$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
-    <None Include="$(PkgLightMock)\lib\netstandard2.0\*.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
-    <None Include="LightMock.Generator.props" Pack="true" PackagePath="build" />
-    <None Include="..\LightMock.Generator.Common\$(OutputPath)\LightMock.Generator.Common.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\*.cs" />
     <Compile Include="Resorces\*.cs" />
     <Compile Include="*.cs" />
     <Compile Include="*\*.cs" />
-    <None Include="..\..\nugetreadme.txt" PackagePath="readme.txt" Pack="true" Visible="false" />
   </ItemGroup>
 
   <ItemGroup>
@@ -50,6 +53,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\LightMock.Generator.Common\LightMock.Generator.Common.csproj" />
+    <ProjectReference Include="..\LightMock.Generator.Roslyn40\LightMock.Generator.Roslyn40.csproj" ReferenceOutputAssembly="false"/>
   </ItemGroup>
 
   <!-- Copy package to folder set by NuGetFolder environment variable if present -->

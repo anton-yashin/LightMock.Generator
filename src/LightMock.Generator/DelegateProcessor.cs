@@ -95,6 +95,7 @@ using LightMock.Generator;
 
 namespace {@namespace}
 {{
+    [global::LightMock.Generator.TypeKeyAttribute(typeof(global::{@namespace}.{fullNameWithCommaArguments}))]
     sealed class {Prefix.TypeByType}{className}{typeArgumentsWithUnderlines} : global::LightMock.Generator.{nameof(TypeResolver)}
     {{
         public {Prefix.TypeByType}{className}{typeArgumentsWithUnderlines}(global::System.Type contextType)
@@ -167,12 +168,6 @@ namespace {@namespace}
 
         public override IEnumerable<Diagnostic> GetWarnings()
             => Enumerable.Empty<Diagnostic>();
-
-        public override void DoGeneratePart_TypeByType(StringBuilder here)
-        {
-            var toAppend = $"{{ typeof(global::{@namespace}.{fullNameWithCommaArguments}), typeof(global::{@namespace}.{Prefix.TypeByType}{className}{typeArgumentsWithUnderlines}) }},";
-            here.Append(toAppend);
-        }
 
         string GetDelegate()
         {

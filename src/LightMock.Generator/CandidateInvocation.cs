@@ -24,21 +24,21 @@
 *******************************************************************************
     https://github.com/anton-yashin/
 *******************************************************************************/
-using System;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
-using System.Linq.Expressions;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace LightMock.Generator
 {
-    /// <summary>
-    /// Use this class with nameof operator
-    /// </summary>
-    [ExcludeFromCodeCoverage]
-    internal sealed class AbstractMockNameofProvider : AbstractMock<IDelegateProvider>
+    internal record struct CandidateInvocation(IMethodSymbol? methodSymbol, InvocationExpressionSyntax? candidateInvocation, InvocationExpressionSyntax node)
     {
-        public AbstractMockNameofProvider(object[] prms) : base(prms)
+        public static implicit operator (IMethodSymbol? methodSymbol, InvocationExpressionSyntax? candidateInvocation, InvocationExpressionSyntax node)(CandidateInvocation value)
         {
+            return (value.methodSymbol, value.candidateInvocation, value.node);
+        }
+
+        public static implicit operator CandidateInvocation((IMethodSymbol? methodSymbol, InvocationExpressionSyntax? candidateInvocation, InvocationExpressionSyntax node) value)
+        {
+            return new CandidateInvocation(value.methodSymbol, value.candidateInvocation, value.node);
         }
     }
 }

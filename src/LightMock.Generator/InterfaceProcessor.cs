@@ -193,6 +193,7 @@ namespace {@namespace}
         {string.Join("\r\n        ", members.Select(i => i.Accept(arrangeOnImplementationVisitor)))}
     }}
 
+    [global::LightMock.Generator.TypeKeyAttribute(typeof(global::{@namespace}.{baseNameWithCommaArguments}))]
     sealed class {Prefix.TypeByType}{interfaceName}{typeArgumentsWithUnderlines} : global::LightMock.Generator.{nameof(TypeResolver)}
     {{
         public {Prefix.TypeByType}{interfaceName}{typeArgumentsWithUnderlines}(global::System.Type contextType)
@@ -250,12 +251,6 @@ namespace {@namespace}
 }}
 ";
             return SourceText.From(code, Encoding.UTF8);
-        }
-
-        public override void DoGeneratePart_TypeByType(StringBuilder here)
-        {
-            var toAppend = $"{{ typeof(global::{@namespace}.{baseNameWithCommaArguments}), typeof(global::{@namespace}.{Prefix.TypeByType}{interfaceName}{typeArgumentsWithUnderlines}) }},";
-            here.Append(toAppend);
         }
 
         string GetInstanceType()

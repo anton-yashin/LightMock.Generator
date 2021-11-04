@@ -1,0 +1,31 @@
+﻿<Project>
+  <Target Name="_LmgGatherAnalyzers">
+    
+    <ItemGroup>
+      <_LmgAnalyzer Include="@(Analyzer)" Condition="'%(Analyzer.NuGetPackageId)' == 'LightMock.Generator'" />
+    </ItemGroup>
+  </Target>
+
+  <Target Name="_LmgAnalyzerMultiTargeting"
+          Condition="'$(SupportsRoslynComponentVersioning)' != 'true'"
+          AfterTargets="ResolvePackageDependenciesForBuild;ResolveNuGetPackageAssets"
+          DependsOnTargets="_LmgGatherAnalyzers">
+
+    <ItemGroup>
+      <!-- Remove our analyzers targeting roslyn4.x -->
+      <Analyzer Remove="@(_LmgAnalyzer)"
+                Condition="$([System.String]::Copy('%(_LmgAnalyzer.Identity)').IndexOf('roslyn4')) &gt;= 0"/>
+    </ItemGroup>
+  </Target>
+
+  <Target Name="_LmgRemoveAnalyzers"
+          Condition="'$(DisableLmgSourceGenerator)' == 'true'"
+          AfterTargets="ResolvePackageDependenciesForBuild;ResolveNuGetPackageAssets"
+          DependsOnTargets="_LmgGatherAnalyzers">
+
+    <!-- Remove all our analyzers -->
+    <ItemGroup>
+      <Analyzer Remove="@(_LmgAnalyzer)" />
+    </ItemGroup>
+  </Target>
+</Project>

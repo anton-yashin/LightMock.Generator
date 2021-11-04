@@ -37,9 +37,8 @@ namespace LightMock.Generator
         public AssertExpressionRewriter(
             IMethodSymbol method,
             InvocationExpressionSyntax invocationExpressionSyntax,
-            CSharpCompilation compilation,
-            ICollection<string> uids)
-            : base(method, invocationExpressionSyntax, compilation, uids)
+            CSharpCompilation compilation)
+            : base(method, invocationExpressionSyntax, compilation)
         { }
 
         protected override ArgumentSyntax? GetLambda(ArgumentListSyntax argumentList)
