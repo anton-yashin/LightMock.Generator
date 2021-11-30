@@ -19,13 +19,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.0.0-6.final" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.0.1" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include="..\LightMock.Generator\Resources\*.cs" />
     <Compile Include="..\LightMock.Generator\Resorces\*.cs" />
-    <Compile Include="..\LightMock.Generator\**\*.cs" Exclude="..\LightMock.Generator\bin\**;..\LightMock.Generator\obj\**"/>
+    <Compile Include="..\LightMock.Generator\**\*.cs" Exclude="..\LightMock.Generator\bin\**;..\LightMock.Generator\obj\**" />
   </ItemGroup>
 
   <ItemGroup>
