@@ -97,6 +97,7 @@ using LightMock.Generator;
 namespace {@namespace}
 {{
     [global::LightMock.Generator.TypeKeyAttribute(typeof(global::{@namespace}.{fullNameWithCommaArguments}))]
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
     sealed class {Prefix.TypeByType}{className}{typeArgumentsWithUnderlines} : global::LightMock.Generator.{nameof(TypeResolver)}
     {{
         public {Prefix.TypeByType}{className}{typeArgumentsWithUnderlines}(global::System.Type contextType)
@@ -114,6 +115,7 @@ namespace {@namespace}
         }}
     }}
 
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
     sealed class {className}{typeArgumentsWithBrackets} : {nameof(IDelegateProvider)}
         {whereClause}
     {{

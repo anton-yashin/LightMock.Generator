@@ -125,12 +125,14 @@ using LightMock;
 namespace {@namespace}
 {{
     [global::LightMock.Generator.OriginalNameAttribute({typeSymbol.TypeArguments.Length}, ""{originalNameFormat}"")]
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
     public interface {Prefix.PropertyToFuncInterface}{interfaceName}{typeArgumentsWithBrackets}
         {whereClause}
     {{
         {string.Join("\r\n        ", members.Select(i => i.Accept(propertyDefinitionVisitor)))}
     }}
 
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
     sealed class {Prefix.AssertWhenImplementation}{interfaceName}{typeArgumentsWithBrackets} : {baseNameWithTypeArguments}
         {whereClause}
     {{
@@ -148,6 +150,7 @@ namespace {@namespace}
         {string.Join("\r\n        ", members.Select(i => i.Accept(assertImplementationVisitor)))}
     }}
 
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
     sealed class {Prefix.AssertWhenAnyImplementation}{interfaceName}{typeArgumentsWithBrackets} : {baseNameWithTypeArguments}
         {whereClause}
     {{
@@ -179,6 +182,7 @@ namespace {@namespace}
         {string.Join("\r\n        ", members.Select(i => i.Accept(arrangeOnAnyImplementationVisitor)))}
     }}
 
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
     sealed class {Prefix.ArrangeWhenImplementation}{interfaceName}{typeArgumentsWithBrackets} : {baseNameWithTypeArguments}
         {whereClause}
     {{
@@ -194,6 +198,7 @@ namespace {@namespace}
     }}
 
     [global::LightMock.Generator.TypeKeyAttribute(typeof(global::{@namespace}.{baseNameWithCommaArguments}))]
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
     sealed class {Prefix.TypeByType}{interfaceName}{typeArgumentsWithUnderlines} : global::LightMock.Generator.{nameof(TypeResolver)}
     {{
         public {Prefix.TypeByType}{interfaceName}{typeArgumentsWithUnderlines}(global::System.Type contextType)
@@ -226,6 +231,7 @@ namespace {@namespace}
         }}
     }}
 
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
     partial class {Prefix.MockClass}{interfaceName}{typeArgumentsWithBrackets} : {baseNameWithTypeArguments}
         {whereClause}
     {{
