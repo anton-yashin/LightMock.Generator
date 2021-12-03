@@ -1,4 +1,8 @@
-﻿* feat: roslyn 4.0.1 support
+﻿1.1.0-preview.3:
+* fix: downgrade package for roslyn 3.xx
+* fix: get rid from System.Collection.Immutable
+* feat: roslyn 4.0.1 support
+* feat: less junk in hints
 1.1.0-preview.2:
 * feat: roslyn 4.0-final.6 support
 * feat: roslyn 3.11 support

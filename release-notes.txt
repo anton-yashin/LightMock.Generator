@@ -1,1 +1,4 @@
-﻿* feat: roslyn 4.0.1 support
+﻿* fix: downgrade package for roslyn 3.xx
+* fix: get rid from System.Collection.Immutable
+* feat: roslyn 4.0.1 support
+* feat: less junk in hints
