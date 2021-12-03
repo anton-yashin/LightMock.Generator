@@ -28,7 +28,6 @@
 ******************************************************************************/
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Linq.Expressions;
@@ -148,12 +147,12 @@ namespace LightMock
         public void AssertInternal(LambdaExpression matchExpression, Invoked invoked)
         {
             var matchInfo = matchExpression.ToMatchInfo();
-            var invocations = this.invocations.InvokeLocked(c => c.Where(matchInfo.Matches).ToImmutableList());
+            var invocations = this.invocations.InvokeLocked(c => c.Where(matchInfo.Matches).ToArray());
 
-            if (invoked.Verify(invocations.Count))
+            if (invoked.Verify(invocations.Length))
                 verifiedInvocations.AddRange(invocations);
             else
-                throw new MockException(string.Format("The method {0} was called {1} times", matchExpression.Simplify(), invocations.Count));
+                throw new MockException(string.Format("The method {0} was called {1} times", matchExpression.Simplify(), invocations.Length));
         }
 
         /// <summary>

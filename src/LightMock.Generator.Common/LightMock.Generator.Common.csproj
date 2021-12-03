@@ -31,7 +31,6 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="System.Collections.Immutable" Version="6.0.0" />
   </ItemGroup>
 
   <!-- Copy package to folder set by NuGetFolder environment variable if present -->

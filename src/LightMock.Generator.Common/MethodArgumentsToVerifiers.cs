@@ -26,7 +26,6 @@
 *******************************************************************************/
 using System;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -53,7 +52,7 @@ namespace LightMock
         {
             var @this = new MethodArgumentsToVerifiers(expression.Method);
             @this.Visit(expression);
-            return @this.lambdas.ToImmutableList();
+            return @this.lambdas.AsReadOnly();
         }
 
         protected override Expression VisitMethodCall(MethodCallExpression node)
