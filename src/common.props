@@ -8,7 +8,7 @@
     <PackageVersion>$(Version)$(VersionSuffix)</PackageVersion>
     <Authors>Anton Yashin</Authors>
     <NeutralLanguage>en</NeutralLanguage>
-    <Copyright>Copyright © Anton Yashin 2021</Copyright>
+    <Copyright>Copyright © Anton Yashin 2022</Copyright>
     <RepositoryUrl>https://github.com/anton-yashin/LightMock.Generator</RepositoryUrl>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
