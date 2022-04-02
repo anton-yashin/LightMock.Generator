@@ -85,7 +85,7 @@ namespace LightMock.Generator
                 return null;
 
             var result = new StringBuilder(GetObsoleteAndOrOverrideChunkFor(symbol))
-                .Append(symbol, definitionFormat);
+                .AppendParts(symbol.ToDisplayParts(definitionFormat).Where(k => k.Kind != SymbolDisplayPartKind.Keyword || k.ToString() != "internal"));
             appedGetterAndSetter(result, symbol);
 
             if (implementationName != null && symbol.IsInterfaceRequired())

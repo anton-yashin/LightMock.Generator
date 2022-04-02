@@ -48,7 +48,9 @@ namespace LightMock.Generator
             => @this.IsAbstract || @this.IsVirtual;
 
         public static bool IsInterfaceRequired(this ISymbol @this)
-            => @this.IsCanBeOverriden() && @this.DeclaredAccessibility == Accessibility.Protected;
+            => @this.IsCanBeOverriden()
+            && (@this.DeclaredAccessibility == Accessibility.Protected
+                || @this.DeclaredAccessibility == Accessibility.ProtectedOrInternal);
 
 
         public static ImmutableArray<INamedTypeSymbol> GetTypeHierarchy(this INamedTypeSymbol @this)

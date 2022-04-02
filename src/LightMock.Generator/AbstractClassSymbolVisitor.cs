@@ -81,9 +81,11 @@ namespace LightMock.Generator
             if (isInterfaceRequired)
                 AddInterfaceImplementation(symbol, result);
 
-            result.Append(symbol.GetObsoleteOrOverrideChunk())
-                .Append(symbol, SymbolDisplayFormats.AbstractClass)
-                .AppendMockGetterAndSetter(isInterfaceRequired ? VariableNames.ProtectedContext : VariableNames.Context, symbol);
+            result.Append(symbol.GetObsoleteOrOverrideChunk());
+            result.AppendParts(symbol
+                .ToDisplayParts(SymbolDisplayFormats.AbstractClass)
+                .Where(k => k.Kind != SymbolDisplayPartKind.Keyword || k.ToString() != "internal"));
+            result.AppendMockGetterAndSetter(isInterfaceRequired ? VariableNames.ProtectedContext : VariableNames.Context, symbol);
             return result.ToString();
         }
 

@@ -23,6 +23,12 @@ namespace LightMock.Generator.Tests.AbstractClass
             mock.Object.InvokeProtectedDoSomething(5678);
             mock.Protected().Assert(f => f.ProtectedDoSomething(5678));
 
+            mock.Protected().Arrange(f => f.ProtectedInternalGetSomething()).Returns(1234);
+            Assert.Equal(expected: 1234, mock.Object.InvokeProtectedInternalGetSomething());
+
+            mock.Object.InvokeProtectedInternalDoSomething(5678);
+            mock.Protected().Assert(f => f.ProtectedInternalDoSomething(5678));
+
             return 42;
         }
     }
