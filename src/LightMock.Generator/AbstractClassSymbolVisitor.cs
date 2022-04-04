@@ -101,7 +101,9 @@ namespace LightMock.Generator
                 return null;
 
             var result = new StringBuilder("override ")
-                .Append(symbol, SymbolDisplayFormats.AbstractClass)
+                .AppendParts(symbol
+                    .ToDisplayParts(SymbolDisplayFormats.AbstractClass)
+                    .Where(k => k.Kind != SymbolDisplayPartKind.Keyword || k.ToString() != "internal"))
                 .AppendEventAddRemove(VariableNames.PropertiesContext, symbol, methodName: "Invoke");
             if (symbol.IsInterfaceRequired())
                 AddInterfaceImplementation(symbol, result);

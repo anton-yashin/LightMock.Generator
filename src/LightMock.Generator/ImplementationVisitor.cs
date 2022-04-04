@@ -120,7 +120,7 @@ namespace LightMock.Generator
             if (symbol.IsCanBeOverriden())
             {
                 result.Append("override ")
-                    .Append(symbol, SymbolDisplayFormats.AbstractClass);
+                    .AppendParts(symbol.ToDisplayParts(SymbolDisplayFormats.AbstractClass).Where(k => k.Kind != SymbolDisplayPartKind.Keyword || k.ToString() != "internal"));
                 appendEventAddRemove(result, symbol);
 
                 if (implementationName != null && symbol.IsInterfaceRequired())
