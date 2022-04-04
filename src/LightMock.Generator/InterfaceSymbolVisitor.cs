@@ -32,8 +32,12 @@ namespace LightMock.Generator
 {
     sealed class InterfaceSymbolVisitor : SymbolVisitor<string>
     {
-        public InterfaceSymbolVisitor()
-        { }
+        private readonly Compilation compilation;
+
+        public InterfaceSymbolVisitor(Compilation compilation)
+        {
+            this.compilation = compilation;
+        }
 
         public override string? VisitMethod(IMethodSymbol symbol)
         {
@@ -41,7 +45,7 @@ namespace LightMock.Generator
                 return null;
 
             var result = new StringBuilder()
-                .AppendMethodDeclaration(SymbolDisplayFormats.Interface, symbol)
+                .AppendMethodDeclaration(compilation, SymbolDisplayFormats.Interface, symbol)
                 .AppendMethodBody(VariableNames.Context, symbol,
                 sb => sb.Append("(").Append(symbol.ContainingType, SymbolDisplayFormats.WithTypeParams).Append(")"));
             return result.ToString();

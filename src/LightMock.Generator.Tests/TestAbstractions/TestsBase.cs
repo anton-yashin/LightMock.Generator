@@ -18,11 +18,16 @@ namespace LightMock.Generator.Tests.TestAbstractions
             => this.testOutputHelper = testOutputHelper;
 
         protected (ImmutableArray<Diagnostic> diagnostics, bool success, byte[] assembly) DoCompile(string sourceCode, string hint)
-            => DoCompile(new TestableSourceText[] { new TestableSourceText(sourceCode, hint) });
+            => DoCompile(sourceCode, hint, Enumerable.Empty<MetadataReference>());
 
-        protected (ImmutableArray<Diagnostic> diagnostics, bool success, byte[] assembly) DoCompile(IEnumerable<TestableSourceText> texts)
+        protected (ImmutableArray<Diagnostic> diagnostics, bool success, byte[] assembly) DoCompile(
+            string sourceCode, string hint, IEnumerable<MetadataReference> linkAssemblies)
+            => DoCompile(new TestableSourceText[] { new TestableSourceText(sourceCode, hint) }, linkAssemblies);
+
+        protected (ImmutableArray<Diagnostic> diagnostics, bool success, byte[] assembly) DoCompile(
+            IEnumerable<TestableSourceText> texts, IEnumerable<MetadataReference> linkAssemblies)
         {
-            var compilation = CreateCompilation(texts);
+            var compilation = CreateCompilation(texts, linkAssemblies);
             var driver = CreateGenerationDriver(compilation);
             driver.RunGeneratorsAndUpdateCompilation(compilation, out var updatedCompilation, out var diagnostics);
             var ms = new MemoryStream();
@@ -51,30 +56,44 @@ namespace LightMock.Generator.Tests.TestAbstractions
         }
 
         protected static CSharpCompilation CreateCompilation(string sourceCode, string hint)
-            => CreateCompilation(new TestableSourceText[] { new TestableSourceText(sourceCode, hint) });
+            => CreateCompilation(sourceCode, hint, Enumerable.Empty<MetadataReference>());
 
-        protected static CSharpCompilation CreateCompilation(IEnumerable<TestableSourceText> texts)
-            => CSharpCompilation.Create(
-                
-                assemblyName: texts.First().hint,
+        protected static CSharpCompilation CreateCompilation(
+            string sourceCode,
+            string hint,
+            IEnumerable<MetadataReference> linkAssemblies)
+        {
+            return CreateCompilation(
+                new TestableSourceText[] { new TestableSourceText(sourceCode, hint) },
+                linkAssemblies);
+        }
 
-                syntaxTrees: texts.Select(i
-                    => CSharpSyntaxTree.ParseText(i.sourceCode, new CSharpParseOptions(LanguageVersion.Preview),
-                        Path.GetFullPath(i.hint))),
-                
-                references: new[]
-                {
-                    MetadataReference.CreateFromFile(Assembly.GetCallingAssembly().Location),
-                    MetadataReference.CreateFromFile(typeof(string).Assembly.Location),
-                    MetadataReference.CreateFromFile(typeof(MockContext<>).Assembly.Location),
-                    MetadataReference.CreateFromFile(typeof(IMock<>).Assembly.Location),
-                    MetadataReference.CreateFromFile(typeof(Xunit.Assert).Assembly.Location),
-                    MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("System.Threading.Tasks")).Location),
-                    MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("System.Linq.Expressions")).Location),
-                    MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("System.Runtime")).Location),
-                    MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("netstandard")).Location),
-                },
+        protected static CSharpCompilation CreateCompilation(
+            IEnumerable<TestableSourceText> texts,
+            IEnumerable<MetadataReference> linkAssemblies)
+        {
+            return CSharpCompilation.Create(
 
-                options: new CSharpCompilationOptions(Microsoft.CodeAnalysis.OutputKind.DynamicallyLinkedLibrary));
+                           assemblyName: texts.First().hint,
+
+                           syntaxTrees: texts.Select(i
+                               => CSharpSyntaxTree.ParseText(i.sourceCode, new CSharpParseOptions(LanguageVersion.Preview),
+                                   Path.GetFullPath(i.hint))),
+
+                           references: new[]
+                           {
+                                MetadataReference.CreateFromFile(Assembly.GetCallingAssembly().Location),
+                                MetadataReference.CreateFromFile(typeof(string).Assembly.Location),
+                                MetadataReference.CreateFromFile(typeof(MockContext<>).Assembly.Location),
+                                MetadataReference.CreateFromFile(typeof(IMock<>).Assembly.Location),
+                                MetadataReference.CreateFromFile(typeof(Xunit.Assert).Assembly.Location),
+                                MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("System.Threading.Tasks")).Location),
+                                MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("System.Linq.Expressions")).Location),
+                                MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("System.Runtime")).Location),
+                                MetadataReference.CreateFromFile(Assembly.Load(new AssemblyName("netstandard")).Location),
+                           }.Concat(linkAssemblies),
+
+                           options: new CSharpCompilationOptions(Microsoft.CodeAnalysis.OutputKind.DynamicallyLinkedLibrary));
+        }
     }
 }

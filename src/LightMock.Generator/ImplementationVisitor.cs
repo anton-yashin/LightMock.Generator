@@ -34,11 +34,16 @@ namespace LightMock.Generator
 {
     abstract class ImplementationVisitor : SymbolVisitor<string>
     {
+        private readonly Compilation compilation;
         protected readonly SymbolDisplayFormat definitionFormat;
         private readonly string? implementationName;
 
-        public ImplementationVisitor(SymbolDisplayFormat definitionFormat, string? implementationName)
+        public ImplementationVisitor(
+            Compilation compilation,
+            SymbolDisplayFormat definitionFormat,
+            string? implementationName)
         {
+            this.compilation = compilation;
             this.definitionFormat = definitionFormat;
             this.implementationName = implementationName;
         }
@@ -53,7 +58,7 @@ namespace LightMock.Generator
                 return null;
             var result = new StringBuilder()
                 .Append(GetObsoleteAndOrOverrideChunkFor(symbol))
-                .AppendMethodDeclaration(definitionFormat, symbol);
+                .AppendMethodDeclaration(compilation, definitionFormat, symbol);
             result.Append("{");
             if (symbol.ReturnsVoid == false)
             {
@@ -64,7 +69,7 @@ namespace LightMock.Generator
             result.Append("}");
             if (implementationName != null && symbol.IsInterfaceRequired())
             {
-                result.AppendMethodDeclaration(SymbolDisplayFormats.Interface, symbol, p
+                result.AppendMethodDeclaration(compilation, SymbolDisplayFormats.Interface, symbol, p
                     => p.Kind == SymbolDisplayPartKind.ClassName && p.ToString() == symbol.ContainingType.Name
                     ? new SymbolDisplayPart(SymbolDisplayPartKind.ClassName, symbol, Prefix.ProtectedToPublicInterface + implementationName)
                     : p).Append('{');
@@ -85,7 +90,9 @@ namespace LightMock.Generator
                 return null;
 
             var result = new StringBuilder(GetObsoleteAndOrOverrideChunkFor(symbol))
-                .AppendParts(symbol.ToDisplayParts(definitionFormat).Where(k => k.Kind != SymbolDisplayPartKind.Keyword || k.ToString() != "internal"));
+                .AppendParts(symbol
+                    .ToDisplayParts(definitionFormat)
+                    .FilterInternalKeywordFromNonFriendDeclarations(symbol, compilation));
             appedGetterAndSetter(result, symbol);
 
             if (implementationName != null && symbol.IsInterfaceRequired())
@@ -120,7 +127,9 @@ namespace LightMock.Generator
             if (symbol.IsCanBeOverriden())
             {
                 result.Append("override ")
-                    .AppendParts(symbol.ToDisplayParts(SymbolDisplayFormats.AbstractClass).Where(k => k.Kind != SymbolDisplayPartKind.Keyword || k.ToString() != "internal"));
+                    .AppendParts(symbol
+                        .ToDisplayParts(SymbolDisplayFormats.AbstractClass)
+                        .FilterInternalKeywordFromNonFriendDeclarations(symbol, compilation));
                 appendEventAddRemove(result, symbol);
 
                 if (implementationName != null && symbol.IsInterfaceRequired())

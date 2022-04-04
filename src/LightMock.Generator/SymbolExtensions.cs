@@ -170,5 +170,8 @@ namespace LightMock.Generator
             }
             return false;
         }
+
+        public static bool IsAvailableInSource(this ISymbol symbol)
+            => symbol.DeclaringSyntaxReferences.Length > 0;
     }
 }

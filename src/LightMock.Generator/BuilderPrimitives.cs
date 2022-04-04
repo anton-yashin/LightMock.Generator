@@ -438,13 +438,15 @@ namespace LightMock.Generator
             : p;
 
         public static StringBuilder AppendMethodDeclaration(this StringBuilder @this,
+            Compilation compilation,
             SymbolDisplayFormat format,
             IMethodSymbol symbol)
         {
-            return @this.AppendMethodDeclaration(format, symbol, p => p);
+            return @this.AppendMethodDeclaration(compilation, format, symbol, p => p);
         }
 
         public static StringBuilder AppendMethodDeclaration(this StringBuilder @this,
+            Compilation compilation,
             SymbolDisplayFormat format,
             IMethodSymbol symbol,
             Func<SymbolDisplayPart, SymbolDisplayPart> mutator)
@@ -458,7 +460,8 @@ namespace LightMock.Generator
             {
                 if (i++ == 0)
                 {
-                    span.Where(FilterInternal).Aggregate(@this, (sb, p) => sb.Append(mutator(p).ToString()));
+                    span.FilterInternalKeywordFromNonFriendDeclarations(symbol, compilation)
+                        .Aggregate(@this, (sb, p) => sb.Append(mutator(p).ToString()));
                 }
                 else
                 {
@@ -475,9 +478,6 @@ namespace LightMock.Generator
                 }
             }
             return @this;
-
-            static bool FilterInternal(SymbolDisplayPart k)
-                => k.Kind != SymbolDisplayPartKind.Keyword || k.ToString() != "internal";
         }
 
         public static StringBuilder AppendMethodBody(this StringBuilder @this, string contextName, IMethodSymbol symbol)

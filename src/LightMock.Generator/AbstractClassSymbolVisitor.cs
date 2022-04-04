@@ -34,10 +34,12 @@ namespace LightMock.Generator
     sealed class AbstractClassSymbolVisitor : SymbolVisitor<string>
     {
         readonly string className;
+        readonly Compilation compilation;
 
-        public AbstractClassSymbolVisitor(string className)
+        public AbstractClassSymbolVisitor(string className, Compilation compilation)
         {
             this.className = className;
+            this.compilation = compilation;
         }
 
         public override string? VisitMethod(IMethodSymbol symbol)
@@ -52,14 +54,14 @@ namespace LightMock.Generator
                 AddInterfaceImplementation(symbol, result);
 
             result.Append(symbol.GetObsoleteOrOverrideChunk())
-                .AppendMethodDeclaration(SymbolDisplayFormats.AbstractClass, symbol)
+                .AppendMethodDeclaration(compilation, SymbolDisplayFormats.AbstractClass, symbol)
                 .AppendMethodBody(isInterfaceRequired ? VariableNames.ProtectedContext : VariableNames.Context, symbol);
             return result.ToString();
         }
 
         void AddInterfaceImplementation(IMethodSymbol symbol, StringBuilder result)
         {
-            result.AppendMethodDeclaration(SymbolDisplayFormats.Interface, symbol, p => ToP2P(p, symbol))
+            result.AppendMethodDeclaration(compilation, SymbolDisplayFormats.Interface, symbol, p => ToP2P(p, symbol))
                 .AppendMethodBody(VariableNames.ProtectedContext, symbol);
         }
 
@@ -84,7 +86,7 @@ namespace LightMock.Generator
             result.Append(symbol.GetObsoleteOrOverrideChunk());
             result.AppendParts(symbol
                 .ToDisplayParts(SymbolDisplayFormats.AbstractClass)
-                .Where(k => k.Kind != SymbolDisplayPartKind.Keyword || k.ToString() != "internal"));
+                .FilterInternalKeywordFromNonFriendDeclarations(symbol, compilation));
             result.AppendMockGetterAndSetter(isInterfaceRequired ? VariableNames.ProtectedContext : VariableNames.Context, symbol);
             return result.ToString();
         }
@@ -103,7 +105,7 @@ namespace LightMock.Generator
             var result = new StringBuilder("override ")
                 .AppendParts(symbol
                     .ToDisplayParts(SymbolDisplayFormats.AbstractClass)
-                    .Where(k => k.Kind != SymbolDisplayPartKind.Keyword || k.ToString() != "internal"))
+                    .FilterInternalKeywordFromNonFriendDeclarations(symbol, compilation))
                 .AppendEventAddRemove(VariableNames.PropertiesContext, symbol, methodName: "Invoke");
             if (symbol.IsInterfaceRequired())
                 AddInterfaceImplementation(symbol, result);
