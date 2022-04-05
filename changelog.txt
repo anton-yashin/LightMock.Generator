@@ -1,4 +1,6 @@
-﻿1.1.0
+﻿1.1.1
+* fix: support for protected internal members
+1.1.0
 * chore: bump version
 1.1.0-preview.3:
 * fix: downgrade package for roslyn 3.xx
