@@ -75,11 +75,11 @@ namespace LightMock.Generator
                 cc,
                 receiver.AbstractClasses.Select(
                     t => new AbstractClassProcessor(
-                        t.mock, t.mockedType, receiver.DontOverrideTypes)),
+                        cc.Compilation, t.mock, t.mockedType, receiver.DontOverrideTypes)),
                 context.CancellationToken);
             DoGenerateCode(
                 cc,
-                receiver.Interfaces.Select(t => new InterfaceProcessor(t)),
+                receiver.Interfaces.Select(t => new InterfaceProcessor(cc.Compilation, t)),
                 context.CancellationToken);
             DoGenerateCode(
                 cc,
@@ -238,7 +238,7 @@ namespace LightMock.Generator
                         (CSharpCompilation)sr.compilation,
                         (CSharpParseOptions)sr.parseOptions,
                         GetCompilationContext(sr.compilation)),
-                    new InterfaceProcessor(sr.candidate!),
+                    new InterfaceProcessor(sr.compilation, sr.candidate!),
                     sp.CancellationToken));
 
             var delegates = context.SyntaxProvider.CreateSyntaxProvider(
@@ -299,7 +299,7 @@ namespace LightMock.Generator
                         (CSharpCompilation)sr.compilation,
                         (CSharpParseOptions)sr.parseOptions,
                         GetCompilationContext(sr.compilation)),
-                    new AbstractClassProcessor(sr.candidate!.Value.mock, sr.candidate!.Value.mockedType, sr.dontOverrideTypes),
+                    new AbstractClassProcessor(sr.compilation, sr.candidate!.Value.mock, sr.candidate!.Value.mockedType, sr.dontOverrideTypes),
                     sp.CancellationToken));
 
             var invocations = context.SyntaxProvider.CreateSyntaxProvider(

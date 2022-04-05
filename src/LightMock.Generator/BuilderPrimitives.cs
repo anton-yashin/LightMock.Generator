@@ -438,13 +438,15 @@ namespace LightMock.Generator
             : p;
 
         public static StringBuilder AppendMethodDeclaration(this StringBuilder @this,
+            Compilation compilation,
             SymbolDisplayFormat format,
             IMethodSymbol symbol)
         {
-            return @this.AppendMethodDeclaration(format, symbol, p => p);
+            return @this.AppendMethodDeclaration(compilation, format, symbol, p => p);
         }
 
         public static StringBuilder AppendMethodDeclaration(this StringBuilder @this,
+            Compilation compilation,
             SymbolDisplayFormat format,
             IMethodSymbol symbol,
             Func<SymbolDisplayPart, SymbolDisplayPart> mutator)
@@ -458,7 +460,8 @@ namespace LightMock.Generator
             {
                 if (i++ == 0)
                 {
-                    span.Aggregate(@this, (sb, p) => sb.Append(mutator(p).ToString()));
+                    span.FilterInternalKeywordFromNonFriendDeclarations(symbol, compilation)
+                        .Aggregate(@this, (sb, p) => sb.Append(mutator(p).ToString()));
                 }
                 else
                 {
@@ -749,26 +752,23 @@ namespace LightMock.Generator
             => @this.AppendParts(symbol.ToDisplayParts(format));
 
         public static StringBuilder AppendParts<T>(this StringBuilder @this, T parts)
-            where T : IReadOnlyList<SymbolDisplayPart>
+            where T : IEnumerable<SymbolDisplayPart>
         {
-            foreach (var item in parts)
-                @this.Append(item.ToString());
-            return @this;
+            return parts.Aggregate(@this, (sb, item) => sb.Append(item.ToString()));
         }
 
         public static StringBuilder AppendParts<T>(this StringBuilder @this, T parts, Func<SymbolDisplayPart, SymbolDisplayPart> mutator)
-            where T : IReadOnlyList<SymbolDisplayPart>
+            where T : IEnumerable<SymbolDisplayPart>
         {
-            foreach (var item in parts)
-                @this.Append(mutator(item).ToString());
-            return @this;
+            return parts.Aggregate(@this, (sb, item) => sb.Append(mutator(item).ToString()));
         }
 
         public static StringBuilder AppendParts<T>(this StringBuilder @this, T parts, Func<SymbolDisplayPart, int, SymbolDisplayPart> mutator)
-            where T : IReadOnlyList<SymbolDisplayPart>
+            where T : IEnumerable<SymbolDisplayPart>
         {
-            for (int i = 0; i < parts.Count; i++)
-                @this.Append(mutator(parts[i], i).ToString());
+            int i = 0;
+            foreach (var item in parts)
+                @this.Append(mutator(item, i++));
             return @this;
         }
     }

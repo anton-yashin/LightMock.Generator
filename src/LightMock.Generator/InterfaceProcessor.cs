@@ -52,14 +52,17 @@ namespace LightMock.Generator
         private readonly SymbolVisitor<string> arrangeOnImplementationVisitor;
 
         public InterfaceProcessor(
+            Compilation compilation,
             INamedTypeSymbol typeSymbol) : base(typeSymbol)
         {
             typeSymbol = typeSymbol.OriginalDefinition;
 
-            this.symbolVisitor = new InterfaceSymbolVisitor();
+            this.symbolVisitor = new InterfaceSymbolVisitor(compilation);
             this.propertyDefinitionVisitor = new PropertyDefinitionVisitor();
-            this.assertImplementationVisitor = new AssertImplementationVisitor(SymbolDisplayFormats.Interface, null);
-            this.assertIsAnyImplementationVisitor = new AssertIsAnyImplementationVisitor(SymbolDisplayFormats.Interface, null);
+            this.assertImplementationVisitor = new AssertImplementationVisitor(
+                compilation, SymbolDisplayFormats.Interface, null);
+            this.assertIsAnyImplementationVisitor = new AssertIsAnyImplementationVisitor(
+                compilation, SymbolDisplayFormats.Interface, null);
 
             var typeHierarchy = typeSymbol.GetTypeHierarchy();
             var typeArguments = typeHierarchy.GetTypeArguments();
@@ -88,9 +91,9 @@ namespace LightMock.Generator
             @namespace = typeSymbol.ContainingNamespace.ToDisplayString(SymbolDisplayFormats.Namespace);
             var p2fInterfaceName = Prefix.PropertyToFuncInterface + interfaceName + typeArgumentsWithBrackets;
             this.arrangeOnAnyImplementationVisitor = new ArrangeOnAnyImplementationVisitor(
-                SymbolDisplayFormats.Interface, p2fInterfaceName, null);
+                compilation, SymbolDisplayFormats.Interface, p2fInterfaceName, null);
             this.arrangeOnImplementationVisitor = new ArrangeOnImplementationVisitor(
-                SymbolDisplayFormats.Interface, p2fInterfaceName, null);
+                compilation, SymbolDisplayFormats.Interface, p2fInterfaceName, null);
         }
 
         public override IEnumerable<Diagnostic> GetErrors()

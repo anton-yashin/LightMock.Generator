@@ -13,6 +13,9 @@ namespace LightMock.Generator.Tests.AbstractClass
         protected abstract int ProtectedOnlyGet { get; }
         protected abstract int ProtectedGetAndSet { get; set; }
 
+        protected internal abstract int ProtectedInternalOnlyGet { get; }
+        protected internal abstract int ProtectedInternalGetAndSet { get; set; }
+
         protected string ProtectedNonAbstractNonVirtualProperty
             => throw new System.NotImplementedException();
 
@@ -21,6 +24,13 @@ namespace LightMock.Generator.Tests.AbstractClass
         {
             get => ProtectedGetAndSet;
             set => ProtectedGetAndSet = value;
+        }
+
+        public int InvokeProtectedInternalOnlyGet => ProtectedInternalOnlyGet;
+        public int InvokeProtectedInternalGetAndSet
+        {
+            get => ProtectedInternalGetAndSet;
+            set => ProtectedInternalGetAndSet = value;
         }
     }
 }

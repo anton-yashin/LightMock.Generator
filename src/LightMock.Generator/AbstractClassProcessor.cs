@@ -56,6 +56,7 @@ namespace LightMock.Generator
         private readonly SymbolVisitor<string> arrangeOnImplementationVisitor;
 
         public AbstractClassProcessor(
+            Compilation compilation,
             SyntaxNode containingGeneric,
             INamedTypeSymbol typeSymbol,
             IReadOnlyList<INamedTypeSymbol> dontOverrideList) : base(typeSymbol)
@@ -84,7 +85,7 @@ namespace LightMock.Generator
                 .Append(typeSymbol.Name)
                 .Append(haveTypeArguments ? "<" + string.Join(",", typeSymbol.TypeArguments.Select(i => " ")) + ">" : "")
                 .ToString();
-            symbolVisitor = new AbstractClassSymbolVisitor(className);
+            symbolVisitor = new AbstractClassSymbolVisitor(className, compilation);
 
             typeArgumentsWithBrackets = string.Join(",", typeArguments.Select(i => i.Name)); ;
             if (typeArgumentsWithBrackets.Length > 0)
@@ -107,12 +108,12 @@ namespace LightMock.Generator
 
             protectedVisitor = new ProtectedMemberSymbolVisitor();
             propertyDefinitionVisitor = new PropertyDefinitionVisitor();
-            assertImplementationVisitor = new AssertImplementationVisitor(SymbolDisplayFormats.AbstractClass, className);
-            assertIsAnyImplementationVisitor = new AssertIsAnyImplementationVisitor(SymbolDisplayFormats.AbstractClass, className);
+            assertImplementationVisitor = new AssertImplementationVisitor(compilation, SymbolDisplayFormats.AbstractClass, className);
+            assertIsAnyImplementationVisitor = new AssertIsAnyImplementationVisitor(compilation, SymbolDisplayFormats.AbstractClass, className);
             this.arrangeOnAnyImplementationVisitor = new ArrangeOnAnyImplementationVisitor(
-                SymbolDisplayFormats.AbstractClass, p2fInterfaceName, className);
+                compilation, SymbolDisplayFormats.AbstractClass, p2fInterfaceName, className);
             this.arrangeOnImplementationVisitor = new ArrangeOnImplementationVisitor(
-                SymbolDisplayFormats.AbstractClass, p2fInterfaceName, className);
+                compilation, SymbolDisplayFormats.AbstractClass, p2fInterfaceName, className);
         }
 
         string GenerateConstructor(string declaration, string call)
