@@ -6,8 +6,8 @@
     <AssemblyName>LightMock.Generator</AssemblyName>
     <RootNamespace>LightMock.Generator</RootNamespace>
     <PackageId>LightMock.Generator</PackageId>
-    <Summary>LightMock.Generator: Source generator that generates mocks by provided interfaces and abstract classes.</Summary>
-    <Description>LightMock.Generator: Source generator that generates mocks by provided interfaces and abstract classes.</Description>
+    <Summary>LightMock.Generator: Source generator that generates mocks by provided interfaces, classes and delegates.</Summary>
+    <Description>LightMock.Generator: Source generator that generates mocks by provided interfaces, classes and delegates.</Description>
     <PackageTags>mock generator roslyn aot lightmock android ios uwp xamarin</PackageTags>
     <Title>LightMock.Generator</Title>
     <PackageReleaseNotes>$([System.IO.File]::ReadAllText("$(MSBuildProjectDirectory)/../../release-notes.txt"))</PackageReleaseNotes>

@@ -1,10 +1,10 @@
 # LightMock.Generator
 
-Source generator that generates mocks by provided interfaces, abstract classes and delegates. [Available on nuget](https://www.nuget.org/packages/LightMock.Generator/).
+Source generator that generates mocks by provided interfaces, classes with virtual and/or abstract members and delegates. [Available on nuget](https://www.nuget.org/packages/LightMock.Generator/).
 You should be familiar with [LightMock](https://github.com/seesharper/LightMock) because this project uses it underhood.
 
 ## How to use
-Use Mock\<T\> where T is your abstract class, interface or delegate to batch create MockContext\<T\> and mock object.
+Use Mock\<T\> where T is your class, interface or delegate to batch create MockContext\<T\> and mock object.
 
 ## Example with interface
 
@@ -52,7 +52,7 @@ namespace Playground
 
 ```
 
-## Example with abstract class
+## Example with class
 
 ```csharp
 using System;
@@ -82,7 +82,7 @@ namespace Playground
         public void Test()
         {
             const int expected = 123;
-            // To invoke a constructor of abstract class place parameters in Mock<T> constructor
+            // To invoke a constructor of class place parameters in Mock<T> constructor
             var mock = new Mock<AFoo>(12, 45);
             // To arrange or assert protected members call Protected() extension function.
             // It and corresponding interface will be generated only for classes
