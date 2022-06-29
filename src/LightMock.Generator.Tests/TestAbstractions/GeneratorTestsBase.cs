@@ -11,7 +11,7 @@ using Xunit.Abstractions;
 
 namespace LightMock.Generator.Tests.TestAbstractions
 {
-    public abstract class GeneratorTestsBase : TestsBase
+    public abstract class GeneratorTestsBase : TestsBase<LightMockGenerator>
     {
         protected GeneratorTestsBase(ITestOutputHelper testOutputHelper) 
             : base(testOutputHelper)

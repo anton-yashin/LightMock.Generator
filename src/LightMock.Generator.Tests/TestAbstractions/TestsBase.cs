@@ -10,7 +10,13 @@ using Xunit.Abstractions;
 
 namespace LightMock.Generator.Tests.TestAbstractions
 {
-    public abstract class TestsBase
+    public abstract class TestsBase<TGenerator>
+#if ROSLYN_4
+        where TGenerator : IIncrementalGenerator, new()
+#else
+        where TGenerator : ISourceGenerator, new()
+#endif
+
     {
         protected readonly ITestOutputHelper testOutputHelper;
 
@@ -41,13 +47,13 @@ namespace LightMock.Generator.Tests.TestAbstractions
         {
             GeneratorDriver result;
 #if ROSLYN_4
-            result = CSharpGeneratorDriver.Create(new LightMockGenerator())
+            result = CSharpGeneratorDriver.Create(new TGenerator())
                 .WithUpdatedParseOptions(compilation.SyntaxTrees.First().Options);
             if (analyzerConfigOptions != null)
                 result = result.WithUpdatedAnalyzerConfigOptions(analyzerConfigOptions);
 #else
             result = CSharpGeneratorDriver.Create(
-                ImmutableArray.Create(new LightMockGenerator()),
+                ImmutableArray.Create<ISourceGenerator>(new TGenerator()),
                 Enumerable.Empty<AdditionalText>(),
                 (CSharpParseOptions)compilation.SyntaxTrees.First().Options, analyzerConfigOptions);
 #endif
