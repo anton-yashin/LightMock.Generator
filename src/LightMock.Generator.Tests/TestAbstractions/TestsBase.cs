@@ -17,14 +17,14 @@ namespace LightMock.Generator.Tests.TestAbstractions
         public TestsBase(ITestOutputHelper testOutputHelper)
             => this.testOutputHelper = testOutputHelper;
 
-        protected (ImmutableArray<Diagnostic> diagnostics, bool success, byte[] assembly) DoCompile(string sourceCode, string hint)
+        protected CompilationResult DoCompile(string sourceCode, string hint)
             => DoCompile(sourceCode, hint, Enumerable.Empty<MetadataReference>());
 
-        protected (ImmutableArray<Diagnostic> diagnostics, bool success, byte[] assembly) DoCompile(
+        protected CompilationResult DoCompile(
             string sourceCode, string hint, IEnumerable<MetadataReference> linkAssemblies)
             => DoCompile(new TestableSourceText[] { new TestableSourceText(sourceCode, hint) }, linkAssemblies);
 
-        protected (ImmutableArray<Diagnostic> diagnostics, bool success, byte[] assembly) DoCompile(
+        protected CompilationResult DoCompile(
             IEnumerable<TestableSourceText> texts, IEnumerable<MetadataReference> linkAssemblies)
         {
             var compilation = CreateCompilation(texts, linkAssemblies);
@@ -34,7 +34,7 @@ namespace LightMock.Generator.Tests.TestAbstractions
             var result = updatedCompilation.Emit(ms);
             foreach (var i in result.Diagnostics)
                 testOutputHelper.WriteLine(i.ToString());
-            return (diagnostics, result.Success, ms.ToArray());
+            return new(diagnostics, result.Success, ms.ToArray());
         }
 
         protected GeneratorDriver CreateGenerationDriver(CSharpCompilation compilation, AnalyzerConfigOptionsProvider? analyzerConfigOptions = null)
