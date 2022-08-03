@@ -11,7 +11,7 @@ using Xunit.Abstractions;
 
 namespace LightMock.Generator.Tests.TestAbstractions
 {
-    public abstract class GeneratorTestsBase : TestsBase
+    public abstract class GeneratorTestsBase : TestsBase<LightMockGenerator>
     {
         protected GeneratorTestsBase(ITestOutputHelper testOutputHelper) 
             : base(testOutputHelper)
@@ -20,19 +20,19 @@ namespace LightMock.Generator.Tests.TestAbstractions
 
         protected abstract string GetFullResourceName(string resourceName);
 
-        protected (ImmutableArray<Diagnostic> diagnostics, bool success, byte[] assembly) DoCompileResource(
+        protected CompilationResult DoCompileResource(
             [CallerMemberName] string resourceName = "")
         {
             return DoCompileResource(new string[] { resourceName }, Enumerable.Empty<MetadataReference>());
         }
 
-        protected (ImmutableArray<Diagnostic> diagnostics, bool success, byte[] assembly) DoCompileResource(
+        protected CompilationResult DoCompileResource(
             IEnumerable<MetadataReference> linkAssemblies, [CallerMemberName] string resourceName = "")
         {
             return DoCompileResource(new string[] { resourceName }, linkAssemblies);
         }
 
-        protected (ImmutableArray<Diagnostic> diagnostics, bool success, byte[] assembly) DoCompileResource(
+        protected CompilationResult DoCompileResource(
             IEnumerable<string> resourceNames, IEnumerable<MetadataReference> linkAssemblies)
         {
             return DoCompile(

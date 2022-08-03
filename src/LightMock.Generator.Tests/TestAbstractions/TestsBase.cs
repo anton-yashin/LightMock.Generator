@@ -10,21 +10,27 @@ using Xunit.Abstractions;
 
 namespace LightMock.Generator.Tests.TestAbstractions
 {
-    public abstract class TestsBase
+    public abstract class TestsBase<TGenerator>
+#if ROSLYN_4
+        where TGenerator : IIncrementalGenerator, new()
+#else
+        where TGenerator : ISourceGenerator, new()
+#endif
+
     {
         protected readonly ITestOutputHelper testOutputHelper;
 
         public TestsBase(ITestOutputHelper testOutputHelper)
             => this.testOutputHelper = testOutputHelper;
 
-        protected (ImmutableArray<Diagnostic> diagnostics, bool success, byte[] assembly) DoCompile(string sourceCode, string hint)
+        protected CompilationResult DoCompile(string sourceCode, string hint)
             => DoCompile(sourceCode, hint, Enumerable.Empty<MetadataReference>());
 
-        protected (ImmutableArray<Diagnostic> diagnostics, bool success, byte[] assembly) DoCompile(
+        protected CompilationResult DoCompile(
             string sourceCode, string hint, IEnumerable<MetadataReference> linkAssemblies)
             => DoCompile(new TestableSourceText[] { new TestableSourceText(sourceCode, hint) }, linkAssemblies);
 
-        protected (ImmutableArray<Diagnostic> diagnostics, bool success, byte[] assembly) DoCompile(
+        protected CompilationResult DoCompile(
             IEnumerable<TestableSourceText> texts, IEnumerable<MetadataReference> linkAssemblies)
         {
             var compilation = CreateCompilation(texts, linkAssemblies);
@@ -34,20 +40,26 @@ namespace LightMock.Generator.Tests.TestAbstractions
             var result = updatedCompilation.Emit(ms);
             foreach (var i in result.Diagnostics)
                 testOutputHelper.WriteLine(i.ToString());
-            return (diagnostics, result.Success, ms.ToArray());
+            return new(
+                diagnostics
+                    .AddRange(result.Diagnostics)
+                    .Where(d => d.Severity > DiagnosticSeverity.Info)
+                    .ToImmutableArray(),
+                result.Success,
+                ms.ToArray());
         }
 
         protected GeneratorDriver CreateGenerationDriver(CSharpCompilation compilation, AnalyzerConfigOptionsProvider? analyzerConfigOptions = null)
         {
             GeneratorDriver result;
 #if ROSLYN_4
-            result = CSharpGeneratorDriver.Create(new LightMockGenerator())
+            result = CSharpGeneratorDriver.Create(new TGenerator())
                 .WithUpdatedParseOptions(compilation.SyntaxTrees.First().Options);
             if (analyzerConfigOptions != null)
                 result = result.WithUpdatedAnalyzerConfigOptions(analyzerConfigOptions);
 #else
             result = CSharpGeneratorDriver.Create(
-                ImmutableArray.Create(new LightMockGenerator()),
+                ImmutableArray.Create<ISourceGenerator>(new TGenerator()),
                 Enumerable.Empty<AdditionalText>(),
                 (CSharpParseOptions)compilation.SyntaxTrees.First().Options, analyzerConfigOptions);
 #endif
