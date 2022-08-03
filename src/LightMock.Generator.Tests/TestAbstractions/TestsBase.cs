@@ -40,7 +40,13 @@ namespace LightMock.Generator.Tests.TestAbstractions
             var result = updatedCompilation.Emit(ms);
             foreach (var i in result.Diagnostics)
                 testOutputHelper.WriteLine(i.ToString());
-            return new(diagnostics, result.Success, ms.ToArray());
+            return new(
+                diagnostics
+                    .AddRange(result.Diagnostics)
+                    .Where(d => d.Severity > DiagnosticSeverity.Info)
+                    .ToImmutableArray(),
+                result.Success,
+                ms.ToArray());
         }
 
         protected GeneratorDriver CreateGenerationDriver(CSharpCompilation compilation, AnalyzerConfigOptionsProvider? analyzerConfigOptions = null)

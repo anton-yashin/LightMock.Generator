@@ -27,8 +27,8 @@ namespace LightMock.Generator.Tests.AbstractClass
 
             return 42;
 
-            void SomeEventHandler(object? o, EventArgs a) { }
-            void AnotherEventHandler(object? o, EventArgs a) { }
+            void SomeEventHandler(object o, EventArgs a) { }
+            void AnotherEventHandler(object o, EventArgs a) { }
         }
     }
 }
