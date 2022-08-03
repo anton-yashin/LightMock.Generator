@@ -76,7 +76,7 @@ namespace LightMock.Generator
         void AddCandidateMock(GenericNameSyntax candidateGeneric, SemanticModel semanticModel)
         {
             var mockedType = syntaxHelpers.GetMockedType(candidateGeneric, semanticModel);
-            if (mockedType != null)
+            if (mockedType != null && mockedType.Kind != SymbolKind.ErrorType)
             {
                 var mtbt = mockedType.BaseType;
                 if (mtbt != null)
