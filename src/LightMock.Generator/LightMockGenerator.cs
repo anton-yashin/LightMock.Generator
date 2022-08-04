@@ -231,6 +231,7 @@ namespace LightMock.Generator
                 => IsCodeGenerationDisabledByAttributes(t.disableCodegenerationAttributes)
                 && IsGenerationDisabledByOptions(t.options) == false 
                 && t.candidate != null
+                && t.candidate.Kind != SymbolKind.ErrorType
                 && t.compilation is CSharpCompilation
                 && t.parseOptions is CSharpParseOptions),
                 (sp, sr) => DoGenerateCode(
@@ -259,6 +260,7 @@ namespace LightMock.Generator
                 => IsCodeGenerationDisabledByAttributes(t.disableCodegenerationAttributes)
                 && IsGenerationDisabledByOptions(t.options) == false
                 && t.candidate != null
+                && t.candidate.Kind != SymbolKind.ErrorType
                 && t.compilation is CSharpCompilation
                 && t.parseOptions is CSharpParseOptions),
                 (sp, sr) => DoGenerateCode(
@@ -292,6 +294,7 @@ namespace LightMock.Generator
                 => IsCodeGenerationDisabledByAttributes(t.disableCodegenerationAttributes)
                 && IsGenerationDisabledByOptions(t.options) == false
                 && t.candidate != null
+                && t.candidate.Value.mockedType.Kind != SymbolKind.ErrorType
                 && t.compilation is CSharpCompilation
                 && t.parseOptions is CSharpParseOptions),
                 (sp, sr) => DoGenerateCode(
