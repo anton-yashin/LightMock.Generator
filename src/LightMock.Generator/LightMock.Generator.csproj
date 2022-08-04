@@ -38,7 +38,6 @@
     <None Include="../LightMock.Generator.Roslyn40/$(OutputPath)/$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/roslyn4.0/cs" Visible="false" />
     <None Include="../LightMock.Generator.Common/$(OutputPath)/LightMock.Generator.Common.dll" Pack="true" PackagePath="analyzers/dotnet/roslyn3.8/cs" Visible="false" />
     <None Include="../LightMock.Generator.Common/$(OutputPath)/LightMock.Generator.Common.dll" Pack="true" PackagePath="analyzers/dotnet/roslyn4.0/cs" Visible="false" />
-    <None Include="../../README.md" Pack="false" PackagePath="/" Visible="false" />
   </ItemGroup>
 
   <ItemGroup>
