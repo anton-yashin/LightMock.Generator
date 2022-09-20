@@ -19,9 +19,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		..\release-notes.txt = ..\release-notes.txt
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LightMock.Generator.Roslyn40", "LightMock.Generator.Roslyn40\LightMock.Generator.Roslyn40.csproj", "{36283F79-0142-4FFB-A9BC-12242CBA9BBA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LightMock.Generator.Roslyn40", "LightMock.Generator\LightMock.Generator.Roslyn40.csproj", "{36283F79-0142-4FFB-A9BC-12242CBA9BBA}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LightMock.Generator.Tests.Roslyn40", "LightMock.Generator.Tests.Roslyn40\LightMock.Generator.Tests.Roslyn40.csproj", "{EAA2C7A0-C212-4B55-BE53-24A80AC7B489}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LightMock.Generator.Tests.Roslyn40", "LightMock.Generator.Tests\LightMock.Generator.Tests.Roslyn40.csproj", "{EAA2C7A0-C212-4B55-BE53-24A80AC7B489}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

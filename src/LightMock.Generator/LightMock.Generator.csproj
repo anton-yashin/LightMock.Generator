@@ -35,9 +35,9 @@
     <None Include="LightMock.Generator.props" Pack="true" PackagePath="build/netstandard2.0" />
 
     <None Include="$(OutputPath)/$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/roslyn3.8/cs" Visible="false" />
-    <None Include="../LightMock.Generator.Roslyn40/$(OutputPath)/$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/roslyn4.0/cs" Visible="false" />
-    <None Include="../LightMock.Generator.Common/$(OutputPath)/LightMock.Generator.Common.dll" Pack="true" PackagePath="analyzers/dotnet/roslyn3.8/cs" Visible="false" />
-    <None Include="../LightMock.Generator.Common/$(OutputPath)/LightMock.Generator.Common.dll" Pack="true" PackagePath="analyzers/dotnet/roslyn4.0/cs" Visible="false" />
+    <None Include="bin/$(Configuration)/LightMock.Generator.Roslyn40/$(TargetFramework)/$(AssemblyName).dll" Pack="true" PackagePath="analyzers/dotnet/roslyn4.0/cs" Visible="false" />
+    <None Include="$(OutputPath)/LightMock.Generator.Common.dll" Pack="true" PackagePath="analyzers/dotnet/roslyn3.8/cs" Visible="false" />
+    <None Include="$(OutputPath)/LightMock.Generator.Common.dll" Pack="true" PackagePath="analyzers/dotnet/roslyn4.0/cs" Visible="false" />
   </ItemGroup>
 
   <ItemGroup>
@@ -53,7 +53,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\LightMock.Generator.Common\LightMock.Generator.Common.csproj" />
-    <ProjectReference Include="..\LightMock.Generator.Roslyn40\LightMock.Generator.Roslyn40.csproj" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="LightMock.Generator.Roslyn40.csproj" ReferenceOutputAssembly="false" />
   </ItemGroup>
 
   <!-- Copy package to folder set by NuGetFolder environment variable if present -->

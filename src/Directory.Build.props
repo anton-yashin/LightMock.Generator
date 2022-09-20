@@ -1,0 +1,10 @@
+<Project>
+  <PropertyGroup Condition=" '$(MSBuildProjectName)' != 'LightMock.Generator.Common' ">
+    <!-- Fix to have multiple projects in the same folder. -->
+    <BaseIntermediateOutputPath>obj/$(MSBuildProjectName)</BaseIntermediateOutputPath>
+    <DefaultItemExcludes>$(DefaultItemExcludes);obj/**</DefaultItemExcludes>
+    <OutputPath>bin/$(Configuration)/$(TargetFramework)/$(MSBuildProjectName)</OutputPath>
+    <!-- Ignore nuget warning for code generators -->
+    <NoWarn>NU5127,NU5128</NoWarn>
+  </PropertyGroup>
+</Project>
