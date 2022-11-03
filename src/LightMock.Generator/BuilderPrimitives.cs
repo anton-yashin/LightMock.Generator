@@ -489,13 +489,28 @@ namespace LightMock.Generator
             IMethodSymbol symbol,
             Func<StringBuilder, StringBuilder> appendTypeCast)
         {
+            const string OUT_PREFIX = "__оut_variаble_for_"; // a russian letters in these constants, don't wanna to calculate a hash
+            const string RESULT_VARIABLE = "__result_vаriablе"; // a russian letters in these constants, don't wanna to calculate a hash
             if (IsHaveRefStructParameters(symbol))
                 return @this.AppendRefStructException();
 
             @this.Append("{");
 
+            var outParams = symbol.Parameters.Where(p => p.RefKind == RefKind.Out);
+
+            foreach (var parameter in outParams)
+            {
+                @this.Append(parameter.Type, SymbolDisplayFormats.WithTypeParams)
+                    .Append(" " + OUT_PREFIX)
+                    .Append(parameter.Name)
+                    .Append(" = default;");
+            }
+
             if (symbol.ReturnsVoid == false)
-                @this.Append("return ");
+            {
+                @this.Append(symbol.ReturnType, SymbolDisplayFormats.WithTypeParams)
+                    .Append(" " + RESULT_VARIABLE + " = ");
+            }
 
             @this.Append("global::LightMock.Generator.Default.Get(() =>")
                 .Append(contextName)
@@ -507,9 +522,28 @@ namespace LightMock.Generator
                     .Append(string.Join(",", symbol.TypeParameters.Select(i => i.Name)))
                     .Append(">");
             }
-            return @this.Append("(")
-                .Append(string.Join(", ", symbol.Parameters.Select(i => i.IsHaveReservedName() ? '@' + i.Name : i.Name)))
-                .Append(")));}");
+
+            @this.Append("(")
+                .Append(string.Join(", ", symbol.Parameters.Select(
+                    i => (i.RefKind == RefKind.Out 
+                    ? "out " + OUT_PREFIX
+                    : i.IsHaveReservedName() ? "@" : ""
+                    ) + i.Name)))
+                .Append(")));");
+
+            foreach (var parameter in outParams)
+            {
+                @this.Append(parameter.Name)
+                    .Append(" = " + OUT_PREFIX)
+                    .Append(parameter.Name)
+                    .Append(";");
+            }
+
+            if (symbol.ReturnsVoid)
+                @this.Append("}");
+            else
+                @this.Append(" return " + RESULT_VARIABLE + "; }");
+            return @this;
         }
 
         static bool IsHaveRefStructParameters(IMethodSymbol symbol)

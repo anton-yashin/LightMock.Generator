@@ -60,6 +60,12 @@ namespace LightMock.Generator
                 .Append(GetObsoleteAndOrOverrideChunkFor(symbol))
                 .AppendMethodDeclaration(compilation, definitionFormat, symbol);
             result.Append("{");
+            foreach (var parameter in symbol.Parameters.Where(p => p.RefKind == RefKind.Out))
+            {
+                result
+                    .Append(parameter.Name)
+                    .Append(" = default;");
+            }
             if (symbol.ReturnsVoid == false)
             {
                 result.Append("return default(")

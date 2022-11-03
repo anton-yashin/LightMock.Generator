@@ -840,6 +840,21 @@ namespace LightMock.Generator.Tests
             Assert.NotNull(testClass);
         }
 
+        [Fact]
+        // Issue #52
+        public void MethodWithOutParameter()
+        {
+            var testScript = LoadAssembly<AMethodWithOutParameter>();
+            var context = testScript.Context;
+            var mock = testScript.MockObject;
+
+            Assert.NotNull(context);
+            Assert.NotNull(mock);
+            var result = mock.Foo(out var bar);
+            Assert.Equal(0, bar);
+            Assert.Equal(0, result);
+        }
+
         protected override string GetFullResourceName(string resourceName)
             => "AbstractClass." + resourceName + ".test.cs";
     }
