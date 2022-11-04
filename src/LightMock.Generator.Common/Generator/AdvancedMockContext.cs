@@ -199,12 +199,12 @@ namespace LightMock.Generator
 
         #region IInvocationContext<T> implementation
 
-        void IInvocationContext<T>.Invoke(Expression<Action<T>> expression)
-            => InvocationContext.Invoke(expression);
+        void IInvocationContext<T>.Invoke(Expression<Action<T>> expression, IDictionary<string, object>? refValues)
+            => InvocationContext.Invoke(expression, refValues);
 
         [return: MaybeNull]
-        TResult IInvocationContext<T>.Invoke<TResult>(Expression<Func<T, TResult>> expression)
-            => InvocationContext.Invoke(expression);
+        TResult IInvocationContext<T>.Invoke<TResult>(Expression<Func<T, TResult>> expression, IDictionary<string, object>? refValues)
+            => InvocationContext.Invoke(expression, refValues);
 
         void IInvocationContext<T>.InvokeSetter<TResult>(Expression<Func<T, TResult>> expression, TResult value)
             => InvocationContext.InvokeSetter(expression, value);

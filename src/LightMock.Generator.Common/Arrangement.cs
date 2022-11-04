@@ -25,6 +25,7 @@
     http://twitter.com/bernhardrichter
 ******************************************************************************/
 using System;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 
 namespace LightMock
@@ -83,8 +84,11 @@ namespace LightMock
 
         protected Exception? GetException() => exceptionFactory.Invoke<Exception>(null, null);
 
-        protected void InvokeCallback(IInvocationInfo invocationInfo)
-            => invocationInfo.Invoke(callback);
+        protected void InvokeCallback(IInvocationInfo invocationInfo, IDictionary<string, object>? refValues)
+            => invocationInfo.Invoke(callback, refValues);
+
+        ICallbackResult ICallback.Callback(Delegate callback)
+            => SetCallback(callback);
 
         ICallbackResult ICallback.Callback(Action callback)
             => SetCallback(callback);

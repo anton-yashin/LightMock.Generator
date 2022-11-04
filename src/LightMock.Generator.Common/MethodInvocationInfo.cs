@@ -25,6 +25,7 @@
     https://github.com/anton-yashin/
 *******************************************************************************/
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
@@ -45,11 +46,34 @@ namespace LightMock
 
         public object[] Arguments { get; }
 
-        public void Invoke(CallbackInvocation callback) => callback.Invoke(Arguments);
+		public void Invoke(CallbackInvocation callback, IDictionary<string, object>? refValues)
+		{
+			callback.Invoke(Arguments);
+			SetRefParameters(refValues);
+		}
 
-        [return: MaybeNull]
-        public TResult Invoke<TResult>(CallbackInvocation callback, [AllowNull] TResult defaultValue)
-            => callback.Invoke(Arguments, defaultValue);
+		[return: MaybeNull]
+		public TResult Invoke<TResult>(CallbackInvocation callback, [AllowNull] TResult defaultValue, IDictionary<string, object>? refValues)
+		{
+			var result = callback.Invoke(Arguments, defaultValue);
+            SetRefParameters(refValues);
+			return result;
+        }
+
+        void SetRefParameters(IDictionary<string, object>? refValues)
+		{
+            if (refValues == null)
+                return;
+            var parameters = Method.GetParameters();
+            for (int i = 0; i < parameters.Length; i++)
+            {
+                var parameter = parameters[i];
+                if (parameter.ParameterType.IsByRef)
+                {
+                    refValues[parameter.Name] = Arguments[i];
+                }
+            }
+        }
 
         public void AppendInvocationInfo(StringBuilder here)
         {

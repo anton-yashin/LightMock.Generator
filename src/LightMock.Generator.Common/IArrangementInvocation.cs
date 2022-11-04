@@ -25,6 +25,7 @@
     https://github.com/anton-yashin/
 *******************************************************************************/
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 
 namespace LightMock
@@ -36,13 +37,13 @@ namespace LightMock
 
     internal interface IArrangementInvocation : IArrangementMatch
     {
-        void Invoke(IInvocationInfo invocationInfo);
+        void Invoke(IInvocationInfo invocationInfo, IDictionary<string, object>? refValues);
     }
 
     internal interface IArrangementInvocation<out TResult> : IArrangementMatch
     {
         [return: MaybeNull]
-        TResult Invoke(IInvocationInfo invocation);
+        TResult Invoke(IInvocationInfo invocation, IDictionary<string, object>? refValues);
     }
 
     internal interface IPropertyArrangementInvocation<TResult> : IArrangementMatch

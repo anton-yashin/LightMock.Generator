@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace LightMock.Generator.Tests.BaseTests
 {
@@ -93,6 +94,28 @@ namespace LightMock.Generator.Tests.BaseTests
         public byte[]? Execute(byte[] array)
         {
             return context.Invoke((f => f.Execute(array)));
+        }
+
+        public string OutMethod(out string @string, out int @int)
+        {
+            string __ref_string = default!;
+            int __ref_int = default!;
+            var refValues = new Dictionary<string, object>();
+            var result = context.Invoke(f => f.OutMethod(out __ref_string, out __ref_int), refValues);
+            @string = (string)refValues[nameof(@string)];
+            @int = (int)refValues[nameof(@int)];
+            return result!;
+        }
+
+        public int RefMethod(ref string @string, ref int @int)
+        {
+            string __ref_string = default!;
+            int __ref_int = default!;
+            var refValues = new Dictionary<string, object>();
+            var result = context.Invoke(f => f.RefMethod(ref __ref_string, ref __ref_int), refValues);
+            @string = (string)refValues[nameof(@string)];
+            @int = (int)refValues[nameof(@int)];
+            return result;
         }
     }
 }

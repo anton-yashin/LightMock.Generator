@@ -357,5 +357,51 @@ namespace LightMock.Generator.Tests.BaseTests
 
             Assert.Equal(expected, actual);
         }
+
+        [Fact]
+        public void OutValue()
+        {
+            const string EXPECTED_STRING = nameof(EXPECTED_STRING);
+            const int EXPECTED_INT = 42;
+            const string EXPECTED_RESULT = nameof(EXPECTED_RESULT);
+            var mockContext = new MockContext<IFoo>();
+            var fooMock = new FooMock(mockContext);
+
+            string @string = default!;
+            int @int = default!;
+            mockContext.Arrange(f => f.OutMethod(out @string, out @int))
+                .Returns(EXPECTED_RESULT)
+                .Callback(OutCallback);
+
+            var result = fooMock.OutMethod(out @string, out @int);
+            Assert.Equal(EXPECTED_STRING, @string);
+            Assert.Equal(EXPECTED_INT, @int);
+            Assert.Equal(EXPECTED_RESULT, result);
+
+            void OutCallback(out string @string, out int @int) => (@string, @int) = (EXPECTED_STRING, EXPECTED_INT);
+        }
+
+        [Fact]
+        public void RefValue()
+        {
+            const string EXPECTED_STRING = nameof(EXPECTED_STRING);
+            const int EXPECTED_INT = 42;
+            const int EXPECTED_RESULT = 123;
+            var mockContext = new MockContext<IFoo>();
+            var fooMock = new FooMock(mockContext);
+
+            string @string = default!;
+            int @int = default!;
+            mockContext.Arrange(f => f.RefMethod(ref @string, ref @int))
+                .Returns(EXPECTED_RESULT)
+                .Callback(RefCallback);
+
+            var result = fooMock.RefMethod(ref @string, ref @int);
+            Assert.Equal(EXPECTED_STRING, @string);
+            Assert.Equal(EXPECTED_INT, @int);
+            Assert.Equal(EXPECTED_RESULT, result);
+
+            void RefCallback(ref string @string, ref int @int) => (@string, @int) = (EXPECTED_STRING, EXPECTED_INT);
+        }
     }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 
@@ -28,7 +29,7 @@ namespace LightMock
         }
 
         [return: MaybeNull]
-        TResult IArrangementInvocation<TResult>.Invoke(IInvocationInfo invocation) => result;
+        TResult IArrangementInvocation<TResult>.Invoke(IInvocationInfo invocation, IDictionary<string, object>? refValues) => result;
 
         void IPropertyArrangementInvocation<TResult>.Invoke(TResult value) => result = value;
 

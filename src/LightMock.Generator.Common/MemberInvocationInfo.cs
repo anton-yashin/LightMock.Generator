@@ -25,6 +25,7 @@
     https://github.com/anton-yashin/
 *******************************************************************************/
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text;
@@ -40,11 +41,21 @@ namespace LightMock
 
         public MemberInfo MemberInfo { get; }
 
-        public void Invoke(CallbackInvocation callback) => callback.Invoke(null);
+        public void Invoke(
+            CallbackInvocation callback,
+            IDictionary<string, object>? refValues)
+        {
+            callback.Invoke(null);
+        }
 
         [return: MaybeNull]
-        public TResult Invoke<TResult>(CallbackInvocation callback, [AllowNull] TResult defaultValue)
-            => callback.Invoke(null, defaultValue);
+        public TResult Invoke<TResult>(
+            CallbackInvocation callback,
+            [AllowNull] TResult defaultValue,
+            IDictionary<string, object>? refValues)
+        {
+            return callback.Invoke(null, defaultValue);
+        }
 
         public void AppendInvocationInfo(StringBuilder here) 
         {
