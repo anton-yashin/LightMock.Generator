@@ -42,6 +42,12 @@ namespace LightMock
         /// </summary>
         /// <param name="callback">A callback to invoke.</param>
         /// <returns>Part of fluent interface. <see cref="ICallbackResult"/></returns>
+        ICallbackResult Callback(Delegate callback);
+        /// <summary>
+        /// Set a <paramref name="callback"/> that will be invoked when the method is called.
+        /// </summary>
+        /// <param name="callback">A callback to invoke.</param>
+        /// <returns>Part of fluent interface. <see cref="ICallbackResult"/></returns>
         ICallbackResult Callback(Action callback);
         /// <summary>
         /// Set a <paramref name="callback"/> that will be invoked when the method is called.

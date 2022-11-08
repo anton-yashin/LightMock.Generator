@@ -84,6 +84,20 @@ namespace LightMock.Generator.Tests.BaseTests
         }
 
         [Fact]
+        public void Assert_Reference_WithValidMatchPredicate_IsVerified()
+        {
+            var mockContext = new MockContext<IFoo>();
+            var fooMock = new FooMock(mockContext);
+            var @string = "SomeValue";
+            var @int = 42;
+            fooMock.RefMethod(ref @string, ref @int);
+            mockContext.Assert(f => f.RefMethod(
+                ref The<string>.Reference.Is(s => s.StartsWith("Some")).Value, 
+                ref The<int>.Reference.Is(i => i % 2 == 0).Value
+                ), Invoked.Once);
+        }
+
+        [Fact]
         public void Assert_WithInvalidMatchPredicate_ThrowsException()
         {
             var mockContext = new MockContext<IFoo>();
@@ -91,6 +105,20 @@ namespace LightMock.Generator.Tests.BaseTests
             fooMock.Execute("SomeValue");
             Assert.Throws<MockException>(()
                 => mockContext.Assert(f => f.Execute(The<string>.Is(s => s == "AnotherValue")), Invoked.Once));
+        }
+
+        [Fact]
+        public void Assert_Reference_WithInvalidMatchPredicate_ThrowsException()
+        {
+            var mockContext = new MockContext<IFoo>();
+            var fooMock = new FooMock(mockContext);
+            var @string = "SomeValue";
+            var @int = 42;
+            fooMock.RefMethod(ref @string, ref @int);
+            Assert.Throws<MockException>(() => mockContext.Assert(f => f.RefMethod(
+                ref The<string>.Reference.Is(s => s == "AnotherValue").Value,
+                ref The<int>.Reference.Is(i => i % 2 == 1).Value
+                ), Invoked.Once));
         }
 
         [Fact]
@@ -286,6 +314,55 @@ namespace LightMock.Generator.Tests.BaseTests
                 .Returns<byte[]>(a => a);
             var result = fooMock.Execute(inputData);
             Assert.Equal(inputData, result);
+        }
+
+        [Fact]
+        public void ArrangedByReferencePredicate_InvokesFooCallback()
+        {
+            const string EXPECTED = "foo";
+            var mockContext = new MockContext<IFoo>();
+            var fooMock = new FooMock(mockContext);
+            int fooCalled = 0;
+            int barCalled = 0;
+            string foo = EXPECTED;
+            int @int = 42;
+
+            mockContext.Arrange(f => f.RefMethod(
+                ref The<string>.Reference.Is(s => s == EXPECTED).Value,
+                ref The<int>.Reference.IsAny.Value)).Callback(FooCallback);
+            mockContext.Arrange(f => f.RefMethod(
+                ref The<string>.Reference.Is(s => s == "bar").Value,
+                ref The<int>.Reference.IsAny.Value)).Callback(BarCallback);
+
+            fooMock.RefMethod(ref foo, ref @int);
+
+            Assert.Equal(1, fooCalled);
+            Assert.Equal(0, barCalled);
+
+            void FooCallback(ref string @string, ref int @int) => fooCalled++;
+            void BarCallback(ref string @string, ref int @int) => barCalled++;
+        }
+
+        [Fact]
+        public void ArrangedByReferencePredicate_ReturnsExpectedResult()
+        {
+            const string EXPECTED = "foo";
+            const int EXPECTED_RESULT = 42;
+            var mockContext = new MockContext<IFoo>();
+            var fooMock = new FooMock(mockContext);
+            string foo = EXPECTED;
+            int @int = 12345;
+
+            mockContext.Arrange(f => f.RefMethod(
+                ref The<string>.Reference.Is(s => s == EXPECTED).Value,
+                ref The<int>.Reference.IsAny.Value)).Returns(EXPECTED_RESULT);
+            mockContext.Arrange(f => f.RefMethod(
+                ref The<string>.Reference.Is(s => s == "bar").Value,
+                ref The<int>.Reference.IsAny.Value)).Returns(24);
+
+            var result = fooMock.RefMethod(ref foo, ref @int);
+
+            Assert.Equal(EXPECTED_RESULT, result);
         }
 
         [Fact]

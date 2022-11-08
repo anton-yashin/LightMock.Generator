@@ -24,6 +24,9 @@ namespace LightMock.Generator.Tests.BaseTests
         Task<string> ExecuteAsync(string first, string second, string third, string fourth);
 
         byte[]? Execute(byte[] array);
+
+        string OutMethod(out string @string, out int @int);
+        int RefMethod(ref string @string, ref int @int);
     }
 
     public interface IBar

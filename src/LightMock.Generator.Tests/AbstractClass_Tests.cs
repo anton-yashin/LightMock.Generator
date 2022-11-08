@@ -840,6 +840,60 @@ namespace LightMock.Generator.Tests
             Assert.NotNull(testClass);
         }
 
+        [Fact]
+        // Issue #52
+        public void MethodWithOutParameter()
+        {
+            const int EXPECTED_OUT = 321;
+            const int EXPECTED_RESULT = 123;
+            var testScript = LoadAssembly<AMethodWithOutParameter>();
+            var context = testScript.Context;
+            var mock = testScript.MockObject;
+
+            Assert.NotNull(context);
+            Assert.NotNull(mock);
+
+            context.Arrange(_ => _.Foo(out The<int>.Reference.IsAny.Value))
+                .Returns(EXPECTED_RESULT)
+                .Callback(FooCallback);
+
+            int bar;
+            Assert.Equal(EXPECTED_RESULT, mock.Foo(out bar));
+            Assert.Equal(EXPECTED_OUT, bar);
+
+            context.Assert(_ => _.Foo(out The<int>.Reference.IsAny.Value), Invoked.Once);
+
+            static void FooCallback(out int bar) => bar = EXPECTED_OUT;
+        }
+
+        [Fact]
+        // Issue #52
+        public void MethodWithRefParameter()
+        {
+            const string EXPECTED_OUT = nameof(EXPECTED_OUT);
+            const string EXPECTED_RESULT = nameof(EXPECTED_RESULT);
+            var testScript = LoadAssembly<AMethodWithRefParameter>();
+            var context = testScript.Context;
+            var mock = testScript.MockObject;
+
+            Assert.NotNull(context);
+            Assert.NotNull(mock);
+
+            context.Arrange(_ => _.Foo(ref The<string>.Reference.IsAny.Value))
+                .Returns(EXPECTED_RESULT)
+                .Callback(FooCallback);
+
+            string bar = "";
+            Assert.Equal(EXPECTED_RESULT, mock.Foo(ref bar));
+            Assert.Equal(EXPECTED_OUT, bar);
+
+            context.Assert(_ => _.Foo(ref The<string>.Reference.IsAny.Value), Invoked.Once);
+
+            static void FooCallback(out string bar) => bar = EXPECTED_OUT;
+        }
+
+
+
         protected override string GetFullResourceName(string resourceName)
             => "AbstractClass." + resourceName + ".test.cs";
     }

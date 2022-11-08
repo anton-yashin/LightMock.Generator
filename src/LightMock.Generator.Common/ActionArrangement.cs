@@ -25,6 +25,7 @@
     https://github.com/anton-yashin/
 *******************************************************************************/
 using System;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 
 namespace LightMock
@@ -35,10 +36,10 @@ namespace LightMock
         {
         }
 
-        public void Invoke(IInvocationInfo invocationInfo)
+        public void Invoke(IInvocationInfo invocationInfo, IDictionary<string, object>? refValues)
         {
             var exception = GetException();
-            InvokeCallback(invocationInfo);
+            InvokeCallback(invocationInfo, refValues);
             if (exception != null)
                 throw exception;
         }

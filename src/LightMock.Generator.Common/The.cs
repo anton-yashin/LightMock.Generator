@@ -32,7 +32,7 @@ namespace LightMock
     /// Specifies an argument match.
     /// </summary>
     /// <typeparam name="TValue">The type of the target parameter.</typeparam>
-    public class The<TValue>
+    public partial class The<TValue>
     {
         /// <summary>
         /// Specifies that the argument value can be any value of <typeparamref name="TValue"/>.

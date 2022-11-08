@@ -24,7 +24,7 @@ namespace LightMock
             var @this = new MatchExpressionRewriter();
             return (LambdaExpression)@this.Visit(expression);
         }
-                
+
         /// <summary>
         /// Replaces references to the <see cref="The{TValue}.IsAnyValue"/> with a <see cref="MethodCallExpression"/>
         /// that represents calling the <see cref="The{TValue}.Is"/> method.
@@ -33,40 +33,51 @@ namespace LightMock
         /// <returns><see cref="Expression"/>.</returns>
         protected override Expression VisitMember(MemberExpression node)
         {
-            MemberInfo member = node.Member; 
-            
-            if (RepresentsIsAnyValueProperty(member))
-            {                                
-                return CreateMethodCallExpression(member);
+            MemberInfo member = node.Member;
+
+            switch (member.Name)
+            {
+                case nameof(The<object>.IsAnyValue)
+                when member.DeclaringType.GetGenericTypeDefinition() == typeof(The<>):
+                    return Create_Is_MethodCallExpression(member);
+                case nameof(TheReference<object>.Value)
+                when node.Expression is MemberExpression mex
+                && mex.Member.Name == nameof(The<object>.Reference.IsAny)
+                && mex.Member.DeclaringType.GetGenericTypeDefinition() == typeof(The<>.Reference):
+                    return Create_The_Is_MethodCallExpression(mex);
+                case nameof(TheReference<object>.Value)
+                when node.Expression is MethodCallExpression mce
+                && mce.Method.DeclaringType.GetGenericTypeDefinition() == typeof(The<>.Reference):
+                    return Create_The_Is_MethodCallExpression(mce);
             }
-            
             return base.VisitMember(node);
         }
 
-        private static bool RepresentsIsAnyValueProperty(MemberInfo member)
-        {
-            return member.Name == nameof(The<object>.IsAnyValue);
-        }
+        private Expression Create_The_Is_MethodCallExpression(MethodCallExpression node)
+            => Expression.Call(
+                GetTheIsMethod(node.Method.DeclaringType.GetGenericArguments()),
+                node.Arguments[0]
+                );
 
-        private static Expression CreateMethodCallExpression(MemberInfo member)
-        {
-            var parameterExpression = Expression.Parameter(GetParameterType(member), "v");
-            var trueConstantExpression = Expression.Constant(true, typeof(bool));
-            LambdaExpression trueExpression = Expression.Lambda(trueConstantExpression, parameterExpression);
-            MethodCallExpression methodCallExpression = Expression.Call(GetIsMethod(member), trueExpression);
-            return methodCallExpression;
-        }
+        private Expression Create_The_Is_MethodCallExpression(MemberExpression node)
+            => Expression.Call(
+                GetTheIsMethod(node.Member.DeclaringType.GetGenericArguments()),
+                TrueLambda(node.Member)
+                );
+
+        private static Expression Create_Is_MethodCallExpression(MemberInfo member)
+            => Expression.Call(GetIsMethod(member), TrueLambda(member));
+
+        static Expression TrueLambda(MemberInfo member)
+            => Expression.Lambda(
+                body: Expression.Constant(true, typeof(bool)),
+                Expression.Parameter(member.DeclaringType.GenericTypeArguments[0], "v")
+                );
 
         private static MethodInfo GetIsMethod(MemberInfo member)
-        {
-            // ReSharper disable once PossibleNullReferenceException
-            return member.DeclaringType.GetTypeInfo().DeclaredMethods.Single(m => m.Name == nameof(The<object>.Is));
-        }
+            => member.DeclaringType.GetTypeInfo().DeclaredMethods.Single(m => m.Name == nameof(The<object>.Is));
 
-        private static Type GetParameterType(MemberInfo member)
-        {
-            // ReSharper disable once PossibleNullReferenceException
-            return member.DeclaringType.GenericTypeArguments[0];	        
-        }
+        static MethodInfo GetTheIsMethod(Type[] genericArguments)
+            => typeof(The<>).MakeGenericType(genericArguments).GetTypeInfo().DeclaredMethods.Single(m => m.Name == nameof(The<object>.Is));
     }
 }

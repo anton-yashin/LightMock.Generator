@@ -1,1 +1,2 @@
-﻿* fix: removed error spam for unknown entities #47
+﻿* feat: support for 'out' and 'ref' arguments #52
+* feat: pattern matching for 'ref' arguments

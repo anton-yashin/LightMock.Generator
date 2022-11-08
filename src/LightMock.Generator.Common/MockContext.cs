@@ -155,13 +155,21 @@ namespace LightMock
                 throw new MockException(string.Format("The method {0} was called {1} times", matchExpression.Simplify(), invocations.Length));
         }
 
-        /// <summary>
-        /// Tracks that the method represented by the <paramref name="expression"/>
-        /// has been invoked.
-        /// </summary>
-        /// <param name="expression">The <see cref="Expression{TDelegate}"/> that 
-        /// represents the method that has been invoked.</param>
+        /// <inheritdoc/>
         void IInvocationContext<TMock>.Invoke(Expression<Action<TMock>> expression)
+            => Invoke(expression, null);
+
+        /// <inheritdoc/>
+        void IInvocationContext<TMock>.Invoke(
+            Expression<Action<TMock>> expression,
+            IDictionary<string, object>? refValues)
+        { 
+            Invoke(expression, refValues);
+        }
+
+        void Invoke(
+            Expression<Action<TMock>> expression,
+            IDictionary<string, object>? refValues)
         {
             var invocationInfo = expression.ToInvocationInfo();
             invocations.Add(invocationInfo);
@@ -174,21 +182,32 @@ namespace LightMock
 
             if (arrangement != null)
             {
-                arrangement.Invoke(invocationInfo);
+                arrangement.Invoke(invocationInfo, refValues);
             }            
         }
 
-        /// <summary>
-        /// Tracks that the method represented by the <paramref name="expression"/>
-        /// has been invoked.
-        /// </summary>
-        /// <typeparam name="TResult">The return type of the method that has been invoked.</typeparam>
-        /// <param name="expression">The <see cref="Expression{TDelegate}"/> that 
-        /// represents the method that has been invoked.</param>
-        /// <returns>An instance of <typeparamref name="TResult"/> or possibly null 
-        /// if <typeparamref name="TResult"/> a reference type.</returns>
+        /// <inheritdoc/>
         [return: MaybeNull]
-        TResult IInvocationContext<TMock>.Invoke<TResult>(Expression<Func<TMock, TResult>> expression)
+        TResult IInvocationContext<TMock>.Invoke<TResult>(
+            Expression<Func<TMock, TResult>> expression)
+        { 
+            return Invoke<TResult>(expression, null);
+        }
+
+        /// <inheritdoc/>
+        [return: MaybeNull]
+        TResult IInvocationContext<TMock>.Invoke<TResult>(
+            Expression<Func<TMock, TResult>> expression,
+            IDictionary<string, object>? refValues)
+        {
+            return Invoke<TResult>(expression, refValues);
+        }
+
+        /// <inheritdoc/>
+        [return: MaybeNull]
+        TResult Invoke<TResult>(
+            Expression<Func<TMock, TResult>> expression,
+            IDictionary<string, object>? refValues)
         {
             var invocationInfo = expression.ToInvocationInfo();
             invocations.Add(invocationInfo);
@@ -200,7 +219,7 @@ namespace LightMock
                       select a).FirstOrDefault());
             if (arrangement != null)
             {
-                return arrangement.Invoke(invocationInfo);
+                return arrangement.Invoke(invocationInfo, refValues);
             }
 
             return default(TResult);

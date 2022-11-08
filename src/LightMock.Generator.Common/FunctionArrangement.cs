@@ -26,6 +26,7 @@
 ******************************************************************************/
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq.Expressions;
 
@@ -59,11 +60,11 @@ namespace LightMock
         }
 
         [return: MaybeNull]
-        TResult IArrangementInvocation<TResult>.Invoke(IInvocationInfo invocation)
+        TResult IArrangementInvocation<TResult>.Invoke(IInvocationInfo invocation, IDictionary<string, object>? refValues)
         {
             var exception = GetException();
-            var result = invocation.Invoke(callback, this.result);
-            InvokeCallback(invocation);
+            var result = invocation.Invoke(callback, this.result, refValues);
+            InvokeCallback(invocation, refValues);
             if (exception != null)
                 throw exception;
             return result;
