@@ -359,49 +359,56 @@ namespace LightMock.Generator.Tests.BaseTests
         }
 
         [Fact]
-        public void OutValue()
+        public void OutValue_AnyReference_InvokesCallback()
         {
             const string EXPECTED_STRING = nameof(EXPECTED_STRING);
             const int EXPECTED_INT = 42;
             const string EXPECTED_RESULT = nameof(EXPECTED_RESULT);
+            int callbackInvoked = 0;
             var mockContext = new MockContext<IFoo>();
             var fooMock = new FooMock(mockContext);
 
-            string @string = default!;
-            int @int = default!;
-            mockContext.Arrange(f => f.OutMethod(out @string, out @int))
+            mockContext.Arrange(f => f.OutMethod(out The<string>.IsAnyReference, out The<int>.IsAnyReference))
                 .Returns(EXPECTED_RESULT)
                 .Callback(OutCallback);
 
+            string @string = "random string";
+            int @int = 123;
             var result = fooMock.OutMethod(out @string, out @int);
             Assert.Equal(EXPECTED_STRING, @string);
             Assert.Equal(EXPECTED_INT, @int);
             Assert.Equal(EXPECTED_RESULT, result);
 
-            void OutCallback(out string @string, out int @int) => (@string, @int) = (EXPECTED_STRING, EXPECTED_INT);
+            mockContext.Assert(f => f.OutMethod(out The<string>.IsAnyReference, out The<int>.IsAnyReference), Invoked.Once);
+
+            void OutCallback(out string @string, out int @int)
+                => (@string, @int, callbackInvoked) = (EXPECTED_STRING, EXPECTED_INT, callbackInvoked + 1);
         }
 
         [Fact]
-        public void RefValue()
+        public void RefValue_AnyReference_InvokesCallback()
         {
             const string EXPECTED_STRING = nameof(EXPECTED_STRING);
             const int EXPECTED_INT = 42;
             const int EXPECTED_RESULT = 123;
+            int callbackInvoked = 0;
             var mockContext = new MockContext<IFoo>();
             var fooMock = new FooMock(mockContext);
 
-            string @string = default!;
-            int @int = default!;
-            mockContext.Arrange(f => f.RefMethod(ref @string, ref @int))
+            mockContext.Arrange(f => f.RefMethod(ref The<string>.IsAnyReference, ref The<int>.IsAnyReference))
                 .Returns(EXPECTED_RESULT)
                 .Callback(RefCallback);
 
+            string @string = "random string";
+            int @int = 123;
             var result = fooMock.RefMethod(ref @string, ref @int);
             Assert.Equal(EXPECTED_STRING, @string);
             Assert.Equal(EXPECTED_INT, @int);
             Assert.Equal(EXPECTED_RESULT, result);
+            mockContext.Assert(f => f.RefMethod(ref The<string>.IsAnyReference, ref The<int>.IsAnyReference), Invoked.Once);
 
-            void RefCallback(ref string @string, ref int @int) => (@string, @int) = (EXPECTED_STRING, EXPECTED_INT);
+            void RefCallback(ref string @string, ref int @int)
+                => (@string, @int, callbackInvoked) = (EXPECTED_STRING, EXPECTED_INT, callbackInvoked + 1);
         }
     }
 }

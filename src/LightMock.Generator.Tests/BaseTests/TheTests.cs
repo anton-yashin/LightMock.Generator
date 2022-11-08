@@ -11,9 +11,16 @@ namespace LightMock.Generator.Tests.BaseTests
         }
 
         [Fact]
+        public void IsAnyReference_ReturnsDefaultValue()
+        {
+            Assert.Equal(default(string), The<string>.IsAnyReference);
+        }
+
+        [Fact]
         public void Is_AnyPredicate_ReturnsDefaultValue()
         {
             Assert.Equal(default(string), The<string>.Is(s => true));
         }
+
     }
 }

@@ -24,7 +24,7 @@ namespace LightMock
             var @this = new MatchExpressionRewriter();
             return (LambdaExpression)@this.Visit(expression);
         }
-                
+
         /// <summary>
         /// Replaces references to the <see cref="The{TValue}.IsAnyValue"/> with a <see cref="MethodCallExpression"/>
         /// that represents calling the <see cref="The{TValue}.Is"/> method.
@@ -45,7 +45,13 @@ namespace LightMock
 
         private static bool RepresentsIsAnyValueProperty(MemberInfo member)
         {
-            return member.Name == nameof(The<object>.IsAnyValue);
+            switch (member.Name)
+            {
+                case nameof(The<object>.IsAnyValue):
+                case nameof(The<object>.IsAnyReference):
+                    return member.DeclaringType.GetGenericTypeDefinition() == typeof(The<>);
+            }    
+            return false;
         }
 
         private static Expression CreateMethodCallExpression(MemberInfo member)

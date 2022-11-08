@@ -34,6 +34,13 @@ namespace LightMock
     /// <typeparam name="TValue">The type of the target parameter.</typeparam>
     public class The<TValue>
     {
+#nullable disable
+        /// <summary>
+        /// Specifies that the argument value can be any reference of <typeparamref name="TValue"/>.
+        /// </summary>
+        public static TValue IsAnyReference;
+#nullable restore
+
         /// <summary>
         /// Specifies that the argument value can be any value of <typeparamref name="TValue"/>.
         /// </summary>
