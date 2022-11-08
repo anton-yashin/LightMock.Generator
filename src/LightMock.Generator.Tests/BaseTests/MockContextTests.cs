@@ -344,7 +344,7 @@ namespace LightMock.Generator.Tests.BaseTests
         }
 
         [Fact]
-        public void ArrangedByReferencePredicate_Returns42()
+        public void ArrangedByReferencePredicate_ReturnsExpectedResult()
         {
             const string EXPECTED = "foo";
             const int EXPECTED_RESULT = 42;
