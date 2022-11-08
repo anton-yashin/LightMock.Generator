@@ -39,13 +39,17 @@ namespace LightMock
             /// <summary>
             /// Specifies that the <see langword="ref"/> argument value can be any value of <typeparamref name="TValue"/>.
             /// </summary>
+            /// <remarks>You can use this with <see langword="out"/> argument, but remember that
+            /// you can't capture incoming value of <see langword="out"/> argument.</remarks>
             public static TheReference<TValue> IsAny => new TheReference<TValue>();
 
             /// <summary>
             /// Specifies that the <see langword="ref"/> argument value must match the given <paramref name="predicate"/>.
             /// </summary>
             /// <param name="predicate"></param>
-            /// <returns></returns>
+            /// <returns>New <see cref="TheReference{TValue}"/></returns>
+            /// <remarks>This pattern matching does not work with <see langword="out"/> argments,
+            /// because you can't capture incomming value of <see langword="out"/> argments.</remarks>
             public static TheReference<TValue> Is(Func<TValue, bool> predicate) => new TheReference<TValue>();
 
         }
