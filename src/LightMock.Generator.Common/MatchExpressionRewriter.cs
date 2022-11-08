@@ -45,12 +45,25 @@ namespace LightMock
                 && mex.Member.Name == nameof(The<object>.Reference.IsAny)
                 && mex.Member.DeclaringType.GetGenericTypeDefinition() == typeof(The<>.Reference):
                     return Create_The_Is_MethodCallExpression(mex);
+                case nameof(TheReference<object>.Value)
+                when node.Expression is MethodCallExpression mce
+                && mce.Method.DeclaringType.GetGenericTypeDefinition() == typeof(The<>.Reference):
+                    return Create_The_Is_MethodCallExpression(mce);
             }
             return base.VisitMember(node);
         }
 
+        private Expression Create_The_Is_MethodCallExpression(MethodCallExpression node)
+            => Expression.Call(
+                GetTheIsMethod(node.Method.DeclaringType.GetGenericArguments()),
+                node.Arguments[0]
+                );
+
         private Expression Create_The_Is_MethodCallExpression(MemberExpression node)
-            => Expression.Call(GetTheIsMethod(node.Member), TrueLambda(node.Member));
+            => Expression.Call(
+                GetTheIsMethod(node.Member.DeclaringType.GetGenericArguments()),
+                TrueLambda(node.Member)
+                );
 
         private static Expression Create_Is_MethodCallExpression(MemberInfo member)
             => Expression.Call(GetIsMethod(member), TrueLambda(member));
@@ -64,7 +77,7 @@ namespace LightMock
         private static MethodInfo GetIsMethod(MemberInfo member)
             => member.DeclaringType.GetTypeInfo().DeclaredMethods.Single(m => m.Name == nameof(The<object>.Is));
 
-        static MethodInfo GetTheIsMethod(MemberInfo member)
-            => typeof(The<>).MakeGenericType(member.DeclaringType.GetGenericArguments()).GetTypeInfo().DeclaredMethods.Single(m => m.Name == nameof(The<object>.Is));
+        static MethodInfo GetTheIsMethod(Type[] genericArguments)
+            => typeof(The<>).MakeGenericType(genericArguments).GetTypeInfo().DeclaredMethods.Single(m => m.Name == nameof(The<object>.Is));
     }
 }
