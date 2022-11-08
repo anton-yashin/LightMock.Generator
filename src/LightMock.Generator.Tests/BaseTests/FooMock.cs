@@ -102,8 +102,8 @@ namespace LightMock.Generator.Tests.BaseTests
             int __ref_int = default!;
             var refValues = new Dictionary<string, object>();
             var result = context.Invoke(f => f.OutMethod(out __ref_string, out __ref_int), refValues);
-            @string = Unpack(refValues, nameof(@string), default(string)!);
-            @int = Unpack(refValues, nameof(@int), default(int));
+            @string = ArgumentHelper.Unpack<string>(refValues, nameof(@string));
+            @int = ArgumentHelper.Unpack<int>(refValues, nameof(@int));
             return result!;
         }
 
@@ -113,12 +113,9 @@ namespace LightMock.Generator.Tests.BaseTests
             int __ref_int = default!;
             var refValues = new Dictionary<string, object>();
             var result = context.Invoke(f => f.RefMethod(ref __ref_string, ref __ref_int), refValues);
-            @string = Unpack(refValues, nameof(@string), @string);
-            @int = Unpack(refValues, nameof(@int), @int);
+            @string = ArgumentHelper.Unpack(refValues, nameof(@string), @string);
+            @int = ArgumentHelper.Unpack(refValues, nameof(@int), @int);
             return result;
         }
-
-        static T Unpack<T>(IDictionary<string, object> d, string name, T @default)
-            => d.TryGetValue(name, out var packed) ? (T)packed : @default;
     }
 }
