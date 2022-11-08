@@ -853,7 +853,7 @@ namespace LightMock.Generator.Tests
             Assert.NotNull(context);
             Assert.NotNull(mock);
 
-            context.Arrange(_ => _.Foo(out The<int>.IsAnyReference))
+            context.Arrange(_ => _.Foo(out The<int>.Reference.IsAny.Value))
                 .Returns(EXPECTED_RESULT)
                 .Callback(FooCallback);
 
@@ -861,7 +861,7 @@ namespace LightMock.Generator.Tests
             Assert.Equal(EXPECTED_RESULT, mock.Foo(out bar));
             Assert.Equal(EXPECTED_OUT, bar);
 
-            context.Assert(_ => _.Foo(out The<int>.IsAnyReference), Invoked.Once);
+            context.Assert(_ => _.Foo(out The<int>.Reference.IsAny.Value), Invoked.Once);
 
             static void FooCallback(out int bar) => bar = EXPECTED_OUT;
         }
@@ -879,7 +879,7 @@ namespace LightMock.Generator.Tests
             Assert.NotNull(context);
             Assert.NotNull(mock);
 
-            context.Arrange(_ => _.Foo(ref The<string>.IsAnyReference))
+            context.Arrange(_ => _.Foo(ref The<string>.Reference.IsAny.Value))
                 .Returns(EXPECTED_RESULT)
                 .Callback(FooCallback);
 
@@ -887,7 +887,7 @@ namespace LightMock.Generator.Tests
             Assert.Equal(EXPECTED_RESULT, mock.Foo(ref bar));
             Assert.Equal(EXPECTED_OUT, bar);
 
-            context.Assert(_ => _.Foo(ref The<string>.IsAnyReference), Invoked.Once);
+            context.Assert(_ => _.Foo(ref The<string>.Reference.IsAny.Value), Invoked.Once);
 
             static void FooCallback(out string bar) => bar = EXPECTED_OUT;
         }

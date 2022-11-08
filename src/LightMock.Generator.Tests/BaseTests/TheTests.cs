@@ -13,7 +13,7 @@ namespace LightMock.Generator.Tests.BaseTests
         [Fact]
         public void IsAnyReference_ReturnsDefaultValue()
         {
-            Assert.Equal(default(string), The<string>.IsAnyReference);
+            Assert.Equal(default(string), The<string>.Reference.IsAny.Value);
         }
 
         [Fact]

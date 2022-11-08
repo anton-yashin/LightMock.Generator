@@ -368,7 +368,7 @@ namespace LightMock.Generator.Tests.BaseTests
             var mockContext = new MockContext<IFoo>();
             var fooMock = new FooMock(mockContext);
 
-            mockContext.Arrange(f => f.OutMethod(out The<string>.IsAnyReference, out The<int>.IsAnyReference))
+            mockContext.Arrange(f => f.OutMethod(out The<string>.Reference.IsAny.Value, out The<int>.Reference.IsAny.Value))
                 .Returns(EXPECTED_RESULT)
                 .Callback(OutCallback);
 
@@ -379,7 +379,7 @@ namespace LightMock.Generator.Tests.BaseTests
             Assert.Equal(EXPECTED_INT, @int);
             Assert.Equal(EXPECTED_RESULT, result);
 
-            mockContext.Assert(f => f.OutMethod(out The<string>.IsAnyReference, out The<int>.IsAnyReference), Invoked.Once);
+            mockContext.Assert(f => f.OutMethod(out The<string>.Reference.IsAny.Value, out The<int>.Reference.IsAny.Value), Invoked.Once);
 
             void OutCallback(out string @string, out int @int)
                 => (@string, @int, callbackInvoked) = (EXPECTED_STRING, EXPECTED_INT, callbackInvoked + 1);
@@ -395,7 +395,7 @@ namespace LightMock.Generator.Tests.BaseTests
             var mockContext = new MockContext<IFoo>();
             var fooMock = new FooMock(mockContext);
 
-            mockContext.Arrange(f => f.RefMethod(ref The<string>.IsAnyReference, ref The<int>.IsAnyReference))
+            mockContext.Arrange(f => f.RefMethod(ref The<string>.Reference.IsAny.Value, ref The<int>.Reference.IsAny.Value))
                 .Returns(EXPECTED_RESULT)
                 .Callback(RefCallback);
 
@@ -405,7 +405,7 @@ namespace LightMock.Generator.Tests.BaseTests
             Assert.Equal(EXPECTED_STRING, @string);
             Assert.Equal(EXPECTED_INT, @int);
             Assert.Equal(EXPECTED_RESULT, result);
-            mockContext.Assert(f => f.RefMethod(ref The<string>.IsAnyReference, ref The<int>.IsAnyReference), Invoked.Once);
+            mockContext.Assert(f => f.RefMethod(ref The<string>.Reference.IsAny.Value, ref The<int>.Reference.IsAny.Value), Invoked.Once);
 
             void RefCallback(ref string @string, ref int @int)
                 => (@string, @int, callbackInvoked) = (EXPECTED_STRING, EXPECTED_INT, callbackInvoked + 1);
