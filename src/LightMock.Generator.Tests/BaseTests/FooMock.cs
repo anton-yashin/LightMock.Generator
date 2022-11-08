@@ -109,8 +109,8 @@ namespace LightMock.Generator.Tests.BaseTests
 
         public int RefMethod(ref string @string, ref int @int)
         {
-            string __ref_string = default!;
-            int __ref_int = default!;
+            string __ref_string = @string;
+            int __ref_int = @int;
             var refValues = new Dictionary<string, object>();
             var result = context.Invoke(f => f.RefMethod(ref __ref_string, ref __ref_int), refValues);
             @string = ArgumentHelper.Unpack(refValues, nameof(@string), @string);

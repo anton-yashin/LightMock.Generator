@@ -489,21 +489,32 @@ namespace LightMock.Generator
             IMethodSymbol symbol,
             Func<StringBuilder, StringBuilder> appendTypeCast)
         {
-            const string OUT_PREFIX = "__оut_variаble_for_"; // a russian letters in these constants, don't wanna to calculate a hash
-            const string RESULT_VARIABLE = "__result_vаriablе"; // a russian letters in these constants, don't wanna to calculate a hash
+            const string REF_VARIABLE_PREFIX = "__ref_variable_for_";
+            const string RESULT_VARIABLE = "__result_variable";
+            const string REF_VALUES_VARIABLE = "__ref_values";
             if (IsHaveRefStructParameters(symbol))
                 return @this.AppendRefStructException();
 
             @this.Append("{");
 
-            var outParams = symbol.Parameters.Where(p => p.RefKind == RefKind.Out);
+            var refParams = symbol.Parameters.Where(p => p.RefKind == RefKind.Out || p.RefKind == RefKind.Ref);
+            bool haveRefParams = false;
 
-            foreach (var parameter in outParams)
+            foreach (var parameter in refParams)
             {
+                haveRefParams = true;
                 @this.Append(parameter.Type, SymbolDisplayFormats.WithTypeParams)
-                    .Append(" " + OUT_PREFIX)
+                    .Append(" " + REF_VARIABLE_PREFIX)
                     .Append(parameter.Name)
-                    .Append(" = default;");
+                    .Append(" = ")
+                    .Append(parameter.RefKind == RefKind.Ref ? parameter.EscapedName() : "default")
+                    .Append(";");
+            }
+
+            if (haveRefParams)
+            {
+                const string DICTIONARY_TYPE = "global::System.Collections.Generic.Dictionary<string, object>";
+                @this.Append(DICTIONARY_TYPE + " " + REF_VALUES_VARIABLE + " = new " + DICTIONARY_TYPE + "();");
             }
 
             if (symbol.ReturnsVoid == false)
@@ -524,19 +535,24 @@ namespace LightMock.Generator
             }
 
             @this.Append("(")
-                .Append(string.Join(", ", symbol.Parameters.Select(
-                    i => (i.RefKind == RefKind.Out 
-                    ? "out " + OUT_PREFIX
-                    : i.IsHaveReservedName() ? "@" : ""
-                    ) + i.Name)))
-                .Append(")));");
+                .Append(string.Join(", ", symbol.Parameters.Select(GetParam)))
+                .Append(")");
 
-            foreach (var parameter in outParams)
+            if (haveRefParams)
+                @this.Append(", " + REF_VALUES_VARIABLE);
+            @this.Append("));");
+
+            foreach (var parameter in refParams)
             {
-                @this.Append(parameter.Name)
-                    .Append(" = " + OUT_PREFIX)
+                @this.Append(parameter.EscapedName())
+                    .Append(" = global::LightMock.ArgumentHelper.Unpack<")
+                    .Append(parameter.Type, SymbolDisplayFormats.WithTypeParams)
+                    .Append(">(" + REF_VALUES_VARIABLE + ", nameof(")
                     .Append(parameter.Name)
-                    .Append(";");
+                    .Append(")");
+                if (parameter.RefKind == RefKind.Ref)
+                    @this.Append(", ").Append(parameter.EscapedName());
+                @this.Append(");");
             }
 
             if (symbol.ReturnsVoid)
@@ -544,6 +560,18 @@ namespace LightMock.Generator
             else
                 @this.Append(" return " + RESULT_VARIABLE + "; }");
             return @this;
+
+            static string GetParam(IParameterSymbol ps)
+            {
+                switch (ps.RefKind)
+                {
+                    case RefKind.Ref:
+                        return "ref " + REF_VARIABLE_PREFIX + ps.Name;
+                    case RefKind.Out:
+                        return "out " + REF_VARIABLE_PREFIX + ps.Name;
+                }
+                return ps.EscapedName();
+            }
         }
 
         static bool IsHaveRefStructParameters(IMethodSymbol symbol)

@@ -844,15 +844,26 @@ namespace LightMock.Generator.Tests
         // Issue #52
         public void MethodWithOutParameter()
         {
+            const int EXPECTED_OUT = 321;
+            const int EXPECTED_RESULT = 123;
             var testScript = LoadAssembly<AMethodWithOutParameter>();
             var context = testScript.Context;
             var mock = testScript.MockObject;
 
             Assert.NotNull(context);
             Assert.NotNull(mock);
-            var result = mock.Foo(out var bar);
-            Assert.Equal(0, bar);
-            Assert.Equal(0, result);
+
+            context.Arrange(_ => _.Foo(out The<int>.IsAnyReference))
+                .Returns(EXPECTED_RESULT)
+                .Callback(FooCallback);
+
+            int bar;
+            Assert.Equal(EXPECTED_RESULT, mock.Foo(out bar));
+            Assert.Equal(EXPECTED_OUT, bar);
+
+            context.Assert(_ => _.Foo(out The<int>.IsAnyReference), Invoked.Once);
+
+            static void FooCallback(out int bar) => bar = EXPECTED_OUT;
         }
 
         protected override string GetFullResourceName(string resourceName)

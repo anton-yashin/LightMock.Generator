@@ -171,6 +171,9 @@ namespace LightMock.Generator
             return false;
         }
 
+        public static string EscapedName(this ISymbol symbol)
+            => (symbol.IsHaveReservedName() ? "@" : "") + symbol.Name;
+
         public static bool IsAvailableInSource(this ISymbol symbol)
             => symbol.DeclaringSyntaxReferences.Length > 0;
     }
