@@ -44,9 +44,17 @@ namespace LightMock
         /// </summary>
         /// <param name="expression">The <see cref="Expression{TDelegate}"/> that 
         /// represents the method that has been invoked.</param>
-        /// <param name="refValues">A dictionary that will contain "out" values
+        void Invoke(Expression<Action<TMock>> expression);
+
+        /// <summary>
+        /// Tracks that the method represented by the <paramref name="expression"/>
+        /// has been invoked.
+        /// </summary>
+        /// <param name="expression">The <see cref="Expression{TDelegate}"/> that 
+        /// represents the method that has been invoked.</param>
+        /// <param name="refValues">A dictionary that will contain "out" or "ref" values
         /// if there is an appropriate callback.</param>
-        void Invoke(Expression<Action<TMock>> expression, IDictionary<string, object>? refValues = null);
+        void Invoke(Expression<Action<TMock>> expression, IDictionary<string, object>? refValues);
 
         /// <summary>
         /// Tracks that the method represented by the <paramref name="expression"/>
@@ -55,12 +63,22 @@ namespace LightMock
         /// <typeparam name="TResult">The return type of the method that has been invoked.</typeparam>
         /// <param name="expression">The <see cref="Expression{TDelegate}"/> that 
         /// represents the method that has been invoked.</param>
-        /// <param name="refValues">A dictionary that will contain "out" values
+        [return: MaybeNull]
+        TResult Invoke<TResult>(Expression<Func<TMock, TResult>> expression);
+
+        /// <summary>
+        /// Tracks that the method represented by the <paramref name="expression"/>
+        /// has been invoked.
+        /// </summary>
+        /// <typeparam name="TResult">The return type of the method that has been invoked.</typeparam>
+        /// <param name="expression">The <see cref="Expression{TDelegate}"/> that 
+        /// represents the method that has been invoked.</param>
+        /// <param name="refValues">A dictionary that will contain "out" or "ref" values
         /// if there is an appropriate callback.</param>
         /// <returns>An instance of <typeparamref name="TResult"/> or possibly null 
         /// if <typeparamref name="TResult"/> a reference type.</returns>
         [return: MaybeNull]
-        TResult Invoke<TResult>(Expression<Func<TMock, TResult>> expression, IDictionary<string, object>? refValues = null);
+        TResult Invoke<TResult>(Expression<Func<TMock, TResult>> expression, IDictionary<string, object>? refValues);
 
         /// <summary>
         /// Tracks that the setter represented by the <paramref name="expression"/>

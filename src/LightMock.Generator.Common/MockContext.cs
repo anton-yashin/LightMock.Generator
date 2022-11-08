@@ -156,7 +156,18 @@ namespace LightMock
         }
 
         /// <inheritdoc/>
+        void IInvocationContext<TMock>.Invoke(Expression<Action<TMock>> expression)
+            => Invoke(expression, null);
+
+        /// <inheritdoc/>
         void IInvocationContext<TMock>.Invoke(
+            Expression<Action<TMock>> expression,
+            IDictionary<string, object>? refValues)
+        { 
+            Invoke(expression, refValues);
+        }
+
+        void Invoke(
             Expression<Action<TMock>> expression,
             IDictionary<string, object>? refValues)
         {
@@ -178,6 +189,23 @@ namespace LightMock
         /// <inheritdoc/>
         [return: MaybeNull]
         TResult IInvocationContext<TMock>.Invoke<TResult>(
+            Expression<Func<TMock, TResult>> expression)
+        { 
+            return Invoke<TResult>(expression, null);
+        }
+
+        /// <inheritdoc/>
+        [return: MaybeNull]
+        TResult IInvocationContext<TMock>.Invoke<TResult>(
+            Expression<Func<TMock, TResult>> expression,
+            IDictionary<string, object>? refValues)
+        {
+            return Invoke<TResult>(expression, refValues);
+        }
+
+        /// <inheritdoc/>
+        [return: MaybeNull]
+        TResult Invoke<TResult>(
             Expression<Func<TMock, TResult>> expression,
             IDictionary<string, object>? refValues)
         {
