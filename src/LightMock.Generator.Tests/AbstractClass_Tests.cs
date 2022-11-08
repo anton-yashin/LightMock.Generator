@@ -866,6 +866,34 @@ namespace LightMock.Generator.Tests
             static void FooCallback(out int bar) => bar = EXPECTED_OUT;
         }
 
+        [Fact]
+        // Issue #52
+        public void MethodWithRefParameter()
+        {
+            const string EXPECTED_OUT = nameof(EXPECTED_OUT);
+            const string EXPECTED_RESULT = nameof(EXPECTED_RESULT);
+            var testScript = LoadAssembly<AMethodWithRefParameter>();
+            var context = testScript.Context;
+            var mock = testScript.MockObject;
+
+            Assert.NotNull(context);
+            Assert.NotNull(mock);
+
+            context.Arrange(_ => _.Foo(ref The<string>.IsAnyReference))
+                .Returns(EXPECTED_RESULT)
+                .Callback(FooCallback);
+
+            string bar = "";
+            Assert.Equal(EXPECTED_RESULT, mock.Foo(ref bar));
+            Assert.Equal(EXPECTED_OUT, bar);
+
+            context.Assert(_ => _.Foo(ref The<string>.IsAnyReference), Invoked.Once);
+
+            static void FooCallback(out string bar) => bar = EXPECTED_OUT;
+        }
+
+
+
         protected override string GetFullResourceName(string resourceName)
             => "AbstractClass." + resourceName + ".test.cs";
     }
