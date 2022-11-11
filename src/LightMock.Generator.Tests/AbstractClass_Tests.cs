@@ -892,6 +892,27 @@ namespace LightMock.Generator.Tests
             static void FooCallback(out string bar) => bar = EXPECTED_OUT;
         }
 
+        [Fact]
+        // Issue #54
+        public void MethodWithInParameter()
+        {
+            const string EXPECTED_IN = nameof(EXPECTED_IN);
+            const string EXPECTED_RESULT = nameof(EXPECTED_RESULT);
+            var testScript = LoadAssembly<AMethodWithInParameter>();
+            var context = testScript.Context;
+            var mock = testScript.MockObject;
+
+            Assert.NotNull(context);
+            Assert.NotNull(mock);
+
+            context.Arrange(_ => _.Foo(in The<string>.Reference.IsAny.Value))
+                .Returns(EXPECTED_RESULT);
+
+            string bar = EXPECTED_IN;
+            Assert.Equal(EXPECTED_RESULT, mock.Foo(in bar));
+
+            context.Assert(_ => _.Foo(in The<string>.Reference.Is(s => s == EXPECTED_IN).Value), Invoked.Once);
+        }
 
 
         protected override string GetFullResourceName(string resourceName)

@@ -497,7 +497,8 @@ namespace LightMock.Generator
 
             @this.Append("{");
 
-            var refParams = symbol.Parameters.Where(p => p.RefKind == RefKind.Out || p.RefKind == RefKind.Ref);
+            var refParams = symbol.Parameters.Where(
+                p => p.RefKind == RefKind.Out || p.RefKind == RefKind.Ref || p.RefKind == RefKind.In);
             bool haveRefParams = false;
 
             foreach (var parameter in refParams)
@@ -507,7 +508,7 @@ namespace LightMock.Generator
                     .Append(" " + REF_VARIABLE_PREFIX)
                     .Append(parameter.Name)
                     .Append(" = ")
-                    .Append(parameter.RefKind == RefKind.Ref ? parameter.EscapedName() : "default")
+                    .Append(parameter.RefKind == RefKind.Out ? "default" : parameter.EscapedName())
                     .Append(";");
             }
 
@@ -544,6 +545,8 @@ namespace LightMock.Generator
 
             foreach (var parameter in refParams)
             {
+                if (parameter.RefKind == RefKind.In)
+                    continue;
                 @this.Append(parameter.EscapedName())
                     .Append(" = global::LightMock.ArgumentHelper.Unpack<")
                     .Append(parameter.Type, SymbolDisplayFormats.WithTypeParams)
@@ -569,6 +572,8 @@ namespace LightMock.Generator
                         return "ref " + REF_VARIABLE_PREFIX + ps.Name;
                     case RefKind.Out:
                         return "out " + REF_VARIABLE_PREFIX + ps.Name;
+                    case RefKind.In:
+                        return "in " + REF_VARIABLE_PREFIX + ps.Name;
                 }
                 return ps.EscapedName();
             }
