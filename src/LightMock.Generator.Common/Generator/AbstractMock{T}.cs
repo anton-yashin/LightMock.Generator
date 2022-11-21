@@ -41,7 +41,7 @@ namespace LightMock.Generator
     /// </summary>
     /// <typeparam name="T">The type for which mock is generated.</typeparam> 
     [EditorBrowsable(EditorBrowsableState.Never)]
-    public abstract class AbstractMock<T> : IProtectedContext<T>, IMock<T>, IMockContext<T>
+    public abstract class AbstractMock<T> : IProtectedContext<T>, IRefReturnContext<T>, IMock<T>, IMockContext<T>
         where T : class
     {
         T? instance;
@@ -49,6 +49,7 @@ namespace LightMock.Generator
         readonly TypeResolver typeResolver;
         readonly IAdvancedMockContext protectedContext;
         readonly IMockContextInternal propertiesContext;
+        readonly IMockContextInternal refReturnContext;
         readonly AdvancedMockContext<T> publicContext;
 
         /// <summary>
@@ -63,6 +64,7 @@ namespace LightMock.Generator
             publicContext = new AdvancedMockContext<T>(prms, typeResolver, ExchangeForExpression);
             protectedContext = typeResolver.ActivateProtectedContext<T>(GetProtectedContextArgs());
             propertiesContext = typeResolver.GetPropertiesContext<T>();
+            refReturnContext = typeResolver.GetRefReturnContext<T>();
         }
 
         /// <summary>
@@ -71,6 +73,7 @@ namespace LightMock.Generator
         public T Object => LazyInitializer.EnsureInitialized(ref instance!, CreateMockInstance);
 
         object IProtectedContext<T>.ProtectedContext => protectedContext;
+        object IRefReturnContext<T>.RefReturnContext => refReturnContext;
 
         static readonly Type contextType = typeof(T);
         static readonly bool isDelegate = contextType.IsDelegate();
@@ -92,11 +95,12 @@ namespace LightMock.Generator
 
         object[] GetMockInstanceArgs()
         {
-            const int offset = 3;
+            const int offset = 4;
             var args = new object[prms.Length + offset];
             args[0] = publicContext;
             args[1] = propertiesContext;
-            args[2] = protectedContext;
+            args[2] = refReturnContext;
+            args[3] = protectedContext;
             Array.Copy(prms, 0, args, offset, prms.Length);
             return args;
         }

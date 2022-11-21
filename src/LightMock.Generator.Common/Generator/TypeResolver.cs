@@ -68,6 +68,12 @@ namespace LightMock.Generator
         /// <summary>
         /// For internal usage.
         /// </summary>
+        public virtual Type GetRefReturnContextType()
+            => Defaults.DefaultRefReturnContextType;
+
+        /// <summary>
+        /// For internal usage.
+        /// </summary>
         public virtual Type GetPropertiesContextType()
             => ContextType.IsSubclassOf(Defaults.MulticastDelegateType)
                 ? Defaults.MulticastDelegateContextType
@@ -152,9 +158,16 @@ namespace LightMock.Generator
         internal IMockContextInternal ActivatePropertiesContext<TMock>()
             => (IMockContextInternal)new TypeCacher<(TMock, PropertiesContextTag)>().Activate(GetPropertiesContextType);
 
+        internal IMockContextInternal ActivateRefReturnContext<TMock>()
+            => (IMockContextInternal)new TypeCacher<(TMock, RefReturnContextTag)>().Activate(GetRefReturnContextType);
+
         IMockContextInternal? propertiesContext;
         internal IMockContextInternal GetPropertiesContext<TMock>()
             => propertiesContext ?? (propertiesContext = ActivatePropertiesContext<TMock>());
+
+        IMockContextInternal? refReturnContext;
+        internal virtual IMockContextInternal GetRefReturnContext<TMock>()
+            => refReturnContext ?? (refReturnContext = ActivateRefReturnContext<TMock>());
 
         internal TMock ActivateAssertWhenInstance<TMock>(object[] args)
             => (TMock)new TypeCacher<(TMock, AssertWhenTag)>().Activate(GetAssertWhenType, args);

@@ -33,5 +33,6 @@ namespace LightMock.Generator
         public const string PropertiesContext = "propertiesContext";
         public const string Invoked = "invoked";
         public const string Request = "request";
+        public const string RefReturnContext = "refReturnContext";
     }
 }

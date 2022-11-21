@@ -38,6 +38,7 @@ namespace LightMock.Generator
     {
         private readonly SymbolVisitor<string> symbolVisitor;
         private readonly SymbolVisitor<string> propertyDefinitionVisitor;
+        private readonly SymbolVisitor<string> refReturnVisitor;
         private readonly SymbolVisitor<string> assertImplementationVisitor;
         private readonly SymbolVisitor<string> assertIsAnyImplementationVisitor;
         private readonly string interfaceName;
@@ -59,6 +60,7 @@ namespace LightMock.Generator
 
             this.symbolVisitor = new InterfaceSymbolVisitor(compilation);
             this.propertyDefinitionVisitor = new PropertyDefinitionVisitor();
+            this.refReturnVisitor = new RefReturnVisitor();
             this.assertImplementationVisitor = new AssertImplementationVisitor(
                 compilation, SymbolDisplayFormats.Interface, null);
             this.assertIsAnyImplementationVisitor = new AssertIsAnyImplementationVisitor(
@@ -133,6 +135,14 @@ namespace {@namespace}
         {whereClause}
     {{
         {string.Join("\r\n        ", members.Select(i => i.Accept(propertyDefinitionVisitor)))}
+    }}
+
+    [global::LightMock.Generator.OriginalNameAttribute({typeSymbol.TypeArguments.Length}, ""{originalNameFormat}"")]
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public interface {Prefix.RefReturnInterface}{interfaceName}{typeArgumentsWithBrackets}
+        {whereClause}
+    {{
+        {string.Join("\r\n        ", members.Select(i => i.Accept(refReturnVisitor)))}
     }}
 
     [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
@@ -216,6 +226,10 @@ namespace {@namespace}
         {{
             {GetPropertiesContextType()};
         }}
+        public override global::System.Type {nameof(TypeResolver.GetRefReturnContextType)}()
+        {{
+            {GetRefReturnContextType()};
+        }}
         public override global::System.Type {nameof(TypeResolver.GetAssertWhenType)}()
         {{
             {GetAssertWhenType()};
@@ -240,24 +254,42 @@ namespace {@namespace}
     {{
         private readonly IInvocationContext<{baseNameWithTypeArguments}> {VariableNames.Context};
         private readonly IInvocationContext<{Prefix.PropertyToFuncInterface}{interfaceName}{typeArgumentsWithBrackets}> {VariableNames.PropertiesContext};
+        private readonly IInvocationContext<{Prefix.RefReturnInterface}{interfaceName}{typeArgumentsWithBrackets}> {VariableNames.RefReturnContext};
 
         public {Prefix.MockClass}{interfaceName}(
             IInvocationContext<{baseNameWithTypeArguments}> {VariableNames.Context},
-            IInvocationContext<{Prefix.PropertyToFuncInterface}{interfaceName}{typeArgumentsWithBrackets}> {VariableNames.PropertiesContext})
+            IInvocationContext<{Prefix.PropertyToFuncInterface}{interfaceName}{typeArgumentsWithBrackets}> {VariableNames.PropertiesContext},
+            IInvocationContext<{Prefix.RefReturnInterface}{interfaceName}{typeArgumentsWithBrackets}> {VariableNames.RefReturnContext})
         {{
             this.{VariableNames.Context} = {VariableNames.Context};
             this.{VariableNames.PropertiesContext} = {VariableNames.PropertiesContext};
+            this.{VariableNames.RefReturnContext} = {VariableNames.RefReturnContext};
         }}
 
         public {Prefix.MockClass}{interfaceName}(
             IInvocationContext<{baseNameWithTypeArguments}> {VariableNames.Context},
             IInvocationContext<{Prefix.PropertyToFuncInterface}{interfaceName}{typeArgumentsWithBrackets}> {VariableNames.PropertiesContext},
+            IInvocationContext<{Prefix.RefReturnInterface}{interfaceName}{typeArgumentsWithBrackets}> {VariableNames.RefReturnContext},
             object unused)
-            : this({VariableNames.Context}, {VariableNames.PropertiesContext}) {{ }}
+            : this({VariableNames.Context}, {VariableNames.PropertiesContext}, {VariableNames.RefReturnContext}) {{ }}
 
         {string.Join("\r\n        ", members.Select(i => i.Accept(symbolVisitor)))}
     }}
 }}
+
+namespace LightMock.Generator
+{{
+    using global::{@namespace};
+
+    public static partial class MockExtensions
+    {{
+        [global::System.Diagnostics.DebuggerStepThrough]
+        {GetTypeAccessibility()} static IMockContext<global::{@namespace}.{Prefix.RefReturnInterface}{interfaceName}{typeArgumentsWithBrackets}> RefReturn{typeArgumentsWithBrackets}(this IRefReturnContext<{baseNameWithTypeArguments}> @this)
+            {whereClause}
+            => (IMockContext<global::{@namespace}.{Prefix.RefReturnInterface}{interfaceName}{typeArgumentsWithBrackets}>)@this.{nameof(IRefReturnContext<object>.RefReturnContext)};
+    }}
+}}
+
 #pragma warning restore
 ";
             return SourceText.From(code, Encoding.UTF8);
@@ -275,6 +307,13 @@ namespace {@namespace}
             return typeSymbol.IsGenericType
                 ? $"return MakeGenericMockContextType(typeof(global::{@namespace}.{Prefix.PropertyToFuncInterface}{interfaceName}<{commaArguments}>));"
                 : $"return MakeMockContextType(typeof(global::{@namespace}.{Prefix.PropertyToFuncInterface}{interfaceName}));";
+        }
+
+        string GetRefReturnContextType()
+        {
+            return typeSymbol.IsGenericType
+                ? $"return MakeGenericMockContextType(typeof(global::{@namespace}.{Prefix.RefReturnInterface}{interfaceName}<{commaArguments}>));"
+                : $"return MakeMockContextType(typeof(global::{@namespace}.{Prefix.RefReturnInterface}{interfaceName}));";
         }
 
         string GetAssertWhenType()
@@ -303,6 +342,16 @@ namespace {@namespace}
             return typeSymbol.IsGenericType
                 ? $"return MakeGenericType(typeof(global::{@namespace}.{Prefix.ArrangeWhenImplementation}{interfaceName}<{commaArguments}>));"
                 : $"return typeof(global::{@namespace}.{Prefix.ArrangeWhenImplementation}{interfaceName});";
+        }
+
+        string GetTypeAccessibility()
+        {
+            switch (typeSymbol.DeclaredAccessibility)
+            {
+                case Accessibility.Public:
+                    return "public";
+            }
+            return "internal";
         }
     }
 }

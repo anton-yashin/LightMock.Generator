@@ -492,6 +492,7 @@ namespace LightMock.Generator
             const string REF_VARIABLE_PREFIX = "__ref_variable_for_";
             const string RESULT_VARIABLE = "__result_variable";
             const string REF_VALUES_VARIABLE = "__ref_values";
+            const string REF_CONTAINER = "__ref_container";
             if (IsHaveRefStructParameters(symbol))
                 return @this.AppendRefStructException();
 
@@ -520,14 +521,33 @@ namespace LightMock.Generator
 
             if (symbol.ReturnsVoid == false)
             {
-                @this.Append(symbol.ReturnType, SymbolDisplayFormats.WithTypeParams)
-                    .Append(" " + RESULT_VARIABLE + " = ");
+                if (symbol.ReturnsByRef || symbol.ReturnsByRefReadonly)
+                {
+                    contextName = VariableNames.RefReturnContext;
+                    @this
+                        .Append("global::LightMock.TheReference<")
+                        .Append(symbol.ReturnType, SymbolDisplayFormats.WithTypeParams)
+                        .Append("> " + REF_CONTAINER)
+                        .Append(" = new global::LightMock.TheReference<")
+                        .Append(symbol.ReturnType, SymbolDisplayFormats.WithTypeParams)
+                        .Append(">(); ref ")
+                        .Append(symbol.ReturnType, SymbolDisplayFormats.WithTypeParams)
+                        .Append(" " + RESULT_VARIABLE + " = ref " + REF_CONTAINER + "." + nameof(TheReference<object>.Value) + ";"
+                        + RESULT_VARIABLE + " = ");
+                }
+                else
+                {
+                    @this.Append(symbol.ReturnType, SymbolDisplayFormats.WithTypeParams)
+                        .Append(" " + RESULT_VARIABLE + " = ");
+                }
             }
 
             @this.Append("global::LightMock.Generator.Default.Get(() =>")
                 .Append(contextName)
                 .Append(".Invoke(f => (");
-            appendTypeCast(@this).Append("f).").Append(symbol.Name);
+            if (symbol.ReturnsByRef == false && symbol.ReturnsByRefReadonly == false)
+                appendTypeCast(@this);
+            @this.Append("f).").Append(symbol.Name);
             if (symbol.IsGenericMethod)
             {
                 @this.Append("<")
@@ -561,7 +581,12 @@ namespace LightMock.Generator
             if (symbol.ReturnsVoid)
                 @this.Append("}");
             else
-                @this.Append(" return " + RESULT_VARIABLE + "; }");
+            {
+                if (symbol.ReturnsByRef || symbol.ReturnsByRefReadonly)
+                    @this.Append(" return ref " + RESULT_VARIABLE + "; }");
+                else
+                    @this.Append(" return " + RESULT_VARIABLE + "; }");
+            }
             return @this;
 
             static string GetParam(IParameterSymbol ps)
