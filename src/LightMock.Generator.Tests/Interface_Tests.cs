@@ -776,6 +776,18 @@ namespace LightMock.Generator.Tests
             context.Assert(_ => _.Foo(in The<string>.Reference.Is(s => s == EXPECTED_IN).Value), Invoked.Once);
         }
 
+        [Fact]
+        // Issue #55
+        public void RefReturn()
+        {
+            var testScript = LoadAssembly<IRefReturn>();
+
+            Assert.NotNull(testScript.Context);
+            Assert.NotNull(testScript.MockObject);
+
+            Assert.Equal(KExpected, testScript.DoRun());
+        }
+
         protected override string GetFullResourceName(string resourceName)
             => "Interface." + resourceName + ".test.cs";
     }

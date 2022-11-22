@@ -68,9 +68,18 @@ namespace LightMock.Generator
             }
             if (symbol.ReturnsVoid == false)
             {
-                result.Append("return default(")
-                    .Append(symbol.ReturnType, SymbolDisplayFormats.WithTypeParams)
-                    .Append(");");
+                if (symbol.ReturnsByRef || symbol.ReturnsByRefReadonly)
+                {
+                    result.Append("return ref global::LightMock.The<")
+                        .Append(symbol.ReturnType, SymbolDisplayFormats.WithTypeParams)
+                        .Append(">.Reference.IsAny.Value;");
+                }
+                else
+                {
+                    result.Append("return default(")
+                        .Append(symbol.ReturnType, SymbolDisplayFormats.WithTypeParams)
+                        .Append(");");
+                }
             }
             result.Append("}");
             if (implementationName != null && symbol.IsInterfaceRequired())

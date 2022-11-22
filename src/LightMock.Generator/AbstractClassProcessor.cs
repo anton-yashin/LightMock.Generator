@@ -50,6 +50,7 @@ namespace LightMock.Generator
         private readonly IReadOnlyList<INamedTypeSymbol> dontOverrideList;
         private readonly SymbolVisitor<string> protectedVisitor;
         private readonly SymbolVisitor<string> propertyDefinitionVisitor;
+        private readonly SymbolVisitor<string> refReturnVisitor;
         private readonly SymbolVisitor<string> assertImplementationVisitor;
         private readonly SymbolVisitor<string> assertIsAnyImplementationVisitor;
         private readonly SymbolVisitor<string> arrangeOnAnyImplementationVisitor;
@@ -108,6 +109,7 @@ namespace LightMock.Generator
 
             protectedVisitor = new ProtectedMemberSymbolVisitor();
             propertyDefinitionVisitor = new PropertyDefinitionVisitor();
+            refReturnVisitor = new RefReturnVisitor();
             assertImplementationVisitor = new AssertImplementationVisitor(compilation, SymbolDisplayFormats.AbstractClass, className);
             assertIsAnyImplementationVisitor = new AssertIsAnyImplementationVisitor(compilation, SymbolDisplayFormats.AbstractClass, className);
             this.arrangeOnAnyImplementationVisitor = new ArrangeOnAnyImplementationVisitor(
@@ -121,12 +123,14 @@ namespace LightMock.Generator
             return $@"
         public {Prefix.MockClass}{className}(IInvocationContext<{baseNameWithTypeArguments}> {VariableNames.Context},
             IInvocationContext<{Prefix.PropertyToFuncInterface}{className}{typeArgumentsWithBrackets}> {VariableNames.PropertiesContext},
+            IInvocationContext<{Prefix.RefReturnInterface}{className}{typeArgumentsWithBrackets}> {VariableNames.RefReturnContext},
             IInvocationContext<{Prefix.ProtectedToPublicInterface}{className}{typeArgumentsWithBrackets}> {VariableNames.ProtectedContext},
             {declaration})
             : base({call})
         {{
             this.{VariableNames.Context} = {VariableNames.Context};
             this.{VariableNames.PropertiesContext} = {VariableNames.PropertiesContext};
+            this.{VariableNames.RefReturnContext} = {VariableNames.RefReturnContext};
             this.{VariableNames.ProtectedContext} = {VariableNames.ProtectedContext};
         }}
 ";
@@ -137,10 +141,12 @@ namespace LightMock.Generator
             return $@"
         public {Prefix.MockClass}{className}(IInvocationContext<{baseNameWithTypeArguments}> {VariableNames.Context},
             IInvocationContext<{Prefix.PropertyToFuncInterface}{className}{typeArgumentsWithBrackets}> {VariableNames.PropertiesContext},
+            IInvocationContext<{Prefix.RefReturnInterface}{className}{typeArgumentsWithBrackets}> {VariableNames.RefReturnContext},
             IInvocationContext<{Prefix.ProtectedToPublicInterface}{className}{typeArgumentsWithBrackets}> {VariableNames.ProtectedContext})
         {{
             this.{VariableNames.Context} = {VariableNames.Context};
             this.{VariableNames.PropertiesContext} = {VariableNames.PropertiesContext};
+            this.{VariableNames.RefReturnContext} = {VariableNames.RefReturnContext};
             this.{VariableNames.ProtectedContext} = {VariableNames.ProtectedContext};
         }}
 ";
@@ -277,6 +283,14 @@ namespace {@namespace}
         {string.Join("\r\n        ", members.Select(i => i.Accept(protectedVisitor)).SkipWhile(i => string.IsNullOrWhiteSpace(i)))}
     }}
 
+    [global::LightMock.Generator.OriginalNameAttribute({typeSymbol.TypeArguments.Length}, ""{originalNameFormat}"")]
+    [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+    public interface {Prefix.RefReturnInterface}{className}{typeArgumentsWithBrackets}
+        {whereClause}
+    {{
+        {string.Join("\r\n        ", members.Select(i => i.Accept(refReturnVisitor)).SkipWhile(i => string.IsNullOrWhiteSpace(i)))}
+    }}
+
     [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
     sealed class {Prefix.AssertWhenImplementation}{className}{typeArgumentsWithBrackets} : {baseNameWithTypeArguments}, {Prefix.ProtectedToPublicInterface}{className}{typeArgumentsWithBrackets}
         {whereClause}
@@ -339,6 +353,10 @@ namespace {@namespace}
         {{
             {GetProtectedContextType()}
         }}
+        public override global::System.Type {nameof(TypeResolver.GetRefReturnContextType)}()
+        {{
+            {GetRefReturnContextType()}
+        }}
         public override global::System.Type {nameof(TypeResolver.GetPropertiesContextType)}()
         {{
             {GetPropertiesContextType()};
@@ -367,6 +385,7 @@ namespace {@namespace}
     {{
         private readonly IInvocationContext<{baseNameWithTypeArguments}> {VariableNames.Context};
         private readonly IInvocationContext<{Prefix.PropertyToFuncInterface}{className}{typeArgumentsWithBrackets}> {VariableNames.PropertiesContext};
+        private readonly IInvocationContext<{Prefix.RefReturnInterface}{className}{typeArgumentsWithBrackets}> {VariableNames.RefReturnContext};
         private readonly IInvocationContext<{Prefix.ProtectedToPublicInterface}{className}{typeArgumentsWithBrackets}> {VariableNames.ProtectedContext};
 
 {string.Join("\r\n", GenerateConstructors())}
@@ -385,6 +404,11 @@ namespace LightMock.Generator
         {GetTypeAccessibility()} static IAdvancedMockContext<global::{@namespace}.{Prefix.ProtectedToPublicInterface}{className}{typeArgumentsWithBrackets}> Protected{typeArgumentsWithBrackets}(this IProtectedContext<{baseNameWithTypeArguments}> @this)
             {whereClause}
             => (IAdvancedMockContext<global::{@namespace}.{Prefix.ProtectedToPublicInterface}{className}{typeArgumentsWithBrackets}>)@this.{nameof(IProtectedContext<object>.ProtectedContext)};
+
+        [DebuggerStepThrough]
+        {GetTypeAccessibility()} static IMockContext<global::{@namespace}.{Prefix.RefReturnInterface}{className}{typeArgumentsWithBrackets}> RefReturn{typeArgumentsWithBrackets}(this IRefReturnContext<{baseNameWithTypeArguments}> @this)
+            {whereClause}
+            => (IMockContext<global::{@namespace}.{Prefix.RefReturnInterface}{className}{typeArgumentsWithBrackets}>)@this.{nameof(IRefReturnContext<object>.RefReturnContext)};
     }}
 }}
 #pragma warning restore
@@ -418,6 +442,13 @@ namespace LightMock.Generator
             return typeSymbol.IsGenericType
                 ? $"return MakeGenericAdvancedMockContextType(typeof(global::{@namespace}.{Prefix.ProtectedToPublicInterface}{className}<{commaArguments}>));"
                 : $"return MakeAdvancedMockContextType(typeof(global::{@namespace}.{Prefix.ProtectedToPublicInterface}{className}));";
+        }
+
+        string GetRefReturnContextType()
+        {
+            return typeSymbol.IsGenericType
+                ? $"return MakeGenericMockContextType(typeof(global::{@namespace}.{Prefix.RefReturnInterface}{className}<{commaArguments}>));"
+                : $"return MakeMockContextType(typeof(global::{@namespace}.{Prefix.RefReturnInterface}{className}));";
         }
 
         string GetPropertiesContextType()

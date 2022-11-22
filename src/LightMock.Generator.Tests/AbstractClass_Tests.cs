@@ -49,7 +49,6 @@ namespace LightMock.Generator.Tests
             var testScript = LoadAssembly<AAbstractClassWithBasicProperty>();
             var context = testScript.Context;
             var mock = testScript.MockObject;
-
             Assert.Throws<MockException>(() => context.AssertGet(f => f.OnlyGet));
             Assert.Throws<MockException>(() => context.AssertSet_When(f => f.GetAndSet = 5678));
             Assert.Throws<MockException>(() => context.AssertGet(f => f.GetAndSet));
@@ -914,6 +913,17 @@ namespace LightMock.Generator.Tests
             context.Assert(_ => _.Foo(in The<string>.Reference.Is(s => s == EXPECTED_IN).Value), Invoked.Once);
         }
 
+        [Fact]
+        // Issue #55
+        public void RefReturn()
+        {
+            var testScript = LoadAssembly<ARefReturn>();
+
+            Assert.NotNull(testScript.Context);
+            Assert.NotNull(testScript.MockObject);
+
+            Assert.Equal(KExpected, testScript.DoRun());
+        }
 
         protected override string GetFullResourceName(string resourceName)
             => "AbstractClass." + resourceName + ".test.cs";

@@ -61,7 +61,6 @@ namespace LightMock
     [EditorBrowsable(EditorBrowsableState.Never)]
     public class TheReference<TValue>
     {
-        internal TheReference() { }
         /// <summary>
         /// The marker for a <see langword="ref"/> argument
         /// </summary>

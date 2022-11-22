@@ -44,6 +44,11 @@ namespace LightMock.Generator
         /// For internal usage
         /// </summary>
         [EditorBrowsable(EditorBrowsableState.Never)]
+        Type DefaultRefReturnContextType { get; }
+        /// <summary>
+        /// For internal usage
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
         Type MockContextType { get; }
         /// <summary>
         /// For internal usage

@@ -36,5 +36,6 @@ namespace LightMock.Generator
         public const string TypeByType = "TypeByType_";
         public const string ArrangeWhenAnyImplementation = "Arrange_WhenAny_";
         public const string ArrangeWhenImplementation = "Arrange_When_";
+        public const string RefReturnInterface = "RefReturn_";
     }
 }

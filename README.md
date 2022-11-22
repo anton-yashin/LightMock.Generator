@@ -21,6 +21,7 @@ namespace Playground
         void Foo(int baz);
         int Bar();
         string Baz { get; set; }
+        ref string Quux();
     }
 
     public class SomeTests
@@ -46,6 +47,14 @@ namespace Playground
             mock.ArrangeSetter_WhenAny(f => f.Baz = "").Callback<string>(s => bazInvokedTimes++); //  without AOT transformations.
             o.Baz = "some random value";
             Assert.Equal(1, bazInvokedTimes);
+
+            const string EXPECTED_STRING = nameof(EXPECTED_STRING);
+            // You can arrange and assert "ref return" methods using a RefReturn() extension method
+            mock.RefReturn().Arrange(f => f.Quux()).Returns(() => EXPECTED_STRING);
+            mock.RefReturn().Assert(f => f.Quux(), Invoked.Never);
+            Assert.Equal(EXPECTED_STRING, o.Quux());
+            // The RefReturn() extension method is generated for interfaces and classes
+            mock.RefReturn().Assert(f => f.Quux(), Invoked.Once);
         }
     }
 }
