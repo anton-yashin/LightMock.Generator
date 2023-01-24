@@ -83,14 +83,33 @@ namespace LightMock.Generator
             => LazyInitializer.EnsureInitialized(ref __resolverType!, () =>
             {
                 var rt = contextType.IsGenericType ? contextType.GetGenericTypeDefinition() : contextType;
-                Type? typeResolverType = (from assembly in AppDomain.CurrentDomain.GetAssemblies()
-                                          from type in assembly.GetTypes()
-                                          from attribute in type.GetCustomAttributes<TypeKeyAttribute>(false)
-                                          where attribute.Key == rt
-                                          select type).FirstOrDefault();
-                if (typeResolverType == null)
-                    throw new MockNotGeneratedException(contextType);
-                return typeResolverType;
+                return FindByAttribute(rt) ?? FindByKeyProperty(rt) ?? throw new MockNotGeneratedException(contextType);
+
+                Type? FindByAttribute(Type resolverType)
+                => (from assembly in AppDomain.CurrentDomain.GetAssemblies()
+                    from type in assembly.GetTypes()
+                    from attribute in type.GetCustomAttributes<TypeKeyAttribute>(false)
+                    where attribute.Key == resolverType
+                    select type).FirstOrDefault();
+
+                Type? FindByKeyProperty(Type resolverType)
+                {
+                    var typeResolverType = typeof(TypeResolver);
+                    var constructorParams = new Type[] { typeof(Type) };
+                    var resolverTypes = (from assembly in AppDomain.CurrentDomain.GetAssemblies()
+                                         from type in assembly.GetTypes()
+                                         where type.IsSubclassOf(typeResolverType)
+                                         && type.GetConstructor(constructorParams) != null
+                                         select type);
+                    foreach (var candidate in resolverTypes)
+                    {
+                        var cs = candidate.GetConstructor(constructorParams);
+                        var instance = (TypeResolver)cs.Invoke(constructorParams);
+                        if (resolverType.IsAssignableFrom(instance.Key))
+                            return candidate;
+                    }
+                    return null;
+                }
             });
 
         object[] GetMockInstanceArgs()

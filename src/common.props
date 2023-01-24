@@ -3,8 +3,8 @@
     <Product>$(AssemblyName) ($(TargetFramework))</Product>
     <AssemblyVersion>1.2.0.0</AssemblyVersion>
     <AssemblyFileVersion>1.2.0.0</AssemblyFileVersion>
-    <Version>1.2.0</Version>
-    <VersionSuffix></VersionSuffix>
+    <Version>1.2.1</Version>
+    <VersionSuffix>-preview.2</VersionSuffix>
     <PackageVersion>$(Version)$(VersionSuffix)</PackageVersion>
     <Authors>Anton Yashin</Authors>
     <NeutralLanguage>en</NeutralLanguage>

@@ -62,6 +62,11 @@ namespace LightMock.Generator
         /// <summary>
         /// For internal usage.
         /// </summary>
+        public abstract Type Key { get; }
+
+        /// <summary>
+        /// For internal usage.
+        /// </summary>
         public virtual Type GetProtectedContextType()
             => Defaults.DefaultProtectedContextType;
 

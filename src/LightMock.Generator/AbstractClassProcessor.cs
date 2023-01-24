@@ -345,6 +345,13 @@ namespace {@namespace}
             : base(contextType)
         {{ }}
 
+        public override global::System.Type {nameof(TypeResolver.Key)} 
+        {{
+            get
+            {{
+                return typeof(global::{@namespace}.{baseNameWithCommaArguments});
+            }}
+        }}
         public override global::System.Type {nameof(TypeResolver.GetInstanceType)}()
         {{
             {GetInstanceType()};
