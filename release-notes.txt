@@ -1,3 +1,1 @@
-﻿* feat: support for 'out', 'in' and 'ref' arguments #52 #54
-* feat: pattern matching for 'ref' and 'in' arguments
-* feat: allow to arrange and assert a "ref return" methods. #55
+﻿* feat: additional way to avoid aggressive linker that can remove class attributes. #61
