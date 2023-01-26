@@ -1,4 +1,6 @@
-﻿1.2.1
+﻿1.2.2
+* fix: In version 1.2.1 due #61 mock search engine may try to activate mock of subtype if there no mock of parent type is found with throw of incorrect exception. Fixed that.
+1.2.1
 * feat: additional way to avoid aggressive linker that can remove class attributes. #61
 1.2.0
 * feat: support for 'out', 'in' and 'ref' arguments #52 #54
