@@ -1,1 +1,1 @@
-﻿* feat: additional way to avoid aggressive linker that can remove class attributes. #61
+﻿* fix: In version 1.2.1 due #61 mock search engine may try to activate mock of subtype if there no mock of parent type is found with throw of incorrect exception. Fixed that.
