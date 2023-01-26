@@ -1,6 +1,7 @@
 ﻿using LightMock.Generator.Tests.Issues;
 using LightMock.Generator.Tests.TestAbstractions;
 using Microsoft.CodeAnalysis;
+using Microsoft.Extensions.DependencyInjection;
 using System.IO;
 using System.Linq;
 using System.Runtime.Loader;
@@ -72,6 +73,24 @@ namespace LightMock.Generator.Tests
             var script = FindTestScript<ITypeKeyAttributeRemoved>(testClassName, loadedAssembly);
 
             Assert.Equal(KExpected, script.DoRun());
+        }
+
+        [Fact]
+        // #62
+        public void EnsureExceptionWhenMockIsMissing()
+        {
+            var testScript = LoadAssembly<IEnsureExceptionWhenMockIsMissing>();
+
+            var sc = new ServiceCollection();
+            AddLightMock<IEnsureExceptionWhenMockIsMissingBase>(sc);
+            var sp = sc.BuildServiceProvider();
+            Assert.Throws<MockNotGeneratedException>(sp.GetRequiredService<IEnsureExceptionWhenMockIsMissingBase>);
+        }
+
+        static void AddLightMock<T>(IServiceCollection sc) where T : class
+        {
+            sc.AddScoped<Mock<T>>();
+            sc.AddTransient(sp => sp.GetRequiredService<Mock<T>>().Object);
         }
 
         protected override string GetFullResourceName(string resourceName)

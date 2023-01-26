@@ -105,7 +105,7 @@ namespace LightMock.Generator
                     {
                         var cs = candidate.GetConstructor(constructorParams);
                         var instance = (TypeResolver)cs.Invoke(constructorParams);
-                        if (resolverType.IsAssignableFrom(instance.Key))
+                        if (instance.Key == resolverType)
                             return candidate;
                     }
                     return null;
