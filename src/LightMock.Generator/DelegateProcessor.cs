@@ -30,11 +30,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace LightMock.Generator
 {
     sealed class DelegateProcessor : ClassProcessor
     {
+        private readonly static Lazy<Regex> allowRefStructRex = new Lazy<Regex>(()
+            => new Regex(@"where \w+? : allows ref struct", RegexOptions.None, TimeSpan.FromDays(1)));
         private readonly string className;
         private readonly string fullNameWithTypeArguments;
         private readonly string fullNameWithCommaArguments;
@@ -69,8 +72,8 @@ namespace LightMock.Generator
             var typeHierarchy = typeSymbol.GetTypeHierarchy();
             var typeArguments = typeHierarchy.GetTypeArguments();
             var whereClause = typeHierarchy.GetWhereClause();
-
-            bool haveTypeArguments = typeSymbol.TypeArguments.Any();
+            whereClause = whereClause.Replace(", allows ref struct", "");
+            whereClause = allowRefStructRex.Value.Replace(whereClause, "");
 
             typeArgumentsWithBrackets = string.Join(",", typeArguments.Select(i => i.Name)); ;
             if (typeArgumentsWithBrackets.Length > 0)
