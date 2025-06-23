@@ -659,8 +659,8 @@ namespace LightMock.Generator.Tests.ExpressionReflect
 			IEnumerable<char> reflectionResult = reflection.Invoke("SomeString");
 
 			// Assert
-			Assert.Equal("SS", emitResult);
-			Assert.Equal("SS", reflectionResult);
+			Assert.Equal(['S', 'S'], emitResult);
+			Assert.Equal(['S', 'S'], reflectionResult);
 			Assert.Equal(emitResult, reflectionResult);
 		}
 
@@ -680,8 +680,8 @@ namespace LightMock.Generator.Tests.ExpressionReflect
 			IEnumerable<char> reflectionResult = reflection.Invoke("SomeString");
 
 			// Assert
-			Assert.Equal("ss", emitResult);
-			Assert.Equal("ss", reflectionResult);
+			Assert.Equal(['s', 's'], emitResult);
+			Assert.Equal(['s', 's'], reflectionResult);
 			Assert.Equal(emitResult, reflectionResult);
 		}
 	}
