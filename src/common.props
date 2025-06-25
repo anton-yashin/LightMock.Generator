@@ -1,9 +1,9 @@
-<Project>
+﻿<Project>
   <PropertyGroup>
     <Product>$(AssemblyName) ($(TargetFramework))</Product>
     <AssemblyVersion>1.2.0.0</AssemblyVersion>
     <AssemblyFileVersion>1.2.0.0</AssemblyFileVersion>
-    <Version>1.2.2</Version>
+    <Version>1.2.3</Version>
     <VersionSuffix></VersionSuffix>
     <PackageVersion>$(Version)$(VersionSuffix)</PackageVersion>
     <Authors>Anton Yashin</Authors>
